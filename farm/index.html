@@ -394,16 +394,16 @@
             <h3>Запросить расчёт фермы</h3>
             <p class="sublead">Форма для проектных запросов и расчёта комплекта.</p>
             <form class="form-grid">
-              <input class="input" type="text" placeholder="Имя / компания" />
-              <input class="input" type="text" placeholder="Контакт для связи" />
-              <input class="input" type="text" placeholder="Площадь / формат объекта" />
-              <select class="select">
+              <input class="input" id="farm-name" type="text" placeholder="Имя / компания" />
+              <input class="input" id="farm-contact" type="text" placeholder="Контакт для связи" />
+              <input class="input" id="farm-object" type="text" placeholder="Площадь / формат объекта" />
+              <select class="select" id="farm-stage">
                 <option>Стадия проекта</option>
                 <option>Запуск с нуля</option>
                 <option>Действующая ферма</option>
                 <option>Пересборка / масштабирование</option>
               </select>
-              <select class="select">
+              <select class="select" id="farm-need">
                 <option>Что нужно посчитать</option>
                 <option>Всю ферму</option>
                 <option>Состав комплекта</option>
@@ -411,7 +411,7 @@
                 <option>Полив</option>
                 <option>Стеллажи</option>
               </select>
-              <textarea class="textarea" placeholder="Опишите задачу: что уже есть, какие ограничения у объекта и что нужно получить на выходе"></textarea>
+              <textarea class="textarea" id="farm-details" placeholder="Опишите задачу: что уже есть, какие ограничения у объекта и что нужно получить на выходе"></textarea>
               <button class="btn btn-primary" type="button">Получить расчёт и следующий шаг</button>
             </form>
           </div>
@@ -454,5 +454,6 @@
       </div>
     </div>
   </footer>
+  <script src="./farm.js"></script>
 </body>
 </html>
