@@ -1,0 +1,223 @@
+{
+  "meta": {
+    "name": "KlubnikaProject Farm Calculator",
+    "currency": "RUB",
+    "version": 1
+  },
+  "constants": {
+    "plantsPerRack": 96,
+    "cropProtectionAndNutritionPerPlantPerMonth": 5,
+    "electricityKwPerRack": 1,
+    "waterLitersPerRackPerDay": 20,
+    "monthlyPreviewLightHoursPerDay": 12,
+    "paybackModelLightHoursPerDay": 14,
+    "rackModelCost": 100000,
+    "irrigationNodeModelCost": 150000
+  },
+  "inputs": {
+    "a0": 4,
+    "a1": 8,
+    "a2": 1200,
+    "a3": 0,
+    "a4": 5,
+    "a5": 15
+  },
+  "items": [
+    {
+      "id": 1,
+      "name": "Перекладина 35 см",
+      "unitPrice": 210,
+      "basicQty": 16,
+      "extraQty": 8,
+      "roofQty": 4,
+      "vestibuleQty": 4,
+      "rearQty": 4
+    },
+    {
+      "id": 2,
+      "name": "Перекладина 99 см",
+      "unitPrice": 430,
+      "vestibuleQty": 4
+    },
+    {
+      "id": 3,
+      "name": "Перекладина 198 см",
+      "unitPrice": 850,
+      "basicQty": 10,
+      "extraQty": 8,
+      "roofQty": 2,
+      "vestibuleQty": 2,
+      "rearQty": 2
+    },
+    {
+      "id": 4,
+      "name": "Перекладина 230 см",
+      "unitPrice": 978,
+      "basicQty": 8,
+      "extraQty": 4,
+      "roofQty": 2,
+      "vestibuleQty": 2,
+      "rearQty": 2
+    },
+    {
+      "id": 5,
+      "name": "Краб-система",
+      "unitPrice": 20,
+      "basicQty": 112,
+      "extraQty": 56,
+      "roofQty": 16,
+      "vestibuleQty": 24,
+      "rearQty": 24
+    },
+    {
+      "id": 6,
+      "name": "Болт М8",
+      "unitPrice": 6,
+      "basicQty": 112,
+      "extraQty": 56,
+      "roofQty": 16,
+      "vestibuleQty": 24,
+      "rearQty": 24
+    },
+    {
+      "id": 7,
+      "name": "Гайка М8",
+      "unitPrice": 6,
+      "basicQty": 112,
+      "extraQty": 56,
+      "roofQty": 16,
+      "vestibuleQty": 24,
+      "rearQty": 24
+    },
+    {
+      "id": 8,
+      "name": "Шайба М8",
+      "unitPrice": 6,
+      "basicQty": 112,
+      "extraQty": 56,
+      "roofQty": 16,
+      "vestibuleQty": 24,
+      "rearQty": 24
+    },
+    {
+      "id": 9,
+      "name": "Саморез кровельный",
+      "unitPrice": 4,
+      "basicQty": 8,
+      "extraQty": 8
+    },
+    {
+      "id": 10,
+      "name": "Саморез прессшайба",
+      "unitPrice": 4,
+      "basicQty": 72,
+      "extraQty": 36
+    },
+    {
+      "id": 11,
+      "name": "Пластина усиления",
+      "unitPrice": 200,
+      "basicQty": 4,
+      "extraQty": 4
+    },
+    {
+      "id": 12,
+      "name": "Лоток",
+      "unitPrice": 1200,
+      "basicQty": 8,
+      "extraQty": 8
+    },
+    {
+      "id": 13,
+      "name": "Светильник",
+      "unitPrice": 8500,
+      "basicQty": 8,
+      "extraQty": 8
+    },
+    {
+      "id": 14,
+      "name": "Капельница компенсированная, в сборе. 2,2 л/ч",
+      "unitPrice": 35,
+      "basicQty": 96,
+      "extraQty": 96
+    },
+    {
+      "id": 15,
+      "name": "Трубка слепая, белая. 16 мм",
+      "unitPrice": 45,
+      "basicQty": 20,
+      "extraQty": 16
+    },
+    {
+      "id": 16,
+      "name": "Мат минеральной ваты Grodan",
+      "unitPrice": 250,
+      "basicQty": 16,
+      "extraQty": 16
+    },
+    {
+      "id": 17,
+      "name": "Держатель ленты цветоноса",
+      "unitPrice": 200,
+      "basicQty": 16,
+      "extraQty": 8
+    },
+    {
+      "id": 18,
+      "name": "Комплект фитингов для подключения капельного полива",
+      "unitPrice": 600
+    },
+    {
+      "id": 19,
+      "name": "Лента поддержки цветоноса",
+      "unitPrice": 1350
+    },
+    {
+      "id": 20,
+      "name": "Фильтр дисковый",
+      "unitPrice": 800
+    },
+    {
+      "id": 21,
+      "name": "Дозировочный насос D25RE2VF",
+      "unitPrice": 45000
+    },
+    {
+      "id": 22,
+      "name": "Пробойник полуавтоматический",
+      "unitPrice": 1200
+    },
+    {
+      "id": 23,
+      "name": "Приборы измерения раствора PH/EC",
+      "unitPrice": 5000
+    },
+    {
+      "id": 24,
+      "name": "Комплект удобрений на 100 кустов",
+      "unitPrice": 4000
+    },
+    {
+      "id": 25,
+      "name": "Рассада",
+      "unitPrice": 45
+    }
+  ],
+  "yieldScenarios": [
+    {
+      "id": "optimistic",
+      "name": "Оптимистичный",
+      "kgPerPlantPerYear": 1.5
+    },
+    {
+      "id": "realistic",
+      "name": "Реалистичный",
+      "kgPerPlantPerYear": 1.15
+    },
+    {
+      "id": "pessimistic",
+      "name": "Пессимистичный",
+      "kgPerPlantPerYear": 0.8
+    }
+  ]
+}

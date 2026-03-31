@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Калькулятор клубничной фермы — КлубникаПро</title>
+  <meta
+    name="description"
+    content="Калькулятор клубничной фермы: состав комплекта, ориентир по смете, операционным расходам и выручке для controlled-environment проекта."
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="./calc.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="container">
+      <div class="hero-shell">
+        <div class="topbar">
+          <div class="brand">
+            <div class="brand-logo">
+              <img src="https://static.tildacdn.com/tild6366-3531-4035-a236-323261656361/logo_greeb.png" alt="КлубникаПро" />
+            </div>
+            <div>
+              <div class="brand-title">КлубникаПро</div>
+              <div class="brand-note">Калькулятор фермы, смета и ориентир по экономике</div>
+            </div>
+          </div>
+
+          <nav class="nav">
+            <a href="../">Главная</a>
+            <a href="../farm/">Расчёт</a>
+            <a href="../shop/">Магазин</a>
+            <a href="../study/">Сопровождение</a>
+            <a href="#calculator-app">Калькулятор</a>
+          </nav>
+        </div>
+
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <span class="eyebrow">Ферма в цифрах</span>
+            <h1>Калькулятор клубничной фермы: состав, смета и ориентир по экономике</h1>
+            <p class="lead">
+              Это быстрый рабочий расчёт, если нужно понять масштаб фермы, состав комплекта,
+              ориентир по закупке и базовую логику по расходам и выручке.
+            </p>
+            <p class="sublead">
+              Калькулятор не заменяет проектный разбор, но помогает быстро перейти от идеи к нормальному разговору:
+              что входит в ферму, сколько это стоит и какой следующий шаг нужен именно вам.
+            </p>
+
+            <div class="btn-row hero-cta">
+              <a class="btn btn-primary" href="../farm/#brief">Запросить расчёт под проект</a>
+              <a class="btn btn-secondary" href="../shop/">Смотреть магазин</a>
+            </div>
+            <div class="text-link-row">
+              <a href="../study/">Нужен разбор действующей фермы</a>
+            </div>
+
+            <div class="hero-stats">
+              <div class="hero-stat">
+                <strong>Что считает</strong>
+                <span>Стеллажи, свет, полив, субстрат, посадочный материал и операционную рамку.</span>
+              </div>
+              <div class="hero-stat">
+                <strong>Кому подходит</strong>
+                <span>Для запуска, новой очереди, пересборки схемы и первичного проектного ориентира.</span>
+              </div>
+              <div class="hero-stat">
+                <strong>Что дальше</strong>
+                <span>Либо перейти к расчёту под объект, либо выбрать типовые позиции в магазине.</span>
+              </div>
+            </div>
+          </div>
+
+          <aside class="visual-panel">
+            <div class="visual-grid">
+              <img
+                class="visual-main"
+                src="https://static.tildacdn.com/tild6235-3635-4838-b030-666133326265/IMG_6063.jpg"
+                alt="Клубничная ферма в controlled environment"
+              />
+              <div class="visual-stack">
+                <img src="https://static.tildacdn.com/tild3232-3635-4439-b030-636336363230/IMG_4924.jpg" alt="Стеллажи для клубничной фермы" />
+                <img src="https://static.tildacdn.com/tild6234-3930-4631-a563-383233396236/IMG_6061.jpg" alt="Клубника под LED" />
+              </div>
+            </div>
+            <div class="visual-note">
+              Если задача уже выходит за рамки одного товара, правильнее считать ферму как систему.
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section" id="calculator-app">
+      <div class="container">
+        <div class="section-frame">
+          <div class="section-head calc-head">
+            <span class="eyebrow">Рабочий расчёт</span>
+            <h2>Сначала задаём вводные, потом смотрим смету, расходы и выручку</h2>
+            <p class="sublead">
+              Это быстрый ориентир по составу фермы и базовой экономике, когда нужно понять рамку проекта до проектного разбора.
+            </p>
+          </div>
+
+          <div class="calc-layout">
+            <section class="calc-controls card card-pad">
+              <div class="calc-toolbar">
+                <div>
+                  <div class="tag">Вводные проекта</div>
+                  <h3 class="calc-card-title">Параметры, которые меняют расчёт</h3>
+                </div>
+                <div class="calc-toolbar-actions">
+                  <button class="btn btn-secondary" id="copy-link-button" type="button">Скопировать ссылку</button>
+                  <button class="btn btn-ghost" id="reset-button" type="button">Сбросить</button>
+                </div>
+              </div>
+
+              <div class="calc-note">
+                Чем точнее площадь, цена реализации и базовые расходы по объекту, тем полезнее ориентир.
+              </div>
+
+              <div class="control-list" id="control-list"></div>
+            </section>
+
+            <aside class="calc-summary card card-pad">
+              <div class="tag">Ключевые цифры</div>
+              <h3 class="calc-card-title">Что получается по текущим вводным</h3>
+
+              <div class="summary-main">
+                <div class="summary-main-label">Ориентир по смете</div>
+                <div class="summary-main-value" id="total-equipment-cost">0 ₽</div>
+                <p class="summary-main-note">Детальная смета оборудования и посадочного материала в текущей конфигурации.</p>
+              </div>
+
+              <div class="summary-grid" id="summary-grid"></div>
+
+              <div class="summary-callout">
+                <strong>Нужен не ориентир, а проектный состав?</strong>
+                <p>Переходите к расчёту под объект, если нужно учесть высоту, электрику, этапность закупки и связку узлов.</p>
+                <div class="btn-row">
+                  <a class="btn btn-primary" href="../farm/#brief">Оставить вводные</a>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-tight" id="estimate">
+      <div class="container">
+        <div class="grid grid-2 calc-section-grid">
+          <article class="card card-pad">
+            <div class="tag">Смета</div>
+            <h3 class="calc-card-title">Что входит в комплект сейчас</h3>
+            <p class="sublead">
+              Здесь видно не просто итоговую цифру, а состав оборудования и расходных позиций, которые формируют смету.
+            </p>
+
+            <div class="equipment-overview">
+              <div class="equipment-overview-card">
+                <span>Оборудование без посадочного материала</span>
+                <strong id="equipment-without-seedlings">0 ₽</strong>
+              </div>
+              <div class="equipment-overview-card">
+                <span>Посадочный материал</span>
+                <strong id="seedlings-total-cost">0 ₽</strong>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table class="calc-table">
+                <thead>
+                  <tr>
+                    <th>Позиция</th>
+                    <th>Кол-во</th>
+                    <th>Ед.</th>
+                    <th>Сумма</th>
+                  </tr>
+                </thead>
+                <tbody id="equipment-table-body"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="card card-pad">
+            <div class="tag">Операционные расходы</div>
+            <div class="calc-section-top">
+              <h3 class="calc-card-title">Ежемесячная и годовая рамка расходов</h3>
+              <div class="toggle-row" id="expense-mode-toggle" role="tablist" aria-label="Режим расходов">
+                <button class="toggle-button is-active" data-expense-mode="month" type="button">В месяц</button>
+                <button class="toggle-button" data-expense-mode="year" type="button">В год</button>
+              </div>
+            </div>
+            <p class="sublead">
+              Этот блок нужен, чтобы быстро понять нагрузку по эксплуатации до более точного проектного расчёта.
+            </p>
+
+            <div class="expense-list" id="expense-list"></div>
+
+            <div class="expense-total">
+              <span>Итого</span>
+              <strong id="expense-total-value">0 ₽</strong>
+            </div>
+
+            <div class="model-note">
+              В блоке окупаемости инвестиционный слой вынесен отдельно, чтобы не смешивать смету закупки и рабочую экономику.
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="revenue">
+      <div class="container">
+        <div class="section-frame">
+          <div class="calc-section-top">
+            <div>
+              <span class="eyebrow">Прогноз выручки</span>
+              <h2>Три сценария по урожайности и накопленному результату</h2>
+            </div>
+            <div class="toggle-row" id="yield-scenario-toggle" role="tablist" aria-label="Сценарий урожайности"></div>
+          </div>
+
+          <div class="grid grid-2 calc-section-grid">
+            <article class="card card-pad">
+              <div class="scenario-grid" id="scenario-grid"></div>
+              <div class="table-wrap" style="margin-top: 24px;">
+                <table class="calc-table compact-table">
+                  <thead>
+                    <tr>
+                      <th>Период</th>
+                      <th>Накопленный результат</th>
+                    </tr>
+                  </thead>
+                  <tbody id="payback-table-body"></tbody>
+                </table>
+              </div>
+            </article>
+
+            <article class="card card-pad">
+              <div class="tag">Что заложено в модель</div>
+              <h3 class="calc-card-title">Чтобы ориентир было легче читать</h3>
+              <ul class="calc-list" id="assumption-list">
+                <li>Модель считает ферму как controlled-environment проект, а не как дачную теплицу.</li>
+                <li>Количество кустов привязано к количеству стеллажей, а не вводится вручную.</li>
+                <li>Детальная смета и инвестиционная модель остаются разделёнными, как в текущем калькуляторе.</li>
+                <li>Финальный подбор зависит от высоты, сервиса, доступной мощности, климатической схемы и этапности закупки.</li>
+              </ul>
+
+              <div class="metric-wall calc-model-wall">
+                <div class="metric">
+                  <strong id="model-investment-cost">0 ₽</strong>
+                  <span>инвестиционная база для модели окупаемости</span>
+                </div>
+                <div class="metric">
+                  <strong id="annual-model-opex">0 ₽</strong>
+                  <span>годовые расходы внутри модели окупаемости</span>
+                </div>
+                <div class="metric">
+                  <strong id="annual-harvest">0 кг</strong>
+                  <span>урожай в год по активному сценарию</span>
+                </div>
+                <div class="metric">
+                  <strong id="annual-revenue">0 ₽</strong>
+                  <span>выручка в год по активному сценарию</span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-tight" id="next-step">
+      <div class="container">
+        <div class="action-panel">
+          <div class="split-hero">
+            <div>
+              <span class="eyebrow">Следующий шаг</span>
+              <h2>Калькулятор даёт ориентир. Для объекта нужен уже проектный разбор.</h2>
+              <p class="sublead">
+                Если вы уже понимаете площадь и сценарий, оставьте вводные на расчёт. Если задача только по конкретному узлу,
+                можно сразу перейти в магазин и собрать типовые позиции.
+              </p>
+              <div class="btn-row">
+                <a class="btn btn-primary" href="../farm/#brief">Запросить расчёт под проект</a>
+                <a class="btn btn-secondary" href="../shop/">Перейти в магазин</a>
+              </div>
+            </div>
+
+            <div class="card form-card">
+              <div class="tag">Подходит, если</div>
+              <ul>
+                <li>Нужно проверить рамку проекта до закупки.</li>
+                <li>Вы считаете новую очередь или пересборку действующей схемы.</li>
+                <li>Хотите не просто цифру, а следующий понятный коммерческий шаг.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-main">
+        <div class="footer-grid">
+          <div class="footer-card">
+            <strong>КлубникаПро</strong>
+            <p>Расчёт, комплектация, запуск и сопровождение решений для клубничных ферм.</p>
+          </div>
+          <div class="footer-card">
+            <strong>Маршруты</strong>
+            <div class="footer-links">
+              <a href="../">Главная</a>
+              <a href="../farm/">Расчёт</a>
+              <a href="../shop/">Магазин</a>
+              <a href="../study/">Сопровождение</a>
+            </div>
+          </div>
+          <div class="footer-card">
+            <strong>Следующий шаг</strong>
+            <p>Если расчёта калькулятора уже мало, оставьте вводные на проектный разбор.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./calc.js" type="module"></script>
+</body>
+</html>
