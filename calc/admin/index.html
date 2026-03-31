@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Админка цен калькулятора — КлубникаПро</title>
+  <meta
+    name="description"
+    content="Внутренняя страница для редактирования цен и констант калькулятора клубничной фермы с живым превью и экспортом pricing.json."
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../styles.css" />
+  <link rel="stylesheet" href="../calc.css" />
+  <link rel="stylesheet" href="./admin.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="container">
+      <div class="hero-shell">
+        <div class="topbar">
+          <div class="brand">
+            <div class="brand-logo">
+              <img src="https://static.tildacdn.com/tild6366-3531-4035-a236-323261656361/logo_greeb.png" alt="КлубникаПро" />
+            </div>
+            <div>
+              <div class="brand-title">КлубникаПро</div>
+              <div class="brand-note">Внутренняя панель цен для калькулятора</div>
+            </div>
+          </div>
+
+          <nav class="nav">
+            <a href="../../">Главная</a>
+            <a href="../">Калькулятор</a>
+            <a href="../../farm/">Расчёт</a>
+            <a href="../../shop/">Магазин</a>
+          </nav>
+        </div>
+
+        <div class="hero-grid admin-hero-grid">
+          <div class="hero-copy">
+            <span class="eyebrow">Внутренний инструмент</span>
+            <h1>Редактор цен и расчётных констант без переписывания калькулятора</h1>
+            <p class="lead">
+              Здесь можно менять цены, константы и значения по умолчанию, а справа сразу видеть,
+              как это влияет на смету, расходы и базовую экономику по модели фермы.
+            </p>
+            <p class="sublead">
+              Эта страница не пишет файл на сервер автоматически. Она готовит новый `pricing.json`,
+              который можно скачать, вставить в проект и затем уже зафиксировать в git или CMS.
+            </p>
+
+            <div class="btn-row hero-cta">
+              <a class="btn btn-primary" href="../">Открыть калькулятор</a>
+              <a class="btn btn-secondary" href="../../farm/#brief">Перейти к расчёту под проект</a>
+            </div>
+
+            <div class="hero-stats">
+              <div class="hero-stat">
+                <strong>Что меняется</strong>
+                <span>Цены по позициям, экономические константы и значения по умолчанию в калькуляторе.</span>
+              </div>
+              <div class="hero-stat">
+                <strong>Что не делаем здесь</strong>
+                <span>Не меняем логику формул и не придумываем новые данные по доставке, наличию и гарантии.</span>
+              </div>
+              <div class="hero-stat">
+                <strong>Следующий этап</strong>
+                <span>Подвязать сохранение к админке сайта или отдельному JSON endpoint.</span>
+              </div>
+            </div>
+          </div>
+
+          <aside class="visual-panel admin-note-panel">
+            <div class="tag">Как работать</div>
+            <ul class="calc-list">
+              <li>Меняете значения слева.</li>
+              <li>Смотрите превью справа.</li>
+              <li>Скачиваете новый `pricing.json`.</li>
+              <li>Подменяете файл в проекте или сохраняете через будущую админку.</li>
+            </ul>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section" id="admin-workspace">
+      <div class="container">
+        <div class="section-frame">
+          <div class="admin-layout">
+            <section class="admin-editor">
+              <article class="card card-pad admin-card">
+                <div class="tag">Модель</div>
+                <h3 class="calc-card-title">Константы расчёта</h3>
+                <p class="sublead">Это не рыночные цены, а параметры самой модели: растения на стеллаж, часы света, стоимость узла в инвест-модели.</p>
+                <div class="admin-grid" id="constants-grid"></div>
+              </article>
+
+              <article class="card card-pad admin-card">
+                <div class="tag">Значения по умолчанию</div>
+                <h3 class="calc-card-title">С какими вводными открывается калькулятор</h3>
+                <p class="sublead">Полезно, если хотите поменять стартовый сценарий для пользователя без трогания формул.</p>
+                <div class="admin-grid" id="defaults-grid"></div>
+              </article>
+
+              <article class="card card-pad admin-card">
+                <div class="admin-section-top">
+                  <div>
+                    <div class="tag">Позиции</div>
+                    <h3 class="calc-card-title">Цены по товарам и узлам</h3>
+                  </div>
+                  <input class="admin-search" id="price-search" type="search" placeholder="Поиск по названию позиции" />
+                </div>
+                <p class="sublead">Меняете цену по позиции, а превью справа сразу пересчитывается.</p>
+                <div class="admin-price-groups" id="price-groups"></div>
+              </article>
+            </section>
+
+            <aside class="admin-preview">
+              <div class="card card-pad admin-card admin-sticky">
+                <div class="tag">Live preview</div>
+                <h3 class="calc-card-title">Как draft влияет на калькулятор</h3>
+                <p class="sublead">Эти вводные нужны только для проверки. Они не меняют опубликованный калькулятор, пока вы не замените `pricing.json`.</p>
+
+                <div class="admin-grid admin-grid-compact" id="preview-inputs"></div>
+
+                <div class="summary-main admin-summary-main">
+                  <div class="summary-main-label">Смета по текущему draft</div>
+                  <div class="summary-main-value" id="preview-total-cost">0 ₽</div>
+                  <p class="summary-main-note">Ориентир по закупке оборудования и посадочного материала.</p>
+                </div>
+
+                <div class="summary-grid" id="preview-metrics"></div>
+
+                <div class="admin-json-actions">
+                  <button class="btn btn-primary" id="download-json-button" type="button">Скачать pricing.json</button>
+                  <button class="btn btn-secondary" id="copy-json-button" type="button">Копировать JSON</button>
+                  <button class="btn btn-ghost" id="reset-draft-button" type="button">Сбросить к опубликованной версии</button>
+                </div>
+
+                <div class="admin-status" id="draft-status">Черновик ещё не меняли.</div>
+
+                <label class="admin-json-label" for="json-output">Текущий JSON для экспорта</label>
+                <textarea class="admin-json-output" id="json-output" spellcheck="false" readonly></textarea>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="./admin.js" type="module"></script>
+</body>
+</html>
