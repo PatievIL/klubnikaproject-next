@@ -1029,7 +1029,7 @@ html[data-theme="dark"] .footer-row > div:last-child {
 
 .routes-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 22px;
 }
 
@@ -1045,6 +1045,22 @@ html[data-theme="dark"] .footer-row > div:last-child {
   background: var(--white);
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
+}
+
+.path-card-visual {
+  position: relative;
+  overflow: hidden;
+  margin: -8px -8px 4px;
+  border-radius: 22px;
+  min-height: 168px;
+  background: color-mix(in srgb, var(--green) 10%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--green) 10%, var(--line));
+}
+
+.path-card-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .path-card::after {
@@ -1065,6 +1081,29 @@ html[data-theme="dark"] .footer-row > div:last-child {
 
 .path-card .sublead {
   max-width: 34ch;
+}
+
+.path-card-outcome {
+  margin-top: 4px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line));
+}
+
+.path-card-outcome strong {
+  display: block;
+  color: var(--green);
+  font-size: 14px;
+  line-height: 1.1;
+}
+
+.path-card-outcome span {
+  display: block;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
 }
 
 .path-card ul {
@@ -1307,6 +1346,49 @@ html[data-theme="dark"] .footer-row > div:last-child {
 .course-panel-side {
   display: grid;
   gap: 16px;
+}
+
+.course-panel-visual-stack {
+  display: grid;
+  gap: 16px;
+}
+
+.course-photo-card {
+  min-height: 260px;
+}
+
+.course-side-note {
+  display: grid;
+  grid-template-columns: 116px 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 18px;
+  border-radius: 24px;
+  background: rgba(245, 236, 223, 0.1);
+  border: 1px solid rgba(245, 236, 223, 0.16);
+}
+
+.course-side-note img {
+  width: 100%;
+  aspect-ratio: 0.95;
+  object-fit: cover;
+  border-radius: 26px;
+  border: 1px solid rgba(245, 236, 223, 0.12);
+}
+
+.course-side-note strong {
+  display: block;
+  color: var(--bg);
+  font-size: 18px;
+  line-height: 1.1;
+}
+
+.course-side-note span {
+  display: block;
+  margin-top: 8px;
+  color: rgba(245, 236, 223, 0.78);
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .course-panel-metrics {
@@ -2654,9 +2736,40 @@ html[data-theme="dark"] .footer-row > div:last-child {
   padding: 26px;
 }
 
+.case-photo {
+  width: 100%;
+  aspect-ratio: 1.24;
+  object-fit: cover;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
 .case-card p {
   margin-top: 12px;
   color: var(--muted);
+}
+
+.case-result {
+  margin-top: auto;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--green) 5%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--green) 12%, var(--line));
+}
+
+.case-result strong {
+  display: block;
+  color: var(--green);
+  font-size: 15px;
+  line-height: 1.1;
+}
+
+.case-result span {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  line-height: 1.5;
 }
 
 .about-layout {
@@ -2674,12 +2787,61 @@ html[data-theme="dark"] .footer-row > div:last-child {
   box-shadow: var(--shadow);
 }
 
-.about-photo img {
+.about-photo-stack {
+  position: relative;
+  min-height: 100%;
+  height: 100%;
+  padding: 10px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(0, 77, 43, 0.08), rgba(0, 77, 43, 0.02));
+}
+
+.about-photo-main {
   width: 100%;
   height: 100%;
-  min-height: 360px;
+  min-height: 420px;
   object-fit: cover;
+  border-radius: 26px;
+  border: 1px solid var(--line);
+}
+
+.about-photo-side {
+  position: absolute;
+  right: 20px;
+  bottom: 124px;
+  width: 172px;
+  aspect-ratio: 0.92;
+  object-fit: cover;
+  border-radius: 34px;
+  border: 10px solid rgba(245, 236, 223, 0.92);
+  box-shadow: var(--shadow);
+}
+
+.about-photo-note {
+  position: absolute;
+  left: 24px;
+  right: 92px;
+  bottom: 24px;
+  padding: 18px 20px;
   border-radius: 22px;
+  background: rgba(255, 252, 246, 0.92);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.about-photo-note strong {
+  display: block;
+  color: var(--green);
+  font-size: 18px;
+  line-height: 1.1;
+}
+
+.about-photo-note span {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .faq-grid {
@@ -2817,6 +2979,20 @@ html[data-theme="dark"] .footer-row > div:last-child {
   .solutions-note {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .course-side-note {
+    grid-template-columns: 96px 1fr;
+  }
+
+  .about-photo-side {
+    width: 144px;
+    right: 18px;
+    bottom: 118px;
+  }
+
+  .about-photo-note {
+    right: 72px;
   }
 
   .topbar {
@@ -3049,6 +3225,49 @@ html[data-theme="dark"] .footer-row > div:last-child {
 
   .solutions-note {
     padding: 18px;
+  }
+
+  .path-card-visual {
+    min-height: 152px;
+  }
+
+  .course-side-note {
+    grid-template-columns: 1fr;
+  }
+
+  .course-side-note img {
+    max-width: 132px;
+  }
+
+  .case-photo {
+    aspect-ratio: 1.15;
+  }
+
+  .about-photo {
+    padding: 14px;
+  }
+
+  .about-photo-stack {
+    padding: 0;
+    background: none;
+  }
+
+  .about-photo-main {
+    min-height: 320px;
+  }
+
+  .about-photo-side {
+    width: 112px;
+    right: 12px;
+    bottom: 108px;
+    border-width: 8px;
+  }
+
+  .about-photo-note {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    padding: 16px;
   }
 
   .crumbs {
