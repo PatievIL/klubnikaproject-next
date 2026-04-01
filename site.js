@@ -161,13 +161,13 @@ function injectUiControls() {
 
 function buildUiControlsMarkup() {
   return `
-    <div class="ui-switch" role="group" aria-label="Language">
+    <div class="ui-switch" role="group" aria-label="Language switch">
       <button class="ui-switch-btn" type="button" data-site-lang="ru">RU</button>
       <button class="ui-switch-btn" type="button" data-site-lang="en">EN</button>
     </div>
-    <div class="ui-switch" role="group" aria-label="Theme">
-      <button class="ui-switch-btn" type="button" data-site-theme="light" title="Light theme">LT</button>
-      <button class="ui-switch-btn" type="button" data-site-theme="dark" title="Dark theme">DK</button>
+    <div class="ui-switch" role="group" aria-label="Theme switch">
+      <button class="ui-switch-btn ui-switch-btn-theme" type="button" data-site-theme="light" title="Light theme" aria-label="Light theme">◐</button>
+      <button class="ui-switch-btn ui-switch-btn-theme" type="button" data-site-theme="dark" title="Dark theme" aria-label="Dark theme">◼</button>
     </div>
   `;
 }
@@ -272,6 +272,18 @@ function translateDocumentTitle(lang) {
 function updateAriaLabels(lang) {
   document.querySelectorAll(".nav-toggle").forEach((toggle) => {
     toggle.setAttribute("aria-label", lang === "en" ? "Open menu" : "Открыть меню");
+  });
+
+  document.querySelectorAll('[data-site-theme="light"]').forEach((button) => {
+    const label = lang === "en" ? "Light theme" : "Светлая тема";
+    button.setAttribute("aria-label", label);
+    button.setAttribute("title", label);
+  });
+
+  document.querySelectorAll('[data-site-theme="dark"]').forEach((button) => {
+    const label = lang === "en" ? "Dark theme" : "Тёмная тема";
+    button.setAttribute("aria-label", label);
+    button.setAttribute("title", label);
   });
 }
 
@@ -502,8 +514,8 @@ const TRANSLATIONS_EN = {
   "Каталог": "Catalog",
   "Калькулятор": "Calculator",
   "Оставить заявку": "Get in touch",
-  "Получить подбор": "Request подбор",
   "Получить подбор": "Request selection",
+  "Нужен разбор": "Need review",
   "Магазин решений для клубничных сити-ферм": "Solution shop for strawberry city farms",
   "Здесь есть свет, полив, стеллажи, субстрат, посадочный материал, расходники и готовые решения для запуска, дооснащения и обслуживания фермы.": "Here you can find lighting, irrigation, racks, substrate, planting material, consumables, and ready-made solutions for launch, upgrades, and farm maintenance.",
   "Часть товаров можно купить сразу. Часть лучше сначала подобрать под объект, чтобы не ошибиться в совместимости, составе и логике закупки.": "Some items can be bought right away. Others are better selected for the site first, so you do not make mistakes with compatibility, composition, or purchasing logic.",
@@ -528,6 +540,7 @@ const TRANSLATIONS_EN = {
   "Точечный разбор задачи, совместимости и следующего шага.": "Focused review of the task, compatibility, and the next step.",
   "Клубничный Хак": "Strawberry Hack",
   "База по клубнике в контролируемой среде без проектной сметы.": "Core strawberry know-how for controlled environment farming without a project estimate.",
+  "Клубничный Хак — это практическая база по клубнике в контролируемой среде.": "Strawberry Hack is a practical foundation for strawberries in controlled environments.",
   "Магазин": "Shop",
   "Весь каталог решений для клубничной фермы.": "The full catalog of solutions for a strawberry farm.",
   "LED": "LED",
@@ -542,6 +555,7 @@ const TRANSLATIONS_EN = {
   "Посадочный материал под фермерский запуск.": "Planting material for farm launches.",
   "© Klubnika Project": "© Klubnika Project",
   "Расчёт, магазин, подбор и сопровождение решений": "Planning, shopping, selection, and support",
+  "Расчёт, магазин, подбор и сопровождение для клубничных ферм в контролируемой среде.": "Planning, shopping, selection, and support for strawberry farms in controlled environments.",
   "Сценарии": "Paths",
   "Информация": "Info",
   "Оферта": "Offer",
@@ -658,17 +672,29 @@ const TRANSLATIONS_EN = {
   "Оставьте контакт и получите программу курса": "Leave your contact and receive the course program",
   "Скопировать запрос": "Copy request",
   "Получите предварительный состав фермы и рамку экономики под ваши вводные": "Get a preliminary farm composition and an economic outline based on your inputs",
+  "Предварительный состав фермы и рамка экономики без длинной анкеты": "A preliminary farm composition and economic outline without a long form",
+  "Калькулятор нужен, чтобы быстро увидеть состав фермы по узлам, порядок цифр по смете и понять, где хватает типовой рамки, а где уже нужен разговор по объекту.": "The calculator helps you quickly see the farm by nodes, the order of magnitude in the estimate, and understand where a standard outline is enough and where a site-specific discussion is already needed.",
+  "Он не заменяет проектный расчёт, но убирает угадывание на старте и помогает быстрее перейти к смете, подбору или разбору действующей схемы.": "It does not replace a project estimate, but removes guesswork at the start and helps you move faster to an estimate, selection, or a review of the current setup.",
   "Начать расчёт": "Start the estimate",
   "Сначала понять, что я получу": "See what I get first",
+  "Есть действующая ферма и нужен точный разбор": "Have an operating farm and need a precise review",
   "Не “доступ к калькулятору”, а понятную рамку проекта": "Not “access to a calculator”, but a clear project outline",
   "Короткий поток без длинной анкеты и лишних полей": "A short flow without a long questionnaire or unnecessary fields",
   "Сначала отвечаете на несколько вопросов, потом сразу видите рамку проекта": "Answer a few questions first, then immediately see the project outline",
   "Назад": "Back",
   "Продолжить расчёт": "Continue the estimate",
+  "Скопировать ссылку": "Copy link",
+  "Сбросить расчёт": "Reset estimate",
+  "Если хотите передать расчёт вручную": "If you want to hand the estimate off manually",
+  "Скопируйте вводные и сразу отправьте их в рабочий Telegram. Так вы не потеряете расчёт и быстрее перейдёте к следующему шагу.": "Copy the brief and send it straight to the working Telegram. This way you do not lose the estimate and move to the next step faster.",
+  "Открыть Telegram": "Open Telegram",
   "Перейти к проектному расчёту": "Go to project estimate",
   "Вот что уже видно по вашим вводным": "Here is what is already visible from your inputs",
+  "Рамка зафиксирована. Теперь важен правильный следующий шаг": "The outline is fixed. Now the right next step matters",
+  "Маршрут уже начинает читаться по текущим вводным": "The route is already becoming clear from the current inputs",
   "Открыть проектный расчёт": "Open project estimate",
   "Сценарии по урожайности и денежному потоку модели": "Yield and cash-flow scenarios for the model",
+  "Скопировать вводные": "Copy brief",
   "Если проект сложный или объект уже работает, калькулятор — это только первый шаг": "If the project is complex or the site is already running, the calculator is only the first step",
   "Обсудить нестандартный проект": "Discuss a non-standard project",
   "Если хотите быстро понять состав проекта и порядок цифр — начните с расчёта": "If you want to quickly understand the project composition and order of magnitude, start with the estimate",

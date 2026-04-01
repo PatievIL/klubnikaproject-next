@@ -378,6 +378,12 @@ h3 {
   cursor: pointer;
 }
 
+.ui-switch-btn-theme {
+  min-width: 22px;
+  font-size: 9px;
+  letter-spacing: 0;
+}
+
 .compact-tools .ui-switch-btn {
   color: var(--green);
 }
@@ -630,6 +636,55 @@ html[data-theme="dark"] .nav-menu span {
 
 html[data-theme="dark"] .ui-switch-btn.is-active {
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.26);
+}
+
+html[data-theme="dark"] .compact-shell-inner {
+  background:
+    radial-gradient(circle at top left, rgba(255, 213, 160, 0.08), transparent 34%),
+    linear-gradient(180deg, #0f1714 0%, #121d18 100%);
+  border: 1px solid rgba(245, 236, 223, 0.1);
+}
+
+html[data-theme="dark"] .compact-brand-note {
+  color: rgba(245, 236, 223, 0.58);
+}
+
+html[data-theme="dark"] .compact-nav a {
+  border-color: rgba(245, 236, 223, 0.1);
+  color: var(--bg);
+}
+
+html[data-theme="dark"] .compact-nav a:hover {
+  background: rgba(245, 236, 223, 0.06);
+}
+
+html[data-theme="dark"] .compact-nav a[aria-current="page"] {
+  background: rgba(245, 236, 223, 0.1);
+  border-color: rgba(245, 236, 223, 0.16);
+}
+
+html[data-theme="dark"] .footer-main {
+  background: transparent;
+}
+
+html[data-theme="dark"] .footer-card {
+  background: rgba(18, 29, 24, 0.9);
+  border-color: rgba(245, 236, 223, 0.08);
+}
+
+html[data-theme="dark"] .footer-row {
+  border-color: rgba(245, 236, 223, 0.08);
+}
+
+html[data-theme="dark"] .footer-card h3,
+html[data-theme="dark"] .footer-links a,
+html[data-theme="dark"] .footer-row {
+  color: var(--bg);
+}
+
+html[data-theme="dark"] .footer-card p,
+html[data-theme="dark"] .footer-row > div:last-child {
+  color: rgba(245, 236, 223, 0.68);
 }
 
 .hero-grid,
