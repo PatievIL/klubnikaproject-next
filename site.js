@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   normalizeSecondaryCtas();
+  injectProductRail(root);
   injectUiControls();
   markActiveCompactNav();
   bindTopbarMenus();
@@ -129,6 +130,125 @@ function normalizeSecondaryCtas() {
       button.textContent = textMap.get(text);
     }
   });
+}
+
+const PRODUCT_RAIL_GROUPS = [
+  {
+    title: "LED",
+    categoryHref: "shop/led/",
+    items: [
+      ["led-50wt-60cm", "M23 50 Вт / 60 см"],
+      ["led-50wt-95cm", "M23 50 Вт / 95 см"],
+      ["led-300wt", "M23 100 Вт / 1,91 м"],
+      ["led-300wt-140cm", "M23 100 Вт / 1,4 м"],
+      ["led-450wt-200cm", "M23 150 Вт / 2 м"],
+    ],
+  },
+  {
+    title: "Полив",
+    categoryHref: "shop/poliv/",
+    items: [
+      ["blind-tube-white", "Слепая трубка"],
+      ["blind-tube-white-roll", "Слепая трубка, бухта"],
+      ["hole-punch-16-20", "Пробойник 16/20 мм"],
+      ["rivulis-supertif-22", "Капельница Rivulis 2,2 л/ч"],
+      ["disc-filter-3-4", "Фильтр дисковый 3/4"],
+      ["fittings-kit-module", "Комплект фитингов"],
+      ["irrigation-base-rack", "Комплект для базового стеллажа"],
+      ["irrigation-extra-rack", "Комплект для дополнительного стеллажа"],
+      ["irrigation-kit", "Система полива на 96 растений"],
+      ["dosatron", "Dosatron"],
+    ],
+  },
+  {
+    title: "Стеллажи",
+    categoryHref: "shop/stellaj/",
+    items: [
+      ["rack-base-16mats", "Базовый модуль"],
+      ["rack-extra-16mats", "Дополнительный модуль"],
+      ["metal-tray-210", "Лоток 210 см"],
+      ["rack-system", "Стеллажная система"],
+      ["farm-module", "Модуль фермы"],
+    ],
+  },
+  {
+    title: "Субстрат",
+    categoryHref: "shop/substrate/",
+    items: [
+      ["grodan-plug", "Grodan Plug"],
+      ["grodan-classic", "Grodan Classic"],
+      ["grodan-prestige", "Grodan Prestige"],
+    ],
+  },
+  {
+    title: "Посадочный материал",
+    categoryHref: "seeds/",
+    items: [
+      ["soraya-f1", "Soraya F1"],
+      ["delizzimo-f1", "Delizzimo F1"],
+      ["estavana-f1", "Estavana F1"],
+      ["milan-f1", "Milan F1"],
+      ["elan-f1", "Elan F1"],
+      ["rowena-f1", "Rowena F1"],
+      ["frigo", "FRIGO"],
+    ],
+  },
+];
+
+function injectProductRail(root) {
+  if (!document.querySelector(".product-layout")) return;
+  const crumbs = document.querySelector(".crumbs");
+  if (!crumbs || document.querySelector(".product-rail")) return;
+
+  const normalizedPath = normalizeSitePath(window.location.pathname);
+  const slug = normalizedPath.split("/").filter(Boolean).pop();
+  if (!slug) return;
+
+  const group = PRODUCT_RAIL_GROUPS.find((entry) =>
+    entry.items.some(([itemSlug]) => itemSlug === slug)
+  );
+  if (!group) return;
+
+  const currentIndex = group.items.findIndex(([itemSlug]) => itemSlug === slug);
+  if (currentIndex === -1) return;
+
+  const rail = document.createElement("nav");
+  rail.className = "product-rail";
+  rail.setAttribute("aria-label", "Навигация по товарам");
+
+  const prev = group.items[currentIndex - 1];
+  const next = group.items[currentIndex + 1];
+
+  rail.innerHTML = `
+    <a class="product-rail-back" href="${root}${group.categoryHref}">
+      <span class="product-rail-section">${group.title}</span>
+      <strong>Все позиции раздела</strong>
+    </a>
+    <div class="product-rail-links">
+      ${prev ? productRailItem(root, group, prev, "Предыдущая позиция") : ""}
+      ${next ? productRailItem(root, group, next, "Следующая позиция") : ""}
+    </div>
+  `;
+
+  crumbs.insertAdjacentElement("afterend", rail);
+}
+
+function productRailItem(root, group, item, label) {
+  const [slug, title] = item;
+  const href = group.categoryHref === "seeds/" ? `${root}seeds/${slug}/` : `${root}shop/products/${slug}/`;
+  return `
+    <a class="product-rail-link" href="${href}">
+      <span class="product-rail-link-label">${label}</span>
+      <strong>${title}</strong>
+    </a>
+  `;
+}
+
+function normalizeSitePath(pathname) {
+  return (pathname || "/")
+    .replace(/\/index\.html$/, "")
+    .replace(/^\/klubnikaproject-next/, "")
+    .replace(/\/+$/, "") || "/";
 }
 
 function injectUiControls() {
@@ -615,6 +735,14 @@ const TRANSLATIONS_EN = {
   "Рассчитать ферму": "Estimate the farm",
   "Перейти в магазин": "Go to the shop",
   "Не уверен, какой сценарий мне подходит": "Not sure which route fits me",
+  "Навигация по товарам": "Product navigation",
+  "Все позиции раздела": "All items in this section",
+  "Предыдущая позиция": "Previous item",
+  "Следующая позиция": "Next item",
+  "Посадочный материал": "Planting material",
+  "Полив": "Irrigation",
+  "Стеллажи": "Racks",
+  "Субстрат": "Substrate",
   "Нужна консультация по задаче": "Need a consultation",
   "Нужна базовая система по технологии": "Need a core technology system",
   "Запуск и расчёт": "Launch and estimate",

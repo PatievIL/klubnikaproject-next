@@ -2569,6 +2569,68 @@ html[data-theme="dark"] .footer-row > div:last-child {
   background: rgba(255, 250, 242, 0.82);
 }
 
+.product-rail {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+  gap: 12px;
+  margin: 0 0 22px;
+}
+
+.product-rail-back,
+.product-rail-link {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  min-height: 88px;
+  padding: 16px 18px;
+  border-radius: 24px;
+  border: 1px solid rgba(0, 77, 43, 0.1);
+  background: linear-gradient(180deg, rgba(255, 250, 242, 0.96) 0%, rgba(255, 248, 238, 0.92) 100%);
+  box-shadow: 0 20px 44px rgba(0, 77, 43, 0.07);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.product-rail-back {
+  align-items: flex-start;
+}
+
+.product-rail-section,
+.product-rail-link-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(0, 77, 43, 0.08);
+  color: rgba(0, 77, 43, 0.66);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.product-rail-back strong,
+.product-rail-link strong {
+  color: var(--green);
+  font-size: 18px;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+.product-rail-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.product-rail-back:hover,
+.product-rail-link:hover {
+  transform: translateY(-1px);
+  border-color: rgba(0, 77, 43, 0.18);
+  box-shadow: 0 24px 50px rgba(0, 77, 43, 0.1);
+}
+
 .page-hero {
   display: grid;
   grid-template-columns: 1.02fr 0.98fr;
@@ -3718,6 +3780,29 @@ html[data-theme="dark"] .footer-row > div:last-child {
 
   .crumbs::-webkit-scrollbar {
     display: none;
+  }
+
+  .product-rail {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .product-rail-back,
+  .product-rail-link {
+    min-height: 0;
+    padding: 14px;
+    border-radius: 20px;
+  }
+
+  .product-rail-links {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .product-rail-back strong,
+  .product-rail-link strong {
+    font-size: 16px;
   }
 
   .product-layout {
