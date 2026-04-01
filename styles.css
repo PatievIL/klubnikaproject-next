@@ -724,6 +724,10 @@ html[data-theme="dark"] .footer-row > div:last-child {
   align-content: start;
 }
 
+.hero-copy.hero-copy-lean {
+  max-width: 700px;
+}
+
 .hero-copy .eyebrow {
   background: rgba(245, 236, 223, 0.12);
   color: #fff;
@@ -743,6 +747,18 @@ html[data-theme="dark"] .footer-row > div:last-child {
 
 .hero-copy .lead {
   max-width: 650px;
+}
+
+.hero-copy.hero-copy-lean .lead {
+  max-width: 610px;
+}
+
+.hero-copy.hero-copy-lean .sublead {
+  max-width: 600px;
+}
+
+.hero-copy.hero-copy-lean .text-link-row {
+  margin-top: 12px;
 }
 
 .hero-cta .btn-primary {
