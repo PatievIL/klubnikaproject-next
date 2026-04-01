@@ -36,11 +36,14 @@ python3 -m http.server 8011 --bind 127.0.0.1
 
 ## SEO / GEO пакет
 
-В проект добавлен генератор технических SEO-сигналов:
+В проект добавлен технический SEO/GEO-пакет. Это не разовая заметка, а рабочая поддержка сайта в коде.
+
+Что входит:
 
 - `scripts/build-seo.mjs` — обновляет `canonical`, `robots`, JSON-LD и нормализует бренд в `<title>`
-- `sitemap.xml` — собирается автоматически из индексируемых HTML-страниц
 - `robots.txt` — закрывает служебные разделы и публикует sitemap
+- `sitemap.xml` — собирается автоматически из индексируемых HTML-страниц
+- этот `README.md` — короткая инструкция по поддержке
 
 Запуск:
 
@@ -49,11 +52,39 @@ cd /Users/ilapatiev/klubnikaproject
 node scripts/build-seo.mjs
 ```
 
+Что делает пакет:
+
+- ставит `canonical` на все индексируемые HTML-страницы
+- добавляет `robots`-meta
+- закрывает служебные разделы от индексации, включая `calc/admin/`
+- генерирует JSON-LD по типу страницы: `WebPage`, `Organization`, `WebSite`, `BreadcrumbList`, `Product`, `FAQPage`
+- пересобирает `sitemap.xml`
+- нормализует бренд в `<title>` под `Klubnika Project`
+
+Примеры уже в проекте:
+
+- главная: `index.html`
+- продуктовая карточка: `shop/products/led-300wt/index.html`
+- админка с `noindex`: `calc/admin/index.html`
+
 Когда запускать:
 
 - после добавления новых страниц
 - после переименования URL или разделов
 - после изменений в логике индексации
+
+Текущее состояние на сегодня:
+
+- обработано `46` HTML-страниц
+- в `sitemap.xml` входит `43` публичных URL
+- служебные разделы выведены из индексации
+
+Полезные ориентиры по поддержке:
+
+- Google Search Central: SEO Starter Guide
+- Google Search Central: canonical / duplicate URLs
+- Google Search Central: site names
+- Google Search Central: AI features
 
 ## Рабочая логика проекта
 
