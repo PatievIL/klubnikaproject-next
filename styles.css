@@ -1994,6 +1994,10 @@ h3 {
   max-width: none;
 }
 
+.product-summary h1 {
+  margin-top: 14px;
+}
+
 .secondary-page .product-summary {
   padding: 32px;
   background: linear-gradient(180deg, var(--surface-3) 0%, var(--surface) 100%);
@@ -2347,11 +2351,20 @@ h3 {
   .compact-topbar {
     flex-direction: column;
     align-items: flex-start;
+    gap: 12px;
   }
 
   .compact-nav {
     width: 100%;
     justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+
+  .compact-nav::-webkit-scrollbar {
+    display: none;
   }
 }
 
@@ -2389,8 +2402,8 @@ h3 {
   }
 
   .compact-shell-inner {
-    padding: 14px 16px;
-    border-radius: 24px;
+    padding: 12px 14px;
+    border-radius: 22px;
   }
 
   .compact-brand {
@@ -2404,21 +2417,30 @@ h3 {
   }
 
   .compact-brand-title {
-    font-size: 19px;
+    font-size: 18px;
   }
 
   .compact-brand-note {
-    font-size: 12px;
+    display: none;
   }
 
   .compact-nav {
     gap: 8px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+
+  .compact-nav::-webkit-scrollbar {
+    display: none;
   }
 
   .compact-nav a {
-    min-height: 38px;
-    padding: 0 11px;
-    font-size: 13px;
+    flex: 0 0 auto;
+    min-height: 36px;
+    padding: 0 10px;
+    font-size: 12px;
   }
 }
 
@@ -2439,6 +2461,48 @@ h3 {
 
   .btn {
     width: 100%;
+  }
+
+  .crumbs {
+    gap: 8px;
+    margin-bottom: 14px;
+    font-size: 11px;
+  }
+
+  .crumbs a,
+  .crumbs span {
+    min-height: 30px;
+    padding: 0 10px;
+  }
+
+  .product-layout {
+    gap: 18px;
+  }
+
+  .product-summary {
+    order: -1;
+    padding: 24px;
+  }
+
+  .product-gallery {
+    order: 1;
+  }
+
+  .product-topline {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .product-price {
+    white-space: normal;
+  }
+
+  .product-summary h1,
+  .secondary-page .product-summary h1 {
+    max-width: none;
+    font-size: clamp(30px, 8.6vw, 40px) !important;
+    line-height: 0.98;
   }
 
   .hero-cta .btn-ghost {
