@@ -355,7 +355,7 @@ h3 {
 .compact-tools {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   flex: 0 0 auto;
 }
 
@@ -367,29 +367,29 @@ h3 {
 .ui-switch {
   display: inline-flex;
   align-items: center;
-  padding: 1px;
-  gap: 1px;
-  border-radius: 9px;
-  background: rgba(245, 236, 223, 0.08);
-  border: 1px solid rgba(245, 236, 223, 0.14);
+  padding: 2px;
+  gap: 2px;
+  border-radius: 12px;
+  background: rgba(245, 236, 223, 0.06);
+  border: 1px solid rgba(245, 236, 223, 0.12);
 }
 
 .compact-tools .ui-switch {
-  background: rgba(0, 77, 43, 0.06);
-  border-color: rgba(0, 77, 43, 0.1);
+  background: rgba(0, 77, 43, 0.05);
+  border-color: rgba(0, 77, 43, 0.08);
 }
 
 .ui-switch-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 24px;
-  min-height: 20px;
-  padding: 0 5px;
+  min-width: 25px;
+  min-height: 21px;
+  padding: 0 6px;
   border: 0;
-  border-radius: 7px;
+  border-radius: 9px;
   background: transparent;
-  color: var(--bg);
+  color: rgba(245, 236, 223, 0.74);
   font-size: 8px;
   font-weight: 800;
   letter-spacing: 0.02em;
@@ -403,13 +403,12 @@ h3 {
 }
 
 .compact-tools .ui-switch-btn {
-  color: var(--green);
+  color: rgba(0, 77, 43, 0.72);
 }
 
 .ui-switch-btn.is-active {
   background: var(--bg);
   color: var(--green);
-  box-shadow: 0 8px 18px rgba(0, 11, 48, 0.16);
 }
 
 .compact-tools .ui-switch-btn.is-active {
@@ -653,7 +652,7 @@ html[data-theme="dark"] .nav-menu span {
 }
 
 html[data-theme="dark"] .ui-switch-btn.is-active {
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.26);
+  box-shadow: none;
 }
 
 html[data-theme="dark"] .compact-shell-inner {
@@ -739,11 +738,11 @@ html[data-theme="dark"] .footer-row > div:last-child {
 
 .hero-copy .sublead {
   color: rgba(245, 236, 223, 0.74);
-  max-width: 680px;
+  max-width: 640px;
 }
 
 .hero-copy .lead {
-  max-width: 700px;
+  max-width: 650px;
 }
 
 .hero-cta .btn-primary {
@@ -788,26 +787,26 @@ html[data-theme="dark"] .footer-row > div:last-child {
 .hero-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 22px;
+  gap: 12px;
+  margin-top: 18px;
 }
 
 .hero-stat {
-  padding: 18px;
+  padding: 16px;
   border-radius: 20px;
-  min-height: 146px;
+  min-height: 126px;
   background: rgba(245, 236, 223, 0.08);
   border: 1px solid rgba(245, 236, 223, 0.16);
 }
 
 .hero-stat strong {
   display: block;
-  margin-bottom: 8px;
-  font-size: 15px;
+  margin-bottom: 6px;
+  font-size: 14px;
 }
 
 .hero-stat span {
-  font-size: 14px;
+  font-size: 13px;
   color: rgba(245, 236, 223, 0.72);
 }
 
