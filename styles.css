@@ -785,7 +785,7 @@ html[data-theme="dark"] .ui-switch-btn.is-active {
   align-self: start;
   justify-self: end;
   width: min(280px, 100%);
-  margin-top: -88px;
+  margin-top: -30px;
   padding: 16px 18px;
   border-radius: 20px;
   background: linear-gradient(180deg, rgba(245, 236, 223, 0.12) 0%, rgba(245, 236, 223, 0.06) 100%);
