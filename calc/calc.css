@@ -782,6 +782,22 @@ code {
 }
 
 @media (max-width: 760px) {
+  .hero-title-compact {
+    max-width: 10ch;
+    font-size: clamp(22px, 10vw, 30px);
+    line-height: 0.98;
+  }
+
+  .hero-output-list {
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .hero-output-list li {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
   .wizard-top,
   .calc-section-top,
   .control-top {
@@ -818,12 +834,14 @@ code {
   .summary-utility {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 10px;
   }
 
   .summary-utility .btn-ghost {
     width: 100%;
     justify-content: center;
+    min-height: 42px;
+    padding: 0 14px;
   }
 
   .result-handoff-row {
@@ -834,42 +852,75 @@ code {
   .result-handoff-row .btn-ghost {
     width: 100%;
     justify-content: center;
+    min-height: 42px;
+    padding: 0 14px;
   }
 
   .wizard-step-list {
-    margin-right: -6px;
+    margin-right: -8px;
+    padding-bottom: 4px;
   }
 
   .wizard-step-chip {
-    flex-basis: 82px;
-    min-width: 82px;
-    min-height: 42px;
-    margin-left: -8px;
-    padding: 0 14px;
-    font-size: 12px;
+    flex-basis: 76px;
+    min-width: 76px;
+    min-height: 38px;
+    margin-left: -6px;
+    padding: 0 12px;
+    font-size: 11px;
   }
 
   .wizard-step-chip.is-active {
-    flex-basis: 164px;
-    min-width: 164px;
+    flex-basis: 144px;
+    min-width: 144px;
   }
 
   .wizard-actions {
     position: sticky;
-    bottom: 10px;
+    bottom: 8px;
     z-index: 6;
-    padding: 16px;
+    padding: 12px;
     border-top: 0;
-    border-radius: 20px;
-    background: rgba(251, 244, 232, 0.96);
-    box-shadow: 0 10px 24px rgba(0, 11, 48, 0.14);
-    margin-top: 22px;
+    border-radius: 16px;
+    background: rgba(251, 244, 232, 0.92);
+    box-shadow: 0 6px 16px rgba(0, 11, 48, 0.12);
+    margin-top: 18px;
     flex-direction: column;
+    gap: 10px;
   }
 
   .wizard-actions .btn {
     width: 100%;
     min-width: 0;
+    min-height: 46px;
+  }
+
+  .wizard-panel-top strong {
+    font-size: 17px;
+  }
+
+  .wizard-panel-top p,
+  .wizard-note,
+  .summary-callout p,
+  .summary-handoff p {
+    font-size: 14px;
+  }
+
+  .summary-main {
+    padding: 16px 18px;
+  }
+
+  .summary-main-value {
+    font-size: clamp(26px, 10vw, 36px);
+  }
+
+  .summary-item,
+  .equipment-overview-card,
+  .budget-structure-card,
+  .expense-card,
+  .scenario-card-lite,
+  .result-card {
+    padding: 14px;
   }
 
   .expense-card,
