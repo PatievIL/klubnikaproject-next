@@ -3,10 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png" />
+  <link rel="manifest" href="../site.webmanifest" />
   <title>Сопровождение и консультации для клубничных ферм — КлубникаПро</title>
   <meta
     name="description"
-    content="Сопровождение и консультации для клубничных ферм в controlled-environment логике: запуск, диагностика проблем, корректировка решений и разбор действующего проекта."
+    content="Сопровождение и консультации для клубничных ферм в логике контролируемой среды: запуск, диагностика проблем, корректировка решений и разбор действующего проекта."
   />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -19,35 +22,61 @@
       <div class="hero-shell">
         <div class="topbar">
           <div class="brand">
-            <div class="brand-logo">
-              <img src="https://static.tildacdn.com/tild6366-3531-4035-a236-323261656361/logo_greeb.png" alt="КлубникаПро" />
-            </div>
-            <div>
-              <div class="brand-title">КлубникаПро</div>
-              <div class="brand-note">Подбор, консультации и сопровождение по задачам фермы</div>
-            </div>
+            <a class="brand-home" href="../">
+              <div class="brand-logo">
+                <img src="../assets/brand-berry-beige.svg" alt="Знак Klubnika Project" />
+              </div>
+              <div class="brand-copy">
+                <div class="brand-title">
+                  <span class="brand-title-line">Klubnika</span>
+                  <span class="brand-title-line">Project</span>
+                </div>
+                <div class="brand-note">Подбор, консультации и сопровождение по задачам фермы</div>
+              </div>
+            </a>
           </div>
+          <button class="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false">
+            <span></span>
+          </button>
 
           <nav class="nav">
-            <a href="../">Главная</a>
-            <a href="../farm/">Расчёт фермы</a>
-            <a href="../shop/">Магазин</a>
-            <a href="../seeds/">Семена</a>
-            <a href="#request">Оставить задачу</a>
+            <a class="nav-link" href="../">Главная</a>
+            <div class="nav-group">
+              <button class="nav-trigger" type="button">Решения</button>
+              <div class="nav-menu">
+                <a href="../farm/"><strong>Расчёт фермы</strong><span>Состав комплекта, рамка бюджета и следующий шаг.</span></a>
+                <a href="../study/"><strong>Сопровождение</strong><span>Разбор действующей фермы, критических узлов и технологии.</span></a>
+                <a href="../consultations/"><strong>Консультации</strong><span>Точечный разбор задачи, совместимости и следующего шага.</span></a>
+                <a href="../klubhack/"><strong>Клубничный Хак</strong><span>Система по клубнике без проектной сметы.</span></a>
+              </div>
+            </div>
+            <div class="nav-group">
+              <button class="nav-trigger" type="button">Каталог</button>
+              <div class="nav-menu nav-menu-wide">
+                <a href="../shop/"><strong>Магазин</strong><span>Весь каталог решений для клубничной фермы.</span></a>
+                <a href="../shop/led/"><strong>LED</strong><span>Светильники M23 и тепличные модели.</span></a>
+                <a href="../shop/poliv/"><strong>Полив</strong><span>Комплектующие, узлы и типовые комплекты.</span></a>
+                <a href="../shop/stellaj/"><strong>Стеллажи</strong><span>Модули, каркасы и конструктив фермы.</span></a>
+                <a href="../shop/substrate/"><strong>Субстрат</strong><span>Grodan и корневая зона под controlled environment.</span></a>
+                <a href="../seeds/"><strong>Семена и Frigo</strong><span>Посадочный материал под фермерский запуск.</span></a>
+              </div>
+            </div>
+            <a class="nav-link" href="../calc/">Калькулятор</a>
+            <a class="nav-cta" href="#request">Оставить задачу</a>
           </nav>
         </div>
 
         <div class="hero-grid">
           <div class="hero-copy">
             <span class="eyebrow">Сопровождение и консультации</span>
-            <h1>Когда проблема уже не решается одним товаром, нужен разбор проекта и следующий точный шаг</h1>
+            <h1>Сопровождение клубничной фермы: когда одной покупки и одной консультации уже мало</h1>
             <p class="lead">
               Эта страница для запусков, действующих ферм и пересборки технологии.
-              Здесь не продаётся абстрактное “обучение”, а предлагается участие в реальных решениях по ферме.
+              Здесь не продаётся абстрактное обучение, а предлагается участие в реальных решениях по ферме.
             </p>
             <p class="sublead">
-              Если у вас вопрос по качеству ягоды, свету, поливу, корневой зоне, логике запуска или критическому этапу проекта,
-              правильный путь — не случайная покупка, а нормальный разбор ситуации.
+              Если вопрос упирается в качество ягоды, свет, полив, корневую зону, логику запуска или критический этап проекта,
+              правильный путь — разбор ситуации и план действий, а не случайная покупка.
             </p>
 
             <div class="btn-row hero-cta">
@@ -56,6 +85,7 @@
             </div>
             <div class="text-link-row">
               <a href="../shop/">Я уже понимаю, что нужно купить</a>
+              <a href="../klubhack/">Нужна базовая система по клубнике</a>
             </div>
 
             <div class="hero-stats">
@@ -65,7 +95,7 @@
               </div>
               <div class="hero-stat">
                 <strong>Что на выходе</strong>
-                <span>Приоритеты, корректировки и понятный следующий шаг по проекту.</span>
+                <span>Приоритеты, корректировки, логика внедрения и более управляемый проект.</span>
               </div>
               <div class="hero-stat">
                 <strong>Когда идти сюда</strong>
@@ -78,7 +108,7 @@
             <div class="visual-grid">
               <img
                 class="visual-main"
-                src="https://static.tildacdn.com/tild3931-3764-4365-a337-613063326461/8hyeerqinwi24ald81an.jpeg"
+                src="https://static.tildacdn.com/stor3061-3632-4435-a332-653934306261/20880535.jpg"
                 alt="Клубника и проектная работа"
               />
               <div class="visual-stack">
@@ -100,7 +130,7 @@
       <div class="section-frame">
         <div class="section-head">
           <span class="eyebrow">Кому подходит</span>
-          <h2>Сопровождение нужно там, где решения уже нельзя принимать наугад</h2>
+          <h2>Сопровождение нужно там, где цена ошибки уже ощутима для проекта</h2>
           <p class="sublead">
             Если цена ошибки уже заметна для проекта, правильнее сначала разобрать ситуацию,
             чем продолжать двигаться через случайные гипотезы.
@@ -114,7 +144,7 @@
             <ul>
               <li>Нужно проверить логику конфигурации до закупок и монтажа.</li>
               <li>Важно не собрать дорогую системную ошибку ещё на старте.</li>
-              <li>Следующий шаг: аудит вводных и приоритетов.</li>
+              <li>Результат: аудит вводных и порядок критичных решений.</li>
             </ul>
           </article>
 
@@ -124,7 +154,7 @@
             <ul>
               <li>Качество ягоды нестабильно, параметры держатся реактивно.</li>
               <li>Нужно понять причину, а не просто менять настройки.</li>
-              <li>Следующий шаг: разбор текущей логики по узлам.</li>
+              <li>Результат: разбор текущей логики по узлам и приоритет корректировок.</li>
             </ul>
           </article>
 
@@ -134,7 +164,7 @@
             <ul>
               <li>Нужно пройти важный участок проекта без лишней цены ошибки.</li>
               <li>Важно не действовать вслепую по мере появления симптомов.</li>
-              <li>Следующий шаг: карта рисков и порядок действий.</li>
+              <li>Результат: карта рисков и порядок действий на критическом этапе.</li>
             </ul>
           </article>
 
@@ -144,7 +174,7 @@
             <ul>
               <li>Нужно менять схему или масштабировать объект.</li>
               <li>Важно не тиражировать старые ошибки в новый объём.</li>
-              <li>Следующий шаг: логика корректировок и сопровождение внедрения.</li>
+              <li>Результат: логика корректировок и сопровождение внедрения.</li>
             </ul>
           </article>
         </div>
@@ -157,10 +187,10 @@
       <div class="metric-row">
         <div class="section-frame">
           <span class="eyebrow">Что даёт сопровождение</span>
-          <h2>Проблема почти никогда не живёт в одной точке</h2>
+          <h2>Сопровождение нужно, когда одна консультация уже не закрывает задачу</h2>
           <p class="sublead">
-            Свет, полив, корневая зона, фазы растения и качество ягоды часто связаны. Поэтому задача не в том,
-            чтобы найти “одну волшебную кнопку”, а в том, чтобы увидеть цепочку решений и отклонений.
+            Свет, полив, корневая зона, фазы растения и качество ягоды часто связаны.
+            Поэтому задача не в том, чтобы найти одну волшебную кнопку, а в том, чтобы увидеть цепочку решений и отклонений.
           </p>
 
           <div class="metric-wall">
@@ -190,7 +220,8 @@
             <li style="position:relative; padding-left:26px; margin-top:10px;"><span style="position:absolute; left:0; top:7px; width:9px; height:9px; border-radius:50%; background:var(--green);"></span>Понимание, где первопричина, а где только следствие.</li>
             <li style="position:relative; padding-left:26px; margin-top:10px;"><span style="position:absolute; left:0; top:7px; width:9px; height:9px; border-radius:50%; background:var(--green);"></span>Порядок действий без распыления на второстепенное.</li>
             <li style="position:relative; padding-left:26px; margin-top:10px;"><span style="position:absolute; left:0; top:7px; width:9px; height:9px; border-radius:50%; background:var(--green);"></span>Логику, где товар, расчёт и технология связаны между собой.</li>
-            <li style="position:relative; padding-left:26px; margin-top:10px;"><span style="position:absolute; left:0; top:7px; width:9px; height:9px; border-radius:50%; background:var(--green);"></span>Следующий шаг, который можно внедрять, а не просто обсуждать.</li>
+            <li style="position:relative; padding-left:26px; margin-top:10px;"><span style="position:absolute; left:0; top:7px; width:9px; height:9px; border-radius:50%; background:var(--green);"></span>План действий, который можно внедрять, а не просто обсуждать.</li>
+            <li style="position:relative; padding-left:26px; margin-top:10px;"><span style="position:absolute; left:0; top:7px; width:9px; height:9px; border-radius:50%; background:var(--green);"></span>Проектный контекст из практики в России, Казахстане и Таиланде.</li>
           </ul>
         </aside>
       </div>
@@ -202,7 +233,7 @@
       <div class="section-frame">
         <div class="section-head">
           <span class="eyebrow">Что разбираем</span>
-          <h2>Сопровождение строится вокруг реальных узлов и решений по ферме</h2>
+          <h2>Разбираем не всё про ферму, а узлы, где реально теряются деньги</h2>
         </div>
 
         <div class="grid grid-3">
@@ -233,8 +264,8 @@
           </article>
           <article class="card card-pad">
             <div class="tag">Управление</div>
-            <h3>Приоритеты и следующий шаг</h3>
-            <p class="sublead">Выход из реактивного режима в сторону более управляемой логики решений.</p>
+            <h3>Приоритеты и внедрение</h3>
+            <p class="sublead">Выход из реактивного режима в сторону более управляемой логики решений и закупок.</p>
           </article>
         </div>
       </div>
@@ -246,11 +277,12 @@
       <div class="grid grid-2">
         <article class="card route-card">
           <div class="badge">Разовая консультация</div>
-          <h3>Когда нужен точный следующий шаг</h3>
+          <h3>Когда нужен точный разбор одной задачи</h3>
           <ul>
             <li>Одна конкретная проблема или блок решений.</li>
             <li>Нужно быстро понять, что делать сначала и что не трогать.</li>
             <li>На выходе: список приоритетов и корректировок под ситуацию.</li>
+            <li>Разовая консультация от 15 000 ₽ за час.</li>
           </ul>
         </article>
 
@@ -261,8 +293,39 @@
             <li>Несколько взаимосвязанных проблем или критический этап проекта.</li>
             <li>Нужна регулярная связь по решениям и отклонениям.</li>
             <li>На выходе: карта рисков, логика внедрения и корректировка по факту.</li>
+            <li>Сопровождение от 35 000 ₽ в месяц.</li>
           </ul>
         </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-tight" id="hack">
+    <div class="container">
+      <div class="action-panel">
+        <div class="split-hero">
+          <div>
+            <span class="eyebrow">Отдельный маршрут</span>
+            <h2>Если вам нужна базовая система по клубнике, а не разбор проекта, для этого есть Клубничный Хак</h2>
+            <p class="sublead">
+              Это отдельный курс: 6 месяцев прохождения, 5 модулей, 1 год доступа к занятиям, пожизненный доступ к дополнительным материалам
+              и проверка практических заданий с рекомендациями.
+            </p>
+            <div class="btn-row">
+              <a class="btn btn-primary" href="../klubhack/">Открыть страницу курса</a>
+              <a class="btn btn-secondary" href="#request">Если нужен именно разбор задачи</a>
+            </div>
+          </div>
+
+          <div class="card form-card">
+            <div class="tag">Когда идти туда</div>
+            <ul>
+              <li>Нужна пошаговая система выращивания, а не проектная работа по вашему объекту.</li>
+              <li>Хотите пройти путь от старта фермы до качества ягоды и масштабирования.</li>
+              <li>Нужен учебный маршрут, закрытый чат и практические задания.</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -272,7 +335,7 @@
       <div class="grid grid-2">
         <article class="card result-card">
           <div class="tag">После консультации</div>
-          <h3>Понятный следующий шаг</h3>
+          <h3>Понятная логика действий</h3>
           <p class="sublead">Ясная картина по проблеме, вероятным причинам и корректировкам без распыления на второстепенное.</p>
         </article>
         <article class="card result-card">
@@ -393,8 +456,8 @@
             <p>Да. Если после разбора становится понятно, какие позиции нужны, проект переводится в нормальный путь через магазин или расчёт комплекта.</p>
           </article>
           <article class="card faq-box">
-            <strong>Какой следующий шаг после заявки?</strong>
-            <p>Понять, достаточно ли разовой консультации, или проекту нужен более длинный формат сопровождения.</p>
+            <strong>Что происходит после заявки?</strong>
+            <p>Понять, достаточно ли одной консультации, или задаче нужен более длинный формат сопровождения.</p>
           </article>
         </div>
       </div>
@@ -407,7 +470,7 @@
         <div class="grid grid-2">
           <div>
             <span class="eyebrow">Форма для сложных случаев</span>
-            <h2>Опишите ситуацию по ферме и получите следующий шаг</h2>
+            <h2>Опишите ситуацию по ферме, а мы предложим формат работы</h2>
             <p class="sublead">
               Здесь важны не длинные описания, а факты: стадия проекта, масштаб, где сейчас главный затык
               и нужно ли точечное решение или сопровождение.
@@ -417,7 +480,7 @@
               <div class="card result-card">
                 <div class="tag">Для консультации</div>
                 <h3>Один точный вопрос</h3>
-                <p class="sublead">Когда нужно быстро понять приоритеты и следующий шаг без длинного процесса.</p>
+                <p class="sublead">Когда нужно быстро понять приоритеты и не растягивать работу на длинный процесс.</p>
               </div>
               <div class="card result-card">
                 <div class="tag">Для сопровождения</div>
@@ -428,9 +491,9 @@
           </div>
 
           <div class="card form-card">
-            <h3>Оставить задачу на разбор</h3>
+            <h3>Собрать задачу на разбор</h3>
             <p class="sublead">Форма для консультации, аудита и сопровождения.</p>
-            <form class="form-grid">
+            <form class="form-grid" data-brief-form="Сопровождение — задача на разбор">
               <input class="input" type="text" placeholder="Имя / компания" />
               <input class="input" type="text" placeholder="Контакт для связи" />
               <select class="select">
@@ -446,7 +509,9 @@
                 <option>Нужна рекомендация по формату</option>
               </select>
               <textarea class="textarea" placeholder="Опишите ситуацию: качество ягоды, свет, полив, запуск, пересборка или другой критичный вопрос по проекту"></textarea>
-              <button class="btn btn-primary" type="button">Получить следующий шаг</button>
+              <button class="btn btn-primary" data-brief-button type="button">Скопировать задачу</button>
+              <p class="brief-form-note">Пока без онлайн-отправки. Кнопка соберёт текст заявки и скопирует его для дальнейшей передачи. Рабочий Telegram: <a href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">@patiev_admin</a>.</p>
+              <p class="brief-form-status" data-brief-status aria-live="polite"></p>
             </form>
           </div>
         </div>
@@ -458,7 +523,7 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-card">
-          <h3>КлубникаПро</h3>
+          <h3>Klubnika Project</h3>
           <p class="sublead">Подбор, консультации и сопровождение для клубничных ферм, где уже нужен не случайный совет, а точная логика решений.</p>
         </div>
 
@@ -468,6 +533,7 @@
             <li><a href="../">Главная</a></li>
             <li><a href="../farm/">Расчёт фермы</a></li>
             <li><a href="./">Сопровождение</a></li>
+            <li><a href="../klubhack/">Клубничный Хак</a></li>
             <li><a href="../shop/">Магазин</a></li>
           </ul>
         </div>
@@ -483,10 +549,11 @@
       </div>
 
       <div class="footer-row">
-        <div>© КлубникаПро</div>
+        <div>© Klubnika Project</div>
         <div>Подбор, консультации и сопровождение по задачам фермы</div>
       </div>
     </div>
   </footer>
+  <script src="../site.js" defer></script>
 </body>
 </html>

@@ -22,7 +22,7 @@ const STEP_META = [
   },
   {
     title: "Формат выращивания",
-    intro: "Калькулятор заточен под клубнику в controlled environment и должен понимать контекст выращивания."
+    intro: "Калькулятор заточен под клубнику в контролируемой среде и учитывает контекст выращивания."
   },
   {
     title: "Масштаб и базовые цифры",
@@ -30,7 +30,7 @@ const STEP_META = [
   },
   {
     title: "Цель расчёта",
-    intro: "Нужно понять, чего вы ждёте от результата: комплект, бюджет, сравнение сценариев или следующий шаг к запуску."
+    intro: "Нужно понять, чего вы ждёте от результата: комплект, бюджет, сравнение сценариев или подготовку к запуску."
   },
   {
     title: "Канал реализации и ожидания",
@@ -144,7 +144,7 @@ const elements = {
   copyBriefButton: document.getElementById("copy-brief-button"),
   equipmentWithoutSeedlings: document.getElementById("equipment-without-seedlings"),
   seedlingsTotalCost: document.getElementById("seedlings-total-cost"),
-  equipmentTableBody: document.getElementById("equipment-table-body"),
+  budgetStructureGrid: document.getElementById("budget-structure-grid"),
   expenseList: document.getElementById("expense-list"),
   expenseTotalValue: document.getElementById("expense-total-value"),
   scenarioGrid: document.getElementById("scenario-grid"),
@@ -550,37 +550,53 @@ function renderPreviewState(calculation) {
   elements.resultSecondaryLink.textContent = route.secondary.label;
 
   if (state.submitted) {
-    elements.resultStatusTitle.textContent = "Предварительная рамка собрана";
-    elements.resultStatusText.textContent = "Теперь у вас есть состав проекта, ориентир по смете и понятный следующий шаг без повторного ввода основных параметров.";
+    elements.resultStatusTitle.textContent = "Рамка зафиксирована. Теперь важен правильный следующий шаг";
+    elements.resultStatusText.textContent = "Основные вводные уже собраны. Ниже видно, когда можно идти в типовой путь, а когда лучше сразу переходить в расчёт под объект или в разбор с человеком.";
   } else {
-    elements.resultStatusTitle.textContent = "Вот что уже видно по вашим вводным";
-    elements.resultStatusText.textContent = "Калькулятор считает рамку сразу. Завершите wizard, чтобы зафиксировать следующий маршрут и перейти дальше предметно.";
+    elements.resultStatusTitle.textContent = "Маршрут уже начинает читаться по текущим вводным";
+    elements.resultStatusText.textContent = "Калькулятор показывает не только цифры, но и следующий логичный путь. Завершите wizard, чтобы передать вводные дальше без повторного набора.";
   }
 }
 
 function buildRouteAdvice(calculation) {
   const farmLink = buildFarmLink(calculation);
   const solutionsLink = "../shop/solutions/";
+  const consultationsLink = "../consultations/#request";
+
+  if (state.goal === "bottleneck") {
+    return {
+      title: "Если задача в узком месте, не идите сразу в каталог",
+      text: "Здесь важнее не подобрать случайную позицию, а разобрать причину просадки по узлу, качеству ягоды, поливу, корневой зоне или свету.",
+      primary: {
+        label: "Открыть консультации",
+        href: consultationsLink
+      },
+      secondary: {
+        label: "Открыть сопровождение",
+        href: "../study/"
+      }
+    };
+  }
 
   if (state.objectState === "active" || state.scenarioType === "existing" || state.goal === "bottleneck") {
     return {
-      title: "Для действующего объекта калькулятор — только первый шаг",
-      text: "Базовая рамка уже видна, но по действующей ферме важнее проверить совместимость узлов, ограничения объекта и реальную причину просадки.",
+      title: "Для действующей фермы сначала нужен разбор текущей схемы",
+      text: "У вас уже не старт с нуля. Здесь важнее проверить совместимость узлов, ограничения объекта и логику текущей технологии, а не просто собирать новые позиции.",
       primary: {
         label: "Открыть сопровождение",
         href: "../study/"
       },
       secondary: {
-        label: "Передать вводные на расчёт",
-        href: farmLink
+        label: "Открыть консультации",
+        href: consultationsLink
       }
     };
   }
 
   if (state.scaleType === "pilot" && state.goal === "kit") {
     return {
-      title: "Сейчас можно двигаться в готовые решения или в проектный расчёт",
-      text: "Если нужен пилотный вход и понятный состав модуля, смотрите готовые решения. Если надо привязать всё к объекту, переходите в расчёт под проект.",
+      title: "Для пилотного запуска можно идти в готовое решение",
+      text: "Если нужен быстрый вход и типовой модуль, смотрите готовые решения. Если хотя бы один параметр объекта нестандартный, не покупайте вслепую и переходите в расчёт под помещение.",
       primary: {
         label: "Открыть готовые решения",
         href: solutionsLink
@@ -594,8 +610,8 @@ function buildRouteAdvice(calculation) {
 
   if (state.scaleType === "current" || state.scaleType === "expand" || state.scenarioType === "expand") {
     return {
-      title: "Следующий шаг — расчёт под объект",
-      text: "На расширении уже важно считать этапность, состав закупки и связку узлов под реальные ограничения помещения.",
+      title: "На расширении следующий шаг — расчёт под объект",
+      text: "На этом этапе уже важны проходы, высота, этапность закупки, связка света, полива и стеллажей. Магазин здесь полезен только после объектного расчёта.",
       primary: {
         label: "Передать вводные на расчёт",
         href: farmLink
@@ -608,15 +624,15 @@ function buildRouteAdvice(calculation) {
   }
 
   return {
-    title: "Этого уже достаточно, чтобы перейти к предметному разговору",
-    text: "У вас есть базовая рамка по ферме. Теперь можно или передать вводные на расчёт, или дособрать типовые позиции через магазин.",
+    title: "Для типового запуска дальше нужен расчёт или добор типовых позиций",
+    text: "Если задача в типовой первой очереди, можно передать вводные на расчёт и затем добрать понятные позиции через магазин. Если объект уже нестандартный, не задерживайтесь на каталоге.",
     primary: {
       label: "Передать вводные на расчёт",
       href: farmLink
     },
     secondary: {
-      label: "Открыть магазин",
-      href: "../shop/"
+      label: "Открыть готовые решения",
+      href: solutionsLink
     }
   };
 }
@@ -695,14 +711,41 @@ function renderEquipment(calculation) {
   elements.equipmentWithoutSeedlings.textContent = formatRub(calculation.equipmentWithoutSeedlings);
   elements.seedlingsTotalCost.textContent = formatRub(calculation.seedlingsTotalCost);
 
-  elements.equipmentTableBody.innerHTML = calculation.equipmentLines.map((line) => `
-    <tr>
-      <td>${line.name}</td>
-      <td>${formatSmart(line.qty)}</td>
-      <td>${line.unit}</td>
-      <td>${formatRub(line.total)}</td>
-    </tr>
+  const groupedBudget = [
+    {
+      title: "Конструкция и ярусы",
+      total: sumLines(calculation.equipmentLines, ["rack-basic", "rack-extra", "trays"]),
+      note: "Каркас, дополнительные секции и лотки, на которых собирается сама ферма."
+    },
+    {
+      title: "Свет",
+      total: sumLines(calculation.equipmentLines, ["lights"]),
+      note: "Досветка под ярусную схему и текущую конфигурацию проекта."
+    },
+    {
+      title: "Полив и узлы подачи",
+      total: sumLines(calculation.equipmentLines, ["droppers", "blind-tube", "fittings", "filter", "pump", "punch", "meters"]),
+      note: "Магистраль, капельницы, дозирование, фильтрация и базовый контроль раствора."
+    },
+    {
+      title: "Корневая зона и запуск",
+      total: sumLines(calculation.equipmentLines, ["mats", "holder", "support-tape", "fertilizer"]),
+      note: "Субстрат, стартовые расходники и базовые позиции, без которых узел не запускается."
+    }
+  ];
+
+  elements.budgetStructureGrid.innerHTML = groupedBudget.map((group) => `
+    <div class="budget-structure-card">
+      <span>${group.title}</span>
+      <strong>${formatRub(group.total)}</strong>
+      <p>${group.note}</p>
+    </div>
   `).join("");
+}
+
+function sumLines(lines, ids) {
+  const idSet = new Set(ids);
+  return lines.reduce((sum, line) => sum + (idSet.has(line.id) ? line.total : 0), 0);
 }
 
 function renderExpenseBlock(calculation) {
@@ -730,10 +773,10 @@ function renderRevenueBlock(calculation) {
   const activeScenario = calculation.activeScenario;
 
   elements.scenarioGrid.innerHTML = [
-    { label: "Урожай в год с 1 саженца", value: `${formatSmart(activeScenario.kgPerPlantPerYear)} кг` },
-    { label: "Урожай в год со всех саженцев", value: `${formatSmart(activeScenario.annualHarvest)} кг` },
-    { label: "Выручка в месяц", value: formatRub(activeScenario.monthlyRevenue) },
-    { label: "Выручка в год", value: formatRub(activeScenario.annualRevenue) }
+    { label: "Допущение по урожайности на 1 растение в год", value: `${formatSmart(activeScenario.kgPerPlantPerYear)} кг` },
+    { label: "Ориентир по годовому объёму ягоды", value: `${formatSmart(activeScenario.annualHarvest)} кг` },
+    { label: "Ориентир по денежному потоку в месяц", value: formatRub(activeScenario.monthlyRevenue) },
+    { label: "Ориентир по денежному потоку в год", value: formatRub(activeScenario.annualRevenue) }
   ].map((item) => `
     <div class="scenario-card-lite">
       <span>${item.label}</span>
@@ -756,10 +799,10 @@ function renderRevenueBlock(calculation) {
 
 function renderAssumptions(calculation) {
   elements.assumptionList.innerHTML = [
-    `${calculation.basicRacks} базовых и ${calculation.extraRacks} дополнительных стеллажей. Всего ${calculation.totalRacks} модулей в расчёте.`,
-    `${pricing.constants.plantsPerRack} растений на стеллаж. В экономике это ${formatSmart(calculation.plantCount)} растений.`,
-    `Блок расходов "в месяц" использует ${pricing.constants.monthlyPreviewLightHoursPerDay} часов света в день, а инвестиционная модель ниже — ${pricing.constants.paybackModelLightHoursPerDay} часов.`,
-    `Посадочный материал в смете округляется до партии по 100 шт., а в годовой модели учитывается по точному числу растений.`
+    `Если у вас уже есть объект или действующая ферма, каталог не должен быть первым шагом. Сначала нужен разбор текущей схемы.`,
+    `${calculation.basicRacks} базовых и ${calculation.extraRacks} дополнительных стеллажей. Всего ${calculation.totalRacks} модулей в текущей рамке.`,
+    `${pricing.constants.plantsPerRack} растений на стеллаж. В модели это ${formatSmart(calculation.plantCount)} растений, но фактическая схема потом уточняется по объекту.`,
+    `Блок сценариев использует модельные допущения по свету, расходам и урожайности. Их задача — сравнить порядок цифр, а не обещать финальный результат.`
   ].map((item) => `<li>${item}</li>`).join("");
 }
 

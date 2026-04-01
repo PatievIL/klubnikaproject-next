@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png" />
+  <link rel="manifest" href="../site.webmanifest" />
   <title>Магазин КлубникаПро — решения для клубничных сити-ферм</title>
   <meta
     name="description"
@@ -19,43 +22,68 @@
       <div class="hero-shell">
         <div class="topbar">
           <div class="brand">
-            <div class="brand-logo">
-              <img src="https://static.tildacdn.com/tild6366-3531-4035-a236-323261656361/logo_greeb.png" alt="КлубникаПро" />
-            </div>
-            <div>
-              <div class="brand-title">КлубникаПро</div>
-              <div class="brand-note">Магазин решений для клубничных сити-ферм</div>
-            </div>
+            <a class="brand-home" href="../">
+              <div class="brand-logo">
+                <img src="../assets/brand-berry-beige.svg" alt="Знак Klubnika Project" />
+              </div>
+              <div class="brand-copy">
+                <div class="brand-title">
+                  <span class="brand-title-line">Klubnika</span>
+                  <span class="brand-title-line">Project</span>
+                </div>
+                <div class="brand-note">Магазин решений для клубничных сити-ферм</div>
+              </div>
+            </a>
           </div>
+          <button class="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false">
+            <span></span>
+          </button>
 
           <nav class="nav">
-            <a href="../">Главная</a>
-            <a href="../farm/">Расчёт фермы</a>
-            <a href="../study/">Сопровождение</a>
-            <a href="../seeds/">Семена</a>
-            <a href="#categories">Категории</a>
-            <a href="#catalog">Каталог</a>
+            <a class="nav-link" href="../">Главная</a>
+            <div class="nav-group">
+              <button class="nav-trigger" type="button">Решения</button>
+              <div class="nav-menu">
+                <a href="../farm/"><strong>Расчёт фермы</strong><span>Состав комплекта, рамка бюджета и следующий шаг.</span></a>
+                <a href="../study/"><strong>Сопровождение</strong><span>Разбор действующей фермы, критических узлов и технологии.</span></a>
+                <a href="../consultations/"><strong>Консультации</strong><span>Точечный разбор задачи, совместимости и следующего шага.</span></a>
+                <a href="../klubhack/"><strong>Клубничный Хак</strong><span>Система по клубнике без проектной сметы.</span></a>
+              </div>
+            </div>
+            <div class="nav-group">
+              <button class="nav-trigger" type="button">Каталог</button>
+              <div class="nav-menu nav-menu-wide">
+                <a href="./"><strong>Магазин</strong><span>Весь каталог решений для клубничной фермы.</span></a>
+                <a href="./led/"><strong>LED</strong><span>Светильники M23 и тепличные модели.</span></a>
+                <a href="./poliv/"><strong>Полив</strong><span>Комплектующие, узлы и типовые комплекты.</span></a>
+                <a href="./stellaj/"><strong>Стеллажи</strong><span>Модули, каркасы и конструктив фермы.</span></a>
+                <a href="./substrate/"><strong>Субстрат</strong><span>Grodan и корневая зона под controlled environment.</span></a>
+                <a href="../seeds/"><strong>Семена и Frigo</strong><span>Посадочный материал под фермерский запуск.</span></a>
+              </div>
+            </div>
+            <a class="nav-link" href="../calc/">Калькулятор</a>
+            <a class="nav-cta" href="#contact">Получить подбор</a>
           </nav>
         </div>
 
         <div class="hero-grid">
           <div class="hero-copy">
             <span class="eyebrow">Магазин</span>
-            <h1>Магазин решений для клубничных сити-ферм</h1>
+            <h1>Магазин решений для клубничной фермы</h1>
             <p class="lead">
               Здесь есть свет, полив, стеллажи, субстрат, посадочный материал, расходники и готовые решения
               для запуска, дооснащения и обслуживания фермы.
             </p>
             <p class="sublead">
               Часть товаров можно купить сразу. Часть лучше сначала подобрать под объект, чтобы не ошибиться
-              в совместимости, составе и следующем шаге.
+              в совместимости, составе и логике закупки.
             </p>
             <div class="btn-row hero-cta">
-              <a class="btn btn-primary" href="../study/">Подобрать комплект под задачу</a>
+              <a class="btn btn-primary" href="#scenarios">Выбрать свой сценарий</a>
               <a class="btn btn-secondary" href="#categories">Смотреть категории</a>
             </div>
             <div class="text-link-row">
-              <a href="../farm/">Нужен расчёт фермы</a>
+              <a href="../consultations/">Есть действующая ферма и нужен разбор</a>
             </div>
 
             <div class="hero-stats">
@@ -68,7 +96,7 @@
                 <span>Мелкие позиции идут в розничную логику, сложные решения — в подбор и смету.</span>
               </div>
               <div class="hero-stat">
-                <strong>Какой следующий шаг</strong>
+                <strong>Куда идти дальше</strong>
                 <span>Категория, карточка товара, запрос на подбор или расчёт комплекта под объект.</span>
               </div>
             </div>
@@ -78,12 +106,12 @@
             <div class="visual-grid">
               <img
                 class="visual-main"
-                src="https://static.tildacdn.com/tild6235-3635-4838-b030-666133326265/IMG_6063.jpg"
+                src="../assets/photos/optimized/greenhouse-rack.webp"
                 alt="Оборудование для клубничной фермы"
               />
               <div class="visual-stack">
-                <img src="https://static.tildacdn.com/tild3232-3635-4439-b030-636336363230/IMG_4924.jpg" alt="Стеллажи" />
-                <img src="https://static.tildacdn.com/tild3931-3764-4365-a337-613063326461/8hyeerqinwi24ald81an.jpeg" alt="Клубника" />
+                <img src="../assets/photos/optimized/rack-aisle.webp" alt="Стеллажи" />
+                <img src="../assets/photos/optimized/berry-red.webp" alt="Клубника" />
               </div>
             </div>
             <div class="visual-note">
@@ -100,55 +128,46 @@
       <div class="section-frame">
         <div class="section-head">
           <span class="eyebrow">Быстрый выбор</span>
-          <h2>Сначала выберите свой сценарий, потом категорию или товар</h2>
+          <h2>Не начинайте с каталога, пока не понятен сценарий</h2>
           <p class="sublead">
-            Даже если вы не знаете точное название товара, здесь можно быстро выйти на нужную категорию или запрос на подбор.
+            Магазин нужен не всем одинаково. Кому-то нужен расчёт фермы, кому-то консультация по действующему объекту, а кому-то уже можно идти в категорию или готовое решение.
           </p>
         </div>
 
-        <div class="grid grid-3">
+        <div class="grid grid-2">
           <article class="path-card">
             <div class="kicker">Сценарий</div>
-            <h3>Запуск с нуля</h3>
-            <p class="sublead">Нужна не одна позиция, а рабочая схема объекта.</p>
+            <h3>Запускаю ферму с нуля</h3>
+            <p class="sublead">Если вы ещё считаете состав фермы, площадь, очередность закупки и рамку бюджета, каталог не должен быть первым шагом.</p>
             <div class="btn-row">
-              <a class="btn btn-primary" href="../farm/">Перейти к расчёту</a>
+              <a class="btn btn-primary" href="../farm/">Перейти к расчёту фермы</a>
             </div>
           </article>
 
           <article class="path-card">
             <div class="kicker">Сценарий</div>
-            <h3>Действующая ферма</h3>
-            <p class="sublead">Нужно заменить узел, разобраться в совместимости или пересобрать часть схемы.</p>
+            <h3>Ферма уже работает</h3>
+            <p class="sublead">Если нужно заменить узел, понять причину просадки или проверить совместимость, сначала нужен разбор текущей схемы.</p>
             <div class="btn-row">
-              <a class="btn btn-primary" href="../study/">Открыть подбор</a>
+              <a class="btn btn-primary" href="../consultations/">Открыть консультации</a>
             </div>
           </article>
 
           <article class="path-card">
             <div class="kicker">Сценарий</div>
-            <h3>Нужны расходники</h3>
-            <p class="sublead">Ищу типовые комплектующие, субстрат, фитинги или отдельные позиции.</p>
-            <div class="btn-row">
-              <a class="btn btn-primary" href="#catalog">Смотреть витрину</a>
-            </div>
-          </article>
-
-          <article class="path-card">
-            <div class="kicker">Сценарий</div>
-            <h3>Нужен посадочный материал</h3>
-            <p class="sublead">Важно понять, что подходит под формат фермы, генерацию и канал продаж.</p>
-            <div class="btn-row">
-              <a class="btn btn-primary" href="../seeds/">Открыть раздел</a>
-            </div>
-          </article>
-
-          <article class="path-card">
-            <div class="kicker">Сценарий</div>
-            <h3>Нужен свет или полив</h3>
-            <p class="sublead">Задача уже близка к категории, но ещё нужно понять тип решения.</p>
+            <h3>Нужен типовой товар или расходник</h3>
+            <p class="sublead">Если задача уже свелась к понятной категории или SKU, можно идти в категории и потом в карточку товара.</p>
             <div class="btn-row">
               <a class="btn btn-primary" href="#categories">Открыть категории</a>
+            </div>
+          </article>
+
+          <article class="path-card">
+            <div class="kicker">Сценарий</div>
+            <h3>Нужен узел, модуль или комплект</h3>
+            <p class="sublead">Если не хотите собирать всё по частям, правильнее идти в готовые решения и состав комплекта, а не в витрину розницы.</p>
+            <div class="btn-row">
+              <a class="btn btn-primary" href="./solutions/">Смотреть готовые решения</a>
             </div>
           </article>
         </div>
@@ -161,9 +180,9 @@
       <div class="section-frame">
         <div class="section-head">
           <span class="eyebrow">Готовые решения</span>
-          <h2>Высокий интерес нужно переводить не в блуждание, а в конкретный коммерческий шаг</h2>
+          <h2>Готовые решения для старта, дооснащения и замены узлов</h2>
           <p class="sublead">
-            Ниже не просто карточки. Каждая отвечает, кому подходит решение, что в него входит и какой CTA правильный.
+            Ниже не просто карточки. Каждая показывает, кому подходит решение, что в него входит и когда нужен расчёт вместо прямой покупки.
           </p>
         </div>
 
@@ -176,9 +195,9 @@
             </div>
             <h3>Комплект для запуска фермы</h3>
             <ul>
-              <li>Кому подходит: запуску новой фермы или первой очереди.</li>
-              <li>Что входит: рамка по стеллажам, свету, поливу и расходникам.</li>
-              <li>CTA: получить состав и смету.</li>
+              <li>Кому подходит: пилотному запуску, старту первой очереди и тестовой схеме.</li>
+              <li>Что входит: модуль 2×2 м, 8 металлических лотков, 16 матов и 8 светильников M23.</li>
+              <li>Когда выбирать: если хотите быстро понять, из чего начинается рабочий модуль фермы.</li>
             </ul>
             <div class="btn-row">
               <a class="btn btn-primary" href="./solutions/">Смотреть готовые решения</a>
@@ -188,14 +207,14 @@
           <article class="card product-card">
             <img class="product-photo" src="https://static.tildacdn.com/tild3163-6431-4233-b061-346464626266/300wt.png" alt="Комплект света" />
             <div class="product-meta">
-              <div class="tag">Комплект света</div>
-              <div class="price">от 18 900 ₽</div>
+              <div class="tag">Техничная позиция</div>
+              <div class="price">9 900 ₽</div>
             </div>
-            <h3>Свет для ряда или яруса</h3>
+            <h3>Светильник M23 для ряда или яруса</h3>
             <ul>
               <li>Кому подходит: типовой схеме и дооснащению действующей фермы.</li>
-              <li>Что входит: светильник и рамка применения по объекту.</li>
-              <li>CTA: открыть карточку и купить сразу, если задача ясна.</li>
+              <li>Что важно: длина 1,91 м, режимы 50/100 Вт и проверка совместимости со стеллажом.</li>
+              <li>Когда выбирать: если задача уже свелась к конкретному светильнику и осталось проверить fit по объекту.</li>
             </ul>
             <div class="btn-row">
               <a class="btn btn-primary" href="./products/led-300wt/">Открыть карточку</a>
@@ -203,16 +222,16 @@
           </article>
 
           <article class="card product-card">
-            <img class="product-photo" src="https://static.tildacdn.com/tild3931-3764-4365-a337-613063326461/8hyeerqinwi24ald81an.jpeg" alt="Комплект полива" />
+            <img class="product-photo" src="https://static.tildacdn.com/tild6234-3930-4631-a563-383233396236/IMG_6061.jpg" alt="Комплект полива" />
             <div class="product-meta">
               <div class="tag">Комплект полива</div>
-              <div class="price">от рамки задачи</div>
+              <div class="price">от 1 940 ₽</div>
             </div>
             <h3>Полив под проект или зону</h3>
             <ul>
-              <li>Кому подходит: запуску, пересборке и замене ключевого узла.</li>
-              <li>Что входит: логика схемы, расход и состав комплекта.</li>
-              <li>CTA: получить состав и смету.</li>
+              <li>Кому подходит: запуску, пересборке и замене поливочного узла.</li>
+              <li>Что входит: логика схемы, Rivulis Supertif PCND 2.2 л/ч, магистраль Metzerplas и DOSATRON.</li>
+              <li>Когда выбирать: если важно не ошибиться в схеме, расходе и подборе компонентов.</li>
             </ul>
             <div class="btn-row">
               <a class="btn btn-primary" href="./poliv/">Открыть решение</a>
@@ -223,13 +242,13 @@
             <img class="product-photo" src="https://static.tildacdn.com/tild3232-3635-4439-b030-636336363230/IMG_4924.jpg" alt="Модуль и каркас" />
             <div class="product-meta">
               <div class="tag">Модуль / каркас</div>
-              <div class="price">по проекту</div>
+              <div class="price">от 104 500 ₽</div>
             </div>
             <h3>Каркас или готовый модуль</h3>
             <ul>
-              <li>Кому подходит: тем, кто собирает объект под конкретную площадь и задачу.</li>
-              <li>Что входит: рамка конструкции и связка с ферменной схемой.</li>
-              <li>CTA: обсудить проект.</li>
+              <li>Кому подходит: тем, кто считает объект под конкретную площадь и плотность.</li>
+              <li>Что входит: конструктивная рамка, ярусность и привязка к свету и обслуживанию.</li>
+              <li>Когда выбирать: если конструкция влияет на всю схему фермы, а не только на отдельный узел.</li>
             </ul>
             <div class="btn-row">
               <a class="btn btn-primary" href="./solutions/">Открыть линию решений</a>
@@ -246,7 +265,7 @@
             <ul>
               <li>Кому подходит: действующей ферме и регулярным закупкам.</li>
               <li>Что входит: типовые позиции, которые можно докупать без сложного расчёта.</li>
-              <li>CTA: открыть витрину и выбрать товар.</li>
+              <li>Когда выбирать: если задача уже понятна и нужен быстрый вход в витрину.</li>
             </ul>
             <div class="btn-row">
               <a class="btn btn-primary" href="#catalog">Смотреть витрину</a>
@@ -262,10 +281,25 @@
       <div class="section-frame">
         <div class="section-head">
           <span class="eyebrow">Категории с логикой выбора</span>
-          <h2>Категория должна отвечать, как выбирать и когда лучше не покупать вслепую</h2>
+          <h2>В категории стоит идти только когда задача уже сузилась до узла</h2>
           <p class="sublead">
-            Не просто список разделов. Для каждой категории важно объяснить функцию в ферме и границу между типовой покупкой и подбором.
+            Категория полезна, когда уже ясно, что вам нужен свет, полив, стеллаж, субстрат или посадочный материал. Если этого понимания ещё нет, сначала нужен подбор или расчёт.
           </p>
+        </div>
+
+        <div class="section-photo-rail">
+          <article class="photo-card">
+            <img src="../assets/photos/optimized/hero-process.webp" alt="Светильники для фермы" />
+            <div class="photo-card-caption">Свет выбирают не по названию модели, а по длине ряда, подвесу и плотности досветки.</div>
+          </article>
+          <article class="photo-card">
+            <img src="../assets/photos/optimized/greenhouse-rack.webp" alt="Узел полива для фермы" />
+            <div class="photo-card-caption">Полив и корневая зона требуют проверки fit по линии, расходу и режиму растения.</div>
+          </article>
+          <article class="photo-card">
+            <img src="../assets/photos/optimized/berry-cluster.webp" alt="Посадочный материал и ягода" />
+            <div class="photo-card-caption">Посадочный материал подбирают в логике фермы, а не как изолированную покупку “по сорту”.</div>
+          </article>
         </div>
 
         <div class="grid grid-3">
@@ -274,7 +308,7 @@
             <h3>Освещение</h3>
             <ul>
               <li>Для чего нужно: фотосинтез, генерация, стабильность цикла.</li>
-              <li>Как выбирать: мощность, покрытие, высота подвеса, формат ряда.</li>
+              <li>Как выбирать: длина светильника, режимы мощности, покрытие, высота подвеса, формат ряда.</li>
               <li>Когда нужен подбор: большая площадь или нестандартная схема.</li>
             </ul>
             <div class="btn-row">
@@ -325,7 +359,7 @@
             <div class="kicker">Посадочный материал</div>
             <h3>Семена, рассада, frigo</h3>
             <ul>
-              <li>Для чего нужно: посадить сорт под controlled-environment логику, а не под грядку.</li>
+              <li>Для чего нужно: посадить сорт под логику фермы в контролируемой среде, а не под грядку.</li>
               <li>Как выбирать: генерация, плотность, вкус, размер, канал сбыта.</li>
               <li>Когда нужен подбор: если тип посадочного материала ещё не определён.</li>
             </ul>
@@ -353,12 +387,12 @@
 
   <section class="section-tight" id="navigator">
     <div class="container">
-      <div class="grid grid-2">
-        <div class="section-frame">
-          <span class="eyebrow">Навигатор выбора</span>
-          <h2>Что важно понять перед выбором</h2>
+        <div class="grid grid-2">
+          <div class="section-frame">
+            <span class="eyebrow">Навигатор выбора</span>
+          <h2>Перед покупкой важнее понять роль узла в системе, чем название товара</h2>
           <p class="sublead">
-            Даже если вы не знаете точного названия товара, этих вводных достаточно, чтобы не ошибиться в следующем шаге.
+            Даже если вы не знаете точного названия товара, этих вводных уже достаточно, чтобы не ошибиться в категории и типе решения.
           </p>
           <ul style="margin-top:18px; padding:0; list-style:none;">
             <li style="position:relative; padding-left:26px; margin-top:10px;"><span style="position:absolute; left:0; top:8px; width:9px; height:9px; border-radius:50%; background:var(--green);"></span>Площадь и формат фермы.</li>
@@ -370,13 +404,12 @@
 
         <div class="card note-panel">
           <div class="badge">Если этого пока нет</div>
-          <h3 style="margin-top:14px;">Не нужно угадывать по витрине</h3>
+          <h3 style="margin-top:14px;">Не открывайте каталог как замену подбору</h3>
           <p>
-            Оставьте задачу на подбор. Тогда магазин перестаёт быть просто списком категорий
-            и начинает работать как точка входа в правильное решение.
+            Если вы ещё не понимаете, какая категория нужна, витрина только создаст лишние клики. Сначала оставьте задачу, и станет понятно, что можно купить сразу, а что надо считать.
           </p>
           <div class="btn-row">
-            <a class="btn btn-primary" href="../study/">Получить подбор</a>
+            <a class="btn btn-primary" href="../consultations/">Получить консультацию</a>
             <a class="btn btn-secondary" href="../farm/">Нужен расчёт фермы</a>
           </div>
         </div>
@@ -389,35 +422,18 @@
       <div class="section-frame">
         <div class="section-head">
           <span class="eyebrow">Каталог и витрина</span>
-          <h2>Каталог показывает не только товар, но и правильный следующий шаг</h2>
+          <h2>Витрина нужна тем, у кого задача уже дошла до категории или карточки</h2>
           <p class="sublead">
-            В рабочей версии здесь должны быть поиск, фильтры, сортировка, маркеры статуса и понятный тип CTA для каждого товара.
+            Если задача уже ясна, фильтры и статусы помогают быстро отделить типовые позиции от проектных. Если задача пока не ясна, не задерживайтесь в витрине и возвращайтесь к подбору или расчёту.
           </p>
         </div>
 
-        <div class="filter-bar">
+        <div class="filter-bar filter-helper">
           <div class="filter-row">
-            <input class="filter-search" type="text" placeholder="Поиск по товару, задаче или категории" />
-            <select class="filter-select">
-              <option>Категория</option>
-              <option>LED</option>
-              <option>Полив</option>
-              <option>Стеллажи</option>
-              <option>Субстрат</option>
-              <option>Посадочный материал</option>
-            </select>
-            <select class="filter-select">
-              <option>Тип товара</option>
-              <option>Купить сразу</option>
-              <option>Нужен подбор</option>
-              <option>Проектная позиция</option>
-            </select>
-            <select class="filter-select">
-              <option>Сортировка</option>
-              <option>Сначала типовые товары</option>
-              <option>Сначала проектные решения</option>
-              <option>По популярности</option>
-            </select>
+            <a class="status-badge status-instock" href="./led/">Нужен свет</a>
+            <a class="status-badge status-order" href="./poliv/">Нужен полив</a>
+            <a class="status-badge status-project" href="./solutions/">Нужен комплект</a>
+            <a class="status-badge status-compat" href="../consultations/">Нужен разбор задачи</a>
           </div>
 
           <div class="filter-row">
@@ -426,26 +442,27 @@
             <span class="status-badge status-project">Проектная позиция</span>
             <span class="status-badge status-compat">Нужен подбор</span>
           </div>
+          <p class="filter-note">Поиск, фильтры и сортировку подключим вместе с магазинным движком. Пока этот блок честно работает как быстрый навигатор по категориям и сценариям.</p>
         </div>
 
         <div class="catalog-grid" style="margin-top:24px;">
           <article class="card product-card">
-            <img class="product-photo" src="https://static.tildacdn.com/tild3163-6431-4233-b061-346464626266/300wt.png" alt="LED 300W" />
+            <img class="product-photo" src="https://static.tildacdn.com/tild3163-6431-4233-b061-346464626266/300wt.png" alt="Светильник M23 100 Вт" />
             <div class="status-row">
-              <span class="status-badge status-instock">В наличии</span>
-              <span class="status-badge status-compat">Совместимость: типовая схема</span>
+              <span class="status-badge status-order">Уточнить наличие</span>
+              <span class="status-badge status-compat">Совместимость: стеллаж + подвес</span>
             </div>
             <div class="product-meta">
-              <div class="tag">Купить сразу</div>
-              <div class="price">от 18 900 ₽</div>
+              <div class="tag">Уточнить совместимость</div>
+              <div class="price">9 900 ₽</div>
             </div>
-            <h3>LED 300W для яруса</h3>
+            <h3>Светильник M23 100 Вт, 191 см</h3>
             <ul>
-              <li>Подходит для типового ряда и дооснащения.</li>
-              <li>Следующий шаг: открыть карточку и добавить в корзину.</li>
+              <li>Подходит для типового ряда и дооснащения многоярусной фермы.</li>
+              <li>Что дальше: открыть карточку и сначала сверить совместимость.</li>
             </ul>
             <div class="btn-row">
-              <a class="btn btn-primary" href="./products/led-300wt/">Открыть карточку</a>
+              <a class="btn btn-primary" href="./products/led-300wt/">Проверить совместимость</a>
             </div>
           </article>
 
@@ -461,16 +478,16 @@
             </div>
             <h3>Субстратный мат</h3>
             <ul>
-              <li>Подходит для типовой controlled-environment схемы.</li>
-              <li>Следующий шаг: открыть карточку и проверить fit по схеме полива.</li>
+              <li>Подходит для типовой схемы фермы в контролируемой среде.</li>
+              <li>Что дальше: открыть карточку и проверить fit по схеме полива.</li>
             </ul>
             <div class="btn-row">
-              <a class="btn btn-primary" href="./products/grodan-prestige/">Открыть карточку</a>
+              <a class="btn btn-primary" href="./products/grodan-prestige/">Открыть товар</a>
             </div>
           </article>
 
           <article class="card product-card">
-            <img class="product-photo" src="https://static.tildacdn.com/tild3931-3764-4365-a337-613063326461/8hyeerqinwi24ald81an.jpeg" alt="Полив под объект" />
+            <img class="product-photo" src="https://static.tildacdn.com/tild6234-3930-4631-a563-383233396236/IMG_6061.jpg" alt="Полив под объект" />
             <div class="status-row">
               <span class="status-badge status-project">Проектная позиция</span>
               <span class="status-badge status-compat">Нужен подбор</span>
@@ -482,10 +499,10 @@
             <h3>Полив под объект</h3>
             <ul>
               <li>Нужны схема, расход и состав системы.</li>
-              <li>Следующий шаг: получить состав и смету.</li>
+              <li>Что дальше: получить состав и смету.</li>
             </ul>
             <div class="btn-row">
-              <a class="btn btn-primary" href="./poliv/">Получить состав</a>
+              <a class="btn btn-primary" href="./poliv/">Получить состав и смету</a>
             </div>
           </article>
 
@@ -502,10 +519,10 @@
             <h3>Стеллажная система</h3>
             <ul>
               <li>Нужно понимать площадь, высоту, связку со светом и обслуживанием.</li>
-              <li>Следующий шаг: открыть карточку и запросить состав.</li>
+              <li>Что дальше: открыть карточку и запросить состав.</li>
             </ul>
             <div class="btn-row">
-              <a class="btn btn-primary" href="./products/rack-system/">Открыть карточку</a>
+              <a class="btn btn-primary" href="./products/rack-system/">Запросить состав</a>
             </div>
           </article>
 
@@ -513,19 +530,39 @@
             <img class="product-photo" src="https://static.tildacdn.com/stor3061-3632-4435-a332-653934306261/20880535.jpg" alt="Семена Soraya F1" />
             <div class="status-row">
               <span class="status-badge status-order">Под заказ</span>
-              <span class="status-badge status-compat">Формат: controlled environment</span>
+              <span class="status-badge status-compat">Формат: контролируемая среда</span>
             </div>
             <div class="product-meta">
               <div class="tag">Нужен выбор сорта</div>
-              <div class="price">по формату фермы</div>
+              <div class="price">от 750 ₽</div>
             </div>
             <h3>Soraya F1</h3>
             <ul>
-              <li>Важно смотреть не садовый язык, а генерацию, вкус, плотность и fit под сбыт.</li>
-              <li>Следующий шаг: открыть карточку сорта.</li>
+              <li>Ранний гибрид с высокой урожайностью, крупной ягодой и сладким вкусом с лёгкой кислинкой.</li>
+              <li>Что дальше: открыть карточку сорта и сравнить его с задачей по сбыту и формату фермы.</li>
             </ul>
             <div class="btn-row">
-              <a class="btn btn-primary" href="../seeds/soraya-f1/">Открыть карточку</a>
+              <a class="btn btn-primary" href="../seeds/soraya-f1/">Сравнить сорт</a>
+            </div>
+          </article>
+
+          <article class="card product-card">
+            <img class="product-photo" src="https://static.tildacdn.com/stor6436-3235-4932-a635-663765343162/80038176.jpg" alt="Рассада Frigo" />
+            <div class="status-row">
+              <span class="status-badge status-order">Под заказ</span>
+              <span class="status-badge status-compat">Формат: фермерский запуск</span>
+            </div>
+            <div class="product-meta">
+              <div class="tag">Посадочный материал</div>
+              <div class="price">по сорту и партии</div>
+            </div>
+            <h3>Профессиональная рассада FRIGO</h3>
+            <ul>
+              <li>Итальянская генетика, микроклональное оздоровление и хранение по технологии Frigo.</li>
+              <li>Что дальше: открыть карточку и понять fit под запуск фермы.</li>
+            </ul>
+            <div class="btn-row">
+              <a class="btn btn-primary" href="../seeds/frigo/">Открыть материал</a>
             </div>
           </article>
 
@@ -542,10 +579,10 @@
             <h3>Готовый модуль фермы</h3>
             <ul>
               <li>Для пилота, демонстрационного объекта или старта на ограниченной площади.</li>
-              <li>Следующий шаг: обсудить проект, а не покупать вслепую.</li>
+              <li>Что дальше: обсудить проект, а не покупать вслепую.</li>
             </ul>
             <div class="btn-row">
-              <a class="btn btn-primary" href="./products/farm-module/">Открыть карточку</a>
+              <a class="btn btn-primary" href="./products/farm-module/">Обсудить модуль</a>
             </div>
           </article>
         </div>
@@ -556,32 +593,32 @@
   <section class="section-tight" id="why">
     <div class="container">
       <div class="section-frame">
-        <div class="section-head">
-          <span class="eyebrow">Почему покупать здесь</span>
-          <h2>Покупка строится не от абстрактного каталога, а от логики клубничной фермы</h2>
-        </div>
+        <div class="section-split-card">
+          <div class="section-split-copy">
+            <span class="eyebrow">Почему покупать здесь</span>
+            <h2>Почему здесь проще не ошибиться</h2>
+            <p class="sublead">
+              Магазин не пытается притвориться универсальной витриной. Он помогает разделить типовую закупку,
+              проектную позицию и ситуацию, где сначала нужен разбор.
+            </p>
+            <ul>
+              <li>Фокус на клубнике в controlled environment, а не на широком рынке “для всего зелёного”.</li>
+              <li>Свет, полив, субстрат и конструкция рассматриваются как связанная система.</li>
+              <li>До оплаты можно понять, где хватит карточки товара, а где нужна смета или консультация.</li>
+              <li>Если проект растёт поэтапно, систему можно собирать частями без потери логики.</li>
+            </ul>
+          </div>
 
-        <div class="grid grid-4">
-          <article class="card card-pad">
-            <div class="tag">Ниша</div>
-            <h3>Фокус на клубнике</h3>
-            <p class="sublead">Выбор идёт под клубничную ферму, а не под широкий рынок “для любых растений”.</p>
-          </article>
-          <article class="card card-pad">
-            <div class="tag">Совместимость</div>
-            <h3>Компоненты смотрятся в связке</h3>
-            <p class="sublead">Свет, полив, субстрат и стеллаж не должны жить как отдельные покупки без общей логики.</p>
-          </article>
-          <article class="card card-pad">
-            <div class="tag">Поддержка до покупки</div>
-            <h3>Можно спросить до оплаты</h3>
-            <p class="sublead">Если решение проектное, магазин переводит в подбор и смету, а не имитирует простую розницу.</p>
-          </article>
-          <article class="card card-pad">
-            <div class="tag">Гибкость</div>
-            <h3>Можно собирать систему частями</h3>
-            <p class="sublead">Там, где это безопасно, вы покупаете отдельные узлы. Там, где это опасно, получаете корректный следующий шаг.</p>
-          </article>
+          <div class="section-split-visual">
+            <article class="photo-card">
+              <img src="../assets/photos/optimized/hero-process.webp" alt="Клубничный модуль и оборудование" />
+              <div class="photo-card-caption">Типовые товары работают хорошо, когда они встроены в понятный модуль, а не оторваны от схемы.</div>
+            </article>
+            <article class="photo-card">
+              <img src="../assets/photos/optimized/rack-aisle.webp" alt="Стеллажная конструкция фермы" />
+              <div class="photo-card-caption">Проектные позиции не маскируются под розницу: сначала состав, потом смета, потом закупка.</div>
+            </article>
+          </div>
         </div>
       </div>
     </div>
@@ -592,10 +629,9 @@
       <div class="section-frame">
         <div class="section-head">
           <span class="eyebrow">Доставка и отгрузка</span>
-          <h2>Условия должны быть едиными и чистыми</h2>
+          <h2>Как устроены наличие, отгрузка и проектные позиции</h2>
           <p class="sublead">
-            Здесь нельзя смешивать старые версии логистики, разные города или случайные шаблонные строки.
-            Для типовых и проектных товаров логика разная, и это должно быть видно заранее.
+            Для типовых и проектных товаров логика разная. Это должно быть видно заранее, чтобы не путать обычный заказ с проектной сметой.
           </p>
         </div>
 
@@ -627,9 +663,9 @@
         <div class="grid grid-2">
           <div>
             <span class="eyebrow">Быстрый вход в подбор</span>
-            <h2>Если сомневаетесь, не кликайте по каталогу вслепую</h2>
+            <h2>Если сомневаетесь, не тратьте время на лишние переходы по витрине</h2>
             <p class="sublead">
-              Оставьте несколько вводных, и станет понятно, что можно купить сразу, а что лучше считать под объект.
+              Оставьте несколько вводных, и станет понятно, что можно купить сразу, а что лучше сначала считать под объект.
             </p>
 
             <div class="faq-grid" style="margin-top:24px;">
@@ -645,15 +681,17 @@
           </div>
 
           <div class="card form-card">
-            <h3>Получить подбор</h3>
+            <h3>Собрать задачу на подбор</h3>
             <p class="sublead">Короткая форма для тех, кто ещё не уверен в категории или товаре.</p>
-            <form class="form-grid">
+            <form class="form-grid" data-brief-form="Магазин — запрос на подбор">
               <input class="input" type="text" placeholder="Имя" />
               <input class="input" type="text" placeholder="Контакт" />
               <input class="input" type="text" placeholder="Что нужно подобрать" />
               <input class="input" type="text" placeholder="Площадь / масштаб" />
               <textarea class="textarea" placeholder="Что уже есть на объекте и какую задачу нужно закрыть"></textarea>
-              <button class="btn btn-primary" type="button">Получить подбор</button>
+              <button class="btn btn-primary" data-brief-button type="button">Скопировать вводные</button>
+              <p class="brief-form-note">Пока без онлайн-отправки. Кнопка соберёт текст заявки и скопирует его для дальнейшей передачи. Рабочий Telegram: <a href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">@patiev_admin</a>.</p>
+              <p class="brief-form-status" data-brief-status aria-live="polite"></p>
             </form>
           </div>
         </div>
@@ -703,7 +741,7 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-card">
-          <h3>КлубникаПро</h3>
+          <h3>Klubnika Project</h3>
           <p class="sublead">Магазин решений для клубничных ферм: от типовых товаров до проектных комплектов.</p>
         </div>
 
@@ -728,10 +766,11 @@
       </div>
 
       <div class="footer-row">
-        <div>© КлубникаПро</div>
+        <div>© Klubnika Project</div>
         <div>Магазин решений для клубничных ферм</div>
       </div>
     </div>
   </footer>
+  <script src="../site.js" defer></script>
 </body>
 </html>

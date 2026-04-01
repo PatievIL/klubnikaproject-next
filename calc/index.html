@@ -3,10 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png" />
+  <link rel="manifest" href="../site.webmanifest" />
   <title>Калькулятор клубничной фермы — КлубникаПро</title>
   <meta
     name="description"
-    content="Калькулятор клубничной фермы: предварительный состав оборудования, рамка по смете и экономике, следующий шаг по проекту."
+    content="Калькулятор клубничной фермы: предварительный состав оборудования, рамка по смете и экономике, и понятный маршрут по проекту."
   />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -20,21 +23,47 @@
       <div class="hero-shell">
         <div class="topbar">
           <div class="brand">
-            <div class="brand-logo">
-              <img src="https://static.tildacdn.com/tild6366-3531-4035-a236-323261656361/logo_greeb.png" alt="КлубникаПро" />
-            </div>
-            <div>
-              <div class="brand-title">КлубникаПро</div>
-              <div class="brand-note">Калькулятор фермы и предварительная рамка проекта</div>
-            </div>
+            <a class="brand-home" href="../">
+              <div class="brand-logo">
+                <img src="../assets/brand-berry-beige.svg" alt="Знак Klubnika Project" />
+              </div>
+              <div class="brand-copy">
+                <div class="brand-title">
+                  <span class="brand-title-line">Klubnika</span>
+                  <span class="brand-title-line">Project</span>
+                </div>
+                <div class="brand-note">Калькулятор фермы и предварительная рамка проекта</div>
+              </div>
+            </a>
           </div>
+          <button class="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false">
+            <span></span>
+          </button>
 
           <nav class="nav">
-            <a href="../">Главная</a>
-            <a href="../farm/">Расчёт фермы</a>
-            <a href="../shop/">Магазин</a>
-            <a href="../study/">Сопровождение</a>
-            <a href="#calculator-app">Начать расчёт</a>
+            <a class="nav-link" href="../">Главная</a>
+            <div class="nav-group">
+              <button class="nav-trigger" type="button">Решения</button>
+              <div class="nav-menu">
+                <a href="../farm/"><strong>Расчёт фермы</strong><span>Состав комплекта, рамка бюджета и следующий шаг.</span></a>
+                <a href="../study/"><strong>Сопровождение</strong><span>Разбор действующей фермы, критических узлов и технологии.</span></a>
+                <a href="../consultations/"><strong>Консультации</strong><span>Точечный разбор задачи, совместимости и следующего шага.</span></a>
+                <a href="../klubhack/"><strong>Клубничный Хак</strong><span>Система по клубнике без проектной сметы.</span></a>
+              </div>
+            </div>
+            <div class="nav-group">
+              <button class="nav-trigger" type="button">Каталог</button>
+              <div class="nav-menu nav-menu-wide">
+                <a href="../shop/"><strong>Магазин</strong><span>Весь каталог решений для клубничной фермы.</span></a>
+                <a href="../shop/led/"><strong>LED</strong><span>Светильники M23 и тепличные модели.</span></a>
+                <a href="../shop/poliv/"><strong>Полив</strong><span>Комплектующие, узлы и типовые комплекты.</span></a>
+                <a href="../shop/stellaj/"><strong>Стеллажи</strong><span>Модули, каркасы и конструктив фермы.</span></a>
+                <a href="../shop/substrate/"><strong>Субстрат</strong><span>Grodan и корневая зона под controlled environment.</span></a>
+                <a href="../seeds/"><strong>Семена и Frigo</strong><span>Посадочный материал под фермерский запуск.</span></a>
+              </div>
+            </div>
+            <a class="nav-link" aria-current="page" href="./">Калькулятор</a>
+            <a class="nav-cta" href="../consultations/#request">Нужен разбор</a>
           </nav>
         </div>
 
@@ -44,7 +73,7 @@
             <h1>Получите предварительный состав фермы и рамку экономики под ваши вводные</h1>
             <p class="lead">
               Это не checkout и не форма ради формы. Это быстрый вход в проект, когда нужно понять,
-              из чего складывается ферма, какой порядок цифр выходит и где уже нужен следующий шаг с человеком.
+              из чего складывается ферма, какой порядок цифр выходит и где уже нужен разбор с человеком.
             </p>
             <p class="sublead">
               Калькулятор показывает рабочую рамку по стеллажам, свету, поливу, субстрату, посадочному материалу,
@@ -56,7 +85,7 @@
               <a class="btn btn-secondary" href="#what-you-get">Сначала понять, что я получу</a>
             </div>
             <div class="text-link-row">
-              <a href="../study/">Есть действующая ферма и нужна не цифра, а разбор</a>
+              <a href="../consultations/">Есть действующая ферма и нужен точный разбор</a>
             </div>
 
             <ul class="hero-output-list">
@@ -71,7 +100,7 @@
               <img
                 class="visual-main"
                 src="https://static.tildacdn.com/tild6235-3635-4838-b030-666133326265/IMG_6063.jpg"
-                alt="Клубничная ферма в controlled environment"
+                alt="Клубничная ферма в контролируемой среде"
               />
               <div class="visual-stack">
                 <img src="https://static.tildacdn.com/tild3232-3635-4439-b030-636336363230/IMG_4924.jpg" alt="Стеллажи для клубничной фермы" />
@@ -117,8 +146,8 @@
             </article>
             <article class="card result-card">
               <div class="tag">Маршрут</div>
-              <h3>Следующий шаг</h3>
-              <p class="sublead">Сразу видно, когда можно идти дальше с расчётом, а когда нужен разбор действующего объекта.</p>
+              <h3>Куда идти дальше</h3>
+              <p class="sublead">Сразу видно, когда достаточно расчёта, а когда уже нужен разбор действующего объекта.</p>
             </article>
           </div>
         </div>
@@ -179,7 +208,7 @@
             </article>
             <article class="card step-card">
               <div class="tag">Шаг 4</div>
-              <h3>Понимаем следующий шаг</h3>
+              <h3>Понимаем маршрут дальше</h3>
               <p class="sublead">Если проект выходит за рамки типового сценария, сразу видно, куда идти дальше: в расчёт или сопровождение.</p>
             </article>
           </div>
@@ -331,7 +360,7 @@
               <div class="wizard-panel" data-step-panel="2">
                 <div class="wizard-panel-top">
                   <strong>Шаг 3. Формат выращивания</strong>
-                  <p>Этот блок нужен, чтобы отличить controlled-environment проект от абстрактной “фермы вообще”.</p>
+                  <p>Этот блок нужен, чтобы отличить проект в контролируемой среде от абстрактной “фермы вообще”.</p>
                 </div>
 
                 <div class="wizard-stack">
@@ -356,7 +385,7 @@
                   <div class="option-grid option-grid-2">
                     <button class="option-button" type="button" data-choice-key="strawberryFocus" data-choice-value="main">
                       <strong>Клубника — основной фокус</strong>
-                      <span>Считаем именно клубничный controlled-environment сценарий.</span>
+                      <span>Считаем именно клубничный сценарий в контролируемой среде.</span>
                     </button>
                     <button class="option-button" type="button" data-choice-key="strawberryFocus" data-choice-value="secondary">
                       <strong>Клубника — часть проекта</strong>
@@ -469,7 +498,7 @@
               <div class="wizard-panel" data-step-panel="4">
                 <div class="wizard-panel-top">
                   <strong>Шаг 5. Цель расчёта</strong>
-                  <p>Нужно понять, на что вы реально хотите получить следующий шаг: комплект, бюджет, сравнение или запуск.</p>
+                  <p>Нужно понять, на что вы хотите получить результат: комплект, бюджет, сравнение или подготовку к запуску.</p>
                 </div>
 
                 <div class="option-grid option-grid-3">
@@ -528,7 +557,7 @@
 
               <div class="wizard-panel" data-step-panel="6">
                 <div class="wizard-panel-top">
-                  <strong>Шаг 7. Контакты для следующего шага</strong>
+                  <strong>Шаг 7. Контакты для продолжения работы</strong>
                   <p>Эти поля пригодятся, если после расчёта вы захотите быстро перейти к проектному разбору без повторного ввода.</p>
                 </div>
 
@@ -539,7 +568,7 @@
                   </label>
                   <label class="wizard-field">
                     <span class="field-label">Telegram / WhatsApp / телефон</span>
-                    <input class="input" data-field-key="contact" type="text" placeholder="Контакт для следующего шага" />
+                    <input class="input" data-field-key="contact" type="text" placeholder="Контакт для связи" />
                   </label>
                   <label class="wizard-field">
                     <span class="field-label">Email</span>
@@ -602,27 +631,27 @@
       <div class="container">
         <div class="section-frame">
           <div class="section-head">
-            <span class="eyebrow">Предпросмотр результата</span>
+            <span class="eyebrow">Следующий шаг</span>
             <h2 id="result-status-title">Вот что уже видно по вашим вводным</h2>
             <p class="sublead" id="result-status-text">
-              Калькулятор сразу показывает предварительную рамку проекта. Завершите все шаги, чтобы зафиксировать следующий маршрут.
+              Калькулятор сразу показывает предварительную рамку проекта. Завершите все шаги, чтобы зафиксировать дальнейший маршрут.
             </p>
           </div>
 
           <div class="grid grid-3">
             <article class="card result-card">
-              <div class="tag">Что получите</div>
-              <h3>На выходе из расчёта</h3>
+              <div class="tag">Что у вас на руках</div>
+              <h3>Результат нужен не для “посмотреть цифру”</h3>
               <ul>
-                <li>Состав фермы по основным узлам.</li>
-                <li>Рамку по смете оборудования и расходников.</li>
-                <li>Ежемесячные расходы и выручку по сценариям.</li>
-                <li>Понимание, где нужен следующий шаг с человеком.</li>
+                <li>Рамка по узлам, чтобы не собирать ферму вслепую.</li>
+                <li>Ориентир по бюджету до объектного расчёта.</li>
+                <li>Сценарная модель, чтобы сравнить порядок цифр.</li>
+                <li>Понимание, идти ли в магазин, готовые решения, расчёт или разбор.</li>
               </ul>
             </article>
 
             <article class="card result-card">
-              <div class="tag">Следующий шаг</div>
+              <div class="tag">Маршрут дальше</div>
               <h3 id="result-route-title">Пока это предварительная рамка</h3>
               <p class="sublead" id="result-route-text">
                 Когда проект выходит за рамки типового сценария, калькулятор не заменяет проектный разбор. Он просто экономит время до него.
@@ -634,10 +663,10 @@
             </article>
 
             <article class="card result-card">
-              <div class="tag">Контекст</div>
-              <h3>Что важно помнить</h3>
+              <div class="tag">Как не ошибиться</div>
+              <h3>Когда не стоит идти в каталог сразу</h3>
               <ul id="assumption-list">
-                <li>Модель считает клубничную controlled-environment ферму, а не дачную теплицу.</li>
+                <li>Модель считает клубничную ферму в контролируемой среде, а не дачную теплицу.</li>
                 <li>Состав оборудования остаётся предварительным до привязки к объекту.</li>
                 <li>Калькулятор помогает перейти к нормальному разговору, а не заменить его.</li>
                 <li>Часть решений потом может уйти в магазин, а часть — в смету и подбор.</li>
@@ -653,9 +682,9 @@
         <div class="grid grid-2 calc-section-grid">
           <article class="card card-pad">
             <div class="tag">Смета</div>
-            <h3 class="calc-card-title">Что входит в комплект сейчас</h3>
+            <h3 class="calc-card-title">Как выглядит структура бюджета сейчас</h3>
             <p class="sublead">
-              Здесь видно не просто итоговую цифру, а состав оборудования и расходных позиций, которые формируют смету.
+              До разговора показываем не позиционную смету, а рамку по узлам. Так понятнее, из чего складывается проект, и меньше риск зацепиться за сырую детализацию до привязки к объекту.
             </p>
 
             <div class="equipment-overview">
@@ -669,18 +698,10 @@
               </div>
             </div>
 
-            <div class="table-wrap">
-              <table class="calc-table">
-                <thead>
-                  <tr>
-                    <th>Позиция</th>
-                    <th>Кол-во</th>
-                    <th>Ед.</th>
-                    <th>Сумма</th>
-                  </tr>
-                </thead>
-                <tbody id="equipment-table-body"></tbody>
-              </table>
+            <div class="budget-structure-grid" id="budget-structure-grid"></div>
+
+            <div class="model-note">
+              Детализация по конкретным позициям, количеству и замене узлов раскрывается уже после передачи вводных на расчёт или короткого созвона по объекту.
             </div>
           </article>
 
@@ -717,8 +738,8 @@
         <div class="section-frame">
           <div class="calc-section-top">
             <div>
-              <span class="eyebrow">Прогноз выручки</span>
-              <h2>Сценарии по урожайности и накопленному результату</h2>
+              <span class="eyebrow">Сценарная рамка</span>
+              <h2>Сценарии по урожайности и денежному потоку модели</h2>
             </div>
             <div class="toggle-row" id="yield-scenario-toggle" role="tablist" aria-label="Сценарий урожайности"></div>
           </div>
@@ -726,12 +747,15 @@
           <div class="grid grid-2 calc-section-grid">
             <article class="card card-pad">
               <div class="scenario-grid" id="scenario-grid"></div>
+              <div class="model-note">
+                Это не обещание выручки и не финплан под любой объект. Блок нужен, чтобы сравнить сценарии и понять порядок цифр до проектного расчёта.
+              </div>
               <div class="table-wrap" style="margin-top: 24px;">
                 <table class="calc-table compact-table">
                   <thead>
                     <tr>
                       <th>Период</th>
-                      <th>Накопленный результат</th>
+                      <th>Накопленный денежный поток</th>
                     </tr>
                   </thead>
                   <tbody id="payback-table-body"></tbody>
@@ -741,27 +765,27 @@
 
             <article class="card card-pad">
               <div class="tag">Модель</div>
-              <h3 class="calc-card-title">Как читать этот прогноз</h3>
+              <h3 class="calc-card-title">Как читать эту сценарную рамку</h3>
               <p class="sublead">
-                Это предварительная модель под клубничную ферму в controlled environment, а не обещание результата по любому объекту.
+                Это предварительная модель для клубничной фермы в контролируемой среде. Она помогает сравнивать сценарии, но не заменяет объектный расчёт, разбор канала сбыта и проверку ограничений по помещению.
               </p>
 
               <div class="metric-wall calc-model-wall">
                 <div class="metric">
                   <strong id="model-investment-cost">0 ₽</strong>
-                  <span>инвестиционная база для модели окупаемости</span>
+                  <span>инвестиционная база в текущей модели</span>
                 </div>
                 <div class="metric">
                   <strong id="annual-model-opex">0 ₽</strong>
-                  <span>годовые расходы внутри модели окупаемости</span>
+                  <span>годовые расходы внутри сценария</span>
                 </div>
                 <div class="metric">
                   <strong id="annual-harvest">0 кг</strong>
-                  <span>урожай в год по активному сценарию</span>
+                  <span>годовой объём ягоды по активному сценарию</span>
                 </div>
                 <div class="metric">
                   <strong id="annual-revenue">0 ₽</strong>
-                  <span>выручка в год по активному сценарию</span>
+                  <span>годовой денежный поток по активному сценарию</span>
                 </div>
               </div>
             </article>
@@ -778,11 +802,11 @@
               <span class="eyebrow">Когда нужен не калькулятор, а подбор</span>
               <h2>Если проект сложный или объект уже работает, калькулятор — это только первый шаг</h2>
               <p class="sublead">
-                На нестандартном объекте, при действующей ферме или при проблеме по узлу важнее не сама цифра, а корректная логика следующего решения.
+                На нестандартном объекте, при действующей ферме или при проблеме по узлу важнее не сама цифра, а корректная логика дальнейшего решения.
               </p>
               <div class="btn-row">
                 <a class="btn btn-primary" href="../study/">Обсудить нестандартный проект</a>
-                <a class="btn btn-secondary" href="../farm/#brief">Передать вводные на расчёт</a>
+                <a class="btn btn-secondary" href="../consultations/#request">Нужна консультация по задаче</a>
               </div>
             </div>
 
@@ -814,7 +838,7 @@
           </article>
           <article class="card result-card">
             <div class="tag">Что получает клиент</div>
-            <h3>Не “красивую форму”, а следующий осмысленный шаг</h3>
+            <h3>Не красивую форму, а осмысленный маршрут</h3>
             <p class="sublead">После расчёта уже понятно, идти ли в проектный разбор, подбор узла или в типовые позиции магазина.</p>
           </article>
         </div>
@@ -832,7 +856,7 @@
           <div class="faq-grid">
             <article class="card faq-box">
               <strong>Что я получу после расчёта?</strong>
-              <p>Предварительный состав фермы, ориентир по смете, расходы, выручку и понятный следующий шаг.</p>
+              <p>Предварительный состав фермы, ориентир по смете, расходы, выручку и понятный маршрут дальше.</p>
             </article>
             <article class="card faq-box">
               <strong>Нужен ли точный метраж помещения?</strong>
@@ -848,7 +872,7 @@
             </article>
             <article class="card faq-box">
               <strong>Что делать, если у меня уже есть ферма?</strong>
-              <p>Если считаете новую очередь или рамку следующего шага, калькулятор полезен. Если вопрос уже в технологии и просадке, лучше идти в сопровождение.</p>
+              <p>Если считаете новую очередь или рамку следующего этапа, калькулятор полезен. Если вопрос уже в технологии и просадке, лучше идти в сопровождение.</p>
             </article>
             <article class="card faq-box">
               <strong>Когда мне нужен человек, а не калькулятор?</strong>
@@ -902,12 +926,13 @@
             <div class="footer-links">
               <a href="../">Главная</a>
               <a href="../farm/">Расчёт</a>
+              <a href="../consultations/">Консультации</a>
               <a href="../shop/">Магазин</a>
               <a href="../study/">Сопровождение</a>
             </div>
           </div>
           <div class="footer-card">
-            <strong>Следующий шаг</strong>
+            <strong>Куда идти дальше</strong>
             <p>Если расчёта уже мало, передайте вводные на проектный разбор и смету под объект.</p>
           </div>
         </div>
@@ -915,6 +940,7 @@
     </div>
   </footer>
 
+  <script src="../site.js" defer></script>
   <script src="./calc.js" type="module"></script>
 </body>
 </html>

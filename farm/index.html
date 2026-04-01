@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png" />
+  <link rel="manifest" href="../site.webmanifest" />
   <title>Расчёт клубничной фермы и состав комплекта — КлубникаПро</title>
   <meta
     name="description"
@@ -19,35 +22,61 @@
       <div class="hero-shell">
         <div class="topbar">
           <div class="brand">
-            <div class="brand-logo">
-              <img src="https://static.tildacdn.com/tild6366-3531-4035-a236-323261656361/logo_greeb.png" alt="КлубникаПро" />
-            </div>
-            <div>
-              <div class="brand-title">КлубникаПро</div>
-              <div class="brand-note">Расчёт фермы и состав комплекта под объект</div>
-            </div>
+            <a class="brand-home" href="../">
+              <div class="brand-logo">
+                <img src="../assets/brand-berry-beige.svg" alt="Знак Klubnika Project" />
+              </div>
+              <div class="brand-copy">
+                <div class="brand-title">
+                  <span class="brand-title-line">Klubnika</span>
+                  <span class="brand-title-line">Project</span>
+                </div>
+                <div class="brand-note">Расчёт фермы и состав комплекта под объект</div>
+              </div>
+            </a>
           </div>
+          <button class="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false">
+            <span></span>
+          </button>
 
           <nav class="nav">
-            <a href="../">Главная</a>
-            <a href="../shop/">Магазин</a>
-            <a href="../study/">Сопровождение</a>
-            <a href="../seeds/">Семена</a>
-            <a href="#brief">Оставить вводные</a>
+            <a class="nav-link" href="../">Главная</a>
+            <div class="nav-group">
+              <button class="nav-trigger" type="button">Решения</button>
+              <div class="nav-menu">
+                <a href="../farm/"><strong>Расчёт фермы</strong><span>Состав комплекта, рамка бюджета и следующий шаг.</span></a>
+                <a href="../study/"><strong>Сопровождение</strong><span>Разбор действующей фермы, критических узлов и технологии.</span></a>
+                <a href="../consultations/"><strong>Консультации</strong><span>Точечный разбор задачи, совместимости и следующего шага.</span></a>
+                <a href="../klubhack/"><strong>Клубничный Хак</strong><span>Система по клубнике без проектной сметы.</span></a>
+              </div>
+            </div>
+            <div class="nav-group">
+              <button class="nav-trigger" type="button">Каталог</button>
+              <div class="nav-menu nav-menu-wide">
+                <a href="../shop/"><strong>Магазин</strong><span>Весь каталог решений для клубничной фермы.</span></a>
+                <a href="../shop/led/"><strong>LED</strong><span>Светильники M23 и тепличные модели.</span></a>
+                <a href="../shop/poliv/"><strong>Полив</strong><span>Комплектующие, узлы и типовые комплекты.</span></a>
+                <a href="../shop/stellaj/"><strong>Стеллажи</strong><span>Модули, каркасы и конструктив фермы.</span></a>
+                <a href="../shop/substrate/"><strong>Субстрат</strong><span>Grodan и корневая зона под controlled environment.</span></a>
+                <a href="../seeds/"><strong>Семена и Frigo</strong><span>Посадочный материал под фермерский запуск.</span></a>
+              </div>
+            </div>
+            <a class="nav-link" href="../calc/">Калькулятор</a>
+            <a class="nav-cta" href="#brief">Оставить вводные</a>
           </nav>
         </div>
 
         <div class="hero-grid">
           <div class="hero-copy">
             <span class="eyebrow">Расчёт фермы</span>
-            <h1>Расчёт фермы, состав комплекта и понятный следующий шаг по проекту</h1>
+            <h1>Расчёт клубничной фермы под ваш объект</h1>
             <p class="lead">
-              Эта страница нужна, когда речь идёт не про один товар, а про рабочую схему фермы:
-              что входит, что покупать в первую очередь и как связаны между собой ключевые узлы.
+              Эта страница нужна, когда вопрос уже не в одном товаре, а в рабочей схеме фермы:
+              что входит в проект, что покупать в первую очередь и какие узлы нужно считать вместе.
             </p>
             <p class="sublead">
-              Расчёт помогает перевести идею, площадь или проблемный объект в понятную рамку:
-              стеллажи, свет, полив, субстрат, посадочный материал и коммерческий следующий шаг.
+              Расчёт помогает перевести площадь, формат объекта и задачу в понятную рамку:
+              стеллажи, свет, полив, субстрат, посадочный материал и состав комплекта под запуск или рост.
             </p>
 
             <div class="btn-row hero-cta">
@@ -56,6 +85,7 @@
             </div>
             <div class="text-link-row">
               <a href="../study/">Нужен разбор действующей фермы</a>
+              <a href="../klubhack/">Нужна базовая система по технологии</a>
             </div>
 
             <div class="hero-stats">
@@ -65,7 +95,7 @@
               </div>
               <div class="hero-stat">
                 <strong>Что на выходе</strong>
-                <span>Состав решения, рамка комплекта, приоритеты закупки и следующий шаг по проекту.</span>
+                <span>Состав решения, рамка бюджета, приоритеты закупки и границы между типовыми и проектными узлами.</span>
               </div>
               <div class="hero-stat">
                 <strong>Когда идти сюда</strong>
@@ -83,11 +113,11 @@
               />
               <div class="visual-stack">
                 <img src="https://static.tildacdn.com/tild3232-3635-4439-b030-636336363230/IMG_4924.jpg" alt="Стеллажи" />
-                <img src="https://static.tildacdn.com/tild3931-3764-4365-a337-613063326461/8hyeerqinwi24ald81an.jpeg" alt="Клубника в controlled environment" />
+                <img src="https://static.tildacdn.com/stor3061-3632-4435-a332-653934306261/20880535.jpg" alt="Клубника в контролируемой среде" />
               </div>
             </div>
             <div class="visual-note">
-              Если вы считаете ферму как систему, правильный первый шаг — не корзина, а вводные по объекту.
+              Если вы считаете не один SKU, а ферму целиком, правильный первый шаг — вводные по объекту.
             </div>
           </aside>
         </div>
@@ -100,7 +130,7 @@
       <div class="section-frame">
         <div class="section-head">
           <span class="eyebrow">Когда нужен расчёт</span>
-          <h2>Есть задачи, которые лучше не решать через разрозненные покупки</h2>
+          <h2>Есть задачи, которые уже дороже решать через разрозненные покупки</h2>
           <p class="sublead">
             Если ошибка в одном узле тянет за собой остальные, проекту нужен не случайный заказ,
             а расчёт и состав комплекта под реальные вводные.
@@ -114,7 +144,7 @@
             <ul>
               <li>Есть помещение, площадь или рамка проекта.</li>
               <li>Нужно понять конфигурацию фермы и логику запуска.</li>
-              <li>Следующий шаг: расчёт и состав решения.</li>
+              <li>Результат: состав решения, очередность закупки и рамка бюджета.</li>
             </ul>
           </article>
 
@@ -124,7 +154,7 @@
             <ul>
               <li>Часть решений уже принята, но логика проекта вызывает вопросы.</li>
               <li>Нужно понять, что оставить, а что менять.</li>
-              <li>Следующий шаг: рамка корректировок и состава.</li>
+              <li>Результат: рамка корректировок и новый состав по узлам.</li>
             </ul>
           </article>
 
@@ -134,7 +164,7 @@
             <ul>
               <li>Ферма уже работает, но масштабировать её на старых ошибках нельзя.</li>
               <li>Нужно проверить связку оборудования и расходников.</li>
-              <li>Следующий шаг: расчёт следующей очереди.</li>
+              <li>Результат: расчёт следующей очереди без тиражирования слабых мест.</li>
             </ul>
           </article>
 
@@ -144,7 +174,7 @@
             <ul>
               <li>Вопрос уже не в одном SKU, а в наборе решений.</li>
               <li>Нужно понимать, что входит, а что докупается отдельно.</li>
-              <li>Следующий шаг: получить рамку комплекта и смету.</li>
+              <li>Результат: рамка комплекта, список допозиций и логика сметы.</li>
             </ul>
           </article>
         </div>
@@ -156,11 +186,11 @@
     <div class="container">
       <div class="metric-row">
         <div class="section-frame">
-          <span class="eyebrow">Почему это работает</span>
-          <h2>Расчёт собирает проект в одну логику, а не в набор независимых решений</h2>
+          <span class="eyebrow">Что вы получаете</span>
+          <h2>После расчёта понятно, из чего состоит ферма и что считать дальше</h2>
           <p class="sublead">
-            Свет, полив, стеллаж, субстрат и посадочный материал не должны считаться по отдельности,
-            если от их связки зависит результат по ферме.
+            Расчёт нужен не ради красивой таблицы. Он нужен, чтобы собрать в одну схему конструкцию,
+            свет, полив, субстрат, посадочный материал и порядок закупки.
           </p>
 
           <div class="metric-wall">
@@ -184,13 +214,13 @@
         </div>
 
         <aside class="side-copy">
-          <div class="badge badge-solid">Что получает клиент</div>
+          <div class="badge badge-solid">После расчёта</div>
           <h3 style="margin-top:16px;">Не просто счёт, а понятную рамку проекта</h3>
           <ul style="margin-top:18px; padding:0; list-style:none;">
             <li style="position:relative; padding-left:26px; margin-top:10px;"><span style="position:absolute; left:0; top:7px; width:9px; height:9px; border-radius:50%; background:var(--green);"></span>Понимание состава решения под объект, а не абстрактный список товаров.</li>
             <li style="position:relative; padding-left:26px; margin-top:10px;"><span style="position:absolute; left:0; top:7px; width:9px; height:9px; border-radius:50%; background:var(--green);"></span>Приоритеты по закупке, если всё не покупается одним пакетом.</li>
             <li style="position:relative; padding-left:26px; margin-top:10px;"><span style="position:absolute; left:0; top:7px; width:9px; height:9px; border-radius:50%; background:var(--green);"></span>Понимание, где нужен подбор, а где достаточно типового решения.</li>
-            <li style="position:relative; padding-left:26px; margin-top:10px;"><span style="position:absolute; left:0; top:7px; width:9px; height:9px; border-radius:50%; background:var(--green);"></span>Следующий коммерческий шаг без хаотичных переходов между разделами.</li>
+            <li style="position:relative; padding-left:26px; margin-top:10px;"><span style="position:absolute; left:0; top:7px; width:9px; height:9px; border-radius:50%; background:var(--green);"></span>Понимание, что можно закупать сразу, а что нужно считать отдельно.</li>
           </ul>
         </aside>
       </div>
@@ -201,8 +231,8 @@
     <div class="container">
       <div class="section-frame">
         <div class="section-head">
-          <span class="eyebrow">Что входит в расчёт</span>
-          <h2>После расчёта должно быть понятно, что именно делать дальше</h2>
+          <span class="eyebrow">Что вы получаете после расчёта</span>
+          <h2>На выходе нужна не общая идея, а рабочая рамка проекта</h2>
         </div>
 
         <div class="grid grid-4">
@@ -243,12 +273,12 @@
           <article class="card result-card">
             <div class="tag">На выходе</div>
             <h3>Коммерческая рамка</h3>
-            <p class="sublead">Состав решения, базовая логика комплекта и понимание порядка дальнейших действий.</p>
+            <p class="sublead">Состав решения, приоритеты закупки и понимание, какие узлы уже готовы к смете.</p>
           </article>
           <article class="card result-card">
             <div class="tag">Если задача сложнее</div>
             <h3>Переход в сопровождение</h3>
-            <p class="sublead">Если проект упирается уже не только в комплект, а в технологию, запуск или пересборку.</p>
+            <p class="sublead">Если вопрос уже упирается не только в комплект, а в технологию, запуск или пересборку.</p>
           </article>
         </div>
       </div>
@@ -259,7 +289,7 @@
     <div class="container">
       <div class="grid grid-2">
         <article class="card route-card">
-          <div class="badge">Что подготовить</div>
+          <div class="badge">Что прислать в заявку</div>
           <h3>Чем точнее вводные, тем полезнее расчёт</h3>
           <ul>
             <li>Площадь, тип помещения и ограничения по объекту.</li>
@@ -275,7 +305,7 @@
           <ul>
             <li>Итоговое решение всегда опирается на фактические вводные по помещению и задаче.</li>
             <li>Если часть данных пока неизвестна, расчёт всё равно помогает собрать рамку действий.</li>
-            <li>Главная цель — не “идеальный документ”, а более точный следующий шаг по проекту.</li>
+            <li>Главная цель — собрать рабочую рамку проекта, а не гадать по отдельным позициям.</li>
           </ul>
         </article>
       </div>
@@ -287,39 +317,39 @@
       <div class="section-frame">
         <div class="section-head">
           <span class="eyebrow">Как идёт работа</span>
-          <h2>Расчёт проходит по простой и понятной логике</h2>
+          <h2>После расчёта реализация проекта идёт по понятной последовательности</h2>
         </div>
 
         <div class="grid grid-4">
           <article class="card scenario-card">
             <div class="tag">Шаг 01</div>
-            <h3>Сбор вводных</h3>
+            <h3>Проектирование фермы</h3>
             <ul>
-              <li>Фиксируем площадь, формат объекта, ограничения и задачу.</li>
+              <li>При разработке проекта учитываются пожелания клиента, площадь и формат объекта.</li>
             </ul>
           </article>
 
           <article class="card scenario-card">
             <div class="tag">Шаг 02</div>
-            <h3>Расчёт узлов</h3>
+            <h3>Сборка заказа</h3>
             <ul>
-              <li>Собираем логику по стеллажам, свету, поливу и расходникам.</li>
+              <li>Сборка заказа обычно занимает 15–30 календарных дней и зависит от состава проекта.</li>
             </ul>
           </article>
 
           <article class="card scenario-card">
             <div class="tag">Шаг 03</div>
-            <h3>Состав комплекта</h3>
+            <h3>Доставка</h3>
             <ul>
-              <li>Понимаем, что входит, что докупается и что считать отдельно.</li>
+              <li>Формат зависит от размера фермы: ТК, сборный груз или отдельная машина.</li>
             </ul>
           </article>
 
           <article class="card scenario-card">
             <div class="tag">Шаг 04</div>
-            <h3>Следующий шаг</h3>
+            <h3>Монтаж и запуск</h3>
             <ul>
-              <li>Коммерческое предложение, переход в магазин или сопровождение.</li>
+              <li>Сборка на месте, тест систем, получение посадочного материала и высадка.</li>
             </ul>
           </article>
         </div>
@@ -346,7 +376,7 @@
           </article>
           <article class="card faq-box">
             <strong>Что я получу после расчёта?</strong>
-            <p>Понимание состава решения, логики комплекта и следующего коммерческого шага по проекту.</p>
+            <p>Понимание состава решения, логики комплекта, порядка закупки и границ между типовыми и проектными узлами.</p>
           </article>
           <article class="card faq-box">
             <strong>Если ферма уже работает, мне сюда или в сопровождение?</strong>
@@ -371,16 +401,16 @@
         <div class="grid grid-2">
           <div>
             <span class="eyebrow">Форма на расчёт</span>
-            <h2>Оставьте вводные по объекту и получите следующий шаг</h2>
+            <h2>Оставьте вводные по объекту и получите расчёт фермы</h2>
             <p class="sublead">
-              Здесь не нужна длинная история. Нужны площадь, стадия проекта, задача и несколько ключевых ограничений.
+              Здесь не нужна длинная история. Нужны площадь, стадия проекта, задача и несколько ключевых ограничений по объекту.
             </p>
 
             <div class="grid grid-2" style="margin-top:24px;">
               <div class="card result-card">
                 <div class="tag">Что получите</div>
                 <h3>Рамку комплекта</h3>
-                <p class="sublead">Состав решения, логику закупки и понимание дальнейшего маршрута по проекту.</p>
+                <p class="sublead">Состав решения, логику закупки и понимание, что считать дальше как проект.</p>
               </div>
               <div class="card result-card">
                 <div class="tag">Если задача глубже</div>
@@ -391,9 +421,9 @@
           </div>
 
           <div class="card form-card">
-            <h3>Запросить расчёт фермы</h3>
-            <p class="sublead">Форма для проектных запросов и расчёта комплекта.</p>
-            <form class="form-grid">
+            <h3>Собрать вводные по объекту</h3>
+            <p class="sublead">Форма для проектных запросов и расчёта комплекта под объект.</p>
+            <form class="form-grid" data-brief-form="Расчёт фермы — вводные по объекту">
               <input class="input" id="farm-name" type="text" placeholder="Имя / компания" />
               <input class="input" id="farm-contact" type="text" placeholder="Контакт для связи" />
               <input class="input" id="farm-object" type="text" placeholder="Площадь / формат объекта" />
@@ -412,7 +442,9 @@
                 <option>Стеллажи</option>
               </select>
               <textarea class="textarea" id="farm-details" placeholder="Опишите задачу: что уже есть, какие ограничения у объекта и что нужно получить на выходе"></textarea>
-              <button class="btn btn-primary" type="button">Получить расчёт и следующий шаг</button>
+              <button class="btn btn-primary" data-brief-button type="button">Скопировать вводные</button>
+              <p class="brief-form-note">Пока без онлайн-отправки. Кнопка соберёт текст заявки и скопирует его для дальнейшей передачи. Рабочий Telegram: <a href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">@patiev_admin</a>.</p>
+              <p class="brief-form-status" data-brief-status aria-live="polite"></p>
             </form>
           </div>
         </div>
@@ -424,8 +456,8 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-card">
-          <h3>КлубникаПро</h3>
-          <p class="sublead">Расчёт фермы, состав комплекта и следующий шаг по проекту для клубничных объектов в контролируемой среде.</p>
+          <h3>Klubnika Project</h3>
+          <p class="sublead">Расчёт фермы, состав комплекта и логика закупки для клубничных объектов в контролируемой среде.</p>
         </div>
 
         <div class="footer-card">
@@ -434,6 +466,7 @@
             <li><a href="../">Главная</a></li>
             <li><a href="./">Расчёт фермы</a></li>
             <li><a href="../study/">Сопровождение</a></li>
+            <li><a href="../klubhack/">Клубничный Хак</a></li>
             <li><a href="../shop/">Магазин</a></li>
           </ul>
         </div>
@@ -449,11 +482,12 @@
       </div>
 
       <div class="footer-row">
-        <div>© КлубникаПро</div>
+        <div>© Klubnika Project</div>
         <div>Расчёт фермы и состав комплекта под объект</div>
       </div>
     </div>
   </footer>
+  <script src="../site.js" defer></script>
   <script src="./farm.js"></script>
 </body>
 </html>

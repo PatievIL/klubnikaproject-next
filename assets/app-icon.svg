@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="144" fill="#004D2B"/>
+  <defs>
+    <path id="seed" d="M0 -22C13 -22 24 -10.6 24 1.2C24 14.6 14.2 24.6 0 40.6C-14.2 24.6 -24 14.6 -24 1.2C-24 -10.6 -13 -22 0 -22Z"/>
+  </defs>
+  <g transform="translate(48 38)">
+    <path fill="#F5ECDF" d="M206.4 116.8C172.57 116.8 145.15 89.38 145.15 55.55C178.98 55.55 206.4 82.97 206.4 116.8Z"/>
+    <path fill="#F5ECDF" d="M206.98 116.8C240.81 116.8 268.23 89.38 268.23 55.55C234.4 55.55 206.98 82.97 206.98 116.8Z"/>
+    <path d="M159.2 138H254.8C290.37 138 319.28 166.91 319.28 202.48V290.88C319.28 326.45 290.37 355.36 254.8 355.36H159.2C123.63 355.36 94.72 326.45 94.72 290.88V202.48C94.72 166.91 123.63 138 159.2 138Z" stroke="#F5ECDF" stroke-width="34" stroke-linejoin="round"/>
+    <g fill="#F5ECDF">
+      <use href="#seed" transform="translate(166.9 210.8) rotate(-8)"/>
+      <use href="#seed" transform="translate(213.3 210.8) rotate(2)"/>
+      <use href="#seed" transform="translate(259.7 210.8) rotate(10)"/>
+      <use href="#seed" transform="translate(189.7 270.5) rotate(-4)"/>
+      <use href="#seed" transform="translate(236.4 270.5) rotate(6)"/>
+    </g>
+  </g>
+</svg>

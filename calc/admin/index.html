@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png" />
+  <link rel="manifest" href="../../site.webmanifest" />
   <title>Админка цен калькулятора — КлубникаПро</title>
   <meta
     name="description"
@@ -22,13 +25,19 @@
         <div class="topbar">
           <div class="brand">
             <div class="brand-logo">
-              <img src="https://static.tildacdn.com/tild6366-3531-4035-a236-323261656361/logo_greeb.png" alt="КлубникаПро" />
+              <img src="../../assets/brand-berry-beige.svg" alt="Знак Klubnika Project" />
             </div>
-            <div>
-              <div class="brand-title">КлубникаПро</div>
+            <div class="brand-copy">
+              <div class="brand-title">
+                <span class="brand-title-line">Klubnika</span>
+                <span class="brand-title-line">Project</span>
+              </div>
               <div class="brand-note">Внутренняя панель цен для калькулятора</div>
             </div>
           </div>
+          <button class="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false">
+            <span></span>
+          </button>
 
           <nav class="nav">
             <a href="../../">Главная</a>
@@ -153,6 +162,7 @@
     </section>
   </main>
 
+  <script src="../../site.js" defer></script>
   <script src="./admin.js" type="module"></script>
 </body>
 </html>
