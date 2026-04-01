@@ -10,6 +10,8 @@ coverage/
 backend/.env
 backend/.venv/
 backend/data/
+backend/**/__pycache__/
+backend/**/*.pyc
 
 calc/klubnika/
 calc/ferticalc/
