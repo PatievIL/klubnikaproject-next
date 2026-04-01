@@ -1,8 +1,34 @@
+const SITE_ADMIN_STORAGE_KEY = "klubnikaproject.site.admin.draft.v1";
+const SITE_ADMIN_DEFAULTS = {
+  site: {
+    supportTelegram: "@patiev_admin",
+    supportTelegramUrl: "https://t.me/patiev_admin",
+    supportEmail: "hello@klubnikaproject.ru",
+  },
+  forms: {
+    mode: "telegram_handoff",
+    primaryChannel: "telegram",
+    handoffPrefix: "Новая заявка с сайта Klubnika Project",
+    successHint: "Скопируйте вводные и отправьте их в Telegram, пока backend ещё не подключён.",
+    openTelegramAfterCopy: true,
+    collectEmail: true,
+    collectPhone: true,
+    collectTelegram: true,
+    collectStage: true,
+  },
+  crm: {
+    requiredFields: ["Имя", "Контакт", "Стадия проекта", "Что нужно", "Источник"],
+  },
+};
+
+let siteAdminConfig = cloneConfig(SITE_ADMIN_DEFAULTS);
+
 document.addEventListener("DOMContentLoaded", () => {
   const siteScript = document.querySelector('script[src*="site.js"]');
   const root = (siteScript?.getAttribute("src") || "./site.js").replace(/site\.js(?:\?.*)?$/, "") || "./";
   const hasTopbar = Boolean(document.querySelector(".topbar"));
   const hasFooter = Boolean(document.querySelector(".footer-main"));
+  siteAdminConfig = loadSiteAdminConfig();
 
   classifyPage(hasTopbar);
 
@@ -23,8 +49,43 @@ document.addEventListener("DOMContentLoaded", () => {
   bindTopbarMenus();
   bindUiControls();
   applyStoredUi();
-  bindDraftForms();
+  bindDraftForms(siteAdminConfig);
 });
+
+function loadSiteAdminConfig() {
+  try {
+    const raw = window.localStorage.getItem(SITE_ADMIN_STORAGE_KEY);
+    if (!raw) return cloneConfig(SITE_ADMIN_DEFAULTS);
+    const parsed = JSON.parse(raw);
+    return mergeConfig(cloneConfig(SITE_ADMIN_DEFAULTS), parsed);
+  } catch (error) {
+    return cloneConfig(SITE_ADMIN_DEFAULTS);
+  }
+}
+
+function mergeConfig(base, patch) {
+  if (Array.isArray(base) || Array.isArray(patch)) return patch;
+  const output = { ...base };
+  Object.entries(patch || {}).forEach(([key, value]) => {
+    if (
+      value &&
+      typeof value === "object" &&
+      !Array.isArray(value) &&
+      base[key] &&
+      typeof base[key] === "object" &&
+      !Array.isArray(base[key])
+    ) {
+      output[key] = mergeConfig(base[key], value);
+    } else {
+      output[key] = value;
+    }
+  });
+  return output;
+}
+
+function cloneConfig(value) {
+  return JSON.parse(JSON.stringify(value));
+}
 
 function classifyPage(hasTopbar) {
   if (!hasTopbar) document.body.classList.add("secondary-page");
@@ -337,6 +398,7 @@ function applyLanguage(lang) {
   translateDocumentTitle(normalizedLang);
   updateAriaLabels(normalizedLang);
   updateUiControlState(normalizedLang);
+  applyBriefFormPresentation(siteAdminConfig, normalizedLang);
   syncBriefButtons();
 }
 
@@ -452,16 +514,31 @@ function normalizeText(text) {
   return (text || "").replace(/\s+/g, " ").trim();
 }
 
-function bindDraftForms() {
+function bindDraftForms(config) {
+  applyBriefFormPresentation(config, document.documentElement.lang === "en" ? "en" : "ru");
+
   document.querySelectorAll("[data-brief-form]").forEach((form) => {
     const button = form.querySelector("[data-brief-button]");
     const status = form.querySelector("[data-brief-status]");
     if (!button) return;
 
     button.addEventListener("click", async () => {
+      const latestConfig = loadSiteAdminConfig();
+      siteAdminConfig = latestConfig;
       const lines = buildBriefLines(form);
+      const missing = validateBriefForm(form, latestConfig);
       const lang = document.documentElement.lang === "en" ? "en" : "ru";
-      const idleLabel = button.dataset.siteInitialLabel || button.textContent.trim();
+      const ui = getBriefUi(latestConfig, lang);
+      const idleLabel = ui.buttonLabel;
+
+      if (missing.length) {
+        if (status) {
+          status.textContent = lang === "en"
+            ? `Fill in required fields: ${missing.join(", ")}.`
+            : `Заполните обязательные поля: ${missing.join(", ")}.`;
+        }
+        return;
+      }
 
       if (!lines.length) {
         if (status) {
@@ -473,39 +550,172 @@ function bindDraftForms() {
       }
 
       const title = form.dataset.briefForm || document.title;
-      const text = [`${title}`, "", ...lines].join("\n");
-      const popup = window.open("https://t.me/patiev_admin", "_blank", "noopener,noreferrer");
+      const prefix = latestConfig.forms.handoffPrefix ? `${latestConfig.forms.handoffPrefix}\n\n` : "";
+      const text = `${prefix}${[title, "", ...lines].join("\n")}`;
+      const shouldOpenTelegram =
+        latestConfig.forms.primaryChannel === "telegram" &&
+        latestConfig.forms.openTelegramAfterCopy &&
+        latestConfig.site.supportTelegramUrl;
+      const popup = shouldOpenTelegram
+        ? window.open(latestConfig.site.supportTelegramUrl, "_blank", "noopener,noreferrer")
+        : null;
       const openedTelegram = Boolean(popup);
       const copied = await copyText(text);
 
       if (status) {
-        if (copied && openedTelegram) {
+        if (latestConfig.forms.mode === "backend_submit") {
+          status.textContent = lang === "en"
+            ? "The brief is prepared for the future backend layer. For now it is also copied locally."
+            : "Вводные подготовлены под будущий backend-слой. Пока они также скопированы локально.";
+        } else if (copied && openedTelegram) {
           status.textContent = lang === "en"
             ? "The brief has been copied and Telegram opened in a new tab."
-            : "Вводные скопированы, Telegram открыт в новой вкладке.";
+            : (latestConfig.forms.successHint || "Вводные скопированы, Telegram открыт в новой вкладке.");
         } else if (copied) {
           status.textContent = lang === "en"
-            ? "The brief has been copied. Open Telegram and paste it there."
-            : "Вводные скопированы. Откройте Telegram и вставьте их туда.";
+            ? "The brief has been copied. Open the selected channel and paste it there."
+            : (latestConfig.forms.successHint || "Вводные скопированы. Откройте выбранный канал и вставьте их туда.");
         } else if (openedTelegram) {
           status.textContent = lang === "en"
             ? "Telegram is open. If the text did not copy, use the direct Telegram button and transfer the brief manually."
             : "Telegram открыт. Если текст не скопировался, откройте диалог и перенесите вводные вручную.";
         } else {
           status.textContent = lang === "en"
-            ? "Automatic copy failed. Use the Telegram button or transfer the brief manually."
-            : "Не удалось скопировать автоматически. Используйте кнопку Telegram или перенесите вводные вручную.";
+            ? "Automatic copy failed. Use the direct channel button or transfer the brief manually."
+            : "Не удалось скопировать автоматически. Используйте кнопку канала или перенесите вводные вручную.";
         }
       }
 
       button.textContent = copied
-        ? (lang === "en" ? "Copied and opened" : "Скопировано и открыто")
-        : (lang === "en" ? "Prepare brief" : "Собрать вводные");
+        ? ui.doneLabel
+        : ui.buttonLabel;
       window.setTimeout(() => {
         button.textContent = idleLabel;
       }, 1800);
     });
   });
+}
+
+function applyBriefFormPresentation(config, lang) {
+  const ui = getBriefUi(config, lang);
+  document.querySelectorAll("[data-brief-form]").forEach((form) => {
+    const button = form.querySelector("[data-brief-button]");
+    const link = form.querySelector(".brief-telegram-link");
+    const note = form.querySelector(".brief-form-note");
+    const status = form.querySelector("[data-brief-status]");
+
+    if (button) {
+      button.textContent = ui.buttonLabel;
+      button.dataset.siteInitialLabel = ui.buttonLabel;
+    }
+
+    if (link) {
+      link.href = config.site.supportTelegramUrl || "https://t.me/patiev_admin";
+      link.textContent = ui.linkLabel;
+      link.hidden = config.forms.primaryChannel !== "telegram" && !config.site.supportTelegramUrl;
+    }
+
+    if (note) {
+      const handle = config.site.supportTelegram || "@patiev_admin";
+      const href = config.site.supportTelegramUrl || "https://t.me/patiev_admin";
+      if (config.forms.mode === "copy_only") {
+        note.innerHTML = lang === "en"
+          ? "The button will prepare the brief and copy it to the clipboard. If needed, send it manually in Telegram: "
+            + `<a href="${href}" target="_blank" rel="noopener noreferrer">${handle}</a>.`
+          : "Кнопка соберёт вводные и скопирует их в буфер. При необходимости отправьте их вручную в Telegram: "
+            + `<a href="${href}" target="_blank" rel="noopener noreferrer">${handle}</a>.`;
+      } else if (config.forms.mode === "backend_submit") {
+        note.innerHTML = lang === "en"
+          ? "The backend layer is planned next. For now the brief is prepared locally and can also be duplicated in Telegram: "
+            + `<a href="${href}" target="_blank" rel="noopener noreferrer">${handle}</a>.`
+          : "Backend-слой будет подключён следующим этапом. Пока вводные готовятся локально и могут быть продублированы в Telegram: "
+            + `<a href="${href}" target="_blank" rel="noopener noreferrer">${handle}</a>.`;
+      } else {
+        note.innerHTML = lang === "en"
+          ? "The button will prepare the brief, copy it, and open the working Telegram. Working Telegram: "
+            + `<a href="${href}" target="_blank" rel="noopener noreferrer">${handle}</a>.`
+          : "Кнопка соберёт вводные, скопирует их и откроет рабочий Telegram. Рабочий Telegram: "
+            + `<a href="${href}" target="_blank" rel="noopener noreferrer">${handle}</a>.`;
+      }
+    }
+
+    if (status && !status.textContent.trim()) {
+      status.textContent = "";
+    }
+  });
+}
+
+function getBriefUi(config, lang) {
+  const english = lang === "en";
+  if (config.forms.mode === "copy_only") {
+    return {
+      buttonLabel: english ? "Prepare and copy brief" : "Собрать и скопировать вводные",
+      doneLabel: english ? "Copied" : "Скопировано",
+      linkLabel: english ? "Open Telegram" : "Открыть Telegram",
+    };
+  }
+
+  if (config.forms.mode === "backend_submit") {
+    return {
+      buttonLabel: english ? "Prepare brief" : "Собрать вводные",
+      doneLabel: english ? "Prepared" : "Подготовлено",
+      linkLabel: english ? "Open Telegram" : "Открыть Telegram",
+    };
+  }
+
+  return {
+    buttonLabel: english ? "Prepare brief and open Telegram" : "Собрать вводные и открыть Telegram",
+    doneLabel: english ? "Copied and opened" : "Скопировано и открыто",
+    linkLabel: english ? "Open Telegram" : "Открыть Telegram",
+  };
+}
+
+function validateBriefForm(form, config) {
+  const required = new Set(config.crm?.requiredFields || []);
+  const values = {
+    name: false,
+    contact: false,
+    stage: false,
+    request: false,
+  };
+
+  Array.from(form.querySelectorAll("input, select, textarea")).forEach((field) => {
+    const role = detectBriefFieldRole(field);
+    if (!role) return;
+
+    if (field.tagName === "SELECT") {
+      const firstOption = field.options[0]?.textContent?.trim();
+      const currentValue = field.options[field.selectedIndex]?.textContent?.trim();
+      values[role] = Boolean(currentValue && currentValue !== firstOption);
+      return;
+    }
+
+    values[role] = Boolean(field.value?.trim());
+  });
+
+  const missing = [];
+  if (required.has("Имя") && !values.name) missing.push("Имя");
+  if (required.has("Контакт") && !values.contact) missing.push("Контакт");
+  if (required.has("Стадия проекта") && config.forms.collectStage && hasRoleField(form, "stage") && !values.stage) missing.push("Стадия проекта");
+  if (required.has("Что нужно") && hasRoleField(form, "request") && !values.request) missing.push("Что нужно");
+  return missing;
+}
+
+function hasRoleField(form, role) {
+  return Array.from(form.querySelectorAll("input, select, textarea")).some((field) => detectBriefFieldRole(field) === role);
+}
+
+function detectBriefFieldRole(field) {
+  if (field.tagName === "TEXTAREA") return "request";
+
+  const placeholder = normalizeText(field.getAttribute("placeholder") || "");
+  const firstOption = field.tagName === "SELECT" ? normalizeText(field.options[0]?.textContent || "") : "";
+
+  if (/имя/i.test(placeholder)) return "name";
+  if (/контакт|telegram|whatsapp|email|телефон/i.test(placeholder)) return "contact";
+  if (/стадия/i.test(firstOption)) return "stage";
+  if (/что нужно|формат интереса/i.test(firstOption)) return "request";
+  return null;
 }
 
 function markActiveCompactNav() {
