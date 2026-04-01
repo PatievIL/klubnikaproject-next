@@ -511,6 +511,12 @@ h3 {
   padding: 10px 6px 6px;
 }
 
+.hero-aside {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
 .hero-copy .eyebrow {
   background: rgba(245, 236, 223, 0.12);
   color: #fff;
@@ -577,6 +583,8 @@ h3 {
 }
 
 .visual-panel {
+  display: grid;
+  gap: 16px;
   padding: 18px;
   border-radius: 28px;
   background: rgba(245, 236, 223, 0.08);
@@ -592,8 +600,6 @@ h3 {
     "top bottom";
   gap: 12px;
   align-items: stretch;
-  position: relative;
-  padding-bottom: 18px;
 }
 
 .visual-main,
@@ -631,11 +637,8 @@ h3 {
 }
 
 .visual-note {
-  position: absolute;
-  left: 18px;
-  top: 56%;
-  bottom: auto;
-  max-width: 340px;
+  display: block;
+  max-width: none;
   padding: 14px 16px;
   border-radius: 18px;
   background: var(--bg);
@@ -643,8 +646,49 @@ h3 {
   font-size: 14px;
   font-weight: 700;
   line-height: 1.45;
-  box-shadow: 0 18px 38px rgba(0, 11, 48, 0.18);
-  transform: translateY(-50%);
+  box-shadow: 0 14px 28px rgba(0, 11, 48, 0.12);
+}
+
+.hero-sidecard {
+  display: grid;
+  gap: 8px;
+  align-self: end;
+  justify-self: end;
+  width: min(280px, 100%);
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(245, 236, 223, 0.12) 0%, rgba(245, 236, 223, 0.06) 100%);
+  border: 1px solid rgba(245, 236, 223, 0.18);
+  color: var(--bg);
+  box-shadow: 0 18px 34px rgba(0, 11, 48, 0.16);
+}
+
+.hero-sidecard:hover {
+  border-color: rgba(245, 236, 223, 0.28);
+  background: linear-gradient(180deg, rgba(245, 236, 223, 0.15) 0%, rgba(245, 236, 223, 0.08) 100%);
+}
+
+.hero-sidecard-tag {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(245, 236, 223, 0.1);
+  color: rgba(245, 236, 223, 0.92);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.hero-sidecard strong {
+  font-size: 20px;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+
+.hero-sidecard span:last-child {
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(245, 236, 223, 0.78);
 }
 
 .visual-promo {
@@ -2616,7 +2660,6 @@ h3 {
       "main"
       "top"
       "bottom";
-    padding-bottom: 0;
   }
 
   .visual-main,
@@ -2626,15 +2669,14 @@ h3 {
   }
 
   .visual-note {
-    position: static;
-    margin-top: 14px;
-    max-width: none;
-    transform: none;
+    margin-top: 0;
   }
 
+  .hero-sidecard,
   .visual-promo {
     position: static;
     width: auto;
     margin-top: 10px;
+    justify-self: stretch;
   }
 }
