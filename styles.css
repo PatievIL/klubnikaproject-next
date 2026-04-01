@@ -1234,6 +1234,41 @@ html[data-theme="dark"] .footer-row > div:last-child {
   min-height: 220px;
 }
 
+.content-list {
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.content-list-item {
+  position: relative;
+  margin-top: 10px;
+  padding-left: 26px;
+}
+
+.content-list-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--green);
+}
+
+.section-card-title {
+  margin-top: 16px;
+}
+
+.mt-10 {
+  margin-top: 10px;
+}
+
+.mt-24 {
+  margin-top: 24px;
+}
+
 .signal-strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3232,6 +3267,10 @@ html[data-theme="dark"] .footer-row > div:last-child {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.status-row-lg {
+  margin-top: 18px;
 }
 
 .status-badge {
