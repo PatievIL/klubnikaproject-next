@@ -2524,34 +2524,49 @@ html[data-theme="dark"] .footer-row > div:last-child {
 .crumbs {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 16px;
+  gap: 8px;
+  margin-bottom: 18px;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.035em;
   text-transform: uppercase;
   color: rgba(0, 77, 43, 0.46);
 }
 
-.crumbs a,
-.crumbs span {
+.crumbs > a,
+.crumbs > span {
   display: inline-flex;
   align-items: center;
   min-height: 34px;
-  padding: 0 12px;
+  gap: 8px;
+  padding: 0 14px;
   border-radius: 999px;
   background: rgba(255, 250, 242, 0.62);
   border: 1px solid rgba(0, 77, 43, 0.08);
 }
 
-.crumbs a {
+.crumbs > a,
+.crumbs > span > a {
   color: var(--green);
 }
 
-.crumbs span::before {
+.crumbs > span::before {
   content: "•";
-  margin-right: 8px;
   color: rgba(0, 77, 43, 0.22);
+}
+
+.crumbs > span > a {
+  display: inline;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.crumbs > span:last-child {
+  color: rgba(0, 77, 43, 0.68);
+  background: rgba(255, 250, 242, 0.82);
 }
 
 .page-hero {
@@ -3694,8 +3709,8 @@ html[data-theme="dark"] .footer-row > div:last-child {
     scrollbar-width: none;
   }
 
-  .crumbs a,
-  .crumbs span {
+  .crumbs > a,
+  .crumbs > span {
     min-height: 30px;
     padding: 0 10px;
     white-space: nowrap;
