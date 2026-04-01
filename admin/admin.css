@@ -222,6 +222,19 @@
   margin-top: 20px;
 }
 
+.admin-auth-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.admin-session-state {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .admin-import-button {
   position: relative;
   overflow: hidden;
@@ -333,6 +346,25 @@
   margin: 10px 0 0;
 }
 
+.admin-lead-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.admin-lead-note {
+  grid-column: 1 / -1;
+}
+
+.admin-lead-save {
+  justify-self: start;
+}
+
+.admin-catalog-output {
+  min-height: 420px;
+}
+
 @media (max-width: 1100px) {
   .admin-hub-hero,
   .admin-hub-layout {
@@ -363,6 +395,11 @@
 
   .admin-toolbar-actions .btn {
     width: 100%;
+  }
+
+  .admin-auth-actions,
+  .admin-lead-actions {
+    grid-template-columns: 1fr;
   }
 
   .admin-tabs {

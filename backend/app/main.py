@@ -3,13 +3,15 @@ from __future__ import annotations
 import json
 import os
 import sqlite3
+import hashlib
+import secrets
 from contextlib import closing
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Response, status
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -27,6 +29,7 @@ class AppConfig:
     public_site_origin: str
     api_public_base: str
     admin_token: str
+    session_cookie_name: str
     db_path: Path
     cors_origins: list[str]
 
@@ -46,6 +49,7 @@ def load_config() -> AppConfig:
         public_site_origin=os.environ.get("KP_PUBLIC_SITE_ORIGIN", "https://klubnikaproject.ru"),
         api_public_base=os.environ.get("KP_API_PUBLIC_BASE", "https://api.klubnikaproject.ru/site/v1"),
         admin_token=os.environ.get("KP_ADMIN_TOKEN", "change-me"),
+        session_cookie_name=os.environ.get("KP_SESSION_COOKIE_NAME", "kp_admin_session"),
         db_path=db_path,
         cors_origins=[origin.strip() for origin in raw_origins.split(",") if origin.strip()],
     )
@@ -179,9 +183,87 @@ DEFAULT_SITE_SETTINGS: dict[str, Any] = {
     },
 }
 
+DEFAULT_CATALOG_ITEMS: list[dict[str, Any]] = [
+    {
+        "slug": "shop-led",
+        "title": "LED-освещение",
+        "kind": "category",
+        "category": "led",
+        "path": "/shop/led/",
+        "cta_mode": "choose",
+        "status": "published",
+        "summary": "Свет под ярус, стеллаж и controlled-environment логику.",
+    },
+    {
+        "slug": "shop-poliv",
+        "title": "Полив и дозирование",
+        "kind": "category",
+        "category": "poliv",
+        "path": "/shop/poliv/",
+        "cta_mode": "choose",
+        "status": "published",
+        "summary": "Схема полива, магистраль, капельницы и узлы под объект.",
+    },
+    {
+        "slug": "shop-stellaj",
+        "title": "Стеллажные решения",
+        "kind": "category",
+        "category": "stellaj",
+        "path": "/shop/stellaj/",
+        "cta_mode": "estimate",
+        "status": "published",
+        "summary": "Стеллаж как часть системы, а не отдельное железо.",
+    },
+    {
+        "slug": "shop-substrate",
+        "title": "Субстрат и корневая зона",
+        "kind": "category",
+        "category": "substrate",
+        "path": "/shop/substrate/",
+        "cta_mode": "choose",
+        "status": "published",
+        "summary": "Маты, пробки и совместимость с посадочным материалом и поливом.",
+    },
+    {
+        "slug": "seed-soraya",
+        "title": "Soraya F1",
+        "kind": "product",
+        "category": "seeds",
+        "path": "/seeds/soraya-f1/",
+        "cta_mode": "consult",
+        "status": "published",
+        "summary": "Сорт для controlled-environment, выбора канала сбыта и плотности ягоды.",
+    },
+    {
+        "slug": "seed-frigo",
+        "title": "FRIGO",
+        "kind": "product",
+        "category": "seeds",
+        "path": "/seeds/frigo/",
+        "cta_mode": "consult",
+        "status": "published",
+        "summary": "Посадочный материал для быстрого старта и управляемого цикла.",
+    },
+]
+
 
 class AuthRequest(BaseModel):
     token: str = Field(min_length=1)
+
+
+class CatalogItemRequest(BaseModel):
+    slug: str = Field(min_length=1)
+    title: str = Field(min_length=1)
+    kind: str = Field(min_length=1)
+    category: str = ""
+    path: str = Field(min_length=1)
+    cta_mode: str = "choose"
+    status: str = "draft"
+    summary: str = ""
+
+
+class CatalogEnvelope(BaseModel):
+    items: list[CatalogItemRequest] = Field(default_factory=list)
 
 
 class SettingsEnvelope(BaseModel):
@@ -211,6 +293,10 @@ class LeadUpdateRequest(BaseModel):
     status: str | None = None
     owner: str | None = None
     note: str | None = None
+
+
+def hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
 def ensure_parent(path: Path) -> None:
@@ -258,6 +344,27 @@ def init_db() -> None:
               owner TEXT NOT NULL,
               note TEXT NOT NULL
             );
+
+            CREATE TABLE IF NOT EXISTS admin_sessions (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              token_hash TEXT NOT NULL UNIQUE,
+              created_at TEXT NOT NULL,
+              expires_at TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS catalog_items (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              slug TEXT NOT NULL UNIQUE,
+              title TEXT NOT NULL,
+              kind TEXT NOT NULL,
+              category TEXT NOT NULL,
+              path TEXT NOT NULL,
+              cta_mode TEXT NOT NULL,
+              status TEXT NOT NULL,
+              summary TEXT NOT NULL,
+              sort_order INTEGER NOT NULL DEFAULT 0,
+              updated_at TEXT NOT NULL
+            );
             """
         )
         row = connection.execute("SELECT payload_json FROM site_settings WHERE id = 1").fetchone()
@@ -266,6 +373,29 @@ def init_db() -> None:
                 "INSERT INTO site_settings (id, payload_json, updated_at) VALUES (1, ?, ?)",
                 (json.dumps(DEFAULT_SITE_SETTINGS, ensure_ascii=False), utc_now()),
             )
+        catalog_row = connection.execute("SELECT COUNT(*) AS count FROM catalog_items").fetchone()
+        if catalog_row["count"] == 0:
+            now = utc_now()
+            for index, item in enumerate(DEFAULT_CATALOG_ITEMS):
+                connection.execute(
+                    """
+                    INSERT INTO catalog_items (
+                      slug, title, kind, category, path, cta_mode, status, summary, sort_order, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        item["slug"],
+                        item["title"],
+                        item["kind"],
+                        item["category"],
+                        item["path"],
+                        item["cta_mode"],
+                        item["status"],
+                        item["summary"],
+                        index,
+                        now,
+                    ),
+                )
         connection.commit()
 
 
@@ -327,6 +457,101 @@ def sanitize_public_settings(payload: dict[str, Any]) -> dict[str, Any]:
             "apiBase": payload.get("integrations", {}).get("apiBase", CONFIG.api_public_base),
         },
     }
+
+
+def list_catalog_items(status_filter: str = "") -> list[dict[str, Any]]:
+    query = """
+        SELECT slug, title, kind, category, path, cta_mode, status, summary, sort_order, updated_at
+        FROM catalog_items
+    """
+    params: list[Any] = []
+    if status_filter:
+        query += " WHERE status = ?"
+        params.append(status_filter)
+    query += " ORDER BY sort_order ASC, id ASC"
+    with closing(db_connect()) as connection:
+        rows = connection.execute(query, params).fetchall()
+    return [
+        {
+            "slug": row["slug"],
+            "title": row["title"],
+            "kind": row["kind"],
+            "category": row["category"],
+            "path": row["path"],
+            "cta_mode": row["cta_mode"],
+            "status": row["status"],
+            "summary": row["summary"],
+            "sort_order": row["sort_order"],
+            "updated_at": row["updated_at"],
+        }
+        for row in rows
+    ]
+
+
+def replace_catalog_items(items: list[CatalogItemRequest]) -> list[dict[str, Any]]:
+    now = utc_now()
+    with closing(db_connect()) as connection:
+        connection.execute("DELETE FROM catalog_items")
+        for index, item in enumerate(items):
+            connection.execute(
+                """
+                INSERT INTO catalog_items (
+                  slug, title, kind, category, path, cta_mode, status, summary, sort_order, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    item.slug,
+                    item.title,
+                    item.kind,
+                    item.category,
+                    item.path,
+                    item.cta_mode,
+                    item.status,
+                    item.summary,
+                    index,
+                    now,
+                ),
+            )
+        connection.commit()
+    return list_catalog_items()
+
+
+def create_admin_session() -> str:
+    raw_token = secrets.token_urlsafe(32)
+    now = datetime.now(timezone.utc)
+    expires_at = now.replace(microsecond=0).timestamp() + 60 * 60 * 24 * 14
+    with closing(db_connect()) as connection:
+        connection.execute(
+            """
+            INSERT INTO admin_sessions (token_hash, created_at, expires_at)
+            VALUES (?, ?, ?)
+            """,
+            (hash_token(raw_token), utc_now(), datetime.fromtimestamp(expires_at, timezone.utc).replace(microsecond=0).isoformat()),
+        )
+        connection.commit()
+    return raw_token
+
+
+def delete_admin_session(raw_token: str) -> None:
+    if not raw_token:
+        return
+    with closing(db_connect()) as connection:
+        connection.execute("DELETE FROM admin_sessions WHERE token_hash = ?", (hash_token(raw_token),))
+        connection.commit()
+
+
+def resolve_admin_session(raw_token: str) -> bool:
+    if not raw_token:
+        return False
+    now = utc_now()
+    with closing(db_connect()) as connection:
+        connection.execute("DELETE FROM admin_sessions WHERE expires_at <= ?", (now,))
+        row = connection.execute(
+            "SELECT id FROM admin_sessions WHERE token_hash = ? AND expires_at > ?",
+            (hash_token(raw_token), now),
+        ).fetchone()
+        connection.commit()
+    return row is not None
 
 
 def insert_lead(lead: LeadCreateRequest, resolved_settings: dict[str, Any]) -> dict[str, Any]:
@@ -399,8 +624,13 @@ def serialize_lead(row: sqlite3.Row) -> dict[str, Any]:
     }
 
 
-def require_admin(authorization: str | None = Header(default=None)) -> None:
+def require_admin(request: Request, authorization: str | None = Header(default=None)) -> None:
     token = (authorization or "").removeprefix("Bearer ").strip()
+    if token and token == CONFIG.admin_token:
+        return
+    session_token = request.cookies.get(CONFIG.session_cookie_name, "")
+    if resolve_admin_session(session_token):
+        return
     if not token or token != CONFIG.admin_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid admin token")
 
@@ -409,7 +639,7 @@ app = FastAPI(title="KlubnikaProject Backend", version="0.1.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CONFIG.cors_origins,
-    allow_credentials=False,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -437,6 +667,11 @@ def public_settings() -> dict[str, Any]:
     return {"settings": sanitized}
 
 
+@app.get("/v1/public/catalog/items")
+def public_catalog_items(status_filter: str = "published") -> dict[str, Any]:
+    return {"items": list_catalog_items(status_filter=status_filter)}
+
+
 @app.post("/v1/public/leads", status_code=status.HTTP_201_CREATED)
 def create_lead(payload: LeadCreateRequest) -> dict[str, Any]:
     settings = read_settings()
@@ -455,6 +690,36 @@ def admin_auth_verify(payload: AuthRequest) -> dict[str, Any]:
     return {"ok": True}
 
 
+@app.post("/v1/admin/auth/login")
+def admin_auth_login(payload: AuthRequest, response: Response) -> dict[str, Any]:
+    if payload.token != CONFIG.admin_token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+    session_token = create_admin_session()
+    response.set_cookie(
+        key=CONFIG.session_cookie_name,
+        value=session_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        max_age=60 * 60 * 24 * 14,
+        path="/",
+    )
+    return {"ok": True}
+
+
+@app.get("/v1/admin/auth/session")
+def admin_auth_session(request: Request, _: None = Depends(require_admin)) -> dict[str, Any]:
+    session_active = resolve_admin_session(request.cookies.get(CONFIG.session_cookie_name, ""))
+    return {"ok": True, "session": session_active}
+
+
+@app.post("/v1/admin/auth/logout")
+def admin_auth_logout(request: Request, response: Response) -> dict[str, Any]:
+    delete_admin_session(request.cookies.get(CONFIG.session_cookie_name, ""))
+    response.delete_cookie(CONFIG.session_cookie_name, path="/", samesite="none", secure=True)
+    return {"ok": True}
+
+
 @app.get("/v1/admin/settings")
 def admin_get_settings(_: None = Depends(require_admin)) -> dict[str, Any]:
     return {"settings": read_settings()}
@@ -464,6 +729,17 @@ def admin_get_settings(_: None = Depends(require_admin)) -> dict[str, Any]:
 def admin_put_settings(payload: SettingsEnvelope, _: None = Depends(require_admin)) -> dict[str, Any]:
     written = write_settings(payload.settings)
     return {"ok": True, "settings": written}
+
+
+@app.get("/v1/admin/catalog/items")
+def admin_list_catalog_items(_: None = Depends(require_admin)) -> dict[str, Any]:
+    return {"items": list_catalog_items()}
+
+
+@app.put("/v1/admin/catalog/items")
+def admin_put_catalog_items(payload: CatalogEnvelope, _: None = Depends(require_admin)) -> dict[str, Any]:
+    written = replace_catalog_items(payload.items)
+    return {"ok": True, "items": written}
 
 
 @app.get("/v1/admin/leads")

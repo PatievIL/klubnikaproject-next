@@ -148,17 +148,18 @@ node scripts/build-seo.mjs
 - обязательные CRM-поля
 - success/status copy
 
-Текущая схема пока статическая:
+Текущая схема теперь смешанная:
 
-- `/admin/` пишет draft-конфиг в `localStorage`
-- публичные формы читают этот конфиг через `site.js`
-- backend-submit пока не подключён, но UI уже умеет переключаться между `telegram_handoff`, `copy_only` и `backend_submit`
+- `/admin/` хранит локальный draft, но умеет входить в backend-сессию и тянуть/сохранять боевые настройки
+- публичные формы читают runtime-конфиг через `site.js` и отправляют лиды в backend
+- lead inbox уже читает реальные лиды из API
+- catalog manifest вынесен в отдельный backend layer как задел под CMS-lite
 
-Это позволяет дальше подключать настоящий backend без повторной переделки фронта.
+Это позволяет дальше развивать сайт уже не как набор HTML-страниц с ручным handoff, а как управляемую систему.
 
-## Runtime для будущего backend
+## Runtime backend
 
-Под backend уже подготовлен отдельный контур на существующей VM `farms-vm` в Google Cloud. Он не смешан с FarmS по папкам и рассчитан на отдельный сервис.
+Backend уже поднят на существующей VM `farms-vm` в Google Cloud. Он не смешан с FarmS по папкам и крутится как отдельный сервис.
 
 Текущий layout на VM:
 
@@ -170,12 +171,18 @@ node scripts/build-seo.mjs
 - `/opt/klubnikaproject-backend/shared/backups` — backups
 - `/opt/klubnikaproject-backend/deploy` — шаблоны `systemd` и `caddy`
 
-На VM уже подготовлены:
+На VM уже подготовлены и используются:
 
 - `README-BOOTSTRAP.md`
 - `.env.example`
 - `klubnikaproject-backend.service.example`
 - `klubnikaproject-api.caddy.example`
+
+Публичный API:
+
+- `https://api.klubnikaproject.ru/site/v1/health`
+- `https://api.klubnikaproject.ru/site/v1/public/settings`
+- `https://api.klubnikaproject.ru/site/v1/public/catalog/items`
 
 Доступ:
 
@@ -185,7 +192,7 @@ node scripts/build-seo.mjs
 
 ## Следующий этап
 
-- поднять минимальный backend для `site settings`, `lead submit` и admin auth
-- подключить публичные формы к реальному API вместо handoff-only режима
-- перевести каталог на data-layer вместо ручного HTML сопровождения
-- довести admin-кабинет до CRM-lite с inbox и стадиями лидов
+- расширить CRM до нормальных ролей доступа, комментариев и истории лидов
+- перевести каталог на генерацию страниц из data-layer
+- связать site settings / catalog / CRM через один backend-контур
+- добавить безопасный постоянный доступ на VM и убрать временный SSH-ключ

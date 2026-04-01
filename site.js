@@ -54,6 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindUiControls();
   applyStoredUi();
   bindDraftForms(siteAdminConfig);
+  applyGlobalContactLayer(siteAdminConfig);
   refreshBackendSettings().catch(() => {});
 });
 
@@ -87,6 +88,7 @@ async function refreshBackendSettings() {
   window.localStorage.setItem(SITE_ADMIN_BACKEND_CACHE_KEY, JSON.stringify(payload.settings));
   siteAdminConfig = mergeConfig(cloneConfig(SITE_ADMIN_DEFAULTS), payload.settings);
   applyBriefFormPresentation(siteAdminConfig, document.documentElement.lang === "en" ? "en" : "ru");
+  applyGlobalContactLayer(siteAdminConfig);
 }
 
 function mergeConfig(base, patch) {
@@ -201,6 +203,18 @@ function normalizeExistingFooter() {
   const footerRowCells = footer.querySelectorAll(".footer-row > div");
   if (footerRowCells[0]) footerRowCells[0].textContent = "© Klubnika Project";
   if (footerRowCells[1]) footerRowCells[1].textContent = "Расчёт, магазин, подбор и сопровождение решений";
+}
+
+function applyGlobalContactLayer(config) {
+  const telegramHref = config.site.supportTelegramUrl || "https://t.me/patiev_admin";
+  const telegramHandle = config.site.supportTelegram || "@patiev_admin";
+
+  document.querySelectorAll('a[href*="t.me/patiev_admin"], a[data-site-contact="telegram"]').forEach((link) => {
+    link.href = telegramHref;
+    if (normalizeText(link.textContent) === "@patiev_admin") {
+      link.textContent = telegramHandle;
+    }
+  });
 }
 
 function normalizeSecondaryCtas() {
@@ -740,9 +754,9 @@ function applyBriefFormPresentation(config, lang) {
             + `<a href="${href}" target="_blank" rel="noopener noreferrer">${handle}</a>.`;
       } else if (config.forms.mode === "backend_submit") {
         note.innerHTML = lang === "en"
-          ? "The backend layer is planned next. For now the brief is prepared locally and can also be duplicated in Telegram: "
+          ? "The brief is stored in the backend. If a fast manual follow-up is needed, it can also be duplicated in Telegram: "
             + `<a href="${href}" target="_blank" rel="noopener noreferrer">${handle}</a>.`
-          : "Backend-слой будет подключён следующим этапом. Пока вводные готовятся локально и могут быть продублированы в Telegram: "
+          : "Вводные сохраняются в backend. Если нужен быстрый ручной контакт, их можно продублировать в Telegram: "
             + `<a href="${href}" target="_blank" rel="noopener noreferrer">${handle}</a>.`;
       } else {
         note.innerHTML = lang === "en"

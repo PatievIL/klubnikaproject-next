@@ -11,8 +11,8 @@
     name="description"
     content="Внутренний кабинет настройки сайта Klubnika Project: контент, формы, CRM-схема, SEO-рамка и экспорт структуры для будущей CMS/CRM."
   />
-  <link rel="stylesheet" href="../styles.css?v=20260402a" />
-  <link rel="stylesheet" href="./admin.css?v=20260402b" />
+  <link rel="stylesheet" href="../styles.css?v=20260402c" />
+  <link rel="stylesheet" href="./admin.css?v=20260402d" />
   <!-- SEO:START -->
   <meta name="robots" content="noindex, nofollow" />
   <!-- SEO:END -->
@@ -71,12 +71,12 @@
                 <span>Сайт, CTA, формы, контакты, страницы, CRM-статусы, SEO и интеграционный план.</span>
               </div>
               <div class="hero-stat">
-                <strong>Что пока не делаем</strong>
-                <span>Не пишем в production backend и не принимаем лиды через сервер автоматически.</span>
+                <strong>Что уже работает</strong>
+                <span>Backend уже принимает лиды, хранит site settings и даёт админ-сессию для кабинета.</span>
               </div>
               <div class="hero-stat">
                 <strong>Следующий этап</strong>
-                <span>Подвязать этот JSON к своей CMS-lite и внутреннему lead inbox.</span>
+                <span>Расширить CRM, каталог и роли доступа без возврата к ручному HTML-управлению.</span>
               </div>
             </div>
           </div>
@@ -127,12 +127,18 @@
                   <a class="btn btn-secondary" href="../" target="_blank" rel="noreferrer">Открыть сайт</a>
                 </div>
 
-                <div class="admin-auth-panel">
+              <div class="admin-auth-panel">
                   <label class="admin-field">
                     <span class="admin-field-label">Backend token</span>
-                    <span class="admin-field-note">Хранится локально в этом браузере. Нужен для чтения и сохранения настроек, а затем для lead inbox.</span>
+                    <span class="admin-field-note">Нужен для первого входа в админ-сессию. Дальше кабинет работает через secure cookie на API-домене.</span>
                     <input class="admin-input" id="admin-backend-token" type="password" autocomplete="off" placeholder="Bearer token" />
                   </label>
+                  <div class="admin-auth-actions">
+                    <button class="btn btn-primary" id="admin-login-button" type="button">Войти в backend</button>
+                    <button class="btn btn-secondary" id="admin-session-button" type="button">Проверить сессию</button>
+                    <button class="btn btn-secondary" id="admin-logout-button" type="button">Выйти</button>
+                  </div>
+                  <div class="admin-session-state" id="admin-session-state">Сессия backend не проверялась.</div>
                 </div>
 
                 <div class="admin-json-actions">
@@ -156,7 +162,7 @@
     </section>
   </main>
 
-  <script src="../site.js?v=20260402b" defer></script>
-  <script src="./admin.js?v=20260402b" type="module"></script>
+  <script src="../site.js?v=20260402d" defer></script>
+  <script src="./admin.js?v=20260402d" type="module"></script>
 </body>
 </html>

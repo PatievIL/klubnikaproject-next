@@ -84,12 +84,56 @@ const DEFAULT_CONFIG = {
   },
 };
 
+const DEFAULT_CATALOG_ITEMS = [
+  {
+    slug: "shop-led",
+    title: "LED-освещение",
+    kind: "category",
+    category: "led",
+    path: "/shop/led/",
+    cta_mode: "choose",
+    status: "published",
+    summary: "Свет под ярус, стеллаж и controlled-environment логику.",
+  },
+  {
+    slug: "shop-poliv",
+    title: "Полив и дозирование",
+    kind: "category",
+    category: "poliv",
+    path: "/shop/poliv/",
+    cta_mode: "choose",
+    status: "published",
+    summary: "Схема полива, магистраль, капельницы и узлы под объект.",
+  },
+  {
+    slug: "shop-stellaj",
+    title: "Стеллажные решения",
+    kind: "category",
+    category: "stellaj",
+    path: "/shop/stellaj/",
+    cta_mode: "estimate",
+    status: "published",
+    summary: "Стеллаж как часть системы, а не отдельное железо.",
+  },
+  {
+    slug: "shop-substrate",
+    title: "Субстрат и корневая зона",
+    kind: "category",
+    category: "substrate",
+    path: "/shop/substrate/",
+    cta_mode: "choose",
+    status: "published",
+    summary: "Маты, пробки и совместимость с посадочным материалом и поливом.",
+  },
+];
+
 const SECTIONS = [
   { id: "dashboard", label: "Обзор" },
   { id: "site", label: "Сайт" },
   { id: "pages", label: "Страницы" },
   { id: "forms", label: "Формы" },
   { id: "crm", label: "CRM" },
+  { id: "catalog", label: "Каталог" },
   { id: "seo", label: "SEO" },
   { id: "integrations", label: "Интеграции" },
 ];
@@ -107,10 +151,15 @@ const els = {
   resetButton: document.getElementById("reset-admin-button"),
   pullBackendButton: document.getElementById("pull-backend-config"),
   pushBackendButton: document.getElementById("push-backend-config"),
+  loginButton: document.getElementById("admin-login-button"),
+  sessionButton: document.getElementById("admin-session-button"),
+  logoutButton: document.getElementById("admin-logout-button"),
+  sessionState: document.getElementById("admin-session-state"),
 };
 
 let draft = clone(DEFAULT_CONFIG);
 let currentSection = "dashboard";
+let catalogDraft = clone(DEFAULT_CATALOG_ITEMS);
 
 init();
 
@@ -122,6 +171,7 @@ function init() {
   renderSummary();
   bindGlobalEvents();
   persistDraft();
+  checkBackendSession();
 }
 
 function hydrateDraft() {
@@ -149,6 +199,9 @@ function bindGlobalEvents() {
   els.resetButton.addEventListener("click", resetDraft);
   els.pullBackendButton.addEventListener("click", pullBackendDraft);
   els.pushBackendButton.addEventListener("click", pushBackendDraft);
+  els.loginButton.addEventListener("click", loginToBackend);
+  els.sessionButton.addEventListener("click", checkBackendSession);
+  els.logoutButton.addEventListener("click", logoutFromBackend);
   els.backendToken.addEventListener("input", persistBackendToken);
 }
 
@@ -178,6 +231,7 @@ function renderCurrentSection() {
     : currentSection === "pages" ? renderPagesSection()
     : currentSection === "forms" ? renderFormsSection()
     : currentSection === "crm" ? renderCrmSection()
+    : currentSection === "catalog" ? renderCatalogSection()
     : currentSection === "seo" ? renderSeoSection()
     : renderIntegrationsSection();
 
@@ -185,6 +239,9 @@ function renderCurrentSection() {
   bindSectionFields();
   if (currentSection === "crm") {
     loadLeadInbox();
+  }
+  if (currentSection === "catalog") {
+    bindCatalogSection();
   }
 }
 
@@ -342,6 +399,27 @@ function renderCrmSection() {
           <div class="admin-lead-empty">Lead inbox пока не загружен.</div>
         </div>
       </div>
+    </div>
+  `;
+}
+
+function renderCatalogSection() {
+  return `
+    <div class="admin-section-stack">
+      <div class="admin-section-intro">
+        <div class="tag">Каталог</div>
+        <h3 class="calc-card-title">Минимальный catalog data-layer под самописный магазин</h3>
+        <p class="sublead">Отдельный manifest под категории и ключевые входы каталога. Следующий этап: связать его с генерацией карточек, SEO-полями и управлением SKU без ручной правки HTML.</p>
+      </div>
+      <div class="admin-toolbar-actions">
+        <button class="btn btn-secondary" id="load-catalog-button" type="button">Загрузить каталог из backend</button>
+        <button class="btn btn-primary" id="save-catalog-button" type="button">Сохранить каталог в backend</button>
+      </div>
+      <label class="admin-field">
+        <span class="admin-field-label">Catalog manifest</span>
+        <span class="admin-field-note">Пока в виде JSON-массива. Это отдельный слой данных, а не финальная CMS-форма.</span>
+        <textarea class="admin-json-output admin-catalog-output" id="admin-catalog-output" spellcheck="false">${escapeHtml(JSON.stringify(catalogDraft, null, 2))}</textarea>
+      </label>
     </div>
   `;
 }
@@ -519,17 +597,16 @@ async function adminFetch(path, options = {}) {
     throw new Error("Сначала укажите integrations.apiBase.");
   }
   const token = getBackendToken();
-  if (!token) {
-    throw new Error("Сначала вставьте backend token.");
-  }
 
   const headers = new Headers(options.headers || {});
-  headers.set("Authorization", `Bearer ${token}`);
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
   if (options.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 
-  const response = await fetch(`${apiBase}${path}`, { ...options, headers });
+  const response = await fetch(`${apiBase}${path}`, { ...options, headers, credentials: "include" });
   if (!response.ok) {
     const text = await response.text();
     throw new Error(text || `Backend returned ${response.status}`);
@@ -570,9 +647,8 @@ async function loadLeadInbox() {
   if (!list) return;
 
   const apiBase = getApiBase();
-  const token = getBackendToken();
-  if (!apiBase || !token) {
-    list.innerHTML = '<div class="admin-lead-empty">Чтобы увидеть лиды, укажите integrations.apiBase и вставьте backend token.</div>';
+  if (!apiBase) {
+    list.innerHTML = '<div class="admin-lead-empty">Чтобы увидеть лиды, укажите integrations.apiBase.</div>';
     return;
   }
 
@@ -584,7 +660,7 @@ async function loadLeadInbox() {
       list.innerHTML = '<div class="admin-lead-empty">Лидов пока нет.</div>';
       return;
     }
-    list.innerHTML = items.slice(0, 8).map((lead) => `
+    list.innerHTML = items.slice(0, 12).map((lead) => `
       <article class="admin-lead-card">
         <div class="admin-lead-head">
           <strong>#${lead.id} · ${escapeHtml(lead.name || "Без имени")}</strong>
@@ -595,10 +671,126 @@ async function loadLeadInbox() {
           <span>${escapeHtml(lead.contact || lead.email || lead.phone || "Нет контакта")}</span>
         </div>
         <p>${escapeHtml(lead.what_needed || lead.message || "Без описания")}</p>
+        <div class="admin-lead-actions">
+          <label class="admin-field">
+            <span class="admin-field-label">Статус</span>
+            <select class="admin-select" data-lead-status="${lead.id}">
+              ${(draft.crm.pipeline || []).map((item) => `<option value="${escapeAttribute(item)}" ${lead.status === item ? "selected" : ""}>${escapeHtml(item)}</option>`).join("")}
+            </select>
+          </label>
+          <label class="admin-field">
+            <span class="admin-field-label">Owner</span>
+            <input class="admin-input" data-lead-owner="${lead.id}" type="text" value="${escapeAttribute(lead.owner || "")}" />
+          </label>
+          <label class="admin-field admin-lead-note">
+            <span class="admin-field-label">Note</span>
+            <textarea class="admin-textarea" data-lead-note="${lead.id}">${escapeHtml(lead.note || "")}</textarea>
+          </label>
+          <button class="btn btn-primary admin-lead-save" data-lead-save="${lead.id}" type="button">Сохранить лид</button>
+        </div>
       </article>
     `).join("");
+    list.querySelectorAll("[data-lead-save]").forEach((button) => {
+      button.addEventListener("click", () => saveLead(button.dataset.leadSave));
+    });
   } catch (error) {
     list.innerHTML = `<div class="admin-lead-empty">Не удалось загрузить лиды: ${escapeHtml(error.message)}</div>`;
+  }
+}
+
+async function saveLead(leadId) {
+  const statusField = document.querySelector(`[data-lead-status="${leadId}"]`);
+  const ownerField = document.querySelector(`[data-lead-owner="${leadId}"]`);
+  const noteField = document.querySelector(`[data-lead-note="${leadId}"]`);
+  try {
+    els.status.textContent = `Сохраняю лид #${leadId}...`;
+    await adminFetch(`/admin/leads/${leadId}`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        status: statusField?.value || "",
+        owner: ownerField?.value || "",
+        note: noteField?.value || "",
+      }),
+    });
+    els.status.textContent = `Лид #${leadId} обновлён.`;
+    loadLeadInbox();
+  } catch (error) {
+    els.status.textContent = `Не удалось обновить лид #${leadId}: ${error.message}`;
+  }
+}
+
+function bindCatalogSection() {
+  const loadButton = document.getElementById("load-catalog-button");
+  const saveButton = document.getElementById("save-catalog-button");
+  if (loadButton) loadButton.addEventListener("click", pullCatalogDraft);
+  if (saveButton) saveButton.addEventListener("click", pushCatalogDraft);
+}
+
+async function pullCatalogDraft() {
+  const output = document.getElementById("admin-catalog-output");
+  if (!output) return;
+  try {
+    els.status.textContent = "Загружаю каталог из backend...";
+    const response = await adminFetch("/admin/catalog/items");
+    catalogDraft = response.items || [];
+    output.value = JSON.stringify(catalogDraft, null, 2);
+    els.status.textContent = "Каталог загружен из backend.";
+  } catch (error) {
+    els.status.textContent = `Не удалось загрузить каталог: ${error.message}`;
+  }
+}
+
+async function pushCatalogDraft() {
+  const output = document.getElementById("admin-catalog-output");
+  if (!output) return;
+  try {
+    catalogDraft = JSON.parse(output.value);
+    els.status.textContent = "Сохраняю каталог в backend...";
+    await adminFetch("/admin/catalog/items", {
+      method: "PUT",
+      body: JSON.stringify({ items: catalogDraft }),
+    });
+    els.status.textContent = "Каталог сохранён в backend.";
+  } catch (error) {
+    els.status.textContent = `Не удалось сохранить каталог: ${error.message}`;
+  }
+}
+
+async function loginToBackend() {
+  const token = getBackendToken();
+  if (!token) {
+    els.sessionState.textContent = "Сначала вставьте backend token.";
+    return;
+  }
+  try {
+    els.sessionState.textContent = "Выполняю вход...";
+    await adminFetch("/admin/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    });
+    els.sessionState.textContent = "Сессия backend активна.";
+  } catch (error) {
+    els.sessionState.textContent = `Вход не удался: ${error.message}`;
+  }
+}
+
+async function checkBackendSession() {
+  try {
+    els.sessionState.textContent = "Проверяю сессию...";
+    const response = await adminFetch("/admin/auth/session");
+    els.sessionState.textContent = response.session ? "Сессия backend активна." : "Сессия backend не найдена.";
+  } catch (error) {
+    els.sessionState.textContent = `Сессия не подтверждена: ${error.message}`;
+  }
+}
+
+async function logoutFromBackend() {
+  try {
+    els.sessionState.textContent = "Завершаю сессию...";
+    await adminFetch("/admin/auth/logout", { method: "POST" });
+    els.sessionState.textContent = "Сессия backend завершена.";
+  } catch (error) {
+    els.sessionState.textContent = `Не удалось завершить сессию: ${error.message}`;
   }
 }
 
