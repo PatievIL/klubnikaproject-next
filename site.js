@@ -1148,5 +1148,22 @@ const TRANSLATIONS_EN = {
   "Что уже куплено и какие решения менять нельзя.": "What has already been bought and which decisions cannot be changed.",
   "Итоговое решение всегда опирается на фактические вводные по помещению и задаче.": "The final solution always depends on the actual inputs of the room and the task.",
   "Если часть данных пока неизвестна, расчёт всё равно помогает собрать рамку действий.": "If some data is still unknown, the estimate still helps build an action outline.",
-  "Главная цель — собрать рабочую рамку проекта, а не гадать по отдельным позициям.": "The main goal is to build a working project outline, not to guess by individual positions."
+  "Главная цель — собрать рабочую рамку проекта, а не гадать по отдельным позициям.": "The main goal is to build a working project outline, not to guess by individual positions.",
+  "Расчёт нужен не для одной позиции, а чтобы собрать в одну систему стеллаж, свет, полив и логику запуска.": "The estimate is not for a single item, but to bring the rack, light, irrigation, and launch logic into one system.",
+  "Даже проход и обслуживание влияют на состав решения. Поэтому ферму считают как объект, а не как список товаров.": "Even aisle width and maintenance affect the solution composition. That is why the farm is estimated as a site, not as a shopping list.",
+  "Когда схема собрана правильно, потом проще управлять не только закупкой, но и качеством ягоды на выходе.": "When the scheme is assembled correctly, it becomes easier to manage not only procurement, but also the berry quality at the output.",
+  "Даже если не все данные готовы, по объекту уже можно собрать рабочую рамку и понять, что считать глубже.": "Even if not all data is ready, you can already build a working outline for the site and see what needs deeper calculation.",
+  "Расчёт не заменяет реальность объекта, но убирает угадывание и помогает прийти к решению более коротким путём.": "The estimate does not replace the reality of the site, but it removes guesswork and helps you reach a decision through a shorter path.",
+  "Сопровождение почти всегда начинается с того, что свет и среда проверяют вместе, а не по отдельным симптомам.": "Support almost always begins with checking light and environment together, not by isolated symptoms.",
+  "Размер, плотность и вкус ягоды редко ломаются в одной точке. Обычно это уже следствие цепочки решений по узлам.": "Berry size, density, and taste rarely break at a single point. More often they are the result of a chain of node-level decisions.",
+  "Смысл сопровождения не в советах, а в том, чтобы довести корректировки до внедрения и эффекта на проекте.": "The point of support is not advice, but to carry adjustments through implementation and real effect on the project.",
+  "Проект и внедрение": "Project and implementation",
+  "Запуск, пересборка и приоритеты": "Launch, rebuild, and priorities",
+  "Проверка логики проекта, подбор узлов и порядок внедрения без хаотичных действий по симптомам.": "Checking the project logic, selecting nodes, and setting the implementation order without chaotic symptom-driven actions.",
+  "Частый запрос на консультацию начинается с ягоды, но быстро упирается в свет, полив или корневую зону.": "A common consultation request starts with the berry, but quickly runs into light, irrigation, or the root zone.",
+  "Разовый разбор нужен там, где уже можно сузить вопрос до одного узла, одной ошибки или одного решения.": "A one-off review is needed when the question can already be narrowed to one node, one mistake, or one decision.",
+  "Хорошая консультация заканчивается не общими словами, а понятным следующим шагом по проекту.": "A good consultation ends not with general words, but with a clear next step for the project.",
+  "Решение": "Decision",
+  "Проектный вопрос и следующий шаг": "Project question and next step",
+  "Проверка логики решения, fit по узлу и понимание, идти ли дальше в расчёт, закупку или сопровождение.": "Checking the decision logic, node fit, and understanding whether to move on to estimating, procurement, or support."
 };
