@@ -1315,6 +1315,55 @@ html[data-theme="dark"] .footer-row > div:last-child {
   overflow: hidden;
 }
 
+.course-teaser {
+  display: grid;
+  grid-template-columns: 1.08fr 0.92fr;
+  gap: 24px;
+  align-items: center;
+  padding: 30px 32px;
+}
+
+.course-teaser-copy h2 {
+  max-width: 760px;
+}
+
+.course-teaser-copy .sublead {
+  max-width: 700px;
+}
+
+.course-teaser-side {
+  display: grid;
+  gap: 18px;
+}
+
+.course-teaser-points {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.course-teaser-chip {
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: rgba(245, 236, 223, 0.1);
+  border: 1px solid rgba(245, 236, 223, 0.16);
+}
+
+.course-teaser-chip strong {
+  display: block;
+  color: var(--bg);
+  font-size: 17px;
+  line-height: 1.1;
+}
+
+.course-teaser-chip span {
+  display: block;
+  margin-top: 8px;
+  color: rgba(245, 236, 223, 0.78);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
 .course-panel::before {
   content: "";
   position: absolute;
@@ -2954,6 +3003,7 @@ html[data-theme="dark"] .footer-row > div:last-child {
   .page-hero,
   .choice-grid,
   .course-panel-metrics,
+  .course-teaser-points,
   .course-panel-columns,
   .trust-shell,
   .trust-feature-grid,
@@ -2979,6 +3029,11 @@ html[data-theme="dark"] .footer-row > div:last-child {
   .solutions-note {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .course-teaser {
+    grid-template-columns: 1fr;
+    gap: 18px;
   }
 
   .course-side-note {
@@ -3225,6 +3280,10 @@ html[data-theme="dark"] .footer-row > div:last-child {
 
   .solutions-note {
     padding: 18px;
+  }
+
+  .course-teaser {
+    padding: 22px 18px;
   }
 
   .path-card-visual {
