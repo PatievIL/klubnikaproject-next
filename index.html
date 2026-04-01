@@ -11,10 +11,7 @@
     name="description"
     content="Klubnika Project помогает собрать рабочую схему клубничной фермы: расчёт, комплектация, запуск, расходники, подбор оборудования и сопровождение решений."
   />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./styles.css?v=20260401f" />
   <!-- SEO:START -->
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <link rel="canonical" href="https://klubnikaproject.ru/" />
@@ -509,7 +506,7 @@
 
         <div class="solutions-grid">
           <article class="card product-card">
-            <img class="product-photo" src="./assets/catalog/IMG_6063.jpg" alt="Стартовый комплект" />
+            <img class="product-photo" src="./assets/catalog/IMG_6063.webp" alt="Стартовый комплект" />
             <div class="product-meta">
               <div class="tag">Стартовый комплект</div>
               <div class="price">105 000 ₽</div>
@@ -526,7 +523,7 @@
           </article>
 
           <article class="card product-card">
-            <img class="product-photo" src="./assets/catalog/300wt.png" alt="Комплект света" />
+            <img class="product-photo" src="./assets/catalog/300wt.webp" alt="Комплект света" />
             <div class="product-meta">
               <div class="tag">Техничная позиция</div>
               <div class="price">9 900 ₽</div>
@@ -543,7 +540,7 @@
           </article>
 
           <article class="card product-card">
-            <img class="product-photo" src="./assets/catalog/IMG_6061.jpg" alt="Комплект полива" />
+            <img class="product-photo" src="./assets/catalog/IMG_6061.webp" alt="Комплект полива" />
             <div class="product-meta">
               <div class="tag">Проектная позиция</div>
               <div class="price">от 1 940 ₽</div>
@@ -560,7 +557,7 @@
           </article>
 
           <article class="card product-card">
-            <img class="product-photo" src="./assets/catalog/IMG_4924.jpg" alt="Каркас и стеллажи" />
+            <img class="product-photo" src="./assets/catalog/IMG_4924.webp" alt="Каркас и стеллажи" />
             <div class="product-meta">
               <div class="tag">Каркас / модуль</div>
               <div class="price">от 104 500 ₽</div>
@@ -871,8 +868,11 @@
                 <option>Консультация</option>
               </select>
               <textarea class="textarea" placeholder="Коротко: что уже есть по объекту и что нужно решить прямо сейчас"></textarea>
-              <button class="btn btn-primary" data-brief-button type="button">Скопировать вводные</button>
-              <p class="brief-form-note">Пока без онлайн-отправки. Кнопка соберёт текст заявки и скопирует его для Telegram, письма или CRM. Рабочий Telegram: <a href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">@patiev_admin</a>.</p>
+              <div class="brief-form-actions">
+                <button class="btn btn-primary" data-brief-button type="button">Собрать вводные и открыть Telegram</button>
+                <a class="brief-telegram-link" href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">Открыть Telegram</a>
+              </div>
+              <p class="brief-form-note">Кнопка соберёт вводные, скопирует их и сразу откроет рабочий Telegram. Рабочий Telegram: <a href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">@patiev_admin</a>.</p>
               <p class="brief-form-status" data-brief-status aria-live="polite"></p>
             </form>
         </div>
@@ -915,6 +915,6 @@
       </div>
     </div>
   </footer>
-  <script src="./site.js" defer></script>
+  <script src="./site.js?v=20260401f" defer></script>
 </body>
 </html>

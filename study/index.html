@@ -11,10 +11,7 @@
     name="description"
     content="Сопровождение и консультации для клубничных ферм в логике контролируемой среды: запуск, диагностика проблем, корректировка решений и разбор действующего проекта."
   />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../styles.css?v=20260401f" />
   <!-- SEO:START -->
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <link rel="canonical" href="https://klubnikaproject.ru/study/" />
@@ -183,12 +180,12 @@
             <div class="visual-grid">
               <img
                 class="visual-main"
-                src="https://static.tildacdn.com/stor3061-3632-4435-a332-653934306261/20880535.jpg"
+                src="../assets/catalog/20880535.webp"
                 alt="Клубника и проектная работа"
               />
               <div class="visual-stack">
-                <img src="https://static.tildacdn.com/tild6234-3930-4631-a563-383233396236/IMG_6061.jpg" alt="Качество ягоды" />
-                <img src="https://static.tildacdn.com/tild6235-3538-4638-a664-623063646238/IMG_4724.jpg" alt="Работа на ферме" />
+                <img src="../assets/catalog/IMG_6061.webp" alt="Качество ягоды" />
+                <img src="../assets/catalog/IMG_4724.webp" alt="Работа на ферме" />
               </div>
             </div>
             <div class="visual-note">
@@ -584,8 +581,11 @@
                 <option>Нужна рекомендация по формату</option>
               </select>
               <textarea class="textarea" placeholder="Опишите ситуацию: качество ягоды, свет, полив, запуск, пересборка или другой критичный вопрос по проекту"></textarea>
-              <button class="btn btn-primary" data-brief-button type="button">Скопировать задачу</button>
-              <p class="brief-form-note">Пока без онлайн-отправки. Кнопка соберёт текст заявки и скопирует его для дальнейшей передачи. Рабочий Telegram: <a href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">@patiev_admin</a>.</p>
+              <div class="brief-form-actions">
+                <button class="btn btn-primary" data-brief-button type="button">Собрать задачу и открыть Telegram</button>
+                <a class="brief-telegram-link" href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">Открыть Telegram</a>
+              </div>
+              <p class="brief-form-note">Кнопка соберёт вводные, скопирует их и сразу откроет рабочий Telegram. Рабочий Telegram: <a href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">@patiev_admin</a>.</p>
               <p class="brief-form-status" data-brief-status aria-live="polite"></p>
             </form>
           </div>
@@ -629,6 +629,6 @@
       </div>
     </div>
   </footer>
-  <script src="../site.js" defer></script>
+  <script src="../site.js?v=20260401f" defer></script>
 </body>
 </html>

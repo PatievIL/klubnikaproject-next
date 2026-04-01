@@ -11,10 +11,7 @@
     name="description"
     content="Расчёт клубничной фермы под ваш объект: стеллажи, свет, полив, субстрат, посадочный материал, состав комплекта и следующий коммерческий шаг."
   />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../styles.css?v=20260401f" />
   <!-- SEO:START -->
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <link rel="canonical" href="https://klubnikaproject.ru/farm/" />
@@ -517,8 +514,11 @@
                 <option>Стеллажи</option>
               </select>
               <textarea class="textarea" id="farm-details" placeholder="Опишите задачу: что уже есть, какие ограничения у объекта и что нужно получить на выходе"></textarea>
-              <button class="btn btn-primary" data-brief-button type="button">Скопировать вводные</button>
-              <p class="brief-form-note">Пока без онлайн-отправки. Кнопка соберёт текст заявки и скопирует его для дальнейшей передачи. Рабочий Telegram: <a href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">@patiev_admin</a>.</p>
+              <div class="brief-form-actions">
+                <button class="btn btn-primary" data-brief-button type="button">Собрать вводные и открыть Telegram</button>
+                <a class="brief-telegram-link" href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">Открыть Telegram</a>
+              </div>
+              <p class="brief-form-note">Кнопка соберёт вводные, скопирует их и сразу откроет рабочий Telegram. Рабочий Telegram: <a href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">@patiev_admin</a>.</p>
               <p class="brief-form-status" data-brief-status aria-live="polite"></p>
             </form>
           </div>
@@ -562,7 +562,7 @@
       </div>
     </div>
   </footer>
-  <script src="../site.js" defer></script>
+  <script src="../site.js?v=20260401f" defer></script>
   <script src="./farm.js"></script>
 </body>
 </html>

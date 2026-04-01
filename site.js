@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const siteScript = document.querySelector('script[src$="site.js"]');
+  const siteScript = document.querySelector('script[src*="site.js"]');
   const root = (siteScript?.getAttribute("src") || "./site.js").replace(/site\.js(?:\?.*)?$/, "") || "./";
   const hasTopbar = Boolean(document.querySelector(".topbar"));
   const hasFooter = Boolean(document.querySelector(".footer-main"));
@@ -325,21 +325,33 @@ function bindDraftForms() {
 
       const title = form.dataset.briefForm || document.title;
       const text = [`${title}`, "", ...lines].join("\n");
+      const popup = window.open("https://t.me/patiev_admin", "_blank", "noopener,noreferrer");
+      const openedTelegram = Boolean(popup);
       const copied = await copyText(text);
 
       if (status) {
-        status.textContent = copied
-          ? (lang === "en"
-            ? "The brief has been copied. You can paste it into Telegram, email, or your CRM."
-            : "Вводные скопированы. Их можно вставить в Telegram, письмо или CRM.")
-          : (lang === "en"
-            ? "Automatic copy failed. Please transfer the brief manually."
-            : "Не удалось скопировать автоматически. Перенесите вводные вручную.");
+        if (copied && openedTelegram) {
+          status.textContent = lang === "en"
+            ? "The brief has been copied and Telegram opened in a new tab."
+            : "Вводные скопированы, Telegram открыт в новой вкладке.";
+        } else if (copied) {
+          status.textContent = lang === "en"
+            ? "The brief has been copied. Open Telegram and paste it there."
+            : "Вводные скопированы. Откройте Telegram и вставьте их туда.";
+        } else if (openedTelegram) {
+          status.textContent = lang === "en"
+            ? "Telegram is open. If the text did not copy, use the direct Telegram button and transfer the brief manually."
+            : "Telegram открыт. Если текст не скопировался, откройте диалог и перенесите вводные вручную.";
+        } else {
+          status.textContent = lang === "en"
+            ? "Automatic copy failed. Use the Telegram button or transfer the brief manually."
+            : "Не удалось скопировать автоматически. Используйте кнопку Telegram или перенесите вводные вручную.";
+        }
       }
 
       button.textContent = copied
-        ? (lang === "en" ? "Copied" : "Скопировано")
-        : (lang === "en" ? "Copy brief" : "Собрать вводные");
+        ? (lang === "en" ? "Copied and opened" : "Скопировано и открыто")
+        : (lang === "en" ? "Prepare brief" : "Собрать вводные");
       window.setTimeout(() => {
         button.textContent = idleLabel;
       }, 1800);
@@ -608,6 +620,11 @@ const TRANSLATIONS_EN = {
   "Вопросы, которые нужно закрыть до заявки": "Questions to resolve before you submit a request",
   "Опишите задачу в четырёх вводных, а мы направим её в нужный сценарий": "Describe the task in four inputs and we will route it to the right path",
   "Скопировать вводные": "Copy brief",
+  "Собрать вводные и открыть Telegram": "Prepare brief and open Telegram",
+  "Собрать задачу и открыть Telegram": "Prepare task and open Telegram",
+  "Собрать запрос и открыть Telegram": "Prepare request and open Telegram",
+  "Открыть Telegram": "Open Telegram",
+  "Кнопка соберёт вводные, скопирует их и сразу откроет рабочий Telegram. Рабочий Telegram:": "The button will prepare the brief, copy it, and open the working Telegram right away. Working Telegram:",
   "Магазин решений для клубничной фермы": "Solution shop for a strawberry farm",
   "Выбрать свой сценарий": "Choose your path",
   "Есть действующая ферма и нужен разбор": "You already have a farm and need a review",
@@ -717,5 +734,121 @@ const TRANSLATIONS_EN = {
   "Формат интереса": "Preferred format",
   "Разовая консультация": "One-off consultation",
   "Долгосрочное сопровождение": "Long-term support",
-  "Нужна рекомендация по формату": "Need a format recommendation"
+  "Нужна рекомендация по формату": "Need a format recommendation",
+  "Что это даёт клиенту": "What this gives the client",
+  "Запускаю ферму": "Launching a farm",
+  "Уже выращиваю": "Already growing",
+  "Нужны расходники и оборудование": "Need supplies and equipment",
+  "Нужен расчёт и состав комплекта": "Need an estimate and kit composition",
+  "Свет под ярус, зону или проект": "Light for a tier, zone, or project",
+  "Подача раствора и корневая зона": "Solution delivery and the root zone",
+  "Компоновка фермы и экономика площади": "Farm layout and area economics",
+  "Основа для корневой зоны": "Root-zone base",
+  "Семена, рассада, frigo": "Seeds, seedlings, frigo",
+  "Когда проблема уже не только в товаре": "When the problem is no longer just the product",
+  "Модуль для первого запуска": "Module for the first launch",
+  "Светильник M23 для яруса": "M23 light for a tier",
+  "Комплект полива под объект": "Irrigation kit for the site",
+  "Стеллажная система или модуль": "Rack system or module",
+  "На выходе не одна цифра, а рабочая рамка": "The output is not one number, but a working outline",
+  "Сбор вводных": "Input collection",
+  "Расчёт и подбор": "Estimate and selection",
+  "Комплектация и доставка": "Sourcing and delivery",
+  "Монтаж и запуск": "Installation and launch",
+  "Запуск новой конфигурации фермы": "Launching a new farm configuration",
+  "Действующая ферма с нестабильным результатом": "An operating farm with unstable results",
+  "Дооснащение без полной пересборки": "Upgrading without a full rebuild",
+  "Собрать вводные": "Prepare the brief",
+  "Есть задачи, которые уже дороже решать через разрозненные покупки": "Some tasks are already too expensive to solve through fragmented purchases",
+  "Запуск с нуля": "Launch from scratch",
+  "Пересборка схемы": "Rebuilding the scheme",
+  "Рост и новая очередь": "Growth and a new phase",
+  "Нужен состав комплекта": "Need the kit composition",
+  "Стеллажная схема": "Rack layout",
+  "Свет и полив": "Lighting and irrigation",
+  "Субстрат и посадочный материал": "Substrate and planting material",
+  "Состав и смета": "Composition and estimate",
+  "Коммерческая рамка": "Commercial outline",
+  "Переход в сопровождение": "Move into support",
+  "Чем точнее вводные, тем полезнее расчёт": "The more precise the inputs, the more useful the estimate",
+  "Расчёт не заменяет реальность объекта": "An estimate does not replace the reality of the site",
+  "Проектирование фермы": "Farm design",
+  "Сборка заказа": "Order assembly",
+  "Доставка": "Delivery",
+  "Рамку комплекта": "A kit outline",
+  "Собрать вводные по объекту": "Prepare the site brief",
+  "Критический этап": "Critical stage",
+  "Пересборка и рост": "Rebuild and growth",
+  "Не отдельные советы, а рабочую логику решений": "Not isolated tips, but a working decision logic",
+  "Свет, климат, VPD": "Light, climate, VPD",
+  "Полив и субстрат": "Irrigation and substrate",
+  "Фазы растения и ягода": "Plant stages and berry quality",
+  "Запуск и пересборка": "Launch and rebuild",
+  "Подбор узлов и комплектов": "Selection of nodes and kits",
+  "Приоритеты и внедрение": "Priorities and implementation",
+  "Когда нужен точный разбор одной задачи": "When one task needs a precise review",
+  "Когда проект нужно вести не один день": "When the project needs more than a one-day intervention",
+  "Понятная логика действий": "A clear action logic",
+  "Более управляемая логика проекта": "A more controllable project logic",
+  "Диагностика": "Diagnostics",
+  "План действий": "Action plan",
+  "Сопровождение внедрения": "Implementation support",
+  "Ферма уже работает, но результат нестабилен": "The farm is already running, but the result is unstable",
+  "Проект в запуске, цена ошибки уже высокая": "The project is launching and the cost of a mistake is already high",
+  "Нужно пройти критический этап без хаоса": "You need to pass a critical stage without chaos",
+  "Один точный вопрос": "One precise question",
+  "Несколько связанных решений": "Several connected decisions",
+  "Запускаю ферму с нуля": "Launching a farm from scratch",
+  "Ферма уже работает": "The farm is already operating",
+  "Нужен типовой товар или расходник": "Need a standard product or consumable",
+  "Нужен узел, модуль или комплект": "Need a node, module, or kit",
+  "Комплект для запуска фермы": "Farm launch kit",
+  "Светильник M23 для ряда или яруса": "M23 light for a row or tier",
+  "Полив под проект или зону": "Irrigation for a project or zone",
+  "Каркас или готовый модуль": "Frame or ready-made module",
+  "Освещение": "Lighting",
+  "Корневая зона и подача раствора": "Root zone and solution delivery",
+  "Каркас и компоновка фермы": "Frame and farm layout",
+  "Основа корневой зоны": "Root-zone base",
+  "Комплекты и проектные позиции": "Kits and project positions",
+  "Не открывайте каталог как замену подбору": "Do not use the catalog as a substitute for selection",
+  "Светильник M23 100 Вт, 191 см": "M23 light 100 W, 191 cm",
+  "Субстратный мат": "Substrate slab",
+  "Собрать задачу на подбор": "Prepare a selection brief",
+  "Новички": "Beginners",
+  "Действующие фермеры": "Active growers",
+  "Инвесторы и предприниматели": "Investors and entrepreneurs",
+  "Пошаговый маршрут, а не просто набор уроков": "A step-by-step path, not just a set of lessons",
+  "База и старт клубничной фермы": "Strawberry farm foundations and launch",
+  "Инженерия и условия": "Engineering and conditions",
+  "Рост, цикл жизни и развитие куста": "Growth, life cycle, and plant development",
+  "Цветение, урожай и качество ягоды": "Flowering, harvest, and berry quality",
+  "Сбор, хранение и масштабирование": "Harvest, storage, and scaling",
+  "Что делать дальше": "What to do next",
+  "Как устроен доступ": "How access works",
+  "Одна рамка стоимости без сложной тарифной сетки": "One pricing frame without a complex tariff grid",
+  "Понятную программу": "A clear program",
+  "Собрать запрос по курсу": "Prepare a course brief",
+  "Оборудование по узлам": "Equipment by nodes",
+  "Ориентир по закупке": "Procurement benchmark",
+  "Расходы и выручка": "Costs and revenue",
+  "Когда калькулятор даёт реальную пользу": "When the calculator gives real value",
+  "Когда лучше сразу идти в подбор или сопровождение": "When it is better to go straight into selection or support",
+  "Короткий поток без длинной анкеты и лишних полей": "A short flow without a long form and extra fields",
+  "Фиксируем сценарий": "Fix the scenario",
+  "Собираем базовые вводные": "Collect the basic inputs",
+  "Смотрим рабочую рамку": "Review the working outline",
+  "Понимаем маршрут дальше": "Understand the route forward",
+  "Сценарий проекта": "Project scenario",
+  "Что уже видно по текущим вводным": "What is already visible from the current inputs",
+  "Вот что уже видно по вашим вводным": "Here is what is already visible from your inputs",
+  "Результат нужен не для одной цифры": "The result is not for one number",
+  "Пока это предварительная рамка": "For now this is a preliminary outline",
+  "Когда не стоит идти в каталог сразу": "When you should not go straight to the catalog",
+  "Как выглядит структура бюджета сейчас": "What the budget structure looks like now",
+  "Ежемесячная и годовая рамка расходов": "Monthly and yearly cost outline",
+  "Как читать эту сценарную рамку": "How to read this scenario outline",
+  "Калькулятор убирает слепой старт": "The calculator removes a blind start",
+  "Это предварительная рамка, а не финальная смета": "This is a preliminary outline, not a final estimate",
+  "Не красивую форму, а осмысленный маршрут": "Not a pretty form, but a meaningful route"
 };
