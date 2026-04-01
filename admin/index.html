@@ -12,7 +12,7 @@
     content="Внутренний кабинет настройки сайта Klubnika Project: контент, формы, CRM-схема, SEO-рамка и экспорт структуры для будущей CMS/CRM."
   />
   <link rel="stylesheet" href="../styles.css?v=20260402a" />
-  <link rel="stylesheet" href="./admin.css?v=20260402a" />
+  <link rel="stylesheet" href="./admin.css?v=20260402b" />
   <!-- SEO:START -->
   <meta name="robots" content="noindex, nofollow" />
   <!-- SEO:END -->
@@ -105,6 +105,8 @@
               <div class="admin-hub-toolbar">
                 <div class="admin-tabs" id="admin-tabs" role="tablist" aria-label="Разделы кабинета"></div>
                 <div class="admin-toolbar-actions">
+                  <button class="btn btn-secondary" id="pull-backend-config" type="button">Загрузить из backend</button>
+                  <button class="btn btn-primary" id="push-backend-config" type="button">Сохранить в backend</button>
                   <button class="btn btn-secondary" id="reset-admin-button" type="button">Сбросить черновик</button>
                 </div>
               </div>
@@ -123,6 +125,14 @@
                 <div class="admin-hub-links">
                   <a class="btn btn-primary" href="../calc/admin/">Цены калькулятора</a>
                   <a class="btn btn-secondary" href="../" target="_blank" rel="noreferrer">Открыть сайт</a>
+                </div>
+
+                <div class="admin-auth-panel">
+                  <label class="admin-field">
+                    <span class="admin-field-label">Backend token</span>
+                    <span class="admin-field-note">Хранится локально в этом браузере. Нужен для чтения и сохранения настроек, а затем для lead inbox.</span>
+                    <input class="admin-input" id="admin-backend-token" type="password" autocomplete="off" placeholder="Bearer token" />
+                  </label>
                 </div>
 
                 <div class="admin-json-actions">
@@ -146,7 +156,7 @@
     </section>
   </main>
 
-  <script src="../site.js?v=20260402a" defer></script>
-  <script src="./admin.js?v=20260402a" type="module"></script>
+  <script src="../site.js?v=20260402b" defer></script>
+  <script src="./admin.js?v=20260402b" type="module"></script>
 </body>
 </html>

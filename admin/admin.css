@@ -53,6 +53,13 @@
   align-items: center;
 }
 
+.admin-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
 .admin-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -211,6 +218,10 @@
   margin-top: 20px;
 }
 
+.admin-auth-panel {
+  margin-top: 20px;
+}
+
 .admin-import-button {
   position: relative;
   overflow: hidden;
@@ -286,6 +297,42 @@
   color: rgba(0, 77, 43, 0.9);
 }
 
+.admin-lead-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.admin-lead-card {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(250, 247, 240, 0.7);
+  border: 1px solid var(--line);
+}
+
+.admin-lead-head,
+.admin-lead-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-lead-head strong {
+  font-size: 15px;
+}
+
+.admin-lead-head span,
+.admin-lead-meta span,
+.admin-lead-empty {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.admin-lead-card p {
+  margin: 10px 0 0;
+}
+
 @media (max-width: 1100px) {
   .admin-hub-hero,
   .admin-hub-layout {
@@ -308,6 +355,14 @@
   .admin-hub-toolbar,
   .admin-block-head {
     display: grid;
+  }
+
+  .admin-toolbar-actions {
+    justify-content: stretch;
+  }
+
+  .admin-toolbar-actions .btn {
+    width: 100%;
   }
 
   .admin-tabs {

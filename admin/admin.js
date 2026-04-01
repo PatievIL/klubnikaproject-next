@@ -1,4 +1,5 @@
 const STORAGE_KEY = "klubnikaproject.site.admin.draft.v1";
+const BACKEND_TOKEN_KEY = "klubnikaproject.site.admin.token.v1";
 
 const DEFAULT_CONFIG = {
   site: {
@@ -14,11 +15,11 @@ const DEFAULT_CONFIG = {
     activeLogoSystem: "manual-primary",
   },
   forms: {
-    mode: "telegram_handoff",
-    primaryChannel: "telegram",
+    mode: "backend_submit",
+    primaryChannel: "crm",
     handoffPrefix: "Новая заявка с сайта Klubnika Project",
-    successHint: "Скопируйте вводные и отправьте их в Telegram, пока backend ещё не подключён.",
-    openTelegramAfterCopy: true,
+    successHint: "Вводные сохранены в системе. Если нужен быстрый ручной контакт, их можно продублировать в Telegram.",
+    openTelegramAfterCopy: false,
     collectEmail: true,
     collectPhone: true,
     collectTelegram: true,
@@ -78,7 +79,7 @@ const DEFAULT_CONFIG = {
     catalogSource: "static-html",
     futureCms: "JSON/CMS-lite",
     futureCrm: "Lead inbox + pipeline",
-    apiBase: "",
+    apiBase: "https://api.klubnikaproject.ru/site/v1",
     note: "Под этот JSON дальше можно подвязать backend, не меняя логику секций.",
   },
 };
@@ -98,11 +99,14 @@ const els = {
   section: document.getElementById("admin-section-content"),
   summary: document.getElementById("admin-summary-grid"),
   status: document.getElementById("admin-status"),
+  backendToken: document.getElementById("admin-backend-token"),
   jsonOutput: document.getElementById("admin-json-output"),
   downloadButton: document.getElementById("download-admin-json"),
   copyButton: document.getElementById("copy-admin-json"),
   importInput: document.getElementById("import-admin-json"),
   resetButton: document.getElementById("reset-admin-button"),
+  pullBackendButton: document.getElementById("pull-backend-config"),
+  pushBackendButton: document.getElementById("push-backend-config"),
 };
 
 let draft = clone(DEFAULT_CONFIG);
@@ -112,6 +116,7 @@ init();
 
 function init() {
   hydrateDraft();
+  hydrateBackendToken();
   renderTabs();
   renderCurrentSection();
   renderSummary();
@@ -130,11 +135,21 @@ function hydrateDraft() {
   }
 }
 
+function hydrateBackendToken() {
+  const token = window.localStorage.getItem(BACKEND_TOKEN_KEY) || "";
+  if (els.backendToken) {
+    els.backendToken.value = token;
+  }
+}
+
 function bindGlobalEvents() {
   els.downloadButton.addEventListener("click", downloadJson);
   els.copyButton.addEventListener("click", copyJson);
   els.importInput.addEventListener("change", importJson);
   els.resetButton.addEventListener("click", resetDraft);
+  els.pullBackendButton.addEventListener("click", pullBackendDraft);
+  els.pushBackendButton.addEventListener("click", pushBackendDraft);
+  els.backendToken.addEventListener("input", persistBackendToken);
 }
 
 function renderTabs() {
@@ -168,6 +183,9 @@ function renderCurrentSection() {
 
   els.section.innerHTML = html;
   bindSectionFields();
+  if (currentSection === "crm") {
+    loadLeadInbox();
+  }
 }
 
 function renderDashboardSection() {
@@ -313,6 +331,17 @@ function renderCrmSection() {
       <div class="admin-code-card">
 <pre>${escapeHtml(JSON.stringify(buildLeadExample(), null, 2))}</pre>
       </div>
+      <div class="admin-block">
+        <div class="admin-block-head">
+          <div>
+            <strong>Lead inbox</strong>
+            <span>Последние лиды из backend. Работает, если указан API base и вставлен backend token.</span>
+          </div>
+        </div>
+        <div class="admin-lead-list" id="admin-lead-list">
+          <div class="admin-lead-empty">Lead inbox пока не загружен.</div>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -396,6 +425,7 @@ function updatePath(path, field, type) {
 function renderSummary() {
   const crmStatus = draft.crm.enabled ? "включён" : "черновик";
   const publicPages = draft.pages.filter((page) => page.status === "published").length;
+  const backendActive = Boolean(getApiBase());
   els.summary.innerHTML = [
     { label: "Публичных страниц", value: String(publicPages) },
     { label: "Режим форм", value: draft.forms.mode },
@@ -403,6 +433,7 @@ function renderSummary() {
     { label: "Telegram", value: draft.site.supportTelegram || "не указан" },
     { label: "Lead sources", value: String(draft.crm.leadSources.length) },
     { label: "Pipeline stages", value: String(draft.crm.pipeline.length) },
+    { label: "Backend API", value: backendActive ? "указан" : "не указан" },
   ].map((item) => `
     <div class="summary-item">
       <span>${item.label}</span>
@@ -467,6 +498,108 @@ function resetDraft() {
 
 function persistDraft() {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+}
+
+function persistBackendToken() {
+  if (!els.backendToken) return;
+  window.localStorage.setItem(BACKEND_TOKEN_KEY, els.backendToken.value.trim());
+}
+
+function getApiBase() {
+  return (draft.integrations?.apiBase || "").replace(/\/+$/, "");
+}
+
+function getBackendToken() {
+  return (els.backendToken?.value || "").trim();
+}
+
+async function adminFetch(path, options = {}) {
+  const apiBase = getApiBase();
+  if (!apiBase) {
+    throw new Error("Сначала укажите integrations.apiBase.");
+  }
+  const token = getBackendToken();
+  if (!token) {
+    throw new Error("Сначала вставьте backend token.");
+  }
+
+  const headers = new Headers(options.headers || {});
+  headers.set("Authorization", `Bearer ${token}`);
+  if (options.body && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  const response = await fetch(`${apiBase}${path}`, { ...options, headers });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || `Backend returned ${response.status}`);
+  }
+  return response.json();
+}
+
+async function pullBackendDraft() {
+  try {
+    els.status.textContent = "Загружаю настройки из backend...";
+    const response = await adminFetch("/admin/settings");
+    draft = deepMerge(clone(DEFAULT_CONFIG), response.settings || {});
+    persistDraft();
+    renderTabs();
+    renderCurrentSection();
+    renderSummary();
+    els.status.textContent = "Черновик обновлён из backend.";
+  } catch (error) {
+    els.status.textContent = `Не удалось загрузить настройки из backend: ${error.message}`;
+  }
+}
+
+async function pushBackendDraft() {
+  try {
+    els.status.textContent = "Сохраняю настройки в backend...";
+    await adminFetch("/admin/settings", {
+      method: "PUT",
+      body: JSON.stringify({ settings: draft }),
+    });
+    els.status.textContent = "Настройки сохранены в backend.";
+  } catch (error) {
+    els.status.textContent = `Не удалось сохранить настройки в backend: ${error.message}`;
+  }
+}
+
+async function loadLeadInbox() {
+  const list = document.getElementById("admin-lead-list");
+  if (!list) return;
+
+  const apiBase = getApiBase();
+  const token = getBackendToken();
+  if (!apiBase || !token) {
+    list.innerHTML = '<div class="admin-lead-empty">Чтобы увидеть лиды, укажите integrations.apiBase и вставьте backend token.</div>';
+    return;
+  }
+
+  list.innerHTML = '<div class="admin-lead-empty">Загружаю лиды…</div>';
+  try {
+    const response = await adminFetch("/admin/leads");
+    const items = response.items || [];
+    if (!items.length) {
+      list.innerHTML = '<div class="admin-lead-empty">Лидов пока нет.</div>';
+      return;
+    }
+    list.innerHTML = items.slice(0, 8).map((lead) => `
+      <article class="admin-lead-card">
+        <div class="admin-lead-head">
+          <strong>#${lead.id} · ${escapeHtml(lead.name || "Без имени")}</strong>
+          <span>${escapeHtml(lead.status || "Новый лид")}</span>
+        </div>
+        <div class="admin-lead-meta">
+          <span>${escapeHtml(lead.source || lead.route || "Сайт")}</span>
+          <span>${escapeHtml(lead.contact || lead.email || lead.phone || "Нет контакта")}</span>
+        </div>
+        <p>${escapeHtml(lead.what_needed || lead.message || "Без описания")}</p>
+      </article>
+    `).join("");
+  } catch (error) {
+    list.innerHTML = `<div class="admin-lead-empty">Не удалось загрузить лиды: ${escapeHtml(error.message)}</div>`;
+  }
 }
 
 function isDefaultState() {

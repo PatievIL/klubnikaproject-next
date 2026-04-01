@@ -1,4 +1,5 @@
 const SITE_ADMIN_STORAGE_KEY = "klubnikaproject.site.admin.draft.v1";
+const SITE_ADMIN_BACKEND_CACHE_KEY = "klubnikaproject.site.backend.settings.v1";
 const SITE_ADMIN_DEFAULTS = {
   site: {
     supportTelegram: "@patiev_admin",
@@ -6,11 +7,11 @@ const SITE_ADMIN_DEFAULTS = {
     supportEmail: "hello@klubnikaproject.ru",
   },
   forms: {
-    mode: "telegram_handoff",
-    primaryChannel: "telegram",
+    mode: "backend_submit",
+    primaryChannel: "crm",
     handoffPrefix: "Новая заявка с сайта Klubnika Project",
-    successHint: "Скопируйте вводные и отправьте их в Telegram, пока backend ещё не подключён.",
-    openTelegramAfterCopy: true,
+    successHint: "Вводные сохранены в системе. Если нужен быстрый ручной контакт, их можно продублировать в Telegram.",
+    openTelegramAfterCopy: false,
     collectEmail: true,
     collectPhone: true,
     collectTelegram: true,
@@ -18,6 +19,9 @@ const SITE_ADMIN_DEFAULTS = {
   },
   crm: {
     requiredFields: ["Имя", "Контакт", "Стадия проекта", "Что нужно", "Источник"],
+  },
+  integrations: {
+    apiBase: "https://api.klubnikaproject.ru/site/v1",
   },
 };
 
@@ -50,10 +54,16 @@ document.addEventListener("DOMContentLoaded", () => {
   bindUiControls();
   applyStoredUi();
   bindDraftForms(siteAdminConfig);
+  refreshBackendSettings().catch(() => {});
 });
 
 function loadSiteAdminConfig() {
   try {
+    const backendRaw = window.localStorage.getItem(SITE_ADMIN_BACKEND_CACHE_KEY);
+    if (backendRaw) {
+      const parsedBackend = JSON.parse(backendRaw);
+      return mergeConfig(cloneConfig(SITE_ADMIN_DEFAULTS), parsedBackend);
+    }
     const raw = window.localStorage.getItem(SITE_ADMIN_STORAGE_KEY);
     if (!raw) return cloneConfig(SITE_ADMIN_DEFAULTS);
     const parsed = JSON.parse(raw);
@@ -61,6 +71,22 @@ function loadSiteAdminConfig() {
   } catch (error) {
     return cloneConfig(SITE_ADMIN_DEFAULTS);
   }
+}
+
+async function refreshBackendSettings() {
+  const current = loadSiteAdminConfig();
+  const apiBase = (current.integrations?.apiBase || "").replace(/\/+$/, "");
+  if (!apiBase) return;
+
+  const response = await fetch(`${apiBase}/public/settings`, {
+    headers: { Accept: "application/json" },
+  });
+  if (!response.ok) return;
+  const payload = await response.json();
+  if (!payload?.settings) return;
+  window.localStorage.setItem(SITE_ADMIN_BACKEND_CACHE_KEY, JSON.stringify(payload.settings));
+  siteAdminConfig = mergeConfig(cloneConfig(SITE_ADMIN_DEFAULTS), payload.settings);
+  applyBriefFormPresentation(siteAdminConfig, document.documentElement.lang === "en" ? "en" : "ru");
 }
 
 function mergeConfig(base, patch) {
@@ -552,6 +578,8 @@ function bindDraftForms(config) {
       const title = form.dataset.briefForm || document.title;
       const prefix = latestConfig.forms.handoffPrefix ? `${latestConfig.forms.handoffPrefix}\n\n` : "";
       const text = `${prefix}${[title, "", ...lines].join("\n")}`;
+      const apiBase = (latestConfig.integrations?.apiBase || "").replace(/\/+$/, "");
+      const leadPayload = buildLeadPayload(form, title, lines, text);
       const shouldOpenTelegram =
         latestConfig.forms.primaryChannel === "telegram" &&
         latestConfig.forms.openTelegramAfterCopy &&
@@ -561,12 +589,36 @@ function bindDraftForms(config) {
         : null;
       const openedTelegram = Boolean(popup);
       const copied = await copyText(text);
+      let backendLeadId = null;
+
+      if (latestConfig.forms.mode === "backend_submit" && apiBase) {
+        try {
+          const response = await fetch(`${apiBase}/public/leads`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify(leadPayload),
+          });
+          if (response.ok) {
+            const payload = await response.json();
+            backendLeadId = payload?.lead?.id || null;
+          }
+        } catch (error) {
+          backendLeadId = null;
+        }
+      }
 
       if (status) {
         if (latestConfig.forms.mode === "backend_submit") {
-          status.textContent = lang === "en"
-            ? "The brief is prepared for the future backend layer. For now it is also copied locally."
-            : "Вводные подготовлены под будущий backend-слой. Пока они также скопированы локально.";
+          status.textContent = backendLeadId
+            ? (lang === "en"
+              ? `The brief has been stored in the backend as lead #${backendLeadId}.`
+              : `Вводные сохранены в backend как лид #${backendLeadId}.`)
+            : (lang === "en"
+              ? "The brief is prepared, but the backend is unavailable. A local handoff copy was kept."
+              : "Вводные подготовлены, но backend сейчас недоступен. Локальная копия для handoff сохранена.");
         } else if (copied && openedTelegram) {
           status.textContent = lang === "en"
             ? "The brief has been copied and Telegram opened in a new tab."
@@ -594,6 +646,68 @@ function bindDraftForms(config) {
       }, 1800);
     });
   });
+}
+
+function buildLeadPayload(form, title, lines, text) {
+  const lead = {
+    source: title,
+    route: document.body.classList.contains("category-page")
+      ? "Категория"
+      : document.body.classList.contains("product-page")
+        ? "Карточка товара"
+        : document.title,
+    page_path: window.location.pathname,
+    page_title: document.title,
+    form_name: form.dataset.briefForm || title,
+    name: "",
+    contact: "",
+    email: "",
+    phone: "",
+    telegram: "",
+    stage: "",
+    what_needed: "",
+    message: "",
+    brief_text: text,
+    lines,
+    payload: {},
+  };
+
+  Array.from(form.querySelectorAll("input, select, textarea")).forEach((field) => {
+    const role = detectBriefFieldRole(field);
+    const fieldLabel = field.tagName === "SELECT"
+      ? normalizeText(field.options[0]?.textContent || "Поле")
+      : normalizeText(field.getAttribute("placeholder") || field.name || "Поле");
+
+    let value = "";
+    if (field.tagName === "SELECT") {
+      const firstOption = field.options[0]?.textContent?.trim();
+      const currentValue = field.options[field.selectedIndex]?.textContent?.trim();
+      if (currentValue && currentValue !== firstOption) value = currentValue;
+    } else {
+      value = field.value?.trim() || "";
+    }
+    if (!value) return;
+
+    lead.payload[fieldLabel] = value;
+
+    if (role === "name") {
+      lead.name = value;
+    } else if (role === "contact") {
+      lead.contact = value;
+      if (/telegram/i.test(fieldLabel)) lead.telegram = value;
+      if (/email/i.test(fieldLabel)) lead.email = value;
+      if (/телефон|phone|whatsapp/i.test(fieldLabel)) lead.phone = value;
+    } else if (role === "stage") {
+      lead.stage = value;
+    } else if (role === "request") {
+      lead.what_needed = value;
+      lead.message = value;
+    } else if (!lead.message) {
+      lead.message = value;
+    }
+  });
+
+  return lead;
 }
 
 function applyBriefFormPresentation(config, lang) {

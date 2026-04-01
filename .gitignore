@@ -7,6 +7,9 @@ coverage/
 
 .env
 .env.*
+backend/.env
+backend/.venv/
+backend/data/
 
 calc/klubnika/
 calc/ferticalc/
