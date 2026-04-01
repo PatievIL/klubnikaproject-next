@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
 from xml.sax.saxutils import escape
@@ -23,18 +24,39 @@ from reportlab.platypus import (
 )
 
 
-ROOT = Path("/Users/ilapatiev/klubnikaproject")
+ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "docs" / "brand-ui-visual-guide.md"
 OUTPUT = ROOT / "docs" / "brand-ui-visual-guide.pdf"
 LOGO = ROOT / "assets" / "apple-touch-icon.png"
 
-FONT_REGULAR = "/System/Library/Fonts/Supplemental/Arial.ttf"
-FONT_BOLD = "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
+FONT_CANDIDATES_REGULAR = [
+    os.environ.get("KP_FONT_REGULAR"),
+    "/System/Library/Fonts/Supplemental/Arial.ttf",
+    "/Library/Fonts/Arial.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+]
+FONT_CANDIDATES_BOLD = [
+    os.environ.get("KP_FONT_BOLD"),
+    "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
+    "/Library/Fonts/Arial Bold.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+]
 
 
 def register_fonts() -> None:
-    pdfmetrics.registerFont(TTFont("BrandArial", FONT_REGULAR))
-    pdfmetrics.registerFont(TTFont("BrandArial-Bold", FONT_BOLD))
+    font_regular = resolve_font(FONT_CANDIDATES_REGULAR, "regular")
+    font_bold = resolve_font(FONT_CANDIDATES_BOLD, "bold")
+    pdfmetrics.registerFont(TTFont("BrandArial", str(font_regular)))
+    pdfmetrics.registerFont(TTFont("BrandArial-Bold", str(font_bold)))
+
+
+def resolve_font(candidates: list[str | None], weight: str) -> Path:
+    for candidate in candidates:
+        if candidate and Path(candidate).exists():
+            return Path(candidate)
+    raise FileNotFoundError(
+        f"Could not find a {weight} font. Set KP_FONT_{weight.upper()} or install Arial/DejaVu Sans."
+    )
 
 
 def build_styles():

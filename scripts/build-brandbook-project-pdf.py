@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import math
+import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -14,13 +16,23 @@ from reportlab.platypus import Paragraph
 from reportlab.lib.styles import ParagraphStyle
 
 
-ROOT = Path("/Users/ilapatiev/klubnikaproject")
+ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "docs" / "klubnikaproject-brandbook-project.pdf"
 CACHE = ROOT / "docs" / ".brandbook-cache"
 CACHE.mkdir(parents=True, exist_ok=True)
 
-FONT_REGULAR = "/System/Library/Fonts/Supplemental/Arial.ttf"
-FONT_BOLD = "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
+FONT_CANDIDATES_REGULAR = [
+    os.environ.get("KP_FONT_REGULAR"),
+    "/System/Library/Fonts/Supplemental/Arial.ttf",
+    "/Library/Fonts/Arial.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+]
+FONT_CANDIDATES_BOLD = [
+    os.environ.get("KP_FONT_BOLD"),
+    "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
+    "/Library/Fonts/Arial Bold.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+]
 
 GREEN = colors.HexColor("#004D2B")
 GREEN_2 = colors.HexColor("#0F653E")
@@ -42,8 +54,19 @@ MARGIN = 64
 
 
 def register_fonts() -> None:
-    pdfmetrics.registerFont(TTFont("BrandArial", FONT_REGULAR))
-    pdfmetrics.registerFont(TTFont("BrandArial-Bold", FONT_BOLD))
+    font_regular = resolve_font(FONT_CANDIDATES_REGULAR, "regular")
+    font_bold = resolve_font(FONT_CANDIDATES_BOLD, "bold")
+    pdfmetrics.registerFont(TTFont("BrandArial", str(font_regular)))
+    pdfmetrics.registerFont(TTFont("BrandArial-Bold", str(font_bold)))
+
+
+def resolve_font(candidates: list[str | None], weight: str) -> Path:
+    for candidate in candidates:
+        if candidate and Path(candidate).exists():
+            return Path(candidate)
+    raise FileNotFoundError(
+        f"Could not find a {weight} font. Set KP_FONT_{weight.upper()} or install Arial/DejaVu Sans."
+    )
 
 
 H1 = ParagraphStyle(
@@ -96,8 +119,13 @@ def ensure_preview(svg_name: str, size: int = 1800) -> Path:
     if out.exists():
         postprocess_preview(out)
         return out
+    quicklook = shutil.which("qlmanage")
+    if not quicklook:
+        raise RuntimeError(
+            "qlmanage is required to build brandbook previews from SVG. Run on macOS or pre-render assets into docs/.brandbook-cache."
+        )
     subprocess.run(
-        ["qlmanage", "-t", "-s", str(size), "-o", str(CACHE), str(src)],
+        [quicklook, "-t", "-s", str(size), "-o", str(CACHE), str(src)],
         check=True,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,

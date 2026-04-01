@@ -16,6 +16,7 @@
 - `docs/brand-ui-visual-guide.md` — опорная visual/UI-инструкция по бренду, сайту и адаптации
 - `docs/brand-ui-visual-guide.pdf` — экспорт этой инструкции в PDF
 - `docs/klubnikaproject-brandbook-project.pdf` — визуальный брендбук в формате проектного документа
+- `docs/klubnikaproject-brandbook-project-v2.pdf` — усиленная art-directed версия брендбука с key screens
 - `docs/catalog-cro-prompt.md` — рабочий prompt-стандарт для category/product pages
 - `calc/index.html` — новый калькулятор фермы
 - `calc/pricing.json` — цены и расчётные константы калькулятора
@@ -24,7 +25,7 @@
 ## Локальный запуск
 
 ```bash
-cd /Users/ilapatiev/klubnikaproject
+cd /path/to/klubnikaproject
 python3 -m http.server 8011 --bind 127.0.0.1
 ```
 
@@ -42,16 +43,29 @@ python3 -m http.server 8011 --bind 127.0.0.1
 Пересобрать PDF из markdown-источника:
 
 ```bash
-/Users/ilapatiev/klubnikaproject/.venv-brandpdf/bin/python \
-  /Users/ilapatiev/klubnikaproject/scripts/build-brand-guide-pdf.py
+cd /path/to/klubnikaproject
+python3 scripts/build-brand-guide-pdf.py
 ```
 
 Пересобрать визуальный проектный брендбук:
 
 ```bash
-/Users/ilapatiev/klubnikaproject/.venv-brandpdf/bin/python \
-  /Users/ilapatiev/klubnikaproject/scripts/build-brandbook-project-pdf.py
+cd /path/to/klubnikaproject
+python3 scripts/build-brandbook-project-pdf.py
 ```
+
+Пересобрать визуальный брендбук `v2`:
+
+```bash
+cd /path/to/klubnikaproject
+python3 scripts/build-brandbook-project-v2.py
+```
+
+Примечания:
+
+- Скрипты сами определяют корень проекта от своего расположения, абсолютные пути больше не нужны.
+- Для сборки нужен `python3` с `Pillow`, `reportlab` и доступный системный шрифт `Arial` или `DejaVu Sans`.
+- `build-brandbook-project*.py` используют `qlmanage` для рендера SVG preview и нормально работают на macOS. На другой системе либо задайте `KP_FONT_REGULAR` / `KP_FONT_BOLD`, либо предварительно положите PNG-preview в `docs/.brandbook-cache/`.
 
 ## SEO / GEO пакет
 
@@ -67,7 +81,7 @@ python3 -m http.server 8011 --bind 127.0.0.1
 Запуск:
 
 ```bash
-cd /Users/ilapatiev/klubnikaproject
+cd /path/to/klubnikaproject
 node scripts/build-seo.mjs
 ```
 
