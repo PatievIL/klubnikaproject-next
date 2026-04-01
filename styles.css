@@ -2446,13 +2446,13 @@ h3 {
 
 @media (max-width: 760px) {
   .section {
-    padding: 70px 0;
+    padding: 62px 0;
   }
 
   .section-frame,
   .hero-shell,
   .action-panel {
-    padding: 22px;
+    padding: 18px;
   }
 
   .btn-row {
@@ -2465,27 +2465,52 @@ h3 {
 
   .crumbs {
     gap: 8px;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     font-size: 11px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
   }
 
   .crumbs a,
   .crumbs span {
     min-height: 30px;
     padding: 0 10px;
+    white-space: nowrap;
+  }
+
+  .crumbs::-webkit-scrollbar {
+    display: none;
   }
 
   .product-layout {
-    gap: 18px;
+    gap: 14px;
   }
 
   .product-summary {
     order: -1;
-    padding: 24px;
+    padding: 20px;
+  }
+
+  .secondary-page .product-summary {
+    padding: 20px;
   }
 
   .product-gallery {
     order: 1;
+    gap: 10px;
+  }
+
+  .product-gallery-grid {
+    gap: 10px;
+  }
+
+  .product-gallery-main {
+    border-radius: 20px;
+  }
+
+  .product-gallery-grid img {
+    border-radius: 16px;
   }
 
   .product-topline {
@@ -2501,8 +2526,25 @@ h3 {
   .product-summary h1,
   .secondary-page .product-summary h1 {
     max-width: none;
-    font-size: clamp(30px, 8.6vw, 40px) !important;
-    line-height: 0.98;
+    font-size: clamp(26px, 7.8vw, 34px) !important;
+    line-height: 1.02;
+  }
+
+  .product-summary .sublead,
+  .secondary-page .product-summary .sublead {
+    font-size: 16px;
+    line-height: 1.52;
+  }
+
+  .property-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .page-copy h1,
+  .section-head h2 {
+    font-size: clamp(28px, 7.4vw, 36px);
+    line-height: 1.02;
   }
 
   .hero-cta .btn-ghost {
