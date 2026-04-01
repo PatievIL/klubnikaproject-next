@@ -22,6 +22,7 @@
 - `calc/pricing.json` — цены и расчётные константы калькулятора
 - `admin/index.html` — единый внутренний кабинет сайта, форм и CRM-схемы
 - `calc/admin/index.html` — внутренняя страница редактирования draft-цен с экспортом JSON
+- `site.js` — общий UI-слой, язык/тема, формы и привязка к admin-config
 
 ## Локальный запуск
 
@@ -39,6 +40,12 @@ python3 -m http.server 8011 --bind 127.0.0.1
 - `http://127.0.0.1:8011/admin/`
 - `http://127.0.0.1:8011/calc/`
 - `http://127.0.0.1:8011/calc/admin/`
+
+Боевой стенд:
+
+- `https://patievil.github.io/klubnikaproject-next/`
+- `https://patievil.github.io/klubnikaproject-next/admin/`
+- `https://patievil.github.io/klubnikaproject-next/calc/`
 
 ## PDF бренд-гайда
 
@@ -111,7 +118,7 @@ node scripts/build-seo.mjs
 
 Текущее состояние на сегодня:
 
-- обработано `46` HTML-страниц
+- обработано `47` HTML-страниц
 - в `sitemap.xml` входит `43` публичных URL
 - служебные разделы выведены из индексации
 
@@ -132,9 +139,53 @@ node scripts/build-seo.mjs
 
 Главная не должна продавать всё сразу. Её задача — быстро отправить пользователя в правильный сценарий.
 
+## Админ-слой и формы
+
+Сайт уже умеет читать часть runtime-настроек из единого админ-кабинета:
+
+- контакты и Telegram handoff
+- режим работы публичных форм
+- обязательные CRM-поля
+- success/status copy
+
+Текущая схема пока статическая:
+
+- `/admin/` пишет draft-конфиг в `localStorage`
+- публичные формы читают этот конфиг через `site.js`
+- backend-submit пока не подключён, но UI уже умеет переключаться между `telegram_handoff`, `copy_only` и `backend_submit`
+
+Это позволяет дальше подключать настоящий backend без повторной переделки фронта.
+
+## Runtime для будущего backend
+
+Под backend уже подготовлен отдельный контур на существующей VM `farms-vm` в Google Cloud. Он не смешан с FarmS по папкам и рассчитан на отдельный сервис.
+
+Текущий layout на VM:
+
+- `/opt/farms` — действующий FarmS runtime
+- `/opt/klubnikaproject-backend/app` — будущий backend-код
+- `/opt/klubnikaproject-backend/shared/config` — `.env` и конфиг
+- `/opt/klubnikaproject-backend/shared/logs` — логи
+- `/opt/klubnikaproject-backend/shared/uploads` — uploads
+- `/opt/klubnikaproject-backend/shared/backups` — backups
+- `/opt/klubnikaproject-backend/deploy` — шаблоны `systemd` и `caddy`
+
+На VM уже подготовлены:
+
+- `README-BOOTSTRAP.md`
+- `.env.example`
+- `klubnikaproject-backend.service.example`
+- `klubnikaproject-api.caddy.example`
+
+Доступ:
+
+- внешний `22` не использовался
+- рабочий доступ получен через Tailscale / внутренний ssh-контур
+- serial console включена как аварийный fallback
+
 ## Следующий этап
 
-- добить главную под финальный CRO-проход
-- переработать `/shop` и категории глубже под e-commerce логику
-- подключить реальные формы и каналы отправки
-- подвязать `pricing.json` и `admin-config.json` к настоящей админке или API-сохранению
+- поднять минимальный backend для `site settings`, `lead submit` и admin auth
+- подключить публичные формы к реальному API вместо handoff-only режима
+- перевести каталог на data-layer вместо ручного HTML сопровождения
+- довести admin-кабинет до CRM-lite с inbox и стадиями лидов
