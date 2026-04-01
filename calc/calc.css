@@ -1,6 +1,6 @@
 .hero-title-compact {
-  font-size: clamp(30px, 3.7vw, 44px);
-  line-height: 0.96;
+  font-size: clamp(26px, 3.1vw, 38px);
+  line-height: 0.94;
 }
 
 .hero-output-list {
