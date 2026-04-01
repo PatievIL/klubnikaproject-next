@@ -211,12 +211,41 @@ function applyLanguage(lang) {
   document.documentElement.lang = normalizedLang;
   document.body.dataset.language = normalizedLang;
 
+  translateTextNodes(normalizedLang);
   translateLeafNodes(normalizedLang);
   translateFieldAttributes(normalizedLang);
   translateDocumentTitle(normalizedLang);
   updateAriaLabels(normalizedLang);
   updateUiControlState(normalizedLang);
   syncBriefButtons();
+}
+
+function translateTextNodes(lang) {
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      if (!node.parentElement) return NodeFilter.FILTER_REJECT;
+      if (node.parentElement.closest("script, style, noscript")) return NodeFilter.FILTER_REJECT;
+      if (!normalizeText(node.nodeValue)) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+
+  while (walker.nextNode()) {
+    const node = walker.currentNode;
+
+    if (node.__i18nOriginal === undefined) {
+      node.__i18nOriginal = node.nodeValue;
+    }
+
+    const original = node.__i18nOriginal;
+    const trimmed = normalizeText(original);
+    const match = original.match(/^(\s*)(.*?)(\s*)$/s);
+    const prefix = match?.[1] || "";
+    const suffix = match?.[3] || "";
+    const translated = lang === "en" ? TRANSLATIONS_EN[trimmed] : null;
+
+    node.nodeValue = translated ? `${prefix}${translated}${suffix}` : original;
+  }
 }
 
 function translateLeafNodes(lang) {
@@ -896,5 +925,75 @@ const TRANSLATIONS_EN = {
   "Что вы реально даёте": "What you actually provide",
   "Кейсы и проекты": "Cases and projects",
   "О проекте": "About the project",
-  "Финальный CTA": "Final CTA"
+  "Финальный CTA": "Final CTA",
+  "Нужна консультация по задаче Нужна базовая система по технологии": "Need a consultation on the task Need a core technology foundation",
+  "Запуск и расчёт Когда нужно понять состав фермы, очередность закупки и рамку бюджета.": "Launch and estimate When you need to understand the farm setup, purchase order, and budget range.",
+  "Магазин и расходники Когда задача понятна и нужно быстро перейти к выбору категории или товара.": "Shop and consumables When the task is clear and you need to move quickly to a category or product.",
+  "Подбор и консультация Когда проект уже работает или ошибка в одном узле тянет за собой всю схему.": "Selection and consultation When the project is already operating or one wrong node affects the whole setup.",
+  "Площадь, формат фермы и ограничения объекта.": "The area, farm format, and site constraints.",
+  "Свет, полив, стеллажи, субстрат и посадочный материал.": "Lighting, irrigation, racks, substrate, and planting material.",
+  "Результат: состав фермы, рамка бюджета и список приоритетов.": "Result: farm composition, budget outline, and a list of priorities.",
+  "Проблемы по свету, поливу, корневой зоне или качеству ягоды.": "Issues with lighting, irrigation, the root zone, or berry quality.",
+  "Подбор оборудования, корректировок и порядок действий без хаоса.": "Selection of equipment, corrections, and an action order without chaos.",
+  "Результат: консультация или сопровождение под реальную задачу.": "Result: consultation or support for the real task.",
+  "LED, полив, субстрат, посадочный материал и комплектующие.": "LED, irrigation, substrate, planting material, and components.",
+  "Разделение между тем, что можно купить сразу, и тем, что лучше сначала проверить.": "A split between what can be bought immediately and what should be checked first.",
+  "Результат: быстрый вход в категорию, карточку товара или готовое решение.": "Result: a quick entry into a category, product page, or ready-made solution.",
+  "Когда нужно собрать систему частями или целиком.": "When you need to assemble the system in parts or as a whole.",
+  "Когда ошибка в одном узле тянет за собой весь проект.": "When one wrong node affects the entire project.",
+  "Результат: расчёт фермы, смета и понятный состав комплекта.": "Result: farm estimate, cost outline, and a clear kit composition.",
+  "5 модулей по полному циклу выращивания": "5 modules across the full cultivation cycle",
+  "6 месяцев на прохождение без спешки": "6 months to complete without rushing",
+  "1 год доступа к занятиям и материалам курса": "1 year of access to course sessions and materials",
+  "Что внутри": "What is inside",
+  "Старт фермы, инженерия, рост куста, качество ягоды и масштабирование.": "Farm launch, engineering, plant growth, berry quality, and scaling.",
+  "Разборы практических заданий и работа в закрытом чате.": "Reviews of practical assignments and work in a closed chat.",
+  "Материалы, к которым можно возвращаться в процессе запуска и роста.": "Materials you can return to during launch and growth.",
+  "Кому подойдёт": "Who it fits",
+  "Тем, кто только входит в тему и хочет собрать систему без хаоса.": "For people entering the topic who want to build a system without chaos.",
+  "Действующим фермерам, которым нужно структурировать опыт и пересобрать базу.": "For active growers who need to structure their experience and rebuild the foundation.",
+  "Инвесторам и предпринимателям, которым важно понять логику проекта до входа в расчёт.": "For investors and entrepreneurs who need to understand the project logic before moving into an estimate.",
+  "Основание для доверия": "Why you can trust this",
+  "4 года работы в нише клубничных ферм и сопутствующих решений": "4 years of work in the strawberry farm niche and related solutions",
+  "10 000+ м² проектов по площади": "10,000+ m² of project area",
+  "50 000+ растений в проектах": "50,000+ plants in projects",
+  "1 система расчёт, магазин, сопровождение и обучение в одной логике": "1 system with estimates, shop, support, and training in one logic",
+  "LED-освещение": "LED lighting",
+  "Стартовый комплект": "Starter kit",
+  "Кому подходит: пилотному запуску, тестовой схеме и первой рабочей очереди.": "Who it fits: a pilot launch, a test setup, and the first working phase.",
+  "Что входит: модуль 2×2 м, 8 лотков, 16 матов и базовая логика по свету и конструкции.": "What is included: a 2×2 m module, 8 trays, 16 slabs, and the basic lighting and structure logic.",
+  "Когда идти дальше: если нужно понять состав, смету и объём допзакупки.": "When to move forward: if you need to understand composition, cost outline, and the volume of add-on purchases.",
+  "Что видно после расчёта": "What becomes visible after the estimate",
+  "Количество базовых модулей и состав оборудования по узлам.": "The number of base modules and equipment composition by node.",
+  "Ориентир по закупке, ежемесячным расходам и выручке.": "A guide to procurement, monthly costs, and revenue.",
+  "Понимание, какие позиции потом уйдут в магазин, а какие в смету.": "Understanding which positions will later go to the shop and which will go into the estimate.",
+  "Понятный переход в расчёт под объект, если типовой рамки уже мало.": "A clear move into a site-specific estimate if the standard outline is no longer enough.",
+  "Если объект нестандартный, вы не начинаете всё заново: вводные уже собраны, и их можно передать дальше в проектную работу.": "If the site is non-standard, you do not start from scratch: the inputs are already collected and can be passed into project work.",
+  "Площадь, формат объекта, стадия проекта и ограничения.": "Area, site format, project stage, and constraints.",
+  "Конфигурация ключевых узлов и состав решения.": "The configuration of key nodes and the solution composition.",
+  "Что отправляется как товар, а что идёт как проектная позиция.": "What goes out as a product and what moves as a project position.",
+  "Переход от комплекта на бумаге к рабочей схеме на объекте.": "The transition from a kit on paper to a working scheme on the site.",
+  "FAQ Вопросы, которые нужно закрыть до заявки": "FAQ Questions to close before submitting a request",
+  "Расчёт фермы и состав комплекта под объект": "Farm estimate and kit composition for the site",
+  "Если вы считаете ферму как систему, начните с вводных по объекту, а не с отдельных SKU.": "If you calculate the farm as a system, start with the site inputs, not with individual SKUs.",
+  "Понимание состава решения под объект, а не абстрактный список товаров.": "An understanding of the solution composition for the site, not an abstract product list.",
+  "Приоритеты по закупке, если всё не покупается одним пакетом.": "Procurement priorities if everything is not bought in one package.",
+  "Понимание, где нужен подбор, а где достаточно типового решения.": "An understanding of where selection is needed and where a standard solution is enough.",
+  "Понимание, что можно закупать сразу, а что нужно считать отдельно.": "An understanding of what can be purchased immediately and what should be calculated separately.",
+  "Компоновка": "Layout",
+  "Плотность по площади, компоновка и логистика обслуживания.": "Density per area, layout, and service logistics.",
+  "Среда": "Environment",
+  "Подбор узлов под формат объекта и сценарий выращивания.": "Selection of nodes for the site format and cultivation scenario.",
+  "Расходники": "Consumables",
+  "Связка с корневой зоной, каналом сбыта и задачей по ягоде.": "The link to the root zone, sales channel, and berry task.",
+  "Коммерция": "Commercial side",
+  "Что входит в рамку решения, а что лучше считать отдельным шагом.": "What is included in the solution outline and what is better calculated as a separate step.",
+  "Что прислать в заявку": "What to send in the request",
+  "Площадь, тип помещения и ограничения по объекту.": "Area, room type, and site constraints.",
+  "Стадия проекта: запуск, действующая ферма или пересборка.": "Project stage: launch, operating farm, or rebuild.",
+  "Что нужно сейчас: вся схема, отдельный узел или рамка комплекта.": "What is needed now: the full scheme, a separate node, or a kit outline.",
+  "Что уже куплено и какие решения менять нельзя.": "What has already been bought and which decisions cannot be changed.",
+  "Итоговое решение всегда опирается на фактические вводные по помещению и задаче.": "The final solution always depends on the actual inputs of the room and the task.",
+  "Если часть данных пока неизвестна, расчёт всё равно помогает собрать рамку действий.": "If some data is still unknown, the estimate still helps build an action outline.",
+  "Главная цель — собрать рабочую рамку проекта, а не гадать по отдельным позициям.": "The main goal is to build a working project outline, not to guess by individual positions."
 };
