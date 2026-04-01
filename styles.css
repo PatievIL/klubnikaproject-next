@@ -589,6 +589,8 @@ h3 {
   grid-template-columns: minmax(0, 1.06fr) minmax(0, 0.94fr);
   gap: 12px;
   align-items: stretch;
+  position: relative;
+  padding-bottom: 76px;
 }
 
 .visual-main,
@@ -600,24 +602,32 @@ h3 {
 
 .visual-main {
   height: auto;
-  aspect-ratio: 0.82;
+  aspect-ratio: 0.86;
 }
 
 .visual-stack {
   display: grid;
   gap: 12px;
-  grid-template-rows: repeat(2, minmax(0, auto));
+  grid-template-rows: minmax(0, 1fr) minmax(0, 0.82fr);
   align-content: start;
 }
 
 .visual-stack img {
   height: auto;
-  aspect-ratio: 0.95;
+  aspect-ratio: 1.02;
   min-height: 0;
 }
 
+.visual-bottom {
+  object-position: center;
+}
+
 .visual-note {
-  margin-top: 16px;
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 0;
+  max-width: 380px;
   padding: 14px 16px;
   border-radius: 18px;
   background: var(--bg);
@@ -625,6 +635,7 @@ h3 {
   font-size: 14px;
   font-weight: 700;
   line-height: 1.45;
+  box-shadow: 0 14px 32px rgba(0, 11, 48, 0.14);
 }
 
 .section-head {
@@ -2553,11 +2564,18 @@ h3 {
 
   .visual-grid {
     grid-template-columns: 1fr;
+    padding-bottom: 0;
   }
 
   .visual-main,
   .visual-stack img {
     aspect-ratio: auto;
     min-height: 0;
+  }
+
+  .visual-note {
+    position: static;
+    margin-top: 14px;
+    max-width: none;
   }
 }
