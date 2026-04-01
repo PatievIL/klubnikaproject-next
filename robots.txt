@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /calc/admin/
+Disallow: /calc/klubnika/
+
+Sitemap: https://klubnikaproject.ru/sitemap.xml
