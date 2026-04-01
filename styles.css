@@ -2248,6 +2248,14 @@ html[data-theme="dark"] .ui-switch-btn.is-active {
   margin-top: 16px;
 }
 
+.category-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.category-end-panel {
+  margin-top: 0;
+}
+
 .fit-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2523,6 +2531,18 @@ html[data-theme="dark"] .ui-switch-btn.is-active {
 .secondary-page .note-panel {
   padding: 28px;
   background: linear-gradient(180deg, rgba(255, 213, 160, 0.22), rgba(255, 213, 160, 0.14));
+}
+
+.product-next-panel strong {
+  display: block;
+  margin-top: 10px;
+  color: var(--green);
+  font-size: 18px;
+  line-height: 1.22;
+}
+
+.product-next-panel .btn-row {
+  margin-top: 18px;
 }
 
 .case-card {
