@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png" />
+  <link rel="manifest" href="../site.webmanifest" />
+  <title>Админ кабинет сайта — Klubnika Project</title>
+  <meta
+    name="description"
+    content="Внутренний кабинет настройки сайта Klubnika Project: контент, формы, CRM-схема, SEO-рамка и экспорт структуры для будущей CMS/CRM."
+  />
+  <link rel="stylesheet" href="../styles.css?v=20260402a" />
+  <link rel="stylesheet" href="./admin.css?v=20260402a" />
+  <!-- SEO:START -->
+  <meta name="robots" content="noindex, nofollow" />
+  <!-- SEO:END -->
+</head>
+<body>
+  <header class="hero">
+    <div class="container">
+      <div class="hero-shell">
+        <div class="topbar">
+          <a class="brand" href="../">
+            <div class="brand-logo">
+              <img src="../assets/brand-berry-beige.svg" alt="Знак Klubnika Project" />
+            </div>
+            <div class="brand-copy">
+              <div class="brand-title">
+                <span class="brand-title-line">Klubnika</span>
+                <span class="brand-title-line">Project</span>
+              </div>
+              <div class="brand-note">Внутренний кабинет сайта и задел под CRM</div>
+            </div>
+          </a>
+
+          <button class="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false">
+            <span></span>
+          </button>
+
+          <nav class="nav">
+            <a href="../">Сайт</a>
+            <a href="../shop/">Магазин</a>
+            <a href="../calc/">Калькулятор</a>
+            <a href="../calc/admin/">Цены калькулятора</a>
+          </nav>
+        </div>
+
+        <div class="hero-grid admin-hub-hero">
+          <div class="hero-copy">
+            <span class="eyebrow">Внутренний инструмент</span>
+            <h1>Единый кабинет для настроек сайта, контента, форм и будущей CRM</h1>
+            <p class="lead">
+              Это не CMS в полном смысле и не рабочая CRM. Это управляемый внутренний слой,
+              где можно собрать структуру сайта, каналы заявок, стадии лидов, SEO-рамку и экспортировать всё в JSON.
+            </p>
+            <p class="sublead">
+              Подход годится как промежуточный контур перед своей CMS/CRM: сначала фиксируем модель,
+              потом подвязываем сохранение к backend без переписывания логики.
+            </p>
+
+            <div class="btn-row hero-cta">
+              <a class="btn btn-primary" href="#admin-workspace">Открыть кабинет</a>
+              <a class="btn btn-secondary" href="../calc/admin/">Перейти в админку калькулятора</a>
+            </div>
+
+            <div class="hero-stats">
+              <div class="hero-stat">
+                <strong>Что управляем здесь</strong>
+                <span>Сайт, CTA, формы, контакты, страницы, CRM-статусы, SEO и интеграционный план.</span>
+              </div>
+              <div class="hero-stat">
+                <strong>Что пока не делаем</strong>
+                <span>Не пишем в production backend и не принимаем лиды через сервер автоматически.</span>
+              </div>
+              <div class="hero-stat">
+                <strong>Следующий этап</strong>
+                <span>Подвязать этот JSON к своей CMS-lite и внутреннему lead inbox.</span>
+              </div>
+            </div>
+          </div>
+
+          <aside class="visual-panel admin-hub-note">
+            <div class="tag">Что внутри</div>
+            <ul class="calc-list">
+              <li>Общие настройки проекта и контактов.</li>
+              <li>Публичные страницы, CTA и их роли.</li>
+              <li>Формы, handoff-логика и Telegram.</li>
+              <li>CRM-схема: стадии, источники, поля, владельцы.</li>
+              <li>Экспорт JSON как база под свою CMS/CRM.</li>
+            </ul>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section" id="admin-workspace">
+      <div class="container">
+        <div class="section-frame">
+          <div class="admin-hub-layout">
+            <section class="admin-hub-main">
+              <div class="admin-hub-toolbar">
+                <div class="admin-tabs" id="admin-tabs" role="tablist" aria-label="Разделы кабинета"></div>
+                <div class="admin-toolbar-actions">
+                  <button class="btn btn-secondary" id="reset-admin-button" type="button">Сбросить черновик</button>
+                </div>
+              </div>
+
+              <section class="card card-pad admin-card admin-section" id="admin-section-content" aria-live="polite"></section>
+            </section>
+
+            <aside class="admin-hub-sidebar">
+              <div class="card card-pad admin-card admin-sticky">
+                <div class="tag">Snapshot</div>
+                <h3 class="calc-card-title">Сводка по текущему draft</h3>
+                <p class="sublead">Это текущая конфигурация внутреннего кабинета, из которой позже можно собирать CMS-lite или lead inbox.</p>
+
+                <div class="summary-grid" id="admin-summary-grid"></div>
+
+                <div class="admin-hub-links">
+                  <a class="btn btn-primary" href="../calc/admin/">Цены калькулятора</a>
+                  <a class="btn btn-secondary" href="../" target="_blank" rel="noreferrer">Открыть сайт</a>
+                </div>
+
+                <div class="admin-json-actions">
+                  <button class="btn btn-primary" id="download-admin-json" type="button">Скачать admin-config.json</button>
+                  <button class="btn btn-secondary" id="copy-admin-json" type="button">Копировать JSON</button>
+                  <label class="btn btn-ghost admin-import-button">
+                    Импортировать JSON
+                    <input id="import-admin-json" type="file" accept="application/json" hidden />
+                  </label>
+                </div>
+
+                <div class="admin-status" id="admin-status">Черновик совпадает с базовой конфигурацией.</div>
+
+                <label class="admin-json-label" for="admin-json-output">Текущая структура для CMS/CRM</label>
+                <textarea class="admin-json-output" id="admin-json-output" spellcheck="false" readonly></textarea>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../site.js?v=20260402a" defer></script>
+  <script src="./admin.js?v=20260402a" type="module"></script>
+</body>
+</html>

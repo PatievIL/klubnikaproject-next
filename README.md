@@ -20,6 +20,7 @@
 - `docs/catalog-cro-prompt.md` — рабочий prompt-стандарт для category/product pages
 - `calc/index.html` — новый калькулятор фермы
 - `calc/pricing.json` — цены и расчётные константы калькулятора
+- `admin/index.html` — единый внутренний кабинет сайта, форм и CRM-схемы
 - `calc/admin/index.html` — внутренняя страница редактирования draft-цен с экспортом JSON
 
 ## Локальный запуск
@@ -35,6 +36,7 @@ python3 -m http.server 8011 --bind 127.0.0.1
 
 Дополнительно:
 
+- `http://127.0.0.1:8011/admin/`
 - `http://127.0.0.1:8011/calc/`
 - `http://127.0.0.1:8011/calc/admin/`
 
@@ -89,7 +91,7 @@ node scripts/build-seo.mjs
 
 - ставит `canonical` на все индексируемые HTML-страницы
 - добавляет `robots`-meta
-- закрывает служебные разделы от индексации, включая `calc/admin/`
+- закрывает служебные разделы от индексации, включая `admin/` и `calc/admin/`
 - генерирует JSON-LD по типу страницы: `WebPage`, `Organization`, `WebSite`, `BreadcrumbList`, `Product`, `FAQPage`
 - пересобирает `sitemap.xml`
 - нормализует бренд в `<title>` под `Klubnika Project`
@@ -98,6 +100,7 @@ node scripts/build-seo.mjs
 
 - главная: `index.html`
 - продуктовая карточка: `shop/products/led-300wt/index.html`
+- админ кабинет с `noindex`: `admin/index.html`
 - админка с `noindex`: `calc/admin/index.html`
 
 Когда запускать:
@@ -134,4 +137,4 @@ node scripts/build-seo.mjs
 - добить главную под финальный CRO-проход
 - переработать `/shop` и категории глубже под e-commerce логику
 - подключить реальные формы и каналы отправки
-- подвязать `pricing.json` к настоящей админке или API-сохранению
+- подвязать `pricing.json` и `admin-config.json` к настоящей админке или API-сохранению

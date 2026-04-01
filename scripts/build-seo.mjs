@@ -7,6 +7,7 @@ const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, "..");
 const SITE_ORIGIN = "https://klubnikaproject.ru";
 const EXCLUDED_FROM_INDEX = [
+  /^admin\//,
   /^calc\/admin\//,
   /^calc\/klubnika\//
 ];
@@ -344,6 +345,7 @@ function buildRobotsTxt() {
   return [
     "User-agent: *",
     "Allow: /",
+    "Disallow: /admin/",
     "Disallow: /calc/admin/",
     "Disallow: /calc/klubnika/",
     "",
