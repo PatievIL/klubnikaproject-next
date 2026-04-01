@@ -2673,6 +2673,13 @@ html[data-theme="dark"] .footer-row > div:last-child {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.category-signal-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 22px;
+}
+
 .category-end-panel {
   margin-top: 0;
 }
@@ -2720,6 +2727,17 @@ html[data-theme="dark"] .footer-row > div:last-child {
   border-radius: 22px;
   background: rgba(255, 213, 160, 0.28);
   border: 1px solid rgba(0, 77, 43, 0.1);
+}
+
+.category-check-shell {
+  display: grid;
+  grid-template-columns: 0.94fr 1.06fr 0.9fr;
+  gap: 20px;
+  align-items: stretch;
+}
+
+.category-check-photo {
+  min-height: 100%;
 }
 
 .warning-box strong {
@@ -2966,6 +2984,67 @@ html[data-theme="dark"] .footer-row > div:last-child {
   margin-top: 18px;
 }
 
+.product-context-strip {
+  display: grid;
+  grid-template-columns: 1.05fr 0.75fr 0.75fr;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.product-context-card {
+  padding: 22px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, var(--surface-3) 0%, var(--surface) 100%);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.product-context-card .badge {
+  display: inline-flex;
+}
+
+.product-context-card h3 {
+  margin-top: 12px;
+  font-size: 22px;
+  line-height: 1.16;
+  color: var(--green);
+}
+
+.product-context-card p {
+  margin-top: 10px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.product-next-shell {
+  display: grid;
+  grid-template-columns: 1.06fr 0.94fr;
+  gap: 18px;
+  align-items: stretch;
+}
+
+.product-next-aside {
+  padding: 24px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, var(--surface-3) 0%, var(--surface) 100%);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.product-next-aside strong {
+  display: block;
+  margin-top: 10px;
+  color: var(--green);
+  font-size: 18px;
+  line-height: 1.24;
+}
+
+.product-next-aside p {
+  margin-top: 10px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
 .case-card {
   padding: 26px;
 }
@@ -3182,12 +3261,14 @@ html[data-theme="dark"] .footer-row > div:last-child {
   .solutions-grid,
   .process-grid,
   .catalog-grid,
+  .category-signal-strip,
   .category-tile-grid,
   .catalog-jump-grid,
   .shop-logic-strip,
   .navigator-shell,
   .navigator-points,
   .catalog-helper-shell,
+  .category-check-shell,
   .compatibility,
   .page-hero,
   .choice-grid,
@@ -3202,6 +3283,8 @@ html[data-theme="dark"] .footer-row > div:last-child {
   .contact-shell,
   .contact-chip-grid,
   .fit-grid,
+  .product-context-strip,
+  .product-next-shell,
   .product-layout,
   .info-grid,
   .about-layout,
