@@ -142,6 +142,7 @@ const elements = {
   nextStepText: document.getElementById("next-step-text"),
   projectBriefLink: document.getElementById("project-brief-link"),
   copyBriefButton: document.getElementById("copy-brief-button"),
+  resultCopyBriefButton: document.getElementById("result-copy-brief-button"),
   equipmentWithoutSeedlings: document.getElementById("equipment-without-seedlings"),
   seedlingsTotalCost: document.getElementById("seedlings-total-cost"),
   budgetStructureGrid: document.getElementById("budget-structure-grid"),
@@ -295,6 +296,7 @@ function bindStaticEvents() {
   elements.wizardNext.addEventListener("click", goForward);
   elements.copyLinkButton.addEventListener("click", copyLink);
   elements.copyBriefButton.addEventListener("click", copyBrief);
+  elements.resultCopyBriefButton?.addEventListener("click", copyBrief);
   elements.resetButton.addEventListener("click", resetState);
 }
 
@@ -388,6 +390,9 @@ async function copyBrief() {
     const calculation = calculateFarm(state, pricing);
     await copyText(buildBriefText(calculation));
     flashButton(elements.copyBriefButton, "Вводные скопированы");
+    if (elements.resultCopyBriefButton) {
+      flashButton(elements.resultCopyBriefButton, "Вводные скопированы");
+    }
   } catch (error) {
     console.error(error);
   }
@@ -551,10 +556,10 @@ function renderPreviewState(calculation) {
 
   if (state.submitted) {
     elements.resultStatusTitle.textContent = "Рамка зафиксирована. Теперь важен правильный следующий шаг";
-    elements.resultStatusText.textContent = "Основные вводные уже собраны. Ниже видно, когда можно идти в типовой путь, а когда лучше сразу переходить в расчёт под объект или в разбор с человеком.";
+    elements.resultStatusText.textContent = "Основные вводные уже собраны. Теперь можно либо передать расчёт дальше, либо сразу сверить, нужен ли объектный разбор вместо типового пути.";
   } else {
     elements.resultStatusTitle.textContent = "Маршрут уже начинает читаться по текущим вводным";
-    elements.resultStatusText.textContent = "Калькулятор показывает не только цифры, но и следующий логичный путь. Завершите wizard, чтобы передать вводные дальше без повторного набора.";
+    elements.resultStatusText.textContent = "Калькулятор показывает не только цифры, но и следующий логичный путь. Завершите wizard, чтобы зафиксировать расчёт и передать его дальше без повторного набора.";
   }
 }
 
@@ -581,7 +586,7 @@ function buildRouteAdvice(calculation) {
   if (state.objectState === "active" || state.scenarioType === "existing" || state.goal === "bottleneck") {
     return {
       title: "Для действующей фермы сначала нужен разбор текущей схемы",
-      text: "У вас уже не старт с нуля. Здесь важнее проверить совместимость узлов, ограничения объекта и логику текущей технологии, а не просто собирать новые позиции.",
+      text: "У вас уже не старт с нуля. Здесь важнее проверить совместимость узлов, ограничения объекта и логику текущей технологии, а потом уже решать, считать новую очередь или корректировать действующую схему.",
       primary: {
         label: "Открыть сопровождение",
         href: "../study/"
@@ -596,7 +601,7 @@ function buildRouteAdvice(calculation) {
   if (state.scaleType === "pilot" && state.goal === "kit") {
     return {
       title: "Для пилотного запуска можно идти в готовое решение",
-      text: "Если нужен быстрый вход и типовой модуль, смотрите готовые решения. Если хотя бы один параметр объекта нестандартный, не покупайте вслепую и переходите в расчёт под помещение.",
+      text: "Если нужен быстрый вход и типовой модуль, дальше можно смотреть готовые решения. Если хотя бы один параметр объекта нестандартный, лучше сразу передавать вводные в объектный расчёт.",
       primary: {
         label: "Открыть готовые решения",
         href: solutionsLink
@@ -611,7 +616,7 @@ function buildRouteAdvice(calculation) {
   if (state.scaleType === "current" || state.scaleType === "expand" || state.scenarioType === "expand") {
     return {
       title: "На расширении следующий шаг — расчёт под объект",
-      text: "На этом этапе уже важны проходы, высота, этапность закупки, связка света, полива и стеллажей. Магазин здесь полезен только после объектного расчёта.",
+      text: "На этом этапе уже важны проходы, высота, этапность закупки, связка света, полива и стеллажей. Магазин здесь полезен только после объектного расчёта и проверки текущей инфраструктуры.",
       primary: {
         label: "Передать вводные на расчёт",
         href: farmLink
@@ -625,7 +630,7 @@ function buildRouteAdvice(calculation) {
 
   return {
     title: "Для типового запуска дальше нужен расчёт или добор типовых позиций",
-    text: "Если задача в типовой первой очереди, можно передать вводные на расчёт и затем добрать понятные позиции через магазин. Если объект уже нестандартный, не задерживайтесь на каталоге.",
+    text: "Если задача в типовой первой очереди, можно передать вводные на расчёт и затем добрать понятные позиции через магазин. Если объект уже начинает выходить за типовую схему, не задерживайтесь на каталоге.",
     primary: {
       label: "Передать вводные на расчёт",
       href: farmLink

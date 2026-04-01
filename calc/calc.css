@@ -1,6 +1,7 @@
 .hero-title-compact {
-  font-size: clamp(26px, 3.1vw, 38px);
-  line-height: 0.94;
+  font-size: clamp(24px, 2.8vw, 34px);
+  line-height: 0.98;
+  max-width: 12ch;
 }
 
 .hero-output-list {
@@ -447,6 +448,26 @@
   color: var(--muted);
 }
 
+.summary-handoff {
+  margin-top: 16px;
+  padding: 18px 20px;
+  border-radius: var(--radius-md);
+  background: rgba(0, 77, 43, 0.05);
+  border: 1px solid rgba(0, 77, 43, 0.1);
+}
+
+.summary-handoff strong {
+  display: block;
+  color: var(--green);
+}
+
+.summary-handoff p {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
 .summary-utility {
   display: flex;
   flex-wrap: wrap;
@@ -457,6 +478,22 @@
 .summary-utility .btn-ghost {
   min-height: 46px;
   padding: 0 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 77, 43, 0.14);
+  background: rgba(0, 77, 43, 0.04);
+  color: var(--green);
+}
+
+.result-handoff-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.result-handoff-row .btn-ghost {
+  min-height: 44px;
+  padding: 0 16px;
   border-radius: 14px;
   border: 1px solid rgba(0, 77, 43, 0.14);
   background: rgba(0, 77, 43, 0.04);
@@ -755,6 +792,16 @@ code {
   }
 
   .summary-utility .btn-ghost {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .result-handoff-row {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .result-handoff-row .btn-ghost {
     width: 100%;
     justify-content: center;
   }
