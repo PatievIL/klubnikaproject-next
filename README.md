@@ -13,6 +13,9 @@
 - `seeds/index.html` — раздел посадочного материала
 - `styles.css` — общая дизайн-система
 - `docs/strategy-brief.md` — рабочий CRO/UX-бриф по новой версии
+- `docs/brand-ui-visual-guide.md` — опорная visual/UI-инструкция по бренду, сайту и адаптации
+- `docs/brand-ui-visual-guide.pdf` — экспорт этой инструкции в PDF
+- `docs/klubnikaproject-brandbook-project.pdf` — визуальный брендбук в формате проектного документа
 - `docs/catalog-cro-prompt.md` — рабочий prompt-стандарт для category/product pages
 - `calc/index.html` — новый калькулятор фермы
 - `calc/pricing.json` — цены и расчётные константы калькулятора
@@ -33,6 +36,22 @@ python3 -m http.server 8011 --bind 127.0.0.1
 
 - `http://127.0.0.1:8011/calc/`
 - `http://127.0.0.1:8011/calc/admin/`
+
+## PDF бренд-гайда
+
+Пересобрать PDF из markdown-источника:
+
+```bash
+/Users/ilapatiev/klubnikaproject/.venv-brandpdf/bin/python \
+  /Users/ilapatiev/klubnikaproject/scripts/build-brand-guide-pdf.py
+```
+
+Пересобрать визуальный проектный брендбук:
+
+```bash
+/Users/ilapatiev/klubnikaproject/.venv-brandpdf/bin/python \
+  /Users/ilapatiev/klubnikaproject/scripts/build-brandbook-project-pdf.py
+```
 
 ## SEO / GEO пакет
 
