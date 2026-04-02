@@ -1,3 +1,5 @@
+import { catalogLegacyOverrides } from "./catalog-legacy-overrides.mjs";
+
 const SITE_ORIGIN = "https://klubnikaproject.ru";
 const CATALOG_BASE_PATH = "/catalog/";
 const DEFAULT_PAGE_SIZE = 12;
@@ -2601,11 +2603,19 @@ const products = productsSeed.map((product) => {
   const rating = averageRating(product.id);
   const reviewCount = (reviewsByProductId.get(product.id) || []).length;
   const categorySlug = getCategoryById(product.categoryId)?.slug || "";
+  const legacyOverride = catalogLegacyOverrides[product.slug] || null;
   const normalized = {
     ...product,
+    ...(legacyOverride || {}),
     categorySlug,
     rating,
     reviewCount,
+    images: legacyOverride?.images?.length ? legacyOverride.images : product.images,
+    price: legacyOverride?.price ?? product.price,
+    article: legacyOverride?.article || product.article,
+    name: legacyOverride?.name || product.name,
+    shortDescription: legacyOverride?.shortDescription || product.shortDescription,
+    fullDescription: legacyOverride?.fullDescription || product.fullDescription,
   };
   productsById.set(normalized.id, normalized);
   productsBySlug.set(normalized.slug, normalized);

@@ -2,6 +2,8 @@ import { mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises"
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+await import("./build-catalog-legacy-overrides.mjs");
+
 import {
   buildBreadcrumbListJsonLd,
   buildProductJsonLd,
