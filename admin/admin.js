@@ -1446,7 +1446,7 @@ async function createUser() {
   const role = window.prompt("Роль: owner/admin/manager/editor/viewer", "manager") || "manager";
   const defaultScopes = accountType === "admin" ? "admin, crm, catalog, special_pages" : "catalog, special_pages";
   const scopesRaw = window.prompt("Scopes через запятую", defaultScopes) || defaultScopes;
-  const password = window.prompt("Пароль (минимум 8 символов, можно оставить пустым)", "") || "";
+  const password = window.prompt("Пароль (минимум 10 символов, хотя бы одна буква и одна цифра; можно оставить пустым)", "") || "";
   try {
     const response = await adminFetch("/admin/users", {
       method: "POST",
@@ -1544,10 +1544,10 @@ async function loadAuditEvents() {
 }
 
 async function setUserPassword(userId) {
-  const password = window.prompt("Новый пароль пользователя (минимум 8 символов)");
+  const password = window.prompt("Новый пароль пользователя (минимум 10 символов, хотя бы одна буква и одна цифра)");
   if (!password) return;
-  if (password.length < 8) {
-    els.status.textContent = "Пароль должен быть не короче 8 символов.";
+  if (password.length < 10 || !/[A-Za-zА-Яа-я]/.test(password) || !/\\d/.test(password)) {
+    els.status.textContent = "Пароль должен быть не короче 10 символов и содержать хотя бы одну букву и одну цифру.";
     return;
   }
   try {

@@ -229,6 +229,7 @@ DEFAULT_SITE_SETTINGS: dict[str, Any] = {
 
 ADMIN_DEFAULT_SCOPES = ["admin", "crm", "catalog", "special_pages"]
 MEMBER_DEFAULT_SCOPES = ["catalog", "special_pages"]
+PASSWORD_MIN_LENGTH = 10
 ADMIN_SECTION_MATRIX = {
     "dashboard": {"roles": {"owner", "admin", "editor", "manager"}, "scopes": set()},
     "site": {"roles": {"owner", "admin", "editor"}, "scopes": set()},
@@ -491,6 +492,26 @@ def normalize_scopes(scopes: list[str], account_type: str) -> list[str]:
         if value and value not in cleaned:
             cleaned.append(value)
     return cleaned
+
+
+def validate_password_policy(password: str, *, allow_empty: bool = False) -> None:
+    if allow_empty and not password:
+        return
+    if len(password or "") < PASSWORD_MIN_LENGTH:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Password must be at least {PASSWORD_MIN_LENGTH} characters",
+        )
+    if not any(char.isalpha() for char in password):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Password must include at least one letter",
+        )
+    if not any(char.isdigit() for char in password):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Password must include at least one digit",
+        )
 
 
 def hash_password(password: str) -> str:
@@ -908,12 +929,45 @@ def authenticate_user_password(login: str, password: str, account_type: str | No
     user_row = find_user_by_login(login, account_type=account_type)
     if user_row is None:
         return None
+    if not user_row["is_active"]:
+        return None
     if not verify_password(password, user_row["password_hash"] or ""):
         return None
     return user_row
 
 
+def count_active_owners(connection: sqlite3.Connection) -> int:
+    row = connection.execute(
+        """
+        SELECT COUNT(*) AS count
+        FROM users
+        WHERE account_type = 'admin' AND role = 'owner' AND is_active = 1
+        """
+    ).fetchone()
+    return int(row["count"] if row else 0)
+
+
+def delete_admin_sessions_for_user(user_id: int) -> None:
+    with closing(db_connect()) as connection:
+        connection.execute("DELETE FROM admin_sessions WHERE user_id = ?", (user_id,))
+        connection.commit()
+
+
+def delete_member_sessions_for_user(user_id: int) -> None:
+    with closing(db_connect()) as connection:
+        connection.execute("DELETE FROM member_sessions WHERE user_id = ?", (user_id,))
+        connection.commit()
+
+
+def delete_user_sessions(user_id: int, account_type: str | None = None) -> None:
+    if account_type in (None, "admin"):
+        delete_admin_sessions_for_user(user_id)
+    if account_type in (None, "member"):
+        delete_member_sessions_for_user(user_id)
+
+
 def create_user(payload: UserCreateRequest) -> tuple[dict[str, Any], str]:
+    validate_password_policy(payload.password, allow_empty=True)
     access_key = secrets.token_urlsafe(18)
     now = utc_now()
     scopes = normalize_scopes(payload.scopes, payload.account_type)
@@ -951,11 +1005,20 @@ def update_user(user_id: int, payload: UserUpdateRequest) -> dict[str, Any]:
         if row is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
         next_account_type = payload.account_type if payload.account_type is not None else row["account_type"]
+        next_role = payload.role if payload.role is not None else row["role"]
+        next_is_active = int(payload.is_active) if payload.is_active is not None else row["is_active"]
         next_scopes = (
             normalize_scopes(payload.scopes, next_account_type)
             if payload.scopes is not None
             else json.loads(row["scope_json"] or "[]")
         )
+        if row["account_type"] == "admin" and row["role"] == "owner":
+            if next_account_type != "admin" or next_role != "owner" or not next_is_active:
+                if count_active_owners(connection) <= 1:
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail="Cannot remove or deactivate the last active owner",
+                    )
         connection.execute(
             """
             UPDATE users
@@ -966,15 +1029,22 @@ def update_user(user_id: int, payload: UserUpdateRequest) -> dict[str, Any]:
                 payload.display_name if payload.display_name is not None else row["display_name"],
                 payload.email if payload.email is not None else row["email"],
                 next_account_type,
-                payload.role if payload.role is not None else row["role"],
+                next_role,
                 json.dumps(next_scopes, ensure_ascii=False),
-                int(payload.is_active) if payload.is_active is not None else row["is_active"],
+                next_is_active,
                 utc_now(),
                 user_id,
             ),
         )
         connection.commit()
         fresh = connection.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    if (
+        next_account_type != row["account_type"]
+        or next_role != row["role"]
+        or next_scopes != json.loads(row["scope_json"] or "[]")
+        or next_is_active != row["is_active"]
+    ):
+        delete_user_sessions(user_id)
     return serialize_user(fresh)
 
 
@@ -994,6 +1064,7 @@ def rotate_user_key(user_id: int) -> tuple[dict[str, Any], str]:
 
 
 def set_user_password(user_id: int, password: str) -> dict[str, Any]:
+    validate_password_policy(password)
     with closing(db_connect()) as connection:
         row = connection.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
         if row is None:
@@ -1004,6 +1075,7 @@ def set_user_password(user_id: int, password: str) -> dict[str, Any]:
         )
         connection.commit()
         fresh = connection.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    delete_user_sessions(user_id, account_type=row["account_type"])
     return serialize_user(fresh)
 
 
@@ -1639,8 +1711,10 @@ def get_admin_context(request: Request, authorization: str | None = Header(defau
     if session_ctx:
         if session_ctx["user_id"]:
             user_row = find_user_by_id(session_ctx["user_id"])
-            if user_row is not None and user_row["is_active"]:
+            if user_row is not None and user_row["is_active"] and user_row["account_type"] == "admin":
                 return build_user_context(user_row)
+            delete_admin_session(session_token)
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin session expired")
         return {
             "user_id": session_ctx["user_id"],
             "user_role": session_ctx["user_role"],
@@ -1897,8 +1971,17 @@ def admin_create_user(payload: UserCreateRequest, _: dict[str, Any] = Depends(re
 
 @app.patch("/v1/admin/users/{user_id}")
 def admin_patch_user(user_id: int, payload: UserUpdateRequest, _: dict[str, Any] = Depends(require_roles("owner", "admin"))) -> dict[str, Any]:
-    user = update_user(user_id, payload)
     context = _
+    if context.get("user_id") == user_id:
+        next_account_type = payload.account_type if payload.account_type is not None else context.get("account_type", "admin")
+        next_role = payload.role if payload.role is not None else context.get("user_role", "admin")
+        next_is_active = payload.is_active if payload.is_active is not None else True
+        if next_account_type != "admin" or next_role not in {"owner", "admin"} or not next_is_active:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Cannot remove your own admin access in the current session",
+            )
+    user = update_user(user_id, payload)
     insert_audit_event(
         actor_user_id=context.get("user_id"),
         actor_name=context.get("user_name", "Admin"),
