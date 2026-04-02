@@ -141,6 +141,7 @@ const SECTIONS = [
   { id: "forms", label: "Формы" },
   { id: "crm", label: "CRM" },
   { id: "users", label: "Доступ" },
+  { id: "audit", label: "Audit" },
   { id: "catalog", label: "Каталог" },
   { id: "seo", label: "SEO" },
   { id: "integrations", label: "Интеграции" },
@@ -172,6 +173,7 @@ let draft = clone(DEFAULT_CONFIG);
 let currentSection = "dashboard";
 let catalogDraft = clone(DEFAULT_CATALOG_ITEMS);
 let usersDraft = [];
+let auditDraft = [];
 const crmWorkspace = {
   available: false,
   view: "kanban",
@@ -263,6 +265,7 @@ function renderCurrentSection() {
     : currentSection === "forms" ? renderFormsSection()
     : currentSection === "crm" ? renderCrmSection()
     : currentSection === "users" ? renderUsersSection()
+    : currentSection === "audit" ? renderAuditSection()
     : currentSection === "catalog" ? renderCatalogSection()
     : currentSection === "seo" ? renderSeoSection()
     : renderIntegrationsSection();
@@ -274,6 +277,9 @@ function renderCurrentSection() {
   }
   if (currentSection === "users") {
     bindUsersSection();
+  }
+  if (currentSection === "audit") {
+    bindAuditSection();
   }
   if (currentSection === "catalog") {
     bindCatalogSection();
@@ -543,6 +549,24 @@ function renderUsersSection() {
   `;
 }
 
+function renderAuditSection() {
+  return `
+    <div class="admin-section-stack">
+      <div class="admin-section-intro">
+        <div class="tag">Audit</div>
+        <h3 class="calc-card-title">История административных действий</h3>
+        <p class="sublead">Здесь видно, кто входил в админку, менял настройки, пользователей и каталог. Это первый audit-layer поверх текущего backend.</p>
+      </div>
+      <div class="admin-toolbar-actions">
+        <button class="btn btn-secondary" id="load-audit-button" type="button">Загрузить аудит</button>
+      </div>
+      <div class="admin-lead-list" id="admin-audit-list">
+        <div class="admin-lead-empty">Аудит пока не загружен.</div>
+      </div>
+    </div>
+  `;
+}
+
 function renderSeoSection() {
   return `
     <div class="admin-section-stack">
@@ -632,6 +656,7 @@ function renderSummary() {
     { label: "Pipeline stages", value: String(draft.crm.pipeline.length) },
     { label: "Backend API", value: backendActive ? "указан" : "не указан" },
     { label: "Users", value: usersDraft.length ? String(usersDraft.length) : "не загружены" },
+    { label: "Audit", value: auditDraft.length ? String(auditDraft.length) : "не загружен" },
   ].map((item) => `
     <div class="summary-item">
       <span>${item.label}</span>
@@ -1284,6 +1309,11 @@ function bindUsersSection() {
   if (createButton) createButton.addEventListener("click", createUser);
 }
 
+function bindAuditSection() {
+  const loadButton = document.getElementById("load-audit-button");
+  if (loadButton) loadButton.addEventListener("click", loadAuditEvents);
+}
+
 async function loadUsers() {
   const list = document.getElementById("admin-users-list");
   if (!list) return;
@@ -1426,6 +1456,39 @@ async function rotateUserKey(userId) {
     loadUsers();
   } catch (error) {
     els.status.textContent = `Не удалось сменить ключ пользователя #${userId}: ${error.message}`;
+  }
+}
+
+async function loadAuditEvents() {
+  const list = document.getElementById("admin-audit-list");
+  if (!list) return;
+  list.innerHTML = '<div class="admin-lead-empty">Загружаю аудит…</div>';
+  try {
+    const response = await adminFetch("/admin/audit-events?limit=100");
+    auditDraft = response.items || [];
+    renderSummary();
+    if (!auditDraft.length) {
+      list.innerHTML = '<div class="admin-lead-empty">Аудит пока пустой.</div>';
+      return;
+    }
+    list.innerHTML = auditDraft.map((item) => `
+      <article class="admin-lead-card">
+        <div class="admin-lead-head">
+          <strong>${escapeHtml(item.area)} / ${escapeHtml(item.action)}</strong>
+          <span>${escapeHtml(item.created_at || "")}</span>
+        </div>
+        <div class="admin-lead-meta">
+          <span>${escapeHtml(item.actor_name || "system")} · ${escapeHtml(item.actor_role || "")}</span>
+          <span>${escapeHtml(item.target_type || "")} · ${escapeHtml(item.target_id || "")}</span>
+        </div>
+        <div class="admin-history-item">
+          <strong>Payload</strong>
+          <span>${escapeHtml(JSON.stringify(item.payload || {}))}</span>
+        </div>
+      </article>
+    `).join("");
+  } catch (error) {
+    list.innerHTML = `<div class="admin-lead-empty">Не удалось загрузить аудит: ${escapeHtml(error.message)}</div>`;
   }
 }
 

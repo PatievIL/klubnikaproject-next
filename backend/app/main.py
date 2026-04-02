@@ -6,6 +6,8 @@ import sqlite3
 import hashlib
 import secrets
 import base64
+import threading
+import time
 from contextlib import closing
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -20,8 +22,22 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 
+RATE_LIMIT_LOCK = threading.Lock()
+RATE_LIMIT_BUCKETS: dict[str, list[float]] = {}
+
+
 def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+
+def normalize_origin(raw: str) -> str:
+    value = (raw or "").strip()
+    if not value:
+        return ""
+    parsed = urllib_parse.urlsplit(value)
+    if parsed.scheme and parsed.netloc:
+        return f"{parsed.scheme}://{parsed.netloc}"
+    return value.rstrip("/")
 
 
 @dataclass
@@ -50,6 +66,13 @@ def load_config() -> AppConfig:
         "KP_CORS_ORIGINS",
         "https://patievil.github.io,http://127.0.0.1:8011,http://localhost:8011",
     )
+    origins = {
+        normalize_origin(origin)
+        for origin in raw_origins.split(",")
+        if normalize_origin(origin)
+    }
+    origins.add(normalize_origin(os.environ.get("KP_SITE_URL", "https://patievil.github.io/klubnikaproject-next/")))
+    origins.add(normalize_origin(os.environ.get("KP_PUBLIC_SITE_ORIGIN", "https://klubnikaproject.ru")))
     return AppConfig(
         app_env=os.environ.get("KP_APP_ENV", "development"),
         app_host=os.environ.get("KP_APP_HOST", "127.0.0.1"),
@@ -61,7 +84,7 @@ def load_config() -> AppConfig:
         session_cookie_name=os.environ.get("KP_SESSION_COOKIE_NAME", "kp_admin_session"),
         member_session_cookie_name=os.environ.get("KP_MEMBER_SESSION_COOKIE_NAME", "kp_member_session"),
         db_path=db_path,
-        cors_origins=[origin.strip() for origin in raw_origins.split(",") if origin.strip()],
+        cors_origins=sorted(origins),
         crm_base_url=os.environ.get("KP_CRM_BASE_URL", "").rstrip("/"),
         crm_public_token=os.environ.get("KP_CRM_PUBLIC_TOKEN", ""),
         crm_forward_timeout_seconds=float(os.environ.get("KP_CRM_FORWARD_TIMEOUT_SECONDS", "4")),
@@ -419,6 +442,31 @@ def hash_token(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
+def request_client_key(request: Request) -> str:
+    forwarded = request.headers.get("x-forwarded-for", "")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    if request.client and request.client.host:
+        return request.client.host
+    return "unknown"
+
+
+def enforce_rate_limit(request: Request, bucket: str, *, limit: int, window_seconds: int, extra_key: str = "") -> None:
+    client_key = request_client_key(request)
+    storage_key = f"{bucket}:{client_key}:{extra_key}".rstrip(":")
+    now = time.time()
+    with RATE_LIMIT_LOCK:
+        timestamps = RATE_LIMIT_BUCKETS.get(storage_key, [])
+        fresh = [ts for ts in timestamps if now - ts < window_seconds]
+        if len(fresh) >= limit:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Rate limit exceeded for {bucket}",
+            )
+        fresh.append(now)
+        RATE_LIMIT_BUCKETS[storage_key] = fresh
+
+
 def default_scopes_for_account_type(account_type: str) -> list[str]:
     return list(ADMIN_DEFAULT_SCOPES if account_type == "admin" else MEMBER_DEFAULT_SCOPES)
 
@@ -566,6 +614,19 @@ def init_db() -> None:
               actor_role TEXT NOT NULL,
               payload_json TEXT NOT NULL,
               created_at TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS audit_events (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              created_at TEXT NOT NULL,
+              actor_user_id INTEGER,
+              actor_name TEXT NOT NULL,
+              actor_role TEXT NOT NULL,
+              area TEXT NOT NULL,
+              action TEXT NOT NULL,
+              target_type TEXT NOT NULL,
+              target_id TEXT NOT NULL,
+              payload_json TEXT NOT NULL
             );
             """
         )
@@ -1117,6 +1178,62 @@ def list_lead_events(lead_id: int) -> list[dict[str, Any]]:
     ]
 
 
+def insert_audit_event(
+    *,
+    actor_user_id: int | None,
+    actor_name: str,
+    actor_role: str,
+    area: str,
+    action: str,
+    target_type: str,
+    target_id: str,
+    payload: dict[str, Any],
+) -> None:
+    with closing(db_connect()) as connection:
+        connection.execute(
+            """
+            INSERT INTO audit_events (
+              created_at, actor_user_id, actor_name, actor_role, area, action, target_type, target_id, payload_json
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                utc_now(),
+                actor_user_id,
+                actor_name,
+                actor_role,
+                area,
+                action,
+                target_type,
+                target_id,
+                json.dumps(payload, ensure_ascii=False),
+            ),
+        )
+        connection.commit()
+
+
+def list_audit_events(limit: int = 100) -> list[dict[str, Any]]:
+    with closing(db_connect()) as connection:
+        rows = connection.execute(
+            "SELECT * FROM audit_events ORDER BY id DESC LIMIT ?",
+            (max(1, min(limit, 500)),),
+        ).fetchall()
+    return [
+        {
+            "id": row["id"],
+            "created_at": row["created_at"],
+            "actor_user_id": row["actor_user_id"],
+            "actor_name": row["actor_name"],
+            "actor_role": row["actor_role"],
+            "area": row["area"],
+            "action": row["action"],
+            "target_type": row["target_type"],
+            "target_id": row["target_id"],
+            "payload": json.loads(row["payload_json"] or "{}"),
+        }
+        for row in rows
+    ]
+
+
 def insert_lead(lead: LeadCreateRequest, resolved_settings: dict[str, Any]) -> dict[str, Any]:
     now = utc_now()
     status_value = resolved_settings.get("crm", {}).get("pipeline", ["Новый лид"])[0]
@@ -1422,6 +1539,22 @@ def build_user_context(row: sqlite3.Row) -> dict[str, Any]:
     }
 
 
+def set_session_cookie(response: Response, key: str, value: str) -> None:
+    response.set_cookie(
+        key=key,
+        value=value,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        max_age=60 * 60 * 24 * 14,
+        path="/",
+    )
+
+
+def clear_session_cookie(response: Response, key: str) -> None:
+    response.delete_cookie(key, path="/", samesite="none", secure=True)
+
+
 def get_admin_context(request: Request, authorization: str | None = Header(default=None)) -> dict[str, Any]:
     token = (authorization or "").removeprefix("Bearer ").strip()
     if token and token == CONFIG.admin_token:
@@ -1526,7 +1659,8 @@ def public_catalog_items(status_filter: str = "published") -> dict[str, Any]:
 
 
 @app.post("/v1/public/leads", status_code=status.HTTP_201_CREATED)
-def create_lead(payload: LeadCreateRequest) -> dict[str, Any]:
+def create_lead(payload: LeadCreateRequest, request: Request) -> dict[str, Any]:
+    enforce_rate_limit(request, "public_leads", limit=12, window_seconds=600)
     settings = read_settings()
     created = insert_lead(payload, settings)
     crm_forward = forward_lead_to_crm(created["id"], payload)
@@ -1549,7 +1683,8 @@ def admin_auth_verify(payload: AuthRequest) -> dict[str, Any]:
 
 
 @app.post("/v1/admin/auth/login")
-def admin_auth_login(payload: AuthRequest, response: Response) -> dict[str, Any]:
+def admin_auth_login(payload: AuthRequest, response: Response, request: Request) -> dict[str, Any]:
+    enforce_rate_limit(request, "admin_token_login", limit=20, window_seconds=600)
     if payload.token == CONFIG.admin_token:
         user_id = None
         user_role = "owner"
@@ -1564,20 +1699,23 @@ def admin_auth_login(payload: AuthRequest, response: Response) -> dict[str, Any]
         user_name = user_row["display_name"]
         user_payload = serialize_user(user_row)
     session_token = create_admin_session(user_id=user_id, user_role=user_role, user_name=user_name)
-    response.set_cookie(
-        key=CONFIG.session_cookie_name,
-        value=session_token,
-        httponly=True,
-        secure=True,
-        samesite="none",
-        max_age=60 * 60 * 24 * 14,
-        path="/",
+    set_session_cookie(response, CONFIG.session_cookie_name, session_token)
+    insert_audit_event(
+        actor_user_id=user_id,
+        actor_name=user_name,
+        actor_role=user_role,
+        area="auth",
+        action="admin_token_login",
+        target_type="session",
+        target_id="admin",
+        payload={"client": request_client_key(request)},
     )
     return {"ok": True, "user": user_payload}
 
 
 @app.post("/v1/admin/auth/password-login")
-def admin_auth_password_login(payload: CredentialLoginRequest, response: Response) -> dict[str, Any]:
+def admin_auth_password_login(payload: CredentialLoginRequest, response: Response, request: Request) -> dict[str, Any]:
+    enforce_rate_limit(request, "admin_password_login", limit=10, window_seconds=600, extra_key=payload.login.lower())
     user_row = authenticate_user_password(payload.login, payload.password, account_type="admin")
     if user_row is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid login or password")
@@ -1586,14 +1724,16 @@ def admin_auth_password_login(payload: CredentialLoginRequest, response: Respons
         user_role=user_row["role"],
         user_name=user_row["display_name"],
     )
-    response.set_cookie(
-        key=CONFIG.session_cookie_name,
-        value=session_token,
-        httponly=True,
-        secure=True,
-        samesite="none",
-        max_age=60 * 60 * 24 * 14,
-        path="/",
+    set_session_cookie(response, CONFIG.session_cookie_name, session_token)
+    insert_audit_event(
+        actor_user_id=user_row["id"],
+        actor_name=user_row["display_name"],
+        actor_role=user_row["role"],
+        area="auth",
+        action="admin_password_login",
+        target_type="session",
+        target_id="admin",
+        payload={"client": request_client_key(request)},
     )
     return {"ok": True, "user": serialize_user(user_row)}
 
@@ -1605,8 +1745,19 @@ def admin_auth_session(context: dict[str, Any] = Depends(require_admin)) -> dict
 
 @app.post("/v1/admin/auth/logout")
 def admin_auth_logout(request: Request, response: Response) -> dict[str, Any]:
+    context = get_admin_context(request)
     delete_admin_session(request.cookies.get(CONFIG.session_cookie_name, ""))
-    response.delete_cookie(CONFIG.session_cookie_name, path="/", samesite="none", secure=True)
+    clear_session_cookie(response, CONFIG.session_cookie_name)
+    insert_audit_event(
+        actor_user_id=context.get("user_id"),
+        actor_name=context.get("user_name", "Admin"),
+        actor_role=context.get("user_role", "admin"),
+        area="auth",
+        action="admin_logout",
+        target_type="session",
+        target_id="admin",
+        payload={},
+    )
     return {"ok": True}
 
 
@@ -1618,6 +1769,17 @@ def admin_get_settings(_: dict[str, Any] = Depends(require_admin)) -> dict[str, 
 @app.put("/v1/admin/settings")
 def admin_put_settings(payload: SettingsEnvelope, _: dict[str, Any] = Depends(require_roles("owner", "admin"))) -> dict[str, Any]:
     written = write_settings(payload.settings)
+    context = _
+    insert_audit_event(
+        actor_user_id=context.get("user_id"),
+        actor_name=context.get("user_name", "Admin"),
+        actor_role=context.get("user_role", "admin"),
+        area="settings",
+        action="settings_update",
+        target_type="site_settings",
+        target_id="1",
+        payload={"keys": sorted((payload.settings or {}).keys())},
+    )
     return {"ok": True, "settings": written}
 
 
@@ -1629,6 +1791,17 @@ def admin_list_catalog_items(_: dict[str, Any] = Depends(require_admin)) -> dict
 @app.put("/v1/admin/catalog/items")
 def admin_put_catalog_items(payload: CatalogEnvelope, _: dict[str, Any] = Depends(require_roles("owner", "admin", "editor"))) -> dict[str, Any]:
     written = replace_catalog_items(payload.items)
+    context = _
+    insert_audit_event(
+        actor_user_id=context.get("user_id"),
+        actor_name=context.get("user_name", "Admin"),
+        actor_role=context.get("user_role", "admin"),
+        area="catalog",
+        action="catalog_replace",
+        target_type="catalog_manifest",
+        target_id="catalog_items",
+        payload={"count": len(payload.items)},
+    )
     return {"ok": True, "items": written}
 
 
@@ -1640,12 +1813,35 @@ def admin_list_users(_: dict[str, Any] = Depends(require_roles("owner", "admin")
 @app.post("/v1/admin/users")
 def admin_create_user(payload: UserCreateRequest, _: dict[str, Any] = Depends(require_roles("owner", "admin"))) -> dict[str, Any]:
     user, access_key = create_user(payload)
+    context = _
+    insert_audit_event(
+        actor_user_id=context.get("user_id"),
+        actor_name=context.get("user_name", "Admin"),
+        actor_role=context.get("user_role", "admin"),
+        area="users",
+        action="user_create",
+        target_type="user",
+        target_id=str(user["id"]),
+        payload={"slug": user["slug"], "account_type": user["account_type"], "role": user["role"]},
+    )
     return {"ok": True, "item": user, "access_key": access_key}
 
 
 @app.patch("/v1/admin/users/{user_id}")
 def admin_patch_user(user_id: int, payload: UserUpdateRequest, _: dict[str, Any] = Depends(require_roles("owner", "admin"))) -> dict[str, Any]:
-    return {"ok": True, "item": update_user(user_id, payload)}
+    user = update_user(user_id, payload)
+    context = _
+    insert_audit_event(
+        actor_user_id=context.get("user_id"),
+        actor_name=context.get("user_name", "Admin"),
+        actor_role=context.get("user_role", "admin"),
+        area="users",
+        action="user_update",
+        target_type="user",
+        target_id=str(user_id),
+        payload=payload.model_dump(exclude_none=True),
+    )
+    return {"ok": True, "item": user}
 
 
 @app.post("/v1/admin/users/{user_id}/set-password")
@@ -1654,29 +1850,55 @@ def admin_set_user_password(
     payload: PasswordSetRequest,
     _: dict[str, Any] = Depends(require_roles("owner", "admin")),
 ) -> dict[str, Any]:
-    return {"ok": True, "item": set_user_password(user_id, payload.password)}
+    user = set_user_password(user_id, payload.password)
+    context = _
+    insert_audit_event(
+        actor_user_id=context.get("user_id"),
+        actor_name=context.get("user_name", "Admin"),
+        actor_role=context.get("user_role", "admin"),
+        area="users",
+        action="user_set_password",
+        target_type="user",
+        target_id=str(user_id),
+        payload={},
+    )
+    return {"ok": True, "item": user}
 
 
 @app.post("/v1/admin/users/{user_id}/rotate-key")
 def admin_rotate_user_key(user_id: int, _: dict[str, Any] = Depends(require_roles("owner", "admin"))) -> dict[str, Any]:
     user, access_key = rotate_user_key(user_id)
+    context = _
+    insert_audit_event(
+        actor_user_id=context.get("user_id"),
+        actor_name=context.get("user_name", "Admin"),
+        actor_role=context.get("user_role", "admin"),
+        area="users",
+        action="user_rotate_key",
+        target_type="user",
+        target_id=str(user_id),
+        payload={},
+    )
     return {"ok": True, "item": user, "access_key": access_key}
 
 
 @app.post("/v1/auth/login")
-def member_auth_login(payload: CredentialLoginRequest, response: Response) -> dict[str, Any]:
+def member_auth_login(payload: CredentialLoginRequest, response: Response, request: Request) -> dict[str, Any]:
+    enforce_rate_limit(request, "member_password_login", limit=10, window_seconds=600, extra_key=payload.login.lower())
     user_row = authenticate_user_password(payload.login, payload.password, account_type="member")
     if user_row is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid login or password")
     session_token = create_member_session(user_row)
-    response.set_cookie(
-        key=CONFIG.member_session_cookie_name,
-        value=session_token,
-        httponly=True,
-        secure=True,
-        samesite="none",
-        max_age=60 * 60 * 24 * 14,
-        path="/",
+    set_session_cookie(response, CONFIG.member_session_cookie_name, session_token)
+    insert_audit_event(
+        actor_user_id=user_row["id"],
+        actor_name=user_row["display_name"],
+        actor_role=user_row["role"],
+        area="auth",
+        action="member_password_login",
+        target_type="session",
+        target_id="member",
+        payload={"client": request_client_key(request)},
     )
     return {"ok": True, "user": serialize_user(user_row)}
 
@@ -1688,9 +1910,25 @@ def member_auth_session(context: dict[str, Any] = Depends(get_member_context)) -
 
 @app.post("/v1/auth/logout")
 def member_auth_logout(request: Request, response: Response) -> dict[str, Any]:
+    context = get_member_context(request)
     delete_member_session(request.cookies.get(CONFIG.member_session_cookie_name, ""))
-    response.delete_cookie(CONFIG.member_session_cookie_name, path="/", samesite="none", secure=True)
+    clear_session_cookie(response, CONFIG.member_session_cookie_name)
+    insert_audit_event(
+        actor_user_id=context.get("user_id"),
+        actor_name=context.get("user_name", "Member"),
+        actor_role=context.get("user_role", "member"),
+        area="auth",
+        action="member_logout",
+        target_type="session",
+        target_id="member",
+        payload={},
+    )
     return {"ok": True}
+
+
+@app.get("/v1/admin/audit-events")
+def admin_audit_events(limit: int = 100, _: dict[str, Any] = Depends(require_roles("owner", "admin"))) -> dict[str, Any]:
+    return {"items": list_audit_events(limit=limit)}
 
 
 @app.get("/v1/member/catalog/items")
@@ -1872,6 +2110,23 @@ def admin_crm_notification_deliveries(lead_id: int = 0, _: dict[str, Any] = Depe
     return crm_proxy_request("/v1/internal/notification-deliveries", query={"lead_id": lead_id})
 
 
+@app.get("/v1/admin/crm/incoming-webhooks")
+def admin_crm_incoming_webhooks(
+    limit: int = 100,
+    source: str = "",
+    status_filter: str = "",
+    _: dict[str, Any] = Depends(require_admin),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        "/v1/internal/incoming-webhooks",
+        query={
+            "limit": max(1, min(limit, 200)),
+            "source": source,
+            "status_filter": status_filter,
+        },
+    )
+
+
 @app.post("/v1/admin/crm/notification-deliveries/{delivery_id}/retry")
 def admin_crm_retry_notification_delivery(
     delivery_id: int,
@@ -1884,6 +2139,19 @@ def admin_crm_retry_notification_delivery(
     )
 
 
+@app.post("/v1/admin/crm/delivery-retries/run")
+def admin_crm_run_delivery_retries(
+    limit: int = 0,
+    context: dict[str, Any] = Depends(require_roles("owner", "admin", "manager")),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        "/v1/internal/delivery-retries/run",
+        method="POST",
+        query={"limit": max(0, min(limit, 200))},
+        actor=context,
+    )
+
+
 @app.get("/v1/admin/crm/webhook-endpoints")
 def admin_crm_webhook_endpoints(_: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
     return crm_proxy_request("/v1/internal/webhook-endpoints")
@@ -1892,6 +2160,36 @@ def admin_crm_webhook_endpoints(_: dict[str, Any] = Depends(require_admin)) -> d
 @app.get("/v1/admin/crm/contact-config")
 def admin_crm_contact_config(_: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
     return crm_proxy_request("/v1/internal/contact-config")
+
+
+@app.get("/v1/admin/crm/sync-jobs")
+def admin_crm_sync_jobs(
+    limit: int = 100,
+    status_filter: str = "",
+    provider: str = "",
+    _: dict[str, Any] = Depends(require_admin),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        "/v1/internal/sync-jobs",
+        query={
+            "limit": max(1, min(limit, 200)),
+            "status_filter": status_filter,
+            "provider": provider,
+        },
+    )
+
+
+@app.post("/v1/admin/crm/sync-jobs/run")
+def admin_crm_run_sync_jobs(
+    limit: int = 0,
+    context: dict[str, Any] = Depends(require_roles("owner", "admin", "manager")),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        "/v1/internal/sync-jobs/run",
+        method="POST",
+        query={"limit": max(0, min(limit, 200))},
+        actor=context,
+    )
 
 
 @app.get("/v1/admin/crm/webhook-deliveries")

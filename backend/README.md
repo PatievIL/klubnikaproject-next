@@ -12,6 +12,8 @@
 - `catalog data-layer` как отдельный manifest под категории и ключевые позиции
 - `users / roles` как первый access-layer под внутреннюю CRM
 - `lead events` как история изменений по лиду
+- `audit events` по ключевым admin/member действиям
+- rate limiting на auth и публичные формы
 - bridge в отдельный CRM-сервис после локального сохранения лида
 
 Базовые маршруты:
@@ -34,6 +36,7 @@
 - `PATCH /v1/admin/users/{id}`
 - `POST /v1/admin/users/{id}/set-password`
 - `POST /v1/admin/users/{id}/rotate-key`
+- `GET /v1/admin/audit-events`
 - `POST /v1/auth/login`
 - `GET /v1/auth/session`
 - `POST /v1/auth/logout`
@@ -55,10 +58,13 @@
 
 - CRM workspace routes
 - CRM tasks / follow-up routes
+- incoming webhook logs
 - manual dispatch лида в contact layer
 - contact config status
+- sync jobs and manual worker run
 - notification deliveries
 - retry notification delivery
+- delivery retry worker run
 - webhook endpoints
 - webhook deliveries
 - retry webhook delivery
