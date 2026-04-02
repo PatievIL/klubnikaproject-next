@@ -306,6 +306,7 @@ ADMIN_SECTION_MATRIX = {
     "users": {"roles": {"owner", "admin"}, "scopes": set()},
     "audit": {"roles": {"owner", "admin"}, "scopes": set()},
     "catalog": {"roles": {"owner", "admin", "editor", "manager"}, "scopes": {"catalog"}},
+    "inventory": {"roles": {"owner", "admin", "editor", "manager"}, "scopes": {"catalog"}},
     "seo": {"roles": {"owner", "admin", "editor"}, "scopes": set()},
     "integrations": {"roles": {"owner", "admin", "editor"}, "scopes": set()},
 }
@@ -1764,6 +1765,7 @@ def build_admin_access_policy(context: dict[str, Any]) -> dict[str, Any]:
             "manage_users": "users" in sections,
             "view_audit": "audit" in sections,
             "manage_catalog": "catalog" in sections,
+            "manage_inventory": "inventory" in sections,
             "access_crm": "crm" in sections,
             "manage_site": any(section in sections for section in ("site", "pages", "forms", "seo", "integrations")),
         },
@@ -2717,6 +2719,19 @@ def admin_crm_data_quality_runs(
             "status_filter": status_filter,
             "trigger_source": trigger_source,
         },
+    )
+
+
+@app.post("/v1/admin/crm/ops-retention/run")
+def admin_crm_ops_retention_run(
+    payload: CrmDataQualityAutoResolveRequest,
+    context: dict[str, Any] = Depends(require_roles("owner", "admin", "manager")),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        "/v1/internal/ops-retention/run",
+        method="POST",
+        body=payload.model_dump(),
+        actor=context,
     )
 
 

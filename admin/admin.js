@@ -102,6 +102,7 @@ const SECTIONS = [
   { id: "users", label: "Доступ" },
   { id: "audit", label: "Audit" },
   { id: "catalog", label: "Каталог" },
+  { id: "inventory", label: "Товары" },
   { id: "seo", label: "SEO" },
   { id: "integrations", label: "Интеграции" },
 ];
@@ -136,10 +137,16 @@ const els = {
 let draft = clone(DEFAULT_CONFIG);
 let currentSection = "dashboard";
 let catalogDraft = clone(DEFAULT_CATALOG_ITEMS);
+let catalogSnapshotDraft = null;
 let usersDraft = [];
 let auditDraft = [];
 let backendUser = null;
 let backendAccessPolicy = null;
+const inventoryWorkspace = {
+  query: "",
+  category: "",
+  stockStatus: "",
+};
 const crmWorkspace = {
   available: false,
   view: "kanban",
@@ -249,13 +256,13 @@ function canAccessSection(sectionId) {
 
   if (["owner", "admin"].includes(role)) return true;
   if (role === "editor") {
-    return ["dashboard", "site", "pages", "forms", "catalog", "seo", "integrations"].includes(sectionId);
+    return ["dashboard", "site", "pages", "forms", "catalog", "inventory", "seo", "integrations"].includes(sectionId);
   }
   if (role === "manager") {
-    return ["dashboard", "crm"].includes(sectionId) || (sectionId === "catalog" && scopes.has("catalog"));
+    return ["dashboard", "crm"].includes(sectionId) || (["catalog", "inventory"].includes(sectionId) && scopes.has("catalog"));
   }
   if (sectionId === "crm") return scopes.has("crm");
-  if (sectionId === "catalog") return scopes.has("catalog");
+  if (["catalog", "inventory"].includes(sectionId)) return scopes.has("catalog");
   return sectionId === "dashboard";
 }
 
@@ -268,6 +275,7 @@ function renderCurrentSection() {
     : currentSection === "users" ? renderUsersSection()
     : currentSection === "audit" ? renderAuditSection()
     : currentSection === "catalog" ? renderCatalogSection()
+    : currentSection === "inventory" ? renderInventorySection()
     : currentSection === "seo" ? renderSeoSection()
     : renderIntegrationsSection();
 
@@ -284,6 +292,9 @@ function renderCurrentSection() {
   }
   if (currentSection === "catalog") {
     bindCatalogSection();
+  }
+  if (currentSection === "inventory") {
+    bindInventorySection();
   }
 }
 
@@ -531,6 +542,92 @@ function renderCatalogSection() {
   `;
 }
 
+function renderInventorySection() {
+  const snapshot = catalogSnapshotDraft;
+  const categories = Array.isArray(snapshot?.categories) ? snapshot.categories : [];
+  const products = getInventoryProducts();
+  const filteredProducts = filterInventoryProducts(products, categories);
+  const stockCounts = summarizeInventoryStock(products);
+  const priceRange = summarizeInventoryPrice(filteredProducts);
+  const tableContent = !snapshot ? `
+            <div class="admin-lead-empty">Snapshot ещё не загружен. Нужен рабочий backend apiBase и admin-сессия.</div>
+          ` : filteredProducts.length ? `
+            <table class="admin-inventory-table">
+              <thead>
+                <tr>
+                  <th>Артикул</th>
+                  <th>Товар</th>
+                  <th>Категория</th>
+                  <th>Цена</th>
+                  <th>Наличие</th>
+                  <th>Маршрут</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${filteredProducts.map((product) => renderInventoryRow(product, categories)).join("")}
+              </tbody>
+            </table>
+          ` : `
+            <div class="admin-lead-empty">По текущим фильтрам товаров нет.</div>
+          `;
+
+  return `
+    <div class="admin-section-stack">
+      <div class="admin-section-intro">
+        <div class="tag">Товары</div>
+        <h3 class="calc-card-title">Цены, остатки и товарная матрица</h3>
+        <p class="sublead">Отдельная операционная вкладка под SKU, цены, наличие и навигацию по магазину. Источник данных сейчас: backend snapshot, собранный из catalog build-layer.</p>
+      </div>
+      <div class="admin-block">
+        <div class="admin-block-head">
+          <div>
+            <strong>Рабочий срез каталога</strong>
+            <span>Поиск по названию, артикулу и маршруту, фильтр по категории и статусу наличия. Manifest каталога остаётся в соседней вкладке.</span>
+          </div>
+          <div class="admin-toolbar-actions">
+            <button class="btn btn-secondary" id="inventory-refresh-button" type="button">Обновить snapshot</button>
+            <button class="btn btn-secondary" id="inventory-copy-button" type="button">Скопировать snapshot</button>
+          </div>
+        </div>
+        <div class="admin-inventory-filters">
+          <label class="admin-field">
+            <span class="admin-field-label">Поиск</span>
+            <input class="admin-input" id="inventory-query" type="text" value="${escapeAttribute(inventoryWorkspace.query)}" placeholder="Название, артикул, URL" />
+          </label>
+          <label class="admin-field">
+            <span class="admin-field-label">Категория</span>
+            <select class="admin-select" id="inventory-category">
+              <option value="">Все категории</option>
+              ${buildInventoryCategoryOptions(categories)}
+            </select>
+          </label>
+          <label class="admin-field">
+            <span class="admin-field-label">Наличие</span>
+            <select class="admin-select" id="inventory-stock-status">
+              <option value="">Все статусы</option>
+              ${buildInventoryStockOptions()}
+            </select>
+          </label>
+        </div>
+        <div class="admin-mini-metrics admin-inventory-metrics">
+          <div class="admin-mini-metric"><span>Товаров в snapshot</span><strong>${products.length}</strong></div>
+          <div class="admin-mini-metric"><span>Показано сейчас</span><strong>${filteredProducts.length}</strong></div>
+          <div class="admin-mini-metric"><span>В наличии</span><strong>${stockCounts.in_stock}</strong></div>
+          <div class="admin-mini-metric"><span>Мало / под заказ</span><strong>${stockCounts.limited + stockCounts.preorder}</strong></div>
+          <div class="admin-mini-metric"><span>Нет в наличии</span><strong>${stockCounts.out_of_stock}</strong></div>
+          <div class="admin-mini-metric"><span>Диапазон цен</span><strong>${priceRange}</strong></div>
+        </div>
+        <div class="admin-code-card admin-inventory-note">
+<pre>${escapeHtml(buildInventorySourceNote(snapshot))}</pre>
+        </div>
+        <div class="admin-inventory-table-shell">
+          ${tableContent}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function renderUsersSection() {
   return `
     <div class="admin-section-stack">
@@ -652,10 +749,12 @@ function renderSummary() {
   const visibleSections = Array.isArray(backendAccessPolicy?.sections)
     ? backendAccessPolicy.sections.length
     : getVisibleSections().length;
+  const inventoryCount = getInventoryProducts().length;
   els.summary.innerHTML = [
     { label: "Публичных страниц", value: String(publicPages) },
     { label: "Режим форм", value: draft.forms.mode },
     { label: "CRM", value: crmStatus },
+    { label: "Товаров в snapshot", value: inventoryCount ? String(inventoryCount) : "не загружены" },
     { label: "Telegram", value: draft.site.supportTelegram || "не указан" },
     { label: "Lead sources", value: String(draft.crm.leadSources.length) },
     { label: "Pipeline stages", value: String(draft.crm.pipeline.length) },
@@ -1542,6 +1641,45 @@ function bindCatalogSection() {
   if (saveButton) saveButton.addEventListener("click", pushCatalogDraft);
 }
 
+function bindInventorySection() {
+  const refreshButton = document.getElementById("inventory-refresh-button");
+  const copyButton = document.getElementById("inventory-copy-button");
+  const queryField = document.getElementById("inventory-query");
+  const categoryField = document.getElementById("inventory-category");
+  const stockField = document.getElementById("inventory-stock-status");
+
+  if (queryField) {
+    queryField.addEventListener("input", () => {
+      inventoryWorkspace.query = queryField.value;
+      renderCurrentSection();
+    });
+  }
+  if (categoryField) {
+    categoryField.value = inventoryWorkspace.category;
+    categoryField.addEventListener("change", () => {
+      inventoryWorkspace.category = categoryField.value;
+      renderCurrentSection();
+    });
+  }
+  if (stockField) {
+    stockField.value = inventoryWorkspace.stockStatus;
+    stockField.addEventListener("change", () => {
+      inventoryWorkspace.stockStatus = stockField.value;
+      renderCurrentSection();
+    });
+  }
+  if (refreshButton) {
+    refreshButton.addEventListener("click", () => pullCatalogSnapshot(true));
+  }
+  if (copyButton) {
+    copyButton.addEventListener("click", copyCatalogSnapshot);
+  }
+
+  if (!catalogSnapshotDraft) {
+    pullCatalogSnapshot(false);
+  }
+}
+
 async function pullCatalogDraft() {
   const output = document.getElementById("admin-catalog-output");
   if (!output) return;
@@ -1569,6 +1707,47 @@ async function pushCatalogDraft() {
     els.status.textContent = "Каталог сохранён в backend.";
   } catch (error) {
     els.status.textContent = `Не удалось сохранить каталог: ${error.message}`;
+  }
+}
+
+async function pullCatalogSnapshot(forceMessage = true) {
+  if (!canAccessSection("inventory")) return;
+  if (forceMessage) {
+    els.status.textContent = "Загружаю товарный snapshot...";
+  }
+  try {
+    const response = await adminFetch("/admin/catalog/snapshot");
+    catalogSnapshotDraft = response.snapshot || null;
+    renderSummary();
+    if (currentSection === "inventory") {
+      renderCurrentSection();
+    }
+    if (forceMessage) {
+      els.status.textContent = "Товарный snapshot загружен.";
+    }
+  } catch (error) {
+    if (currentSection === "inventory") {
+      const shell = document.querySelector(".admin-inventory-table-shell");
+      if (shell) {
+        shell.innerHTML = `<div class="admin-lead-empty">Не удалось загрузить товарный snapshot: ${escapeHtml(error.message)}</div>`;
+      }
+    }
+    if (forceMessage || !catalogSnapshotDraft) {
+      els.status.textContent = `Не удалось загрузить товарный snapshot: ${error.message}`;
+    }
+  }
+}
+
+async function copyCatalogSnapshot() {
+  if (!catalogSnapshotDraft) {
+    els.status.textContent = "Сначала загрузите товарный snapshot.";
+    return;
+  }
+  try {
+    await copyText(JSON.stringify(catalogSnapshotDraft, null, 2));
+    els.status.textContent = "Товарный snapshot скопирован в буфер.";
+  } catch (error) {
+    els.status.textContent = "Не удалось скопировать товарный snapshot.";
   }
 }
 
@@ -1805,6 +1984,145 @@ function buildLeadExample() {
       request: "Нужен расчёт и состав фермы",
     },
   };
+}
+
+function getInventoryProducts() {
+  return Array.isArray(catalogSnapshotDraft?.products) ? catalogSnapshotDraft.products : [];
+}
+
+function buildInventoryCategoryOptions(categories) {
+  return categories
+    .slice()
+    .sort((left, right) => String(left.name || "").localeCompare(String(right.name || ""), "ru"))
+    .map((category) => `
+      <option value="${escapeAttribute(category.slug || "")}" ${inventoryWorkspace.category === category.slug ? "selected" : ""}>${escapeHtml(category.name || category.slug || "Без названия")}</option>
+    `)
+    .join("");
+}
+
+function buildInventoryStockOptions() {
+  return ["in_stock", "limited", "preorder", "out_of_stock"]
+    .map((status) => `
+      <option value="${status}" ${inventoryWorkspace.stockStatus === status ? "selected" : ""}>${escapeHtml(formatInventoryStockLabel(status))}</option>
+    `)
+    .join("");
+}
+
+function filterInventoryProducts(products, categories) {
+  const categoryMap = new Map(categories.map((category) => [category.slug, category]));
+  const query = inventoryWorkspace.query.trim().toLowerCase();
+  return products.filter((product) => {
+    if (inventoryWorkspace.category) {
+      const categorySlug = product.categorySlug || product.topLevelCategorySlug || "";
+      const category = categoryMap.get(categorySlug);
+      const topLevelSlug = category?.topLevelSlug || product.topLevelCategorySlug || "";
+      if (![categorySlug, topLevelSlug].includes(inventoryWorkspace.category)) {
+        return false;
+      }
+    }
+    if (inventoryWorkspace.stockStatus && product.stockStatus !== inventoryWorkspace.stockStatus) {
+      return false;
+    }
+    if (!query) return true;
+    const haystack = [
+      product.name,
+      product.article,
+      product.slug,
+      product.path,
+      product.categorySlug,
+      product.topLevelCategorySlug,
+    ].join(" ").toLowerCase();
+    return haystack.includes(query);
+  }).sort((left, right) => String(left.name || "").localeCompare(String(right.name || ""), "ru"));
+}
+
+function summarizeInventoryStock(products) {
+  return products.reduce((accumulator, product) => {
+    const key = product.stockStatus || "out_of_stock";
+    accumulator[key] = (accumulator[key] || 0) + 1;
+    return accumulator;
+  }, {
+    in_stock: 0,
+    limited: 0,
+    preorder: 0,
+    out_of_stock: 0,
+  });
+}
+
+function summarizeInventoryPrice(products) {
+  const values = products.map((product) => Number(product.price)).filter((value) => Number.isFinite(value) && value > 0);
+  if (!values.length) return "нет данных";
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  return min === max ? formatMoney(min) : `${formatMoney(min)} - ${formatMoney(max)}`;
+}
+
+function buildInventorySourceNote(snapshot) {
+  if (!snapshot) {
+    return "Snapshot ещё не загружен. Нужен рабочий backend apiBase и активная admin-сессия.";
+  }
+  const generatedAt = snapshot.generatedAt || "неизвестно";
+  const source = snapshot.source || "unknown";
+  const counts = snapshot.counts || {};
+  return [
+    `Источник: ${source}`,
+    `Сгенерировано: ${generatedAt}`,
+    `Категорий: ${counts.categories || 0}`,
+    `Товаров: ${counts.products || 0}`,
+    `Позиции manifest: ${counts.items || 0}`,
+  ].join("\n");
+}
+
+function renderInventoryRow(product, categories) {
+  const category = resolveInventoryCategory(product, categories);
+  const badges = Array.isArray(product.badges) && product.badges.length
+    ? `<div class="admin-inventory-badges">${product.badges.map((badge) => `<span class="admin-crm-chip">${escapeHtml(badge)}</span>`).join("")}</div>`
+    : "";
+  return `
+    <tr>
+      <td class="admin-mono">${escapeHtml(product.article || "—")}</td>
+      <td>
+        <div class="admin-inventory-name">${escapeHtml(product.name || "Без названия")}</div>
+        <div class="admin-inventory-meta">${escapeHtml(product.shortDescription || "")}</div>
+        ${badges}
+      </td>
+      <td>${escapeHtml(category)}</td>
+      <td>
+        <div class="admin-inventory-price">${formatMoney(product.price)}</div>
+        ${product.oldPrice ? `<div class="admin-inventory-old-price">${formatMoney(product.oldPrice)}</div>` : ""}
+      </td>
+      <td><span class="admin-inventory-stock is-${escapeAttribute(product.stockStatus || "out_of_stock")}">${escapeHtml(formatInventoryStockLabel(product.stockStatus))}</span></td>
+      <td>
+        <div class="admin-mono admin-inventory-path">${escapeHtml(product.path || "—")}</div>
+        ${product.path ? `<a class="btn btn-secondary admin-inventory-open" href="..${escapeAttribute(product.path)}" target="_blank" rel="noopener">Открыть</a>` : ""}
+      </td>
+    </tr>
+  `;
+}
+
+function resolveInventoryCategory(product, categories) {
+  const categoryMap = new Map(categories.map((category) => [category.slug, category]));
+  const direct = categoryMap.get(product.categorySlug || "");
+  if (direct?.name) return direct.name;
+  const top = categoryMap.get(product.topLevelCategorySlug || "");
+  if (top?.name) return top.name;
+  return product.categorySlug || product.topLevelCategorySlug || "—";
+}
+
+function formatInventoryStockLabel(status) {
+  if (status === "in_stock") return "В наличии";
+  if (status === "limited") return "Мало";
+  if (status === "preorder") return "Под заказ";
+  if (status === "out_of_stock") return "Нет в наличии";
+  return status || "Не указан";
+}
+
+function formatMoney(value) {
+  const amount = Number(value);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return "по запросу";
+  }
+  return `${new Intl.NumberFormat("ru-RU").format(Math.round(amount))} ₽`;
 }
 
 function parseCommaValues(value) {

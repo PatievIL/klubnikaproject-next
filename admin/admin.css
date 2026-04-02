@@ -425,6 +425,10 @@
   min-height: 420px;
 }
 
+.admin-mono {
+  font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
 .admin-lead-history {
   grid-column: 1 / -1;
   display: grid;
@@ -579,6 +583,120 @@
   gap: 10px;
 }
 
+.admin-inventory-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.admin-inventory-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-inventory-note {
+  margin-top: 16px;
+}
+
+.admin-inventory-table-shell {
+  margin-top: 16px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #fff;
+}
+
+.admin-inventory-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 980px;
+}
+
+.admin-inventory-table th,
+.admin-inventory-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(0, 77, 43, 0.08);
+  vertical-align: top;
+  text-align: left;
+}
+
+.admin-inventory-table th {
+  position: sticky;
+  top: 0;
+  background: rgba(250, 247, 240, 0.96);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(0, 77, 43, 0.72);
+}
+
+.admin-inventory-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.admin-inventory-meta,
+.admin-inventory-path {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.admin-inventory-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.admin-inventory-price {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--green);
+}
+
+.admin-inventory-old-price {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  text-decoration: line-through;
+}
+
+.admin-inventory-stock {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.admin-inventory-stock.is-in_stock {
+  background: rgba(0, 77, 43, 0.08);
+  border-color: rgba(0, 77, 43, 0.14);
+  color: var(--green);
+}
+
+.admin-inventory-stock.is-limited,
+.admin-inventory-stock.is-preorder {
+  background: rgba(112, 86, 23, 0.08);
+  border-color: rgba(112, 86, 23, 0.12);
+  color: rgba(112, 86, 23, 0.92);
+}
+
+.admin-inventory-stock.is-out_of_stock {
+  background: rgba(150, 28, 28, 0.08);
+  border-color: rgba(150, 28, 28, 0.14);
+  color: #8f2323;
+}
+
+.admin-inventory-open {
+  margin-top: 10px;
+}
+
 .admin-crm-pre {
   padding: 12px;
   border-radius: 12px;
@@ -606,7 +724,9 @@
   .admin-block-head,
   .admin-grid,
   .admin-grid-3,
-  .admin-crm-filters {
+  .admin-crm-filters,
+  .admin-inventory-filters,
+  .admin-inventory-metrics {
     grid-template-columns: 1fr;
   }
 
