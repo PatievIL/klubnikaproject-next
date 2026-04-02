@@ -17,6 +17,7 @@ const DEFAULT_SETTINGS = {
 
 let settings = clone(DEFAULT_SETTINGS);
 let currentSessionUser = null;
+let memberAccessPolicy = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
   settings = loadCachedSettings();
@@ -34,6 +35,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const session = await fetchSession();
     if (session?.ok) {
       currentSessionUser = session.user;
+      await refreshAccessPolicy();
       redirectAuthenticatedMember(session.user);
       return;
     }
@@ -48,6 +50,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   currentSessionUser = session.user;
+  await refreshAccessPolicy();
   renderUser(session.user);
 
   if (view === "catalog") {
@@ -120,10 +123,15 @@ function isMembersEnabled() {
 }
 
 function hasScope(user, scope) {
+  if (memberAccessPolicy?.route_access) {
+    if (scope === "catalog") return Boolean(memberAccessPolicy.route_access.catalog);
+    if (scope === "special_pages") return Boolean(memberAccessPolicy.route_access.special);
+  }
   return Array.isArray(user?.scopes) && user.scopes.includes(scope);
 }
 
 function preferredMemberPath(user) {
+  if (memberAccessPolicy?.preferred_path) return memberAccessPolicy.preferred_path;
   if (hasScope(user, "catalog")) return memberPath("catalogPath");
   if (hasScope(user, "special_pages")) return memberPath("specialPath");
   return memberPath("hubPath");
@@ -172,8 +180,9 @@ function bindLogin() {
       }
       const payload = await response.json();
       currentSessionUser = payload.user || null;
+      await refreshAccessPolicy();
       const nextCandidate = new URLSearchParams(window.location.search).get("next") || memberPath("hubPath");
-      const next = nextCandidate.startsWith("/") ? nextCandidate : preferredMemberPath(currentSessionUser);
+      const next = isAllowedNextPath(nextCandidate) ? nextCandidate : preferredMemberPath(currentSessionUser);
       window.location.href = next;
     } catch (error) {
       if (status) status.textContent = `Вход не удался: ${cleanupError(error.message)}`;
@@ -191,6 +200,27 @@ async function fetchSession() {
     return response.json();
   } catch (error) {
     return null;
+  }
+}
+
+async function refreshAccessPolicy() {
+  if (!currentSessionUser) {
+    memberAccessPolicy = null;
+    return;
+  }
+  try {
+    const response = await fetch(`${apiBase()}/auth/access-policy`, {
+      headers: { Accept: "application/json" },
+      credentials: "include",
+    });
+    if (!response.ok) {
+      memberAccessPolicy = null;
+      return;
+    }
+    const payload = await response.json();
+    memberAccessPolicy = payload.policy || null;
+  } catch (error) {
+    memberAccessPolicy = null;
   }
 }
 
@@ -361,11 +391,21 @@ function redirectToLogin() {
 
 function redirectAuthenticatedMember(user) {
   const nextCandidate = new URLSearchParams(window.location.search).get("next");
-  if (nextCandidate && nextCandidate.startsWith("/")) {
+  if (isAllowedNextPath(nextCandidate)) {
     window.location.href = nextCandidate;
     return;
   }
   window.location.href = preferredMemberPath(user);
+}
+
+function isAllowedNextPath(path) {
+  if (!path || !path.startsWith("/")) return false;
+  const normalized = path.replace(/\/+$/, "/");
+  if (normalized === memberPath("hubPath")) return true;
+  if (normalized.startsWith(memberPath("catalogPath"))) return Boolean(memberAccessPolicy?.route_access?.catalog ?? hasScope(currentSessionUser, "catalog"));
+  if (normalized.startsWith(memberPath("specialPath"))) return Boolean(memberAccessPolicy?.route_access?.special ?? hasScope(currentSessionUser, "special_pages"));
+  if (normalized.startsWith(memberPath("loginPath"))) return true;
+  return false;
 }
 
 function renderMembersDisabled(view) {

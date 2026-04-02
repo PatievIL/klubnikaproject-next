@@ -175,6 +175,7 @@ let catalogDraft = clone(DEFAULT_CATALOG_ITEMS);
 let usersDraft = [];
 let auditDraft = [];
 let backendUser = null;
+let backendAccessPolicy = null;
 const crmWorkspace = {
   available: false,
   view: "kanban",
@@ -268,6 +269,11 @@ function getVisibleSections() {
 }
 
 function canAccessSection(sectionId) {
+  const policySections = backendAccessPolicy?.sections;
+  if (Array.isArray(policySections)) {
+    return policySections.includes(sectionId);
+  }
+
   const role = backendUser?.user_role || backendUser?.role || "";
   const scopes = new Set(backendUser?.scopes || []);
 
@@ -676,6 +682,10 @@ function renderSummary() {
   const crmStatus = draft.crm.enabled ? "включён" : "черновик";
   const publicPages = draft.pages.filter((page) => page.status === "published").length;
   const backendActive = Boolean(getApiBase());
+  const roleLabel = backendAccessPolicy?.role || backendUser?.user_role || backendUser?.role || "гость";
+  const visibleSections = Array.isArray(backendAccessPolicy?.sections)
+    ? backendAccessPolicy.sections.length
+    : getVisibleSections().length;
   els.summary.innerHTML = [
     { label: "Публичных страниц", value: String(publicPages) },
     { label: "Режим форм", value: draft.forms.mode },
@@ -684,6 +694,8 @@ function renderSummary() {
     { label: "Lead sources", value: String(draft.crm.leadSources.length) },
     { label: "Pipeline stages", value: String(draft.crm.pipeline.length) },
     { label: "Backend API", value: backendActive ? "указан" : "не указан" },
+    { label: "Роль backend", value: String(roleLabel) },
+    { label: "Видимых разделов", value: String(visibleSections) },
     { label: "Users", value: usersDraft.length ? String(usersDraft.length) : "не загружены" },
     { label: "Audit", value: auditDraft.length ? String(auditDraft.length) : "не загружен" },
   ].map((item) => `
@@ -1600,10 +1612,7 @@ async function loginToBackend() {
       body: JSON.stringify({ token }),
     });
     const user = response.user;
-    backendUser = user || null;
-    renderTabs();
-    renderCurrentSection();
-    renderSummary();
+    await applyBackendAccessState(user || null);
     els.sessionState.textContent = user
       ? `Сессия backend активна: ${user.display_name || user.user_name || "пользователь"} (${user.role || user.user_role || "role"})`
       : "Сессия backend активна.";
@@ -1626,10 +1635,7 @@ async function loginToBackendWithPassword() {
       body: JSON.stringify({ login, password }),
     });
     const user = response.user;
-    backendUser = user || null;
-    renderTabs();
-    renderCurrentSection();
-    renderSummary();
+    await applyBackendAccessState(user || null);
     els.sessionState.textContent = user
       ? `Сессия backend активна: ${user.display_name || "пользователь"} (${user.role || "role"}, ${user.account_type || "admin"})`
       : "Сессия backend активна.";
@@ -1643,18 +1649,12 @@ async function checkBackendSession() {
     els.sessionState.textContent = "Проверяю сессию...";
     const response = await adminFetch("/admin/auth/session");
     const user = response.user;
-    backendUser = user || null;
-    renderTabs();
-    renderCurrentSection();
-    renderSummary();
+    await applyBackendAccessState(user || null);
     els.sessionState.textContent = response.session
       ? `Сессия backend активна: ${user?.user_name || user?.display_name || "пользователь"} (${user?.user_role || user?.role || "role"}, ${user?.account_type || "admin"})`
       : "Сессия backend не найдена.";
   } catch (error) {
-    backendUser = null;
-    renderTabs();
-    renderCurrentSection();
-    renderSummary();
+    applyGuestAccessState();
     els.sessionState.textContent = `Сессия не подтверждена: ${error.message}`;
   }
 }
@@ -1663,14 +1663,35 @@ async function logoutFromBackend() {
   try {
     els.sessionState.textContent = "Завершаю сессию...";
     await adminFetch("/admin/auth/logout", { method: "POST" });
-    backendUser = null;
-    renderTabs();
-    renderCurrentSection();
-    renderSummary();
+    applyGuestAccessState();
     els.sessionState.textContent = "Сессия backend завершена.";
   } catch (error) {
     els.sessionState.textContent = `Не удалось завершить сессию: ${error.message}`;
   }
+}
+
+async function applyBackendAccessState(user) {
+  backendUser = user || null;
+  backendAccessPolicy = null;
+  if (backendUser) {
+    try {
+      const response = await adminFetch("/admin/auth/access-policy");
+      backendAccessPolicy = response.policy || null;
+    } catch (error) {
+      backendAccessPolicy = null;
+    }
+  }
+  renderTabs();
+  renderCurrentSection();
+  renderSummary();
+}
+
+function applyGuestAccessState() {
+  backendUser = null;
+  backendAccessPolicy = null;
+  renderTabs();
+  renderCurrentSection();
+  renderSummary();
 }
 
 function isDefaultState() {

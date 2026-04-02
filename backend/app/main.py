@@ -229,6 +229,18 @@ DEFAULT_SITE_SETTINGS: dict[str, Any] = {
 
 ADMIN_DEFAULT_SCOPES = ["admin", "crm", "catalog", "special_pages"]
 MEMBER_DEFAULT_SCOPES = ["catalog", "special_pages"]
+ADMIN_SECTION_MATRIX = {
+    "dashboard": {"roles": {"owner", "admin", "editor", "manager"}, "scopes": set()},
+    "site": {"roles": {"owner", "admin", "editor"}, "scopes": set()},
+    "pages": {"roles": {"owner", "admin", "editor"}, "scopes": set()},
+    "forms": {"roles": {"owner", "admin", "editor"}, "scopes": set()},
+    "crm": {"roles": {"owner", "admin", "manager"}, "scopes": {"crm"}},
+    "users": {"roles": {"owner", "admin"}, "scopes": set()},
+    "audit": {"roles": {"owner", "admin"}, "scopes": set()},
+    "catalog": {"roles": {"owner", "admin", "editor", "manager"}, "scopes": {"catalog"}},
+    "seo": {"roles": {"owner", "admin", "editor"}, "scopes": set()},
+    "integrations": {"roles": {"owner", "admin", "editor"}, "scopes": set()},
+}
 
 DEFAULT_MEMBER_SPECIAL_PAGES: list[dict[str, Any]] = [
     {
@@ -1539,6 +1551,57 @@ def build_user_context(row: sqlite3.Row) -> dict[str, Any]:
     }
 
 
+def allowed_admin_sections(context: dict[str, Any]) -> list[str]:
+    role = context.get("user_role") or ""
+    scopes = set(context.get("scopes") or [])
+    allowed = []
+    for section, rule in ADMIN_SECTION_MATRIX.items():
+        if role in rule["roles"]:
+            if not rule["scopes"] or rule["scopes"].intersection(scopes):
+                allowed.append(section)
+    return allowed
+
+
+def build_admin_access_policy(context: dict[str, Any]) -> dict[str, Any]:
+    sections = allowed_admin_sections(context)
+    return {
+        "account_type": "admin",
+        "role": context.get("user_role", ""),
+        "scopes": list(context.get("scopes") or []),
+        "sections": sections,
+        "capabilities": {
+            "manage_users": "users" in sections,
+            "view_audit": "audit" in sections,
+            "manage_catalog": "catalog" in sections,
+            "access_crm": "crm" in sections,
+            "manage_site": any(section in sections for section in ("site", "pages", "forms", "seo", "integrations")),
+        },
+    }
+
+
+def build_member_access_policy(context: dict[str, Any]) -> dict[str, Any]:
+    scopes = set(context.get("scopes") or [])
+    route_access = {
+        "hub": True,
+        "catalog": "catalog" in scopes,
+        "special": "special_pages" in scopes,
+    }
+    preferred_path = (
+        DEFAULT_SITE_SETTINGS["members"]["catalogPath"]
+        if route_access["catalog"]
+        else DEFAULT_SITE_SETTINGS["members"]["specialPath"]
+        if route_access["special"]
+        else DEFAULT_SITE_SETTINGS["members"]["hubPath"]
+    )
+    return {
+        "account_type": "member",
+        "role": context.get("user_role", ""),
+        "scopes": list(context.get("scopes") or []),
+        "route_access": route_access,
+        "preferred_path": preferred_path,
+    }
+
+
 def set_session_cookie(response: Response, key: str, value: str) -> None:
     response.set_cookie(
         key=key,
@@ -1743,6 +1806,11 @@ def admin_auth_session(context: dict[str, Any] = Depends(require_admin)) -> dict
     return {"ok": True, "session": True, "user": context}
 
 
+@app.get("/v1/admin/auth/access-policy")
+def admin_auth_access_policy(context: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
+    return {"ok": True, "policy": build_admin_access_policy(context)}
+
+
 @app.post("/v1/admin/auth/logout")
 def admin_auth_logout(request: Request, response: Response) -> dict[str, Any]:
     context = get_admin_context(request)
@@ -1906,6 +1974,11 @@ def member_auth_login(payload: CredentialLoginRequest, response: Response, reque
 @app.get("/v1/auth/session")
 def member_auth_session(context: dict[str, Any] = Depends(get_member_context)) -> dict[str, Any]:
     return {"ok": True, "session": True, "user": context}
+
+
+@app.get("/v1/auth/access-policy")
+def member_auth_access_policy(context: dict[str, Any] = Depends(get_member_context)) -> dict[str, Any]:
+    return {"ok": True, "policy": build_member_access_policy(context)}
 
 
 @app.post("/v1/auth/logout")
