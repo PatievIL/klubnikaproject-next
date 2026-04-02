@@ -12,7 +12,7 @@
     content="Внутренний кабинет настройки сайта Klubnika Project: контент, формы, CRM-схема, SEO-рамка и экспорт структуры для будущей CMS/CRM."
   />
   <link rel="stylesheet" href="../styles.css?v=20260402c" />
-  <link rel="stylesheet" href="./admin.css?v=20260402i" />
+  <link rel="stylesheet" href="./admin.css?v=20260402j" />
   <!-- SEO:START -->
   <meta name="robots" content="noindex, nofollow" />
   <!-- SEO:END -->
@@ -151,8 +151,32 @@
                     <button class="btn btn-secondary" id="admin-session-button" type="button">Проверить сессию</button>
                     <button class="btn btn-secondary" id="admin-logout-button" type="button">Выйти</button>
                   </div>
-                  <div class="admin-session-state" id="admin-session-state">Сессия backend не проверялась.</div>
+                <div class="admin-session-state" id="admin-session-state">Сессия backend не проверялась.</div>
+
+                <div class="admin-self-service">
+                  <div class="admin-self-service-head">
+                    <strong>Собственная безопасность</strong>
+                    <span>Сменить пароль и закрыть другие активные сессии.</span>
+                  </div>
+                  <div class="admin-grid">
+                    <label class="admin-field">
+                      <span class="admin-field-label">Текущий пароль</span>
+                      <input class="admin-input" id="admin-current-password" type="password" autocomplete="current-password" placeholder="Current password" />
+                    </label>
+                    <label class="admin-field">
+                      <span class="admin-field-label">Новый пароль</span>
+                      <input class="admin-input" id="admin-new-password" type="password" autocomplete="new-password" placeholder="New password" />
+                    </label>
+                  </div>
+                  <div class="admin-auth-actions admin-auth-actions-2">
+                    <button class="btn btn-secondary" id="admin-change-password-button" type="button">Сменить пароль</button>
+                    <button class="btn btn-secondary" id="admin-logout-others-button" type="button">Выйти из других сессий</button>
+                  </div>
+                  <div class="admin-session-list" id="admin-own-sessions">
+                    <div class="admin-lead-empty">Список сессий появится после входа.</div>
+                  </div>
                 </div>
+              </div>
 
                 <div class="admin-json-actions">
                   <button class="btn btn-primary" id="download-admin-json" type="button">Скачать admin-config.json</button>
@@ -176,6 +200,6 @@
   </main>
 
   <script src="../site.js?v=20260402d" defer></script>
-  <script src="./admin.js?v=20260402i" type="module"></script>
+  <script src="./admin.js?v=20260402j" type="module"></script>
 </body>
 </html>

@@ -229,10 +229,58 @@
   margin-top: 12px;
 }
 
+.admin-auth-actions-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .admin-session-state {
   margin-top: 10px;
   color: var(--muted);
   font-size: 13px;
+}
+
+.admin-self-service {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 77, 43, 0.12);
+  display: grid;
+  gap: 12px;
+}
+
+.admin-self-service-head {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-self-service-head span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.admin-session-list {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-session-item {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 77, 43, 0.12);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.admin-session-item strong {
+  font-size: 14px;
+}
+
+.admin-session-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .admin-import-button {

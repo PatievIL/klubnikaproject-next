@@ -109,9 +109,38 @@
   font-weight: 700;
 }
 
+.account-password-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.account-session-list {
+  display: grid;
+  gap: 10px;
+}
+
+.account-session-item {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 77, 43, 0.12);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.account-session-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 @media (max-width: 960px) {
   .account-grid,
-  .account-grid-3 {
+  .account-grid-3,
+  .account-password-grid {
     grid-template-columns: 1fr;
   }
 }

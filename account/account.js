@@ -18,6 +18,7 @@ const DEFAULT_SETTINGS = {
 let settings = clone(DEFAULT_SETTINGS);
 let currentSessionUser = null;
 let memberAccessPolicy = null;
+let memberSessions = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
   settings = loadCachedSettings();
@@ -269,12 +270,37 @@ function renderHub(user) {
       <h3 class="calc-card-title">Текущий доступ</h3>
       <p class="sublead">Вы вошли как <strong>${escapeHtml(user.user_name || user.display_name || "Пользователь")}</strong>. Если нужно сменить доступ, выйдите и войдите под другим логином.</p>
     </article>
+    <article class="card card-pad account-card">
+      <div class="tag">Безопасность</div>
+      <h3 class="calc-card-title">Пароль и активные сессии</h3>
+      <p class="sublead">Можно сменить пароль, оставить только текущую сессию и быстро проверить, где аккаунт ещё открыт.</p>
+      <div class="account-password-grid">
+        <label class="account-label">
+          <span>Текущий пароль</span>
+          <input class="account-input" id="account-current-password" type="password" autocomplete="current-password" placeholder="Current password" />
+        </label>
+        <label class="account-label">
+          <span>Новый пароль</span>
+          <input class="account-input" id="account-new-password" type="password" autocomplete="new-password" placeholder="New password" />
+        </label>
+      </div>
+      <div class="account-actions">
+        <button class="btn btn-primary" type="button" id="account-change-password">Сменить пароль</button>
+        <button class="btn btn-secondary" type="button" id="account-logout-others">Выйти из других сессий</button>
+      </div>
+      <div class="account-status" id="account-self-service-status"></div>
+      <div class="account-session-list" id="account-session-list">
+        <div class="account-empty">Сессии загружаются…</div>
+      </div>
+    </article>
     ${!hasCatalog && !hasSpecial ? `
       <div class="account-empty">
         Для этого аккаунта пока не выданы маршруты \`catalog\` или \`special_pages\`. Настройте scopes в админке.
       </div>
     ` : ""}
   `;
+  bindAccountSelfService();
+  loadMemberSessions();
 }
 
 async function renderMemberCatalog() {
@@ -381,6 +407,110 @@ function bindLogout() {
   });
 }
 
+function bindAccountSelfService() {
+  const changeButton = document.getElementById("account-change-password");
+  const logoutOthersButton = document.getElementById("account-logout-others");
+  if (changeButton) {
+    changeButton.addEventListener("click", changeMemberPassword);
+  }
+  if (logoutOthersButton) {
+    logoutOthersButton.addEventListener("click", logoutOtherMemberSessions);
+  }
+}
+
+async function loadMemberSessions() {
+  const container = document.getElementById("account-session-list");
+  if (!container || !currentSessionUser) return;
+  container.innerHTML = '<div class="account-empty">Сессии загружаются…</div>';
+  try {
+    const response = await fetch(`${apiBase()}/auth/sessions`, {
+      headers: { Accept: "application/json" },
+      credentials: "include",
+    });
+    if (!response.ok) {
+      if (response.status === 401) {
+        redirectToLogin();
+        return;
+      }
+      throw new Error(`HTTP ${response.status}`);
+    }
+    const payload = await response.json();
+    memberSessions = payload.items || [];
+    if (!memberSessions.length) {
+      container.innerHTML = '<div class="account-empty">Активных сессий не найдено.</div>';
+      return;
+    }
+    container.innerHTML = memberSessions.map((item) => `
+      <div class="account-session-item">
+        <strong>${item.current ? "Текущая сессия" : "Активная сессия"}</strong>
+        <div class="account-session-meta">
+          <span>${escapeHtml(item.user_role || "member")}</span>
+          <span>Создана: ${escapeHtml(formatDateTime(item.created_at))}</span>
+          <span>Истекает: ${escapeHtml(formatDateTime(item.expires_at))}</span>
+        </div>
+      </div>
+    `).join("");
+  } catch (error) {
+    container.innerHTML = `<div class="account-empty">Не удалось загрузить сессии: ${escapeHtml(cleanupError(error.message))}</div>`;
+  }
+}
+
+async function changeMemberPassword() {
+  const status = document.getElementById("account-self-service-status");
+  const currentPassword = document.getElementById("account-current-password")?.value || "";
+  const newPassword = document.getElementById("account-new-password")?.value || "";
+  if (!currentPassword || !newPassword) {
+    if (status) status.textContent = "Введите текущий и новый пароль.";
+    return;
+  }
+  if (newPassword.length < 10 || !/[A-Za-zА-Яа-я]/.test(newPassword) || !/\d/.test(newPassword)) {
+    if (status) status.textContent = "Новый пароль должен быть не короче 10 символов и содержать букву и цифру.";
+    return;
+  }
+  if (status) status.textContent = "Обновляю пароль...";
+  try {
+    const response = await fetch(`${apiBase()}/auth/change-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || `HTTP ${response.status}`);
+    }
+    const currentField = document.getElementById("account-current-password");
+    const newField = document.getElementById("account-new-password");
+    if (currentField) currentField.value = "";
+    if (newField) newField.value = "";
+    if (status) status.textContent = "Пароль обновлён. Другие сессии закрыты.";
+    loadMemberSessions();
+  } catch (error) {
+    if (status) status.textContent = `Не удалось сменить пароль: ${cleanupError(error.message)}`;
+  }
+}
+
+async function logoutOtherMemberSessions() {
+  const status = document.getElementById("account-self-service-status");
+  if (status) status.textContent = "Закрываю другие сессии...";
+  try {
+    const response = await fetch(`${apiBase()}/auth/logout-others`, {
+      method: "POST",
+      headers: { Accept: "application/json" },
+      credentials: "include",
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || `HTTP ${response.status}`);
+    }
+    const payload = await response.json();
+    if (status) status.textContent = `Другие сессии закрыты: ${payload.revoked || 0}.`;
+    loadMemberSessions();
+  } catch (error) {
+    if (status) status.textContent = `Не удалось закрыть другие сессии: ${cleanupError(error.message)}`;
+  }
+}
+
 function redirectToLogin() {
   if (!isMembersEnabled()) {
     window.location.href = "/";
@@ -443,6 +573,13 @@ function renderScopeDenied(scope) {
 
 function cleanupError(message) {
   return String(message || "").replace(/^Error:\s*/u, "");
+}
+
+function formatDateTime(value) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleString();
 }
 
 function escapeHtml(value) {

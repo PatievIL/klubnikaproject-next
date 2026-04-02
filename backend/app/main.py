@@ -375,6 +375,11 @@ class PasswordSetRequest(BaseModel):
     password: str = Field(min_length=8)
 
 
+class PasswordChangeRequest(BaseModel):
+    current_password: str = Field(min_length=1)
+    new_password: str = Field(min_length=8)
+
+
 class CatalogItemRequest(BaseModel):
     slug: str = Field(min_length=1)
     title: str = Field(min_length=1)
@@ -1063,7 +1068,7 @@ def rotate_user_key(user_id: int) -> tuple[dict[str, Any], str]:
     return serialize_user(fresh), access_key
 
 
-def set_user_password(user_id: int, password: str) -> dict[str, Any]:
+def set_user_password(user_id: int, password: str, *, revoke_sessions: bool = True) -> dict[str, Any]:
     validate_password_policy(password)
     with closing(db_connect()) as connection:
         row = connection.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
@@ -1075,7 +1080,8 @@ def set_user_password(user_id: int, password: str) -> dict[str, Any]:
         )
         connection.commit()
         fresh = connection.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
-    delete_user_sessions(user_id, account_type=row["account_type"])
+    if revoke_sessions:
+        delete_user_sessions(user_id, account_type=row["account_type"])
     return serialize_user(fresh)
 
 
@@ -1177,7 +1183,7 @@ def resolve_admin_session(raw_token: str) -> dict[str, Any] | None:
     with closing(db_connect()) as connection:
         connection.execute("DELETE FROM admin_sessions WHERE expires_at <= ?", (now,))
         row = connection.execute(
-            "SELECT id, user_id, user_role, user_name FROM admin_sessions WHERE token_hash = ? AND expires_at > ?",
+            "SELECT id, user_id, user_role, user_name, created_at, expires_at FROM admin_sessions WHERE token_hash = ? AND expires_at > ?",
             (hash_token(raw_token), now),
         ).fetchone()
         connection.commit()
@@ -1188,6 +1194,8 @@ def resolve_admin_session(raw_token: str) -> dict[str, Any] | None:
         "user_id": row["user_id"],
         "user_role": row["user_role"],
         "user_name": row["user_name"],
+        "created_at": row["created_at"],
+        "expires_at": row["expires_at"],
     }
 
 
@@ -1198,7 +1206,7 @@ def resolve_member_session(raw_token: str) -> dict[str, Any] | None:
     with closing(db_connect()) as connection:
         connection.execute("DELETE FROM member_sessions WHERE expires_at <= ?", (now,))
         row = connection.execute(
-            "SELECT id, user_id, user_role, user_name, scope_json FROM member_sessions WHERE token_hash = ? AND expires_at > ?",
+            "SELECT id, user_id, user_role, user_name, scope_json, created_at, expires_at FROM member_sessions WHERE token_hash = ? AND expires_at > ?",
             (hash_token(raw_token), now),
         ).fetchone()
         connection.commit()
@@ -1210,7 +1218,92 @@ def resolve_member_session(raw_token: str) -> dict[str, Any] | None:
         "user_role": row["user_role"],
         "user_name": row["user_name"],
         "scopes": json.loads(row["scope_json"] or "[]"),
+        "created_at": row["created_at"],
+        "expires_at": row["expires_at"],
     }
+
+
+def list_admin_sessions_for_user(user_id: int, current_raw_token: str = "") -> list[dict[str, Any]]:
+    now = utc_now()
+    current_hash = hash_token(current_raw_token) if current_raw_token else ""
+    with closing(db_connect()) as connection:
+        connection.execute("DELETE FROM admin_sessions WHERE expires_at <= ?", (now,))
+        rows = connection.execute(
+            """
+            SELECT id, user_role, user_name, created_at, expires_at, token_hash
+            FROM admin_sessions
+            WHERE user_id = ?
+            ORDER BY created_at DESC, id DESC
+            """,
+            (user_id,),
+        ).fetchall()
+        connection.commit()
+    return [
+        {
+            "id": row["id"],
+            "user_role": row["user_role"],
+            "user_name": row["user_name"],
+            "created_at": row["created_at"],
+            "expires_at": row["expires_at"],
+            "current": bool(current_hash and row["token_hash"] == current_hash),
+        }
+        for row in rows
+    ]
+
+
+def list_member_sessions_for_user(user_id: int, current_raw_token: str = "") -> list[dict[str, Any]]:
+    now = utc_now()
+    current_hash = hash_token(current_raw_token) if current_raw_token else ""
+    with closing(db_connect()) as connection:
+        connection.execute("DELETE FROM member_sessions WHERE expires_at <= ?", (now,))
+        rows = connection.execute(
+            """
+            SELECT id, user_role, user_name, scope_json, created_at, expires_at, token_hash
+            FROM member_sessions
+            WHERE user_id = ?
+            ORDER BY created_at DESC, id DESC
+            """,
+            (user_id,),
+        ).fetchall()
+        connection.commit()
+    return [
+        {
+            "id": row["id"],
+            "user_role": row["user_role"],
+            "user_name": row["user_name"],
+            "scopes": json.loads(row["scope_json"] or "[]"),
+            "created_at": row["created_at"],
+            "expires_at": row["expires_at"],
+            "current": bool(current_hash and row["token_hash"] == current_hash),
+        }
+        for row in rows
+    ]
+
+
+def delete_other_admin_sessions(user_id: int, keep_raw_token: str = "") -> None:
+    keep_hash = hash_token(keep_raw_token) if keep_raw_token else ""
+    with closing(db_connect()) as connection:
+        if keep_hash:
+            connection.execute(
+                "DELETE FROM admin_sessions WHERE user_id = ? AND token_hash != ?",
+                (user_id, keep_hash),
+            )
+        else:
+            connection.execute("DELETE FROM admin_sessions WHERE user_id = ?", (user_id,))
+        connection.commit()
+
+
+def delete_other_member_sessions(user_id: int, keep_raw_token: str = "") -> None:
+    keep_hash = hash_token(keep_raw_token) if keep_raw_token else ""
+    with closing(db_connect()) as connection:
+        if keep_hash:
+            connection.execute(
+                "DELETE FROM member_sessions WHERE user_id = ? AND token_hash != ?",
+                (user_id, keep_hash),
+            )
+        else:
+            connection.execute("DELETE FROM member_sessions WHERE user_id = ?", (user_id,))
+        connection.commit()
 
 
 def insert_lead_event(
@@ -1885,6 +1978,69 @@ def admin_auth_access_policy(context: dict[str, Any] = Depends(require_admin)) -
     return {"ok": True, "policy": build_admin_access_policy(context)}
 
 
+@app.get("/v1/admin/auth/sessions")
+def admin_auth_sessions(request: Request, context: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
+    user_id = context.get("user_id")
+    if not user_id:
+        return {"ok": True, "items": []}
+    current_token = request.cookies.get(CONFIG.session_cookie_name, "")
+    return {"ok": True, "items": list_admin_sessions_for_user(int(user_id), current_token)}
+
+
+@app.post("/v1/admin/auth/change-password")
+def admin_auth_change_password(
+    payload: PasswordChangeRequest,
+    request: Request,
+    response: Response,
+    context: dict[str, Any] = Depends(require_admin),
+) -> dict[str, Any]:
+    user_id = context.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Bootstrap token cannot change password here")
+    user_row = find_user_by_id(int(user_id))
+    if user_row is None or user_row["account_type"] != "admin":
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Admin user not found")
+    if not verify_password(payload.current_password, user_row["password_hash"] or ""):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Current password is invalid")
+    set_user_password(int(user_id), payload.new_password, revoke_sessions=False)
+    current_token = request.cookies.get(CONFIG.session_cookie_name, "")
+    delete_other_admin_sessions(int(user_id), current_token)
+    insert_audit_event(
+        actor_user_id=context.get("user_id"),
+        actor_name=context.get("user_name", "Admin"),
+        actor_role=context.get("user_role", "admin"),
+        area="auth",
+        action="admin_change_password",
+        target_type="user",
+        target_id=str(user_id),
+        payload={"other_sessions_revoked": True},
+    )
+    return {"ok": True}
+
+
+@app.post("/v1/admin/auth/logout-others")
+def admin_auth_logout_others(request: Request, context: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
+    user_id = context.get("user_id")
+    if not user_id:
+        return {"ok": True, "revoked": 0}
+    current_token = request.cookies.get(CONFIG.session_cookie_name, "")
+    before = list_admin_sessions_for_user(int(user_id), current_token)
+    delete_other_admin_sessions(int(user_id), current_token)
+    after = list_admin_sessions_for_user(int(user_id), current_token)
+    revoked = max(0, len(before) - len(after))
+    insert_audit_event(
+        actor_user_id=context.get("user_id"),
+        actor_name=context.get("user_name", "Admin"),
+        actor_role=context.get("user_role", "admin"),
+        area="auth",
+        action="admin_logout_others",
+        target_type="session",
+        target_id="admin",
+        payload={"revoked": revoked},
+    )
+    return {"ok": True, "revoked": revoked}
+
+
 @app.post("/v1/admin/auth/logout")
 def admin_auth_logout(request: Request, response: Response) -> dict[str, Any]:
     context = get_admin_context(request)
@@ -2062,6 +2218,62 @@ def member_auth_session(context: dict[str, Any] = Depends(get_member_context)) -
 @app.get("/v1/auth/access-policy")
 def member_auth_access_policy(context: dict[str, Any] = Depends(get_member_context)) -> dict[str, Any]:
     return {"ok": True, "policy": build_member_access_policy(context)}
+
+
+@app.get("/v1/auth/sessions")
+def member_auth_sessions(request: Request, context: dict[str, Any] = Depends(get_member_context)) -> dict[str, Any]:
+    user_id = context.get("user_id")
+    current_token = request.cookies.get(CONFIG.member_session_cookie_name, "")
+    return {"ok": True, "items": list_member_sessions_for_user(int(user_id), current_token)}
+
+
+@app.post("/v1/auth/change-password")
+def member_auth_change_password(
+    payload: PasswordChangeRequest,
+    request: Request,
+    context: dict[str, Any] = Depends(get_member_context),
+) -> dict[str, Any]:
+    user_id = context.get("user_id")
+    user_row = find_user_by_id(int(user_id))
+    if user_row is None or user_row["account_type"] != "member":
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Member user not found")
+    if not verify_password(payload.current_password, user_row["password_hash"] or ""):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Current password is invalid")
+    set_user_password(int(user_id), payload.new_password, revoke_sessions=False)
+    current_token = request.cookies.get(CONFIG.member_session_cookie_name, "")
+    delete_other_member_sessions(int(user_id), current_token)
+    insert_audit_event(
+        actor_user_id=context.get("user_id"),
+        actor_name=context.get("user_name", "Member"),
+        actor_role=context.get("user_role", "member"),
+        area="auth",
+        action="member_change_password",
+        target_type="user",
+        target_id=str(user_id),
+        payload={"other_sessions_revoked": True},
+    )
+    return {"ok": True}
+
+
+@app.post("/v1/auth/logout-others")
+def member_auth_logout_others(request: Request, context: dict[str, Any] = Depends(get_member_context)) -> dict[str, Any]:
+    user_id = context.get("user_id")
+    current_token = request.cookies.get(CONFIG.member_session_cookie_name, "")
+    before = list_member_sessions_for_user(int(user_id), current_token)
+    delete_other_member_sessions(int(user_id), current_token)
+    after = list_member_sessions_for_user(int(user_id), current_token)
+    revoked = max(0, len(before) - len(after))
+    insert_audit_event(
+        actor_user_id=context.get("user_id"),
+        actor_name=context.get("user_name", "Member"),
+        actor_role=context.get("user_role", "member"),
+        area="auth",
+        action="member_logout_others",
+        target_type="session",
+        target_id="member",
+        payload={"revoked": revoked},
+    )
+    return {"ok": True, "revoked": revoked}
 
 
 @app.post("/v1/auth/logout")

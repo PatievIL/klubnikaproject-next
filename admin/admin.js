@@ -155,6 +155,8 @@ const els = {
   backendToken: document.getElementById("admin-backend-token"),
   loginIdentity: document.getElementById("admin-login-identity"),
   loginPassword: document.getElementById("admin-login-password"),
+  currentPassword: document.getElementById("admin-current-password"),
+  newPassword: document.getElementById("admin-new-password"),
   jsonOutput: document.getElementById("admin-json-output"),
   downloadButton: document.getElementById("download-admin-json"),
   copyButton: document.getElementById("copy-admin-json"),
@@ -166,6 +168,9 @@ const els = {
   passwordLoginButton: document.getElementById("admin-password-login-button"),
   sessionButton: document.getElementById("admin-session-button"),
   logoutButton: document.getElementById("admin-logout-button"),
+  changePasswordButton: document.getElementById("admin-change-password-button"),
+  logoutOthersButton: document.getElementById("admin-logout-others-button"),
+  ownSessions: document.getElementById("admin-own-sessions"),
   sessionState: document.getElementById("admin-session-state"),
 };
 
@@ -237,6 +242,8 @@ function bindGlobalEvents() {
   els.passwordLoginButton.addEventListener("click", loginToBackendWithPassword);
   els.sessionButton.addEventListener("click", checkBackendSession);
   els.logoutButton.addEventListener("click", logoutFromBackend);
+  els.changePasswordButton?.addEventListener("click", changeOwnPassword);
+  els.logoutOthersButton?.addEventListener("click", logoutOtherAdminSessions);
   els.backendToken.addEventListener("input", persistBackendToken);
 }
 
@@ -1681,6 +1688,7 @@ async function applyBackendAccessState(user) {
       backendAccessPolicy = null;
     }
   }
+  await renderOwnAdminSessions();
   renderTabs();
   renderCurrentSection();
   renderSummary();
@@ -1689,9 +1697,83 @@ async function applyBackendAccessState(user) {
 function applyGuestAccessState() {
   backendUser = null;
   backendAccessPolicy = null;
+  renderOwnAdminSessions();
   renderTabs();
   renderCurrentSection();
   renderSummary();
+}
+
+async function renderOwnAdminSessions() {
+  if (!els.ownSessions) return;
+  if (!backendUser) {
+    els.ownSessions.innerHTML = '<div class="admin-lead-empty">Список сессий появится после входа.</div>';
+    return;
+  }
+  try {
+    const response = await adminFetch("/admin/auth/sessions");
+    const items = response.items || [];
+    if (!items.length) {
+      els.ownSessions.innerHTML = '<div class="admin-lead-empty">Активных сессий не найдено.</div>';
+      return;
+    }
+    els.ownSessions.innerHTML = items.map((item) => `
+      <div class="admin-session-item">
+        <strong>${item.current ? "Текущая сессия" : "Активная сессия"}</strong>
+        <div class="admin-session-meta">
+          <span>${escapeHtml(item.user_role || "admin")}</span>
+          <span>Создана: ${escapeHtml(formatDateTime(item.created_at))}</span>
+          <span>Истекает: ${escapeHtml(formatDateTime(item.expires_at))}</span>
+        </div>
+      </div>
+    `).join("");
+  } catch (error) {
+    els.ownSessions.innerHTML = `<div class="admin-lead-empty">Не удалось загрузить сессии: ${escapeHtml(error.message)}</div>`;
+  }
+}
+
+async function changeOwnPassword() {
+  const currentPassword = els.currentPassword?.value || "";
+  const newPassword = els.newPassword?.value || "";
+  if (!backendUser?.user_id) {
+    els.sessionState.textContent = "Смена пароля доступна только для именного admin-аккаунта.";
+    return;
+  }
+  if (!currentPassword || !newPassword) {
+    els.sessionState.textContent = "Введите текущий и новый пароль.";
+    return;
+  }
+  if (newPassword.length < 10 || !/[A-Za-zА-Яа-я]/.test(newPassword) || !/\d/.test(newPassword)) {
+    els.sessionState.textContent = "Новый пароль должен быть не короче 10 символов и содержать букву и цифру.";
+    return;
+  }
+  try {
+    els.sessionState.textContent = "Обновляю пароль и закрываю другие сессии...";
+    await adminFetch("/admin/auth/change-password", {
+      method: "POST",
+      body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+    });
+    if (els.currentPassword) els.currentPassword.value = "";
+    if (els.newPassword) els.newPassword.value = "";
+    els.sessionState.textContent = "Пароль обновлён. Другие admin-сессии закрыты.";
+    await renderOwnAdminSessions();
+  } catch (error) {
+    els.sessionState.textContent = `Не удалось сменить пароль: ${error.message}`;
+  }
+}
+
+async function logoutOtherAdminSessions() {
+  if (!backendUser?.user_id) {
+    els.sessionState.textContent = "Закрытие других сессий доступно только для именного admin-аккаунта.";
+    return;
+  }
+  try {
+    els.sessionState.textContent = "Закрываю другие admin-сессии...";
+    const response = await adminFetch("/admin/auth/logout-others", { method: "POST" });
+    els.sessionState.textContent = `Другие сессии закрыты: ${response.revoked || 0}.`;
+    await renderOwnAdminSessions();
+  } catch (error) {
+    els.sessionState.textContent = `Не удалось закрыть другие сессии: ${error.message}`;
+  }
 }
 
 function isDefaultState() {
@@ -1794,6 +1876,13 @@ function escapeHtml(value) {
 
 function escapeAttribute(value) {
   return escapeHtml(value).replaceAll('"', "&quot;");
+}
+
+function formatDateTime(value) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleString();
 }
 
 function copyText(text) {
