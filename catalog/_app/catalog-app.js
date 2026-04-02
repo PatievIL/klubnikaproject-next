@@ -264,6 +264,16 @@ function handleClick(event) {
     setDialog("menu", true);
     return;
   }
+  if (action === "open-menu-category") {
+    state.menuCategorySlug = target.dataset.categorySlug;
+    render();
+    return;
+  }
+  if (action === "back-menu-category") {
+    state.menuCategorySlug = null;
+    render();
+    return;
+  }
   if (action === "open-account") {
     setDialog("account", true);
     return;
@@ -470,13 +480,3 @@ document.addEventListener("change", handleChange);
 document.addEventListener("submit", handleSubmit);
 
 render();
-  if (action === "open-menu-category") {
-    state.menuCategorySlug = target.dataset.categorySlug;
-    render();
-    return;
-  }
-  if (action === "back-menu-category") {
-    state.menuCategorySlug = null;
-    render();
-    return;
-  }
