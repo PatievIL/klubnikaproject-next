@@ -9,6 +9,8 @@
 - приём `leads` от публичных форм
 - `lead inbox` и обновление лидов из внутреннего кабинета
 - `catalog data-layer` как отдельный manifest под категории и ключевые позиции
+- `users / roles` как первый access-layer под внутреннюю CRM
+- `lead events` как история изменений по лиду
 
 Базовые маршруты:
 
@@ -24,8 +26,13 @@
 - `PUT /v1/admin/settings`
 - `GET /v1/admin/catalog/items`
 - `PUT /v1/admin/catalog/items`
+- `GET /v1/admin/users`
+- `POST /v1/admin/users`
+- `PATCH /v1/admin/users/{id}`
+- `POST /v1/admin/users/{id}/rotate-key`
 - `GET /v1/admin/leads`
 - `GET /v1/admin/leads/{id}`
+- `GET /v1/admin/leads/{id}/events`
 - `PATCH /v1/admin/leads/{id}`
 
 ## Локальный запуск

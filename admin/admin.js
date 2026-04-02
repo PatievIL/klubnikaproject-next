@@ -133,6 +133,7 @@ const SECTIONS = [
   { id: "pages", label: "Страницы" },
   { id: "forms", label: "Формы" },
   { id: "crm", label: "CRM" },
+  { id: "users", label: "Доступ" },
   { id: "catalog", label: "Каталог" },
   { id: "seo", label: "SEO" },
   { id: "integrations", label: "Интеграции" },
@@ -160,6 +161,7 @@ const els = {
 let draft = clone(DEFAULT_CONFIG);
 let currentSection = "dashboard";
 let catalogDraft = clone(DEFAULT_CATALOG_ITEMS);
+let usersDraft = [];
 
 init();
 
@@ -231,6 +233,7 @@ function renderCurrentSection() {
     : currentSection === "pages" ? renderPagesSection()
     : currentSection === "forms" ? renderFormsSection()
     : currentSection === "crm" ? renderCrmSection()
+    : currentSection === "users" ? renderUsersSection()
     : currentSection === "catalog" ? renderCatalogSection()
     : currentSection === "seo" ? renderSeoSection()
     : renderIntegrationsSection();
@@ -239,6 +242,9 @@ function renderCurrentSection() {
   bindSectionFields();
   if (currentSection === "crm") {
     loadLeadInbox();
+  }
+  if (currentSection === "users") {
+    bindUsersSection();
   }
   if (currentSection === "catalog") {
     bindCatalogSection();
@@ -424,6 +430,25 @@ function renderCatalogSection() {
   `;
 }
 
+function renderUsersSection() {
+  return `
+    <div class="admin-section-stack">
+      <div class="admin-section-intro">
+        <div class="tag">Доступ</div>
+        <h3 class="calc-card-title">Пользователи и роли доступа</h3>
+        <p class="sublead">Этот слой убирает зависимость от одного общего токена. Здесь можно увидеть текущих пользователей, роли и выпустить новый access key под конкретного человека.</p>
+      </div>
+      <div class="admin-toolbar-actions">
+        <button class="btn btn-secondary" id="load-users-button" type="button">Загрузить пользователей</button>
+        <button class="btn btn-primary" id="create-user-button" type="button">Создать пользователя</button>
+      </div>
+      <div class="admin-lead-list" id="admin-users-list">
+        <div class="admin-lead-empty">Пользователи пока не загружены.</div>
+      </div>
+    </div>
+  `;
+}
+
 function renderSeoSection() {
   return `
     <div class="admin-section-stack">
@@ -512,6 +537,7 @@ function renderSummary() {
     { label: "Lead sources", value: String(draft.crm.leadSources.length) },
     { label: "Pipeline stages", value: String(draft.crm.pipeline.length) },
     { label: "Backend API", value: backendActive ? "указан" : "не указан" },
+    { label: "Users", value: usersDraft.length ? String(usersDraft.length) : "не загружены" },
   ].map((item) => `
     <div class="summary-item">
       <span>${item.label}</span>
@@ -687,11 +713,16 @@ async function loadLeadInbox() {
             <textarea class="admin-textarea" data-lead-note="${lead.id}">${escapeHtml(lead.note || "")}</textarea>
           </label>
           <button class="btn btn-primary admin-lead-save" data-lead-save="${lead.id}" type="button">Сохранить лид</button>
+          <button class="btn btn-secondary admin-lead-history-toggle" data-lead-history-toggle="${lead.id}" type="button">Показать историю</button>
+          <div class="admin-lead-history" data-lead-history="${lead.id}" hidden></div>
         </div>
       </article>
     `).join("");
     list.querySelectorAll("[data-lead-save]").forEach((button) => {
       button.addEventListener("click", () => saveLead(button.dataset.leadSave));
+    });
+    list.querySelectorAll("[data-lead-history-toggle]").forEach((button) => {
+      button.addEventListener("click", () => loadLeadHistory(button.dataset.leadHistoryToggle, button));
     });
   } catch (error) {
     list.innerHTML = `<div class="admin-lead-empty">Не удалось загрузить лиды: ${escapeHtml(error.message)}</div>`;
@@ -716,6 +747,154 @@ async function saveLead(leadId) {
     loadLeadInbox();
   } catch (error) {
     els.status.textContent = `Не удалось обновить лид #${leadId}: ${error.message}`;
+  }
+}
+
+async function loadLeadHistory(leadId, button) {
+  const container = document.querySelector(`[data-lead-history="${leadId}"]`);
+  if (!container) return;
+  const expanded = !container.hidden;
+  if (expanded) {
+    container.hidden = true;
+    button.textContent = "Показать историю";
+    return;
+  }
+  container.hidden = false;
+  button.textContent = "Скрыть историю";
+  container.innerHTML = '<div class="admin-lead-empty">Загружаю историю…</div>';
+  try {
+    const response = await adminFetch(`/admin/leads/${leadId}/events`);
+    const items = response.items || [];
+    if (!items.length) {
+      container.innerHTML = '<div class="admin-lead-empty">Истории по лиду пока нет.</div>';
+      return;
+    }
+    container.innerHTML = items.map((item) => `
+      <div class="admin-history-item">
+        <strong>${escapeHtml(item.event_type)}</strong>
+        <span>${escapeHtml(item.actor_name || "system")} · ${escapeHtml(item.actor_role || "")}</span>
+        <span>${escapeHtml(item.created_at || "")}</span>
+      </div>
+    `).join("");
+  } catch (error) {
+    container.innerHTML = `<div class="admin-lead-empty">Не удалось загрузить историю: ${escapeHtml(error.message)}</div>`;
+  }
+}
+
+function bindUsersSection() {
+  const loadButton = document.getElementById("load-users-button");
+  const createButton = document.getElementById("create-user-button");
+  if (loadButton) loadButton.addEventListener("click", loadUsers);
+  if (createButton) createButton.addEventListener("click", createUser);
+}
+
+async function loadUsers() {
+  const list = document.getElementById("admin-users-list");
+  if (!list) return;
+  list.innerHTML = '<div class="admin-lead-empty">Загружаю пользователей…</div>';
+  try {
+    const response = await adminFetch("/admin/users");
+    usersDraft = response.items || [];
+    renderSummary();
+    if (!usersDraft.length) {
+      list.innerHTML = '<div class="admin-lead-empty">Пользователей пока нет.</div>';
+      return;
+    }
+    list.innerHTML = usersDraft.map((user) => `
+      <article class="admin-lead-card">
+        <div class="admin-lead-head">
+          <strong>${escapeHtml(user.display_name)}</strong>
+          <span>${escapeHtml(user.role)}</span>
+        </div>
+        <div class="admin-lead-meta">
+          <span>${escapeHtml(user.slug)}</span>
+          <span>${escapeHtml(user.email || "email не указан")}</span>
+        </div>
+        <div class="admin-lead-actions">
+          <label class="admin-field">
+            <span class="admin-field-label">Имя</span>
+            <input class="admin-input" data-user-name="${user.id}" type="text" value="${escapeAttribute(user.display_name)}" />
+          </label>
+          <label class="admin-field">
+            <span class="admin-field-label">Email</span>
+            <input class="admin-input" data-user-email="${user.id}" type="text" value="${escapeAttribute(user.email || "")}" />
+          </label>
+          <label class="admin-field">
+            <span class="admin-field-label">Роль</span>
+            <select class="admin-select" data-user-role="${user.id}">
+              ${["owner","admin","manager","editor","viewer"].map((role) => `<option value="${role}" ${user.role === role ? "selected" : ""}>${role}</option>`).join("")}
+            </select>
+          </label>
+          <label class="admin-field">
+            <span class="admin-field-label">Активен</span>
+            <input class="admin-input" data-user-active="${user.id}" type="checkbox" ${user.is_active ? "checked" : ""} />
+          </label>
+          <button class="btn btn-primary admin-user-save" data-user-save="${user.id}" type="button">Сохранить пользователя</button>
+          <button class="btn btn-secondary admin-user-rotate" data-user-rotate="${user.id}" type="button">Сменить access key</button>
+        </div>
+      </article>
+    `).join("");
+    list.querySelectorAll("[data-user-save]").forEach((button) => {
+      button.addEventListener("click", () => saveUser(button.dataset.userSave));
+    });
+    list.querySelectorAll("[data-user-rotate]").forEach((button) => {
+      button.addEventListener("click", () => rotateUserKey(button.dataset.userRotate));
+    });
+  } catch (error) {
+    list.innerHTML = `<div class="admin-lead-empty">Не удалось загрузить пользователей: ${escapeHtml(error.message)}</div>`;
+  }
+}
+
+async function createUser() {
+  const slug = window.prompt("Slug нового пользователя");
+  if (!slug) return;
+  const displayName = window.prompt("Имя пользователя");
+  if (!displayName) return;
+  const email = window.prompt("Email пользователя", "") || "";
+  const role = window.prompt("Роль: owner/admin/manager/editor/viewer", "manager") || "manager";
+  try {
+    const response = await adminFetch("/admin/users", {
+      method: "POST",
+      body: JSON.stringify({ slug, display_name: displayName, email, role }),
+    });
+    els.status.textContent = `Пользователь создан. Access key: ${response.access_key}`;
+    loadUsers();
+  } catch (error) {
+    els.status.textContent = `Не удалось создать пользователя: ${error.message}`;
+  }
+}
+
+async function saveUser(userId) {
+  const nameField = document.querySelector(`[data-user-name="${userId}"]`);
+  const emailField = document.querySelector(`[data-user-email="${userId}"]`);
+  const roleField = document.querySelector(`[data-user-role="${userId}"]`);
+  const activeField = document.querySelector(`[data-user-active="${userId}"]`);
+  try {
+    await adminFetch(`/admin/users/${userId}`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        display_name: nameField?.value || "",
+        email: emailField?.value || "",
+        role: roleField?.value || "manager",
+        is_active: Boolean(activeField?.checked),
+      }),
+    });
+    els.status.textContent = `Пользователь #${userId} обновлён.`;
+    loadUsers();
+  } catch (error) {
+    els.status.textContent = `Не удалось обновить пользователя #${userId}: ${error.message}`;
+  }
+}
+
+async function rotateUserKey(userId) {
+  try {
+    const response = await adminFetch(`/admin/users/${userId}/rotate-key`, {
+      method: "POST",
+    });
+    els.status.textContent = `Новый access key для пользователя #${userId}: ${response.access_key}`;
+    loadUsers();
+  } catch (error) {
+    els.status.textContent = `Не удалось сменить ключ пользователя #${userId}: ${error.message}`;
   }
 }
 
@@ -764,11 +943,14 @@ async function loginToBackend() {
   }
   try {
     els.sessionState.textContent = "Выполняю вход...";
-    await adminFetch("/admin/auth/login", {
+    const response = await adminFetch("/admin/auth/login", {
       method: "POST",
       body: JSON.stringify({ token }),
     });
-    els.sessionState.textContent = "Сессия backend активна.";
+    const user = response.user;
+    els.sessionState.textContent = user
+      ? `Сессия backend активна: ${user.display_name || user.user_name || "пользователь"} (${user.role || user.user_role || "role"})`
+      : "Сессия backend активна.";
   } catch (error) {
     els.sessionState.textContent = `Вход не удался: ${error.message}`;
   }
@@ -778,7 +960,10 @@ async function checkBackendSession() {
   try {
     els.sessionState.textContent = "Проверяю сессию...";
     const response = await adminFetch("/admin/auth/session");
-    els.sessionState.textContent = response.session ? "Сессия backend активна." : "Сессия backend не найдена.";
+    const user = response.user;
+    els.sessionState.textContent = response.session
+      ? `Сессия backend активна: ${user?.user_name || user?.display_name || "пользователь"} (${user?.user_role || user?.role || "role"})`
+      : "Сессия backend не найдена.";
   } catch (error) {
     els.sessionState.textContent = `Сессия не подтверждена: ${error.message}`;
   }

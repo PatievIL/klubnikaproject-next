@@ -246,9 +246,33 @@ DEFAULT_CATALOG_ITEMS: list[dict[str, Any]] = [
     },
 ]
 
+DEFAULT_USERS: list[dict[str, Any]] = [
+    {
+        "slug": "ilya",
+        "display_name": "Илья",
+        "email": "",
+        "role": "owner",
+        "is_active": True,
+    }
+]
+
 
 class AuthRequest(BaseModel):
     token: str = Field(min_length=1)
+
+
+class UserCreateRequest(BaseModel):
+    slug: str = Field(min_length=1)
+    display_name: str = Field(min_length=1)
+    email: str = ""
+    role: str = Field(default="manager", min_length=1)
+
+
+class UserUpdateRequest(BaseModel):
+    display_name: str | None = None
+    email: str | None = None
+    role: str | None = None
+    is_active: bool | None = None
 
 
 class CatalogItemRequest(BaseModel):
@@ -348,8 +372,24 @@ def init_db() -> None:
             CREATE TABLE IF NOT EXISTS admin_sessions (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               token_hash TEXT NOT NULL UNIQUE,
+              user_id INTEGER,
+              user_role TEXT NOT NULL DEFAULT '',
+              user_name TEXT NOT NULL DEFAULT '',
               created_at TEXT NOT NULL,
               expires_at TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS users (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              slug TEXT NOT NULL UNIQUE,
+              display_name TEXT NOT NULL,
+              email TEXT NOT NULL,
+              role TEXT NOT NULL,
+              access_key_hash TEXT NOT NULL,
+              access_key_hint TEXT NOT NULL,
+              is_active INTEGER NOT NULL DEFAULT 1,
+              created_at TEXT NOT NULL,
+              updated_at TEXT NOT NULL
             );
 
             CREATE TABLE IF NOT EXISTS catalog_items (
@@ -365,14 +405,56 @@ def init_db() -> None:
               sort_order INTEGER NOT NULL DEFAULT 0,
               updated_at TEXT NOT NULL
             );
+
+            CREATE TABLE IF NOT EXISTS lead_events (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              lead_id INTEGER NOT NULL,
+              event_type TEXT NOT NULL,
+              actor_user_id INTEGER,
+              actor_name TEXT NOT NULL,
+              actor_role TEXT NOT NULL,
+              payload_json TEXT NOT NULL,
+              created_at TEXT NOT NULL
+            );
             """
         )
+        existing_session_columns = {
+            row["name"] for row in connection.execute("PRAGMA table_info(admin_sessions)").fetchall()
+        }
+        if "user_id" not in existing_session_columns:
+            connection.execute("ALTER TABLE admin_sessions ADD COLUMN user_id INTEGER")
+        if "user_role" not in existing_session_columns:
+            connection.execute("ALTER TABLE admin_sessions ADD COLUMN user_role TEXT NOT NULL DEFAULT ''")
+        if "user_name" not in existing_session_columns:
+            connection.execute("ALTER TABLE admin_sessions ADD COLUMN user_name TEXT NOT NULL DEFAULT ''")
         row = connection.execute("SELECT payload_json FROM site_settings WHERE id = 1").fetchone()
         if row is None:
             connection.execute(
                 "INSERT INTO site_settings (id, payload_json, updated_at) VALUES (1, ?, ?)",
                 (json.dumps(DEFAULT_SITE_SETTINGS, ensure_ascii=False), utc_now()),
             )
+        users_row = connection.execute("SELECT COUNT(*) AS count FROM users").fetchone()
+        if users_row["count"] == 0:
+            now = utc_now()
+            for user in DEFAULT_USERS:
+                connection.execute(
+                    """
+                    INSERT INTO users (
+                      slug, display_name, email, role, access_key_hash, access_key_hint, is_active, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        user["slug"],
+                        user["display_name"],
+                        user["email"],
+                        user["role"],
+                        hash_token(CONFIG.admin_token),
+                        "bootstrap token",
+                        1,
+                        now,
+                        now,
+                    ),
+                )
         catalog_row = connection.execute("SELECT COUNT(*) AS count FROM catalog_items").fetchone()
         if catalog_row["count"] == 0:
             now = utc_now()
@@ -488,6 +570,102 @@ def list_catalog_items(status_filter: str = "") -> list[dict[str, Any]]:
     ]
 
 
+def serialize_user(row: sqlite3.Row) -> dict[str, Any]:
+    return {
+        "id": row["id"],
+        "slug": row["slug"],
+        "display_name": row["display_name"],
+        "email": row["email"],
+        "role": row["role"],
+        "access_key_hint": row["access_key_hint"],
+        "is_active": bool(row["is_active"]),
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
+    }
+
+
+def list_users() -> list[dict[str, Any]]:
+    with closing(db_connect()) as connection:
+        rows = connection.execute("SELECT * FROM users ORDER BY id ASC").fetchall()
+    return [serialize_user(row) for row in rows]
+
+
+def find_user_by_access_key(token: str) -> sqlite3.Row | None:
+    with closing(db_connect()) as connection:
+        row = connection.execute(
+            "SELECT * FROM users WHERE access_key_hash = ? AND is_active = 1 LIMIT 1",
+            (hash_token(token),),
+        ).fetchone()
+    return row
+
+
+def create_user(payload: UserCreateRequest) -> tuple[dict[str, Any], str]:
+    access_key = secrets.token_urlsafe(18)
+    now = utc_now()
+    with closing(db_connect()) as connection:
+        cursor = connection.execute(
+            """
+            INSERT INTO users (
+              slug, display_name, email, role, access_key_hash, access_key_hint, is_active, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                payload.slug,
+                payload.display_name,
+                payload.email,
+                payload.role,
+                hash_token(access_key),
+                f"{payload.slug}-key",
+                1,
+                now,
+                now,
+            ),
+        )
+        connection.commit()
+        row = connection.execute("SELECT * FROM users WHERE id = ?", (cursor.lastrowid,)).fetchone()
+    return serialize_user(row), access_key
+
+
+def update_user(user_id: int, payload: UserUpdateRequest) -> dict[str, Any]:
+    with closing(db_connect()) as connection:
+        row = connection.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+        if row is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        connection.execute(
+            """
+            UPDATE users
+            SET display_name = ?, email = ?, role = ?, is_active = ?, updated_at = ?
+            WHERE id = ?
+            """,
+            (
+                payload.display_name if payload.display_name is not None else row["display_name"],
+                payload.email if payload.email is not None else row["email"],
+                payload.role if payload.role is not None else row["role"],
+                int(payload.is_active) if payload.is_active is not None else row["is_active"],
+                utc_now(),
+                user_id,
+            ),
+        )
+        connection.commit()
+        fresh = connection.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    return serialize_user(fresh)
+
+
+def rotate_user_key(user_id: int) -> tuple[dict[str, Any], str]:
+    access_key = secrets.token_urlsafe(18)
+    with closing(db_connect()) as connection:
+        row = connection.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+        if row is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        connection.execute(
+            "UPDATE users SET access_key_hash = ?, updated_at = ? WHERE id = ?",
+            (hash_token(access_key), utc_now(), user_id),
+        )
+        connection.commit()
+        fresh = connection.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    return serialize_user(fresh), access_key
+
+
 def replace_catalog_items(items: list[CatalogItemRequest]) -> list[dict[str, Any]]:
     now = utc_now()
     with closing(db_connect()) as connection:
@@ -516,17 +694,24 @@ def replace_catalog_items(items: list[CatalogItemRequest]) -> list[dict[str, Any
     return list_catalog_items()
 
 
-def create_admin_session() -> str:
+def create_admin_session(user_id: int | None, user_role: str, user_name: str) -> str:
     raw_token = secrets.token_urlsafe(32)
     now = datetime.now(timezone.utc)
     expires_at = now.replace(microsecond=0).timestamp() + 60 * 60 * 24 * 14
     with closing(db_connect()) as connection:
         connection.execute(
             """
-            INSERT INTO admin_sessions (token_hash, created_at, expires_at)
-            VALUES (?, ?, ?)
+            INSERT INTO admin_sessions (token_hash, user_id, user_role, user_name, created_at, expires_at)
+            VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (hash_token(raw_token), utc_now(), datetime.fromtimestamp(expires_at, timezone.utc).replace(microsecond=0).isoformat()),
+            (
+                hash_token(raw_token),
+                user_id,
+                user_role,
+                user_name,
+                utc_now(),
+                datetime.fromtimestamp(expires_at, timezone.utc).replace(microsecond=0).isoformat(),
+            ),
         )
         connection.commit()
     return raw_token
@@ -540,18 +725,74 @@ def delete_admin_session(raw_token: str) -> None:
         connection.commit()
 
 
-def resolve_admin_session(raw_token: str) -> bool:
+def resolve_admin_session(raw_token: str) -> dict[str, Any] | None:
     if not raw_token:
-        return False
+        return None
     now = utc_now()
     with closing(db_connect()) as connection:
         connection.execute("DELETE FROM admin_sessions WHERE expires_at <= ?", (now,))
         row = connection.execute(
-            "SELECT id FROM admin_sessions WHERE token_hash = ? AND expires_at > ?",
+            "SELECT id, user_id, user_role, user_name FROM admin_sessions WHERE token_hash = ? AND expires_at > ?",
             (hash_token(raw_token), now),
         ).fetchone()
         connection.commit()
-    return row is not None
+    if row is None:
+        return None
+    return {
+        "session_id": row["id"],
+        "user_id": row["user_id"],
+        "user_role": row["user_role"],
+        "user_name": row["user_name"],
+    }
+
+
+def insert_lead_event(
+    lead_id: int,
+    event_type: str,
+    actor_user_id: int | None,
+    actor_name: str,
+    actor_role: str,
+    payload: dict[str, Any],
+) -> None:
+    with closing(db_connect()) as connection:
+        connection.execute(
+            """
+            INSERT INTO lead_events (
+              lead_id, event_type, actor_user_id, actor_name, actor_role, payload_json, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                lead_id,
+                event_type,
+                actor_user_id,
+                actor_name,
+                actor_role,
+                json.dumps(payload, ensure_ascii=False),
+                utc_now(),
+            ),
+        )
+        connection.commit()
+
+
+def list_lead_events(lead_id: int) -> list[dict[str, Any]]:
+    with closing(db_connect()) as connection:
+        rows = connection.execute(
+            "SELECT * FROM lead_events WHERE lead_id = ? ORDER BY id DESC",
+            (lead_id,),
+        ).fetchall()
+    return [
+        {
+            "id": row["id"],
+            "lead_id": row["lead_id"],
+            "event_type": row["event_type"],
+            "actor_user_id": row["actor_user_id"],
+            "actor_name": row["actor_name"],
+            "actor_role": row["actor_role"],
+            "payload": json.loads(row["payload_json"] or "{}"),
+            "created_at": row["created_at"],
+        }
+        for row in rows
+    ]
 
 
 def insert_lead(lead: LeadCreateRequest, resolved_settings: dict[str, Any]) -> dict[str, Any]:
@@ -594,6 +835,18 @@ def insert_lead(lead: LeadCreateRequest, resolved_settings: dict[str, Any]) -> d
         )
         connection.commit()
         lead_id = cursor.lastrowid
+    insert_lead_event(
+        lead_id=lead_id,
+        event_type="created",
+        actor_user_id=None,
+        actor_name="Public form",
+        actor_role="public",
+        payload={
+            "source": lead.source,
+            "route": lead.route,
+            "what_needed": lead.what_needed,
+        },
+    )
     return {"id": lead_id, "status": status_value, "owner": owner_value}
 
 
@@ -624,15 +877,39 @@ def serialize_lead(row: sqlite3.Row) -> dict[str, Any]:
     }
 
 
-def require_admin(request: Request, authorization: str | None = Header(default=None)) -> None:
+def get_admin_context(request: Request, authorization: str | None = Header(default=None)) -> dict[str, Any]:
     token = (authorization or "").removeprefix("Bearer ").strip()
     if token and token == CONFIG.admin_token:
-        return
+        return {"user_id": None, "user_role": "owner", "user_name": "Bootstrap admin"}
+    if token:
+        user_row = find_user_by_access_key(token)
+        if user_row is not None:
+            return {
+                "user_id": user_row["id"],
+                "user_role": user_row["role"],
+                "user_name": user_row["display_name"],
+            }
     session_token = request.cookies.get(CONFIG.session_cookie_name, "")
-    if resolve_admin_session(session_token):
-        return
-    if not token or token != CONFIG.admin_token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid admin token")
+    session_ctx = resolve_admin_session(session_token)
+    if session_ctx:
+        return {
+            "user_id": session_ctx["user_id"],
+            "user_role": session_ctx["user_role"],
+            "user_name": session_ctx["user_name"],
+        }
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid admin token")
+
+
+def require_admin(request: Request, authorization: str | None = Header(default=None)) -> dict[str, Any]:
+    return get_admin_context(request, authorization)
+
+
+def require_roles(*roles: str):
+    def checker(context: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
+        if context.get("user_role") not in roles:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient role")
+        return context
+    return checker
 
 
 app = FastAPI(title="KlubnikaProject Backend", version="0.1.0")
@@ -685,16 +962,30 @@ def create_lead(payload: LeadCreateRequest) -> dict[str, Any]:
 
 @app.post("/v1/admin/auth/verify")
 def admin_auth_verify(payload: AuthRequest) -> dict[str, Any]:
-    if payload.token != CONFIG.admin_token:
+    if payload.token == CONFIG.admin_token:
+        return {"ok": True, "user": {"display_name": "Bootstrap admin", "role": "owner"}}
+    user_row = find_user_by_access_key(payload.token)
+    if user_row is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-    return {"ok": True}
+    return {"ok": True, "user": serialize_user(user_row)}
 
 
 @app.post("/v1/admin/auth/login")
 def admin_auth_login(payload: AuthRequest, response: Response) -> dict[str, Any]:
-    if payload.token != CONFIG.admin_token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-    session_token = create_admin_session()
+    if payload.token == CONFIG.admin_token:
+        user_id = None
+        user_role = "owner"
+        user_name = "Bootstrap admin"
+        user_payload = {"display_name": user_name, "role": user_role}
+    else:
+        user_row = find_user_by_access_key(payload.token)
+        if user_row is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        user_id = user_row["id"]
+        user_role = user_row["role"]
+        user_name = user_row["display_name"]
+        user_payload = serialize_user(user_row)
+    session_token = create_admin_session(user_id=user_id, user_role=user_role, user_name=user_name)
     response.set_cookie(
         key=CONFIG.session_cookie_name,
         value=session_token,
@@ -704,13 +995,12 @@ def admin_auth_login(payload: AuthRequest, response: Response) -> dict[str, Any]
         max_age=60 * 60 * 24 * 14,
         path="/",
     )
-    return {"ok": True}
+    return {"ok": True, "user": user_payload}
 
 
 @app.get("/v1/admin/auth/session")
-def admin_auth_session(request: Request, _: None = Depends(require_admin)) -> dict[str, Any]:
-    session_active = resolve_admin_session(request.cookies.get(CONFIG.session_cookie_name, ""))
-    return {"ok": True, "session": session_active}
+def admin_auth_session(context: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
+    return {"ok": True, "session": True, "user": context}
 
 
 @app.post("/v1/admin/auth/logout")
@@ -721,32 +1011,54 @@ def admin_auth_logout(request: Request, response: Response) -> dict[str, Any]:
 
 
 @app.get("/v1/admin/settings")
-def admin_get_settings(_: None = Depends(require_admin)) -> dict[str, Any]:
+def admin_get_settings(_: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
     return {"settings": read_settings()}
 
 
 @app.put("/v1/admin/settings")
-def admin_put_settings(payload: SettingsEnvelope, _: None = Depends(require_admin)) -> dict[str, Any]:
+def admin_put_settings(payload: SettingsEnvelope, _: dict[str, Any] = Depends(require_roles("owner", "admin"))) -> dict[str, Any]:
     written = write_settings(payload.settings)
     return {"ok": True, "settings": written}
 
 
 @app.get("/v1/admin/catalog/items")
-def admin_list_catalog_items(_: None = Depends(require_admin)) -> dict[str, Any]:
+def admin_list_catalog_items(_: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
     return {"items": list_catalog_items()}
 
 
 @app.put("/v1/admin/catalog/items")
-def admin_put_catalog_items(payload: CatalogEnvelope, _: None = Depends(require_admin)) -> dict[str, Any]:
+def admin_put_catalog_items(payload: CatalogEnvelope, _: dict[str, Any] = Depends(require_roles("owner", "admin", "editor"))) -> dict[str, Any]:
     written = replace_catalog_items(payload.items)
     return {"ok": True, "items": written}
+
+
+@app.get("/v1/admin/users")
+def admin_list_users(_: dict[str, Any] = Depends(require_roles("owner", "admin"))) -> dict[str, Any]:
+    return {"items": list_users()}
+
+
+@app.post("/v1/admin/users")
+def admin_create_user(payload: UserCreateRequest, _: dict[str, Any] = Depends(require_roles("owner", "admin"))) -> dict[str, Any]:
+    user, access_key = create_user(payload)
+    return {"ok": True, "item": user, "access_key": access_key}
+
+
+@app.patch("/v1/admin/users/{user_id}")
+def admin_patch_user(user_id: int, payload: UserUpdateRequest, _: dict[str, Any] = Depends(require_roles("owner", "admin"))) -> dict[str, Any]:
+    return {"ok": True, "item": update_user(user_id, payload)}
+
+
+@app.post("/v1/admin/users/{user_id}/rotate-key")
+def admin_rotate_user_key(user_id: int, _: dict[str, Any] = Depends(require_roles("owner", "admin"))) -> dict[str, Any]:
+    user, access_key = rotate_user_key(user_id)
+    return {"ok": True, "item": user, "access_key": access_key}
 
 
 @app.get("/v1/admin/leads")
 def admin_list_leads(
     limit: int = 50,
     status_filter: str = "",
-    _: None = Depends(require_admin),
+    _: dict[str, Any] = Depends(require_admin),
 ) -> dict[str, Any]:
     limit = max(1, min(limit, 200))
     query = "SELECT * FROM leads"
@@ -766,7 +1078,7 @@ def admin_list_leads(
 
 
 @app.get("/v1/admin/leads/{lead_id}")
-def admin_get_lead(lead_id: int, _: None = Depends(require_admin)) -> dict[str, Any]:
+def admin_get_lead(lead_id: int, _: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
     with closing(db_connect()) as connection:
         row = connection.execute("SELECT * FROM leads WHERE id = ?", (lead_id,)).fetchone()
     if row is None:
@@ -774,8 +1086,17 @@ def admin_get_lead(lead_id: int, _: None = Depends(require_admin)) -> dict[str, 
     return {"item": serialize_lead(row)}
 
 
+@app.get("/v1/admin/leads/{lead_id}/events")
+def admin_get_lead_events(lead_id: int, _: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
+    return {"items": list_lead_events(lead_id)}
+
+
 @app.patch("/v1/admin/leads/{lead_id}")
-def admin_patch_lead(lead_id: int, payload: LeadUpdateRequest, _: None = Depends(require_admin)) -> dict[str, Any]:
+def admin_patch_lead(
+    lead_id: int,
+    payload: LeadUpdateRequest,
+    context: dict[str, Any] = Depends(require_roles("owner", "admin", "manager", "editor")),
+) -> dict[str, Any]:
     with closing(db_connect()) as connection:
         row = connection.execute("SELECT * FROM leads WHERE id = ?", (lead_id,)).fetchone()
         if row is None:
@@ -784,6 +1105,18 @@ def admin_patch_lead(lead_id: int, payload: LeadUpdateRequest, _: None = Depends
         updated_status = payload.status if payload.status is not None else current["status"]
         updated_owner = payload.owner if payload.owner is not None else current["owner"]
         updated_note = payload.note if payload.note is not None else current["note"]
+        change_payload = {
+            "from": {
+                "status": current["status"],
+                "owner": current["owner"],
+                "note": current["note"],
+            },
+            "to": {
+                "status": updated_status,
+                "owner": updated_owner,
+                "note": updated_note,
+            },
+        }
         connection.execute(
             """
             UPDATE leads
@@ -794,6 +1127,14 @@ def admin_patch_lead(lead_id: int, payload: LeadUpdateRequest, _: None = Depends
         )
         connection.commit()
         fresh = connection.execute("SELECT * FROM leads WHERE id = ?", (lead_id,)).fetchone()
+    insert_lead_event(
+        lead_id=lead_id,
+        event_type="updated",
+        actor_user_id=context.get("user_id"),
+        actor_name=context.get("user_name", "Admin"),
+        actor_role=context.get("user_role", "admin"),
+        payload=change_payload,
+    )
     return {"ok": True, "item": serialize_lead(fresh)}
 
 

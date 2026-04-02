@@ -154,6 +154,8 @@ node scripts/build-seo.mjs
 - публичные формы читают runtime-конфиг через `site.js` и отправляют лиды в backend
 - lead inbox уже читает реальные лиды из API
 - catalog manifest вынесен в отдельный backend layer как задел под CMS-lite
+- пользователи и роли доступа вынесены в backend как первый access-layer
+- история изменений по лидам уже пишется в `lead events`
 
 Это позволяет дальше развивать сайт уже не как набор HTML-страниц с ручным handoff, а как управляемую систему.
 
@@ -183,6 +185,16 @@ Backend уже поднят на существующей VM `farms-vm` в Googl
 - `https://api.klubnikaproject.ru/site/v1/health`
 - `https://api.klubnikaproject.ru/site/v1/public/settings`
 - `https://api.klubnikaproject.ru/site/v1/public/catalog/items`
+
+Внутренний слой через `/admin/` уже умеет:
+
+- backend login / session / logout
+- тянуть и сохранять site settings
+- работать с lead inbox
+- обновлять статус / owner / note у лида
+- смотреть историю изменений лида
+- управлять первым слоем пользователей и ролей
+- редактировать catalog manifest
 
 Доступ:
 
