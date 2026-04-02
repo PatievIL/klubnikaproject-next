@@ -6,10 +6,10 @@
   <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png" />
   <link rel="manifest" href="../site.webmanifest" />
-  <title>Админ кабинет сайта — Klubnika Project</title>
+  <title>Рабочий кабинет сайта — Klubnika Project</title>
   <meta
     name="description"
-    content="Внутренний кабинет настройки сайта Klubnika Project: контент, формы, CRM-схема, SEO-рамка и экспорт структуры для будущей CMS/CRM."
+    content="Рабочий кабинет Klubnika Project: настройки сайта, доступы, формы, лиды и внутренние разделы без публичной индексации."
   />
   <link rel="stylesheet" href="../styles.css?v=20260402c" />
   <link rel="stylesheet" href="./admin.css?v=20260402l" />
@@ -31,7 +31,7 @@
                 <span class="brand-title-line">Klubnika</span>
                 <span class="brand-title-line">Project</span>
               </div>
-              <div class="brand-note">Внутренний кабинет сайта и задел под CRM</div>
+              <div class="brand-note">Рабочий кабинет сайта и заявок</div>
             </div>
           </a>
 
@@ -49,15 +49,13 @@
 
         <div class="hero-grid admin-hub-hero">
           <div class="hero-copy">
-            <span class="eyebrow">Внутренний инструмент</span>
-            <h1>Единый кабинет для настроек сайта, контента, форм и будущей CRM</h1>
+            <span class="eyebrow">Внутренний кабинет</span>
+            <h1>Рабочий кабинет сайта, доступов и заявок</h1>
             <p class="lead">
-              Это не CMS в полном смысле и не рабочая CRM. Это управляемый внутренний слой,
-              где можно собрать структуру сайта, каналы заявок, стадии лидов, SEO-рамку и экспортировать всё в JSON.
+              Здесь вы управляете настройками сайта, формами, доступами и рабочими заявками без захода в код.
             </p>
             <p class="sublead">
-              Подход годится как промежуточный контур перед своей CMS/CRM: сначала фиксируем модель,
-              потом подвязываем сохранение к backend без переписывания логики.
+              После входа станут доступны нужные разделы: сайт, лиды, пользователи, аудит и внутренние настройки.
             </p>
 
             <div class="btn-row hero-cta">
@@ -67,28 +65,26 @@
 
             <div class="hero-stats">
               <div class="hero-stat">
-                <strong>Что управляем здесь</strong>
-                <span>Сайт, CTA, формы, контакты, страницы, CRM-статусы, SEO и интеграционный план.</span>
+                <strong>Проверить заявки</strong>
+                <span>Открыть CRM-слой, посмотреть лиды и их текущий статус.</span>
               </div>
               <div class="hero-stat">
-                <strong>Что уже работает</strong>
-                <span>Backend уже принимает лиды, хранит site settings и даёт админ-сессию для кабинета.</span>
+                <strong>Обновить сайт</strong>
+                <span>Настроить контакты, формы, CTA, видимые разделы и рабочие сценарии.</span>
               </div>
               <div class="hero-stat">
-                <strong>Следующий этап</strong>
-                <span>Расширить CRM, каталог и роли доступа без возврата к ручному HTML-управлению.</span>
+                <strong>Управлять доступом</strong>
+                <span>Выдать роли, ограничить разделы и проверить историю действий.</span>
               </div>
             </div>
           </div>
 
           <aside class="visual-panel admin-hub-note">
-            <div class="tag">Что внутри</div>
+            <div class="tag">Быстрый маршрут</div>
             <ul class="calc-list">
-              <li>Общие настройки проекта и контактов.</li>
-              <li>Публичные страницы, CTA и их роли.</li>
-              <li>Формы, handoff-логика и Telegram.</li>
-              <li>CRM-схема: стадии, источники, поля, владельцы.</li>
-              <li>Экспорт JSON как база под свою CMS/CRM.</li>
+              <li>Сначала войдите в кабинет по логину и паролю.</li>
+              <li>Потом откроются нужные разделы по вашей роли.</li>
+              <li>Token оставлен как аварийный резерв, а не как основной путь.</li>
             </ul>
           </aside>
         </div>
@@ -116,38 +112,30 @@
 
             <aside class="admin-hub-sidebar">
               <div class="card card-pad admin-card admin-sticky">
-                <div class="tag">Snapshot</div>
-                <h3 class="calc-card-title">Сводка по текущему draft</h3>
-                <p class="sublead">Это текущая конфигурация внутреннего кабинета, из которой позже можно собирать CMS-lite или lead inbox.</p>
-
-                <div class="summary-grid" id="admin-summary-grid"></div>
-
-                <div class="admin-hub-links">
-                  <a class="btn btn-primary" href="../calc/admin/">Цены калькулятора</a>
-                  <a class="btn btn-secondary" href="../" target="_blank" rel="noreferrer">Открыть сайт</a>
-                </div>
-
               <div class="admin-auth-panel">
+                <div class="tag">Вход и статус</div>
+                <h3 class="calc-card-title">Сначала войдите в кабинет</h3>
+                <p class="sublead">Основной способ входа — логин и пароль администратора. Token оставлен как резервный способ.</p>
                 <label class="admin-field">
-                  <span class="admin-field-label">Bootstrap token / access key</span>
-                  <span class="admin-field-note">Остаётся аварийным способом входа. Для постоянной работы лучше входить по логину и паролю admin-пользователя.</span>
+                  <span class="admin-field-label">Аварийный token / access key</span>
+                  <span class="admin-field-note">Используйте его только если обычный вход недоступен.</span>
                   <input class="admin-input" id="admin-backend-token" type="password" autocomplete="off" placeholder="Bearer token or access key" />
                 </label>
                 <div class="admin-grid">
                   <label class="admin-field">
-                    <span class="admin-field-label">Admin login</span>
-                    <span class="admin-field-note">Slug или email admin-пользователя.</span>
-                    <input class="admin-input" id="admin-login-identity" type="text" autocomplete="username" placeholder="admin login or email" />
+                    <span class="admin-field-label">Логин</span>
+                    <span class="admin-field-note">Логин или email администратора.</span>
+                    <input class="admin-input" id="admin-login-identity" type="text" autocomplete="username" placeholder="Логин или email" />
                   </label>
                   <label class="admin-field">
-                    <span class="admin-field-label">Admin password</span>
-                    <span class="admin-field-note">Пароль для входа в `/admin/` и CRM-слой.</span>
-                    <input class="admin-input" id="admin-login-password" type="password" autocomplete="current-password" placeholder="Password" />
+                    <span class="admin-field-label">Пароль</span>
+                    <span class="admin-field-note">Пароль для входа в кабинет и CRM-слой.</span>
+                    <input class="admin-input" id="admin-login-password" type="password" autocomplete="current-password" placeholder="Пароль" />
                   </label>
                 </div>
                   <div class="admin-auth-actions">
-                    <button class="btn btn-primary" id="admin-login-button" type="button">Войти по token</button>
-                    <button class="btn btn-primary" id="admin-password-login-button" type="button">Войти по логину</button>
+                    <button class="btn btn-secondary" id="admin-login-button" type="button">Войти по token</button>
+                    <button class="btn btn-primary" id="admin-password-login-button" type="button">Войти по паролю</button>
                     <button class="btn btn-secondary" id="admin-session-button" type="button">Проверить сессию</button>
                     <button class="btn btn-secondary" id="admin-logout-button" type="button">Выйти</button>
                   </div>
@@ -155,8 +143,8 @@
 
                 <div class="admin-self-service">
                   <div class="admin-self-service-head">
-                    <strong>Собственная безопасность</strong>
-                    <span>Сменить пароль и закрыть другие активные сессии.</span>
+                    <strong>Безопасность аккаунта</strong>
+                    <span>Смените пароль и при необходимости закройте другие открытые сессии.</span>
                   </div>
                   <div class="admin-grid">
                     <label class="admin-field">
@@ -178,6 +166,17 @@
                 </div>
               </div>
 
+                <div class="tag">Текущее состояние</div>
+                <h3 class="calc-card-title">Что сейчас загружено в кабинете</h3>
+                <p class="sublead">Эта сводка помогает быстро понять, что уже подтянулось из backend и какие разделы доступны прямо сейчас.</p>
+
+                <div class="summary-grid" id="admin-summary-grid"></div>
+
+                <div class="admin-hub-links">
+                  <a class="btn btn-primary" href="../calc/admin/">Цены калькулятора</a>
+                  <a class="btn btn-secondary" href="../" target="_blank" rel="noreferrer">Открыть сайт</a>
+                </div>
+
                 <div class="admin-json-actions">
                   <button class="btn btn-primary" id="download-admin-json" type="button">Скачать admin-config.json</button>
                   <button class="btn btn-secondary" id="copy-admin-json" type="button">Копировать JSON</button>
@@ -189,7 +188,7 @@
 
                 <div class="admin-status" id="admin-status">Черновик совпадает с базовой конфигурацией.</div>
 
-                <label class="admin-json-label" for="admin-json-output">Текущая структура для CMS/CRM</label>
+                <label class="admin-json-label" for="admin-json-output">Текущая структура кабинета</label>
                 <textarea class="admin-json-output" id="admin-json-output" spellcheck="false" readonly></textarea>
               </div>
             </aside>
@@ -200,6 +199,6 @@
   </main>
 
   <script src="../site.js?v=20260402d" defer></script>
-  <script src="./admin.js?v=20260402l" type="module"></script>
+  <script src="./admin.js?v=20260402m" type="module"></script>
 </body>
 </html>

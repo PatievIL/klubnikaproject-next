@@ -217,12 +217,19 @@ async function refreshAccessPolicy() {
 }
 
 function renderUser(user) {
+  const chips = [];
+  chips.push(`<span class="admin-pill">${escapeHtml(user.user_name || user.display_name || "Пользователь")}</span>`);
+  if (hasScope(user, "catalog")) {
+    chips.push('<span class="admin-pill">Каталог открыт</span>');
+  }
+  if (hasScope(user, "special_pages")) {
+    chips.push('<span class="admin-pill">Материалы открыты</span>');
+  }
+  if (chips.length === 1) {
+    chips.push('<span class="admin-pill">Доступ уточняется</span>');
+  }
   document.querySelectorAll("[data-account-user]").forEach((target) => {
-    target.innerHTML = `
-      <span class="admin-pill">${escapeHtml(user.user_name || user.display_name || "Пользователь")}</span>
-      <span class="admin-pill">${escapeHtml(user.user_role || user.role || "member")}</span>
-      ${(user.scopes || []).map((scope) => `<span class="admin-pill">${escapeHtml(scope)}</span>`).join("")}
-    `;
+    target.innerHTML = chips.join("");
   });
 }
 
@@ -235,23 +242,23 @@ function renderHub(user) {
     <div class="account-grid">
       <article class="card card-pad account-card">
         <div class="tag">Каталог</div>
-        <h3 class="calc-card-title">Закрытый каталог пользователя</h3>
-        <p class="sublead">Здесь можно быстро открыть ключевые входы каталога, не проходя заново через маркетинговый слой сайта.</p>
+        <h3 class="calc-card-title">Доступные позиции и решения</h3>
+        <p class="sublead">Откройте каталог, если он выдан для этого аккаунта.</p>
         <div class="account-actions">
           ${hasCatalog
             ? `<a class="btn btn-primary" href="${memberPath("catalogPath")}">Открыть каталог</a>`
-            : `<span class="account-note-chip">Нет scope \`catalog\`</span>`
+            : `<span class="account-note-chip">Каталог пока не открыт</span>`
           }
         </div>
       </article>
       <article class="card card-pad account-card">
-        <div class="tag">Спецстраницы</div>
-        <h3 class="calc-card-title">Материалы и маршруты с доступом по аккаунту</h3>
-        <p class="sublead">Отдельные страницы, которые не индексируются и доступны только авторизованным пользователям.</p>
+        <div class="tag">Материалы</div>
+        <h3 class="calc-card-title">Закрытые страницы и подборки</h3>
+        <p class="sublead">Здесь открываются материалы, которые выданы именно вашему аккаунту.</p>
         <div class="account-actions">
           ${hasSpecial
-            ? `<a class="btn btn-secondary" href="${memberPath("specialPath")}">Открыть спецстраницы</a>`
-            : `<span class="account-note-chip">Нет scope \`special_pages\`</span>`
+            ? `<a class="btn btn-secondary" href="${memberPath("specialPath")}">Открыть материалы</a>`
+            : `<span class="account-note-chip">Материалы пока не открыты</span>`
           }
         </div>
       </article>
@@ -259,7 +266,7 @@ function renderHub(user) {
     <article class="card card-pad account-card">
       <div class="tag">Сессия</div>
       <h3 class="calc-card-title">Текущий доступ</h3>
-      <p class="sublead">Вы вошли как <strong>${escapeHtml(user.user_name || user.display_name || "Пользователь")}</strong>. Если нужно сменить доступ, выйдите и войдите под другим логином.</p>
+      <p class="sublead">Вы вошли как <strong>${escapeHtml(user.user_name || user.display_name || "Пользователь")}</strong>. Если нужен другой уровень доступа, выйдите и войдите под другим логином.</p>
     </article>
     <article class="card card-pad account-card">
       <div class="tag">Безопасность</div>
@@ -286,7 +293,7 @@ function renderHub(user) {
     </article>
     ${!hasCatalog && !hasSpecial ? `
       <div class="account-empty">
-        Для этого аккаунта пока не выданы маршруты \`catalog\` или \`special_pages\`. Настройте scopes в админке.
+        Для этого аккаунта пока не открыты каталог и закрытые материалы. Напишите администратору проекта, чтобы выдать доступ.
       </div>
     ` : ""}
   `;
@@ -336,8 +343,7 @@ function renderCatalogCard(item) {
       <p class="sublead">${escapeHtml(item.summary || "Без описания")}</p>
       <div class="account-item-meta">
         <span>${escapeHtml(item.category || "без категории")}</span>
-        <span>${escapeHtml(item.cta_mode || "choose")}</span>
-        <span>${escapeHtml(item.status || "published")}</span>
+        <span>${escapeHtml(item.kind || "страница")}</span>
       </div>
       <div class="account-actions">
         <a class="btn btn-primary" href="${escapeAttribute(item.path)}">Открыть страницу</a>
@@ -353,7 +359,7 @@ function renderSpecialCard(item) {
       <h3 class="calc-card-title">${escapeHtml(item.title)}</h3>
       <p class="sublead">${escapeHtml(item.summary || "Без описания")}</p>
       <div class="account-actions">
-        <a class="btn btn-secondary" href="${escapeAttribute(item.path)}">Перейти</a>
+        <a class="btn btn-secondary" href="${escapeAttribute(item.path)}">Открыть материал</a>
       </div>
     </article>
   `;
@@ -483,9 +489,9 @@ function renderMembersDisabled(view) {
   const title = document.querySelector(".hero-title-compact");
   const lead = document.querySelector(".lead");
   if (title) title.textContent = "Доступ по аккаунту сейчас отключён";
-  if (lead) lead.textContent = "Этот слой временно закрыт в настройках сайта. Публичный каталог и основные маршруты остаются доступными.";
+  if (lead) lead.textContent = "Этот раздел временно отключён. Основной сайт и публичные страницы остаются доступны.";
   const status = document.getElementById("account-login-status");
-  if (status) status.textContent = "Кабинет пользователя отключён в site settings.";
+  if (status) status.textContent = "Кабинет пользователя сейчас отключён.";
   document.querySelectorAll(".account-input, #account-login-form button[type='submit']").forEach((el) => {
     el.setAttribute("disabled", "disabled");
   });
@@ -493,7 +499,7 @@ function renderMembersDisabled(view) {
   if (container) {
     container.innerHTML = `
       <div class="account-empty">
-        Внутренний кабинет пользователя временно отключён. Вернитесь на публичный сайт или включите members-layer в админке.
+        Кабинет пользователя временно недоступен. Вернитесь на основной сайт или включите доступ позже.
       </div>
     `;
   }
@@ -502,9 +508,13 @@ function renderMembersDisabled(view) {
 function renderScopeDenied(scope) {
   const container = document.getElementById("account-dynamic-content");
   if (!container) return;
+  const isCatalog = scope === "catalog";
   container.innerHTML = `
     <div class="account-empty">
-      Для этого раздела нужен scope <strong>${escapeHtml(scope)}</strong>. Вернитесь в кабинет или измените права пользователя в админке.
+      ${isCatalog
+        ? "Для этого аккаунта каталог пока не открыт."
+        : "Для этого аккаунта закрытые материалы пока не открыты."
+      }
       <div class="account-actions">
         <a class="btn btn-secondary" href="${memberPath("hubPath")}">Вернуться в кабинет</a>
       </div>

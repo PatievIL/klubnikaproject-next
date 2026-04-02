@@ -751,18 +751,18 @@ function renderSummary() {
     : getVisibleSections().length;
   const inventoryCount = getInventoryProducts().length;
   els.summary.innerHTML = [
-    { label: "Публичных страниц", value: String(publicPages) },
+    { label: "Публичные страницы", value: String(publicPages) },
     { label: "Режим форм", value: draft.forms.mode },
     { label: "CRM", value: crmStatus },
     { label: "Товаров в snapshot", value: inventoryCount ? String(inventoryCount) : "не загружены" },
     { label: "Telegram", value: draft.site.supportTelegram || "не указан" },
-    { label: "Lead sources", value: String(draft.crm.leadSources.length) },
-    { label: "Pipeline stages", value: String(draft.crm.pipeline.length) },
+    { label: "Источники лидов", value: String(draft.crm.leadSources.length) },
+    { label: "Стадии pipeline", value: String(draft.crm.pipeline.length) },
     { label: "Backend API", value: backendActive ? "указан" : "не указан" },
     { label: "Роль backend", value: String(roleLabel) },
     { label: "Видимых разделов", value: String(visibleSections) },
-    { label: "Users", value: usersDraft.length ? String(usersDraft.length) : "не загружены" },
-    { label: "Audit", value: auditDraft.length ? String(auditDraft.length) : "не загружен" },
+    { label: "Пользователи", value: usersDraft.length ? String(usersDraft.length) : "не загружены" },
+    { label: "Аудит", value: auditDraft.length ? String(auditDraft.length) : "не загружен" },
   ].map((item) => `
     <div class="summary-item">
       <span>${item.label}</span>
@@ -1754,7 +1754,7 @@ async function copyCatalogSnapshot() {
 async function loginToBackend() {
   const token = getBackendToken();
   if (!token) {
-    els.sessionState.textContent = "Сначала вставьте backend token.";
+    els.sessionState.textContent = "Вставьте token, если вход по паролю недоступен.";
     return;
   }
   try {
@@ -1766,8 +1766,8 @@ async function loginToBackend() {
     const user = response.user;
     await applyBackendAccessState(user || null);
     els.sessionState.textContent = user
-      ? `Сессия backend активна: ${user.display_name || user.user_name || "пользователь"} (${user.role || user.user_role || "role"})`
-      : "Сессия backend активна.";
+      ? `Вы вошли как ${user.display_name || user.user_name || "пользователь"}.`
+      : "Вход выполнен.";
   } catch (error) {
     els.sessionState.textContent = `Вход не удался: ${error.message}`;
   }
@@ -1777,7 +1777,7 @@ async function loginToBackendWithPassword() {
   const login = (els.loginIdentity?.value || "").trim();
   const password = els.loginPassword?.value || "";
   if (!login || !password) {
-    els.sessionState.textContent = "Введите admin login и пароль.";
+    els.sessionState.textContent = "Введите логин и пароль.";
     return;
   }
   try {
@@ -1789,10 +1789,10 @@ async function loginToBackendWithPassword() {
     const user = response.user;
     await applyBackendAccessState(user || null);
     els.sessionState.textContent = user
-      ? `Сессия backend активна: ${user.display_name || "пользователь"} (${user.role || "role"}, ${user.account_type || "admin"})`
-      : "Сессия backend активна.";
+      ? `Вы вошли как ${user.display_name || user.user_name || "пользователь"}.`
+      : "Вход выполнен.";
   } catch (error) {
-    els.sessionState.textContent = `Вход по логину не удался: ${error.message}`;
+    els.sessionState.textContent = `Не удалось войти: ${error.message}`;
   }
 }
 
@@ -1803,11 +1803,11 @@ async function checkBackendSession() {
     const user = response.user;
     await applyBackendAccessState(user || null);
     els.sessionState.textContent = response.session
-      ? `Сессия backend активна: ${user?.user_name || user?.display_name || "пользователь"} (${user?.user_role || user?.role || "role"}, ${user?.account_type || "admin"})`
-      : "Сессия backend не найдена.";
+      ? `Сессия активна: ${user?.display_name || user?.user_name || "пользователь"}.`
+      : "Активная сессия не найдена.";
   } catch (error) {
     applyGuestAccessState();
-    els.sessionState.textContent = `Сессия не подтверждена: ${error.message}`;
+    els.sessionState.textContent = `Сессию не удалось подтвердить: ${error.message}`;
   }
 }
 
@@ -1816,7 +1816,7 @@ async function logoutFromBackend() {
     els.sessionState.textContent = "Завершаю сессию...";
     await adminFetch("/admin/auth/logout", { method: "POST" });
     applyGuestAccessState();
-    els.sessionState.textContent = "Сессия backend завершена.";
+    els.sessionState.textContent = "Вы вышли из кабинета.";
   } catch (error) {
     els.sessionState.textContent = `Не удалось завершить сессию: ${error.message}`;
   }
@@ -1880,7 +1880,7 @@ async function changeOwnPassword() {
   const currentPassword = els.currentPassword?.value || "";
   const newPassword = els.newPassword?.value || "";
   if (!backendUser?.user_id) {
-    els.sessionState.textContent = "Смена пароля доступна только для именного admin-аккаунта.";
+    els.sessionState.textContent = "Смена пароля доступна только после входа под своим аккаунтом.";
     return;
   }
   if (!currentPassword || !newPassword) {
@@ -1908,7 +1908,7 @@ async function changeOwnPassword() {
 
 async function logoutOtherAdminSessions() {
   if (!backendUser?.user_id) {
-    els.sessionState.textContent = "Закрытие других сессий доступно только для именного admin-аккаунта.";
+    els.sessionState.textContent = "Сначала войдите под своим аккаунтом.";
     return;
   }
   try {

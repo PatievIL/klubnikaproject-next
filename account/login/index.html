@@ -18,15 +18,15 @@
         <div class="hero-grid hero-grid-lean">
           <div class="hero-copy">
             <span class="eyebrow">Кабинет пользователя</span>
-            <h1 class="hero-title-compact">Вход в закрытый каталог и специальные страницы</h1>
-            <p class="lead">Этот слой не индексируется и работает только для авторизованных пользователей.</p>
+            <h1 class="hero-title-compact">Войдите, чтобы открыть каталог и закрытые материалы</h1>
+            <p class="lead">После входа вы увидите только те разделы, которые открыты для вашего аккаунта.</p>
           </div>
           <aside class="visual-panel">
-            <div class="tag">Что внутри</div>
+            <div class="tag">Что будет дальше</div>
             <ul class="calc-list">
-              <li>Закрытый каталог пользователя.</li>
-              <li>Специальные маршруты и материалы.</li>
-              <li>Отдельный доступ без смешивания с CRM-слоем админов.</li>
+              <li>Откроется ваш личный раздел с доступными материалами.</li>
+              <li>Если каталог открыт, вы сразу перейдёте к нему.</li>
+              <li>Если доступа пока нет, это будет видно без технических ошибок.</li>
             </ul>
           </aside>
         </div>
@@ -40,16 +40,16 @@
         <div class="section-frame">
           <div class="account-shell">
             <article class="card card-pad account-panel">
-              <div class="tag">Login</div>
+              <div class="tag">Вход</div>
               <h2 class="calc-card-title">Войти по логину и паролю</h2>
               <form class="account-form" id="account-login-form">
                 <label class="account-label">
                   <span>Логин или email</span>
-                  <input class="account-input" id="account-login-identity" type="text" autocomplete="username" placeholder="member login or email" />
+                  <input class="account-input" id="account-login-identity" type="text" autocomplete="username" placeholder="Логин или email" />
                 </label>
                 <label class="account-label">
                   <span>Пароль</span>
-                  <input class="account-input" id="account-login-password" type="password" autocomplete="current-password" placeholder="Password" />
+                  <input class="account-input" id="account-login-password" type="password" autocomplete="current-password" placeholder="Пароль" />
                 </label>
                 <div class="account-actions">
                   <button class="btn btn-primary" type="submit">Войти</button>
@@ -57,6 +57,7 @@
                 </div>
               </form>
               <div class="account-status" id="account-login-status"></div>
+              <p class="sublead">Если логин не подходит или доступ ещё не выдан, напишите администратору проекта.</p>
             </article>
           </div>
         </div>
@@ -65,6 +66,6 @@
   </main>
 
   <script src="../../site.js?v=20260402f" defer></script>
-  <script src="../account.js?v=20260402e" type="module"></script>
+  <script src="../account.js?v=20260402f" type="module"></script>
 </body>
 </html>
