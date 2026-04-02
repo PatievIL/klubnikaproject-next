@@ -15,6 +15,12 @@ const DEFAULT_SETTINGS = {
   },
 };
 
+const ACCOUNT_SCRIPT_URL = new URL(import.meta.url);
+const ACCOUNT_ROOT_PATH = ACCOUNT_SCRIPT_URL.pathname.replace(/\/account\/account\.js$/, "/account/");
+const SITE_BASE_PATH = ACCOUNT_ROOT_PATH.endsWith("/account/")
+  ? ACCOUNT_ROOT_PATH.slice(0, -"/account/".length) || "/"
+  : "/";
+
 let settings = clone(DEFAULT_SETTINGS);
 let currentSessionUser = null;
 let memberAccessPolicy = null;
@@ -117,8 +123,22 @@ function apiBase() {
   return (settings.integrations?.apiBase || DEFAULT_SETTINGS.integrations.apiBase).replace(/\/+$/, "");
 }
 
+function joinPath(base, path) {
+  const normalizedBase = (base || "/").replace(/\/+$/, "") || "";
+  const normalizedPath = `/${String(path || "").replace(/^\/+/, "")}`;
+  return `${normalizedBase}${normalizedPath}` || "/";
+}
+
+function normalizeMemberRoute(path) {
+  const raw = String(path || "").trim();
+  if (!raw) return "/";
+  if (/^https?:\/\//i.test(raw)) return raw;
+  if (raw.startsWith("/")) return joinPath(SITE_BASE_PATH, raw);
+  return joinPath(ACCOUNT_ROOT_PATH, raw);
+}
+
 function memberPath(key) {
-  return settings.members?.[key] || DEFAULT_SETTINGS.members[key];
+  return normalizeMemberRoute(settings.members?.[key] || DEFAULT_SETTINGS.members[key]);
 }
 
 function isMembersEnabled() {
