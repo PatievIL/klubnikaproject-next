@@ -171,6 +171,7 @@ init();
 
 function init() {
   hydrateDraft();
+  normalizeDraft();
   hydrateBackendToken();
   renderTabs();
   renderCurrentSection();
@@ -189,6 +190,11 @@ function hydrateDraft() {
   } catch (error) {
     draft = clone(DEFAULT_CONFIG);
   }
+}
+
+function normalizeDraft() {
+  draft.integrations = draft.integrations || {};
+  draft.integrations.apiBase = getApiBase();
 }
 
 function hydrateBackendToken() {
@@ -847,6 +853,7 @@ async function importJson(event) {
     const text = await file.text();
     const parsed = JSON.parse(text);
     draft = deepMerge(clone(DEFAULT_CONFIG), parsed);
+    normalizeDraft();
     persistDraft();
     renderTabs();
     renderCurrentSection();
@@ -861,6 +868,7 @@ async function importJson(event) {
 
 function resetDraft() {
   draft = clone(DEFAULT_CONFIG);
+  normalizeDraft();
   persistDraft();
   renderTabs();
   renderCurrentSection();
@@ -878,7 +886,9 @@ function persistBackendToken() {
 }
 
 function getApiBase() {
-  return (draft.integrations?.apiBase || "").replace(/\/+$/, "");
+  const configured = String(draft.integrations?.apiBase || "").trim().replace(/\/+$/, "");
+  const fallback = String(DEFAULT_CONFIG.integrations?.apiBase || "").trim().replace(/\/+$/, "");
+  return configured || fallback;
 }
 
 function getBackendToken() {
@@ -937,6 +947,7 @@ async function pullBackendDraft() {
     els.status.textContent = "Загружаю настройки из backend...";
     const response = await adminFetch("/admin/settings");
     draft = deepMerge(clone(DEFAULT_CONFIG), response.settings || {});
+    normalizeDraft();
     persistDraft();
     renderTabs();
     renderCurrentSection();
