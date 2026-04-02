@@ -2,6 +2,7 @@ import { DEFAULT_CATALOG_ITEMS } from "./catalog-defaults.generated.js";
 
 const STORAGE_KEY = "klubnikaproject.site.admin.draft.v1";
 const BACKEND_TOKEN_KEY = "klubnikaproject.site.admin.token.v1";
+const ADMIN_SESSION_TOKEN_KEY = "klubnikaproject.site.admin.session.v1";
 
 const DEFAULT_CONFIG = {
   site: {
@@ -842,6 +843,18 @@ function getBackendToken() {
   return (els.backendToken?.value || "").trim();
 }
 
+function getAdminSessionToken() {
+  return (window.localStorage.getItem(ADMIN_SESSION_TOKEN_KEY) || "").trim();
+}
+
+function setAdminSessionToken(token) {
+  if (!token) {
+    window.localStorage.removeItem(ADMIN_SESSION_TOKEN_KEY);
+    return;
+  }
+  window.localStorage.setItem(ADMIN_SESSION_TOKEN_KEY, String(token).trim());
+}
+
 async function adminFetch(path, options = {}) {
   const apiBase = getApiBase();
   if (!apiBase) {
@@ -853,6 +866,10 @@ async function adminFetch(path, options = {}) {
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
   }
+  const sessionToken = getAdminSessionToken();
+  if (sessionToken) {
+    headers.set("X-KP-Admin-Session", sessionToken);
+  }
   headers.set("X-KP-Requested-With", "klubnikaproject");
   if (options.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
@@ -862,6 +879,7 @@ async function adminFetch(path, options = {}) {
   if (!response.ok) {
     const text = await response.text();
     if (response.status === 401) {
+      setAdminSessionToken("");
       applyGuestAccessState();
       els.sessionState.textContent = "Сессия истекла или была отозвана. Войдите снова.";
     }
@@ -1820,6 +1838,7 @@ async function loginToBackend() {
       method: "POST",
       body: JSON.stringify({ token }),
     });
+    setAdminSessionToken(response.session_token || "");
     const user = response.user;
     await applyBackendAccessState(user || null);
     els.sessionState.textContent = user
@@ -1843,6 +1862,7 @@ async function loginToBackendWithPassword() {
       method: "POST",
       body: JSON.stringify({ login, password }),
     });
+    setAdminSessionToken(response.session_token || "");
     const user = response.user;
     await applyBackendAccessState(user || null);
     els.sessionState.textContent = user
@@ -1857,6 +1877,7 @@ async function checkBackendSession() {
   try {
     els.sessionState.textContent = "Проверяю сессию...";
     const response = await adminFetch("/admin/auth/session");
+    setAdminSessionToken(response.session_token || "");
     const user = response.user;
     await applyBackendAccessState(user || null);
     els.sessionState.textContent = response.session
@@ -1872,6 +1893,7 @@ async function logoutFromBackend() {
   try {
     els.sessionState.textContent = "Завершаю сессию...";
     await adminFetch("/admin/auth/logout", { method: "POST" });
+    setAdminSessionToken("");
     applyGuestAccessState();
     els.sessionState.textContent = "Вы вышли из кабинета.";
   } catch (error) {

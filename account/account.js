@@ -1,4 +1,5 @@
 const SITE_ADMIN_BACKEND_CACHE_KEY = "klubnikaproject.site.backend.settings.v1";
+const MEMBER_SESSION_TOKEN_KEY = "klubnikaproject.member.session.v1";
 const DEFAULT_SETTINGS = {
   site: {
     projectName: "Klubnika Project",
@@ -123,6 +124,18 @@ function apiBase() {
   return (settings.integrations?.apiBase || DEFAULT_SETTINGS.integrations.apiBase).replace(/\/+$/, "");
 }
 
+function getStoredMemberSessionToken() {
+  return (window.localStorage.getItem(MEMBER_SESSION_TOKEN_KEY) || "").trim();
+}
+
+function setStoredMemberSessionToken(token) {
+  if (!token) {
+    window.localStorage.removeItem(MEMBER_SESSION_TOKEN_KEY);
+    return;
+  }
+  window.localStorage.setItem(MEMBER_SESSION_TOKEN_KEY, String(token).trim());
+}
+
 function joinPath(base, path) {
   const normalizedBase = (base || "/").replace(/\/+$/, "") || "";
   const normalizedPath = `/${String(path || "").replace(/^\/+/, "")}`;
@@ -210,6 +223,7 @@ function bindLogin() {
         body: JSON.stringify({ login, password }),
       }, { allowUnauthorizedRedirect: false });
       const payload = response;
+      setStoredMemberSessionToken(payload.session_token || "");
       currentSessionUser = payload.user || null;
       await refreshAccessPolicy();
       const nextCandidate = new URLSearchParams(window.location.search).get("next") || memberPath("hubPath");
@@ -226,7 +240,9 @@ function bindLogin() {
 
 async function fetchSession() {
   try {
-    return await accountFetch("/auth/session");
+    const payload = await accountFetch("/auth/session");
+    setStoredMemberSessionToken(payload.session_token || "");
+    return payload;
   } catch (error) {
     return null;
   }
@@ -434,6 +450,7 @@ function bindLogout() {
       } catch (error) {
         // ignore
       }
+      setStoredMemberSessionToken("");
       window.location.href = isMembersEnabled() ? memberPath("loginPath") : "/";
     });
   });
@@ -629,6 +646,10 @@ async function accountFetch(path, options = {}, extra = {}) {
   const headers = new Headers(options.headers || {});
   headers.set("Accept", "application/json");
   headers.set("X-KP-Requested-With", "klubnikaproject");
+  const sessionToken = getStoredMemberSessionToken();
+  if (sessionToken) {
+    headers.set("X-KP-Member-Session", sessionToken);
+  }
   if (options.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
@@ -639,6 +660,9 @@ async function accountFetch(path, options = {}, extra = {}) {
   });
   if (!response.ok) {
     const text = await response.text();
+    if (response.status === 401) {
+      setStoredMemberSessionToken("");
+    }
     if (response.status === 401 && extra.allowUnauthorizedRedirect !== false && currentAccountView !== "login") {
       currentSessionUser = null;
       memberAccessPolicy = null;

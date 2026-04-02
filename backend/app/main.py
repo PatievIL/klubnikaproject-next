@@ -1928,7 +1928,19 @@ def enforce_session_request_guard(request: Request, authorization: str | None = 
         )
 
 
-def get_admin_context(request: Request, authorization: str | None = Header(default=None)) -> dict[str, Any]:
+def admin_session_token_from_request(request: Request, header_value: str | None = None) -> str:
+    return (header_value or "").strip() or request.cookies.get(CONFIG.session_cookie_name, "")
+
+
+def member_session_token_from_request(request: Request, header_value: str | None = None) -> str:
+    return (header_value or "").strip() or request.cookies.get(CONFIG.member_session_cookie_name, "")
+
+
+def get_admin_context(
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_kp_admin_session: str | None = Header(default=None),
+) -> dict[str, Any]:
     enforce_session_request_guard(request, authorization)
     token = (authorization or "").removeprefix("Bearer ").strip()
     if token and token == CONFIG.admin_token:
@@ -1945,7 +1957,7 @@ def get_admin_context(request: Request, authorization: str | None = Header(defau
         user_row = find_user_by_access_key(token)
         if user_row is not None and user_row["account_type"] == "admin":
             return build_user_context(user_row)
-    session_token = request.cookies.get(CONFIG.session_cookie_name, "")
+    session_token = admin_session_token_from_request(request, x_kp_admin_session)
     session_ctx = resolve_admin_session(session_token)
     if session_ctx:
         if session_ctx["user_id"]:
@@ -1978,9 +1990,9 @@ def require_roles(*roles: str):
     return checker
 
 
-def get_member_context(request: Request) -> dict[str, Any]:
+def get_member_context(request: Request, x_kp_member_session: str | None = Header(default=None)) -> dict[str, Any]:
     enforce_session_request_guard(request, None)
-    session_token = request.cookies.get(CONFIG.member_session_cookie_name, "")
+    session_token = member_session_token_from_request(request, x_kp_member_session)
     session_ctx = resolve_member_session(session_token)
     if session_ctx:
         user_row = find_user_by_id(session_ctx["user_id"])
@@ -2092,7 +2104,7 @@ def admin_auth_login(payload: AuthRequest, response: Response, request: Request)
         target_id="admin",
         payload={"client": request_client_key(request)},
     )
-    return {"ok": True, "user": user_payload}
+    return {"ok": True, "user": user_payload, "session_token": session_token}
 
 
 @app.post("/v1/admin/auth/password-login")
@@ -2117,12 +2129,21 @@ def admin_auth_password_login(payload: CredentialLoginRequest, response: Respons
         target_id="admin",
         payload={"client": request_client_key(request)},
     )
-    return {"ok": True, "user": serialize_user(user_row)}
+    return {"ok": True, "user": serialize_user(user_row), "session_token": session_token}
 
 
 @app.get("/v1/admin/auth/session")
-def admin_auth_session(context: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
-    return {"ok": True, "session": True, "user": context}
+def admin_auth_session(
+    request: Request,
+    x_kp_admin_session: str | None = Header(default=None),
+    context: dict[str, Any] = Depends(require_admin),
+) -> dict[str, Any]:
+    return {
+        "ok": True,
+        "session": True,
+        "user": context,
+        "session_token": admin_session_token_from_request(request, x_kp_admin_session),
+    }
 
 
 @app.get("/v1/admin/auth/access-policy")
@@ -2135,7 +2156,7 @@ def admin_auth_sessions(request: Request, context: dict[str, Any] = Depends(requ
     user_id = context.get("user_id")
     if not user_id:
         return {"ok": True, "items": []}
-    current_token = request.cookies.get(CONFIG.session_cookie_name, "")
+    current_token = admin_session_token_from_request(request, request.headers.get("x-kp-admin-session"))
     return {"ok": True, "items": list_admin_sessions_for_user(int(user_id), current_token)}
 
 
@@ -2155,7 +2176,7 @@ def admin_auth_change_password(
     if not verify_password(payload.current_password, user_row["password_hash"] or ""):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Current password is invalid")
     set_user_password(int(user_id), payload.new_password, revoke_sessions=False)
-    current_token = request.cookies.get(CONFIG.session_cookie_name, "")
+    current_token = admin_session_token_from_request(request, request.headers.get("x-kp-admin-session"))
     delete_other_admin_sessions(int(user_id), current_token)
     insert_audit_event(
         actor_user_id=context.get("user_id"),
@@ -2175,7 +2196,7 @@ def admin_auth_logout_others(request: Request, context: dict[str, Any] = Depends
     user_id = context.get("user_id")
     if not user_id:
         return {"ok": True, "revoked": 0}
-    current_token = request.cookies.get(CONFIG.session_cookie_name, "")
+    current_token = admin_session_token_from_request(request, request.headers.get("x-kp-admin-session"))
     before = list_admin_sessions_for_user(int(user_id), current_token)
     delete_other_admin_sessions(int(user_id), current_token)
     after = list_admin_sessions_for_user(int(user_id), current_token)
@@ -2192,9 +2213,13 @@ def admin_auth_logout_others(request: Request, context: dict[str, Any] = Depends
     )
     return {"ok": True, "revoked": revoked}
 @app.post("/v1/admin/auth/logout")
-def admin_auth_logout(request: Request, response: Response) -> dict[str, Any]:
-    context = get_admin_context(request)
-    delete_admin_session(request.cookies.get(CONFIG.session_cookie_name, ""))
+def admin_auth_logout(
+    request: Request,
+    response: Response,
+    x_kp_admin_session: str | None = Header(default=None),
+) -> dict[str, Any]:
+    context = get_admin_context(request, x_kp_admin_session=x_kp_admin_session)
+    delete_admin_session(admin_session_token_from_request(request, x_kp_admin_session))
     clear_session_cookie(response, CONFIG.session_cookie_name)
     insert_audit_event(
         actor_user_id=context.get("user_id"),
@@ -2388,12 +2413,21 @@ def member_auth_login(payload: CredentialLoginRequest, response: Response, reque
         target_id="member",
         payload={"client": request_client_key(request)},
     )
-    return {"ok": True, "user": serialize_user(user_row)}
+    return {"ok": True, "user": serialize_user(user_row), "session_token": session_token}
 
 
 @app.get("/v1/auth/session")
-def member_auth_session(context: dict[str, Any] = Depends(get_member_context)) -> dict[str, Any]:
-    return {"ok": True, "session": True, "user": context}
+def member_auth_session(
+    request: Request,
+    x_kp_member_session: str | None = Header(default=None),
+    context: dict[str, Any] = Depends(get_member_context),
+) -> dict[str, Any]:
+    return {
+        "ok": True,
+        "session": True,
+        "user": context,
+        "session_token": member_session_token_from_request(request, x_kp_member_session),
+    }
 
 
 @app.get("/v1/auth/access-policy")
@@ -2404,7 +2438,7 @@ def member_auth_access_policy(context: dict[str, Any] = Depends(get_member_conte
 @app.get("/v1/auth/sessions")
 def member_auth_sessions(request: Request, context: dict[str, Any] = Depends(get_member_context)) -> dict[str, Any]:
     user_id = context.get("user_id")
-    current_token = request.cookies.get(CONFIG.member_session_cookie_name, "")
+    current_token = member_session_token_from_request(request, request.headers.get("x-kp-member-session"))
     return {"ok": True, "items": list_member_sessions_for_user(int(user_id), current_token)}
 
 
@@ -2421,7 +2455,7 @@ def member_auth_change_password(
     if not verify_password(payload.current_password, user_row["password_hash"] or ""):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Current password is invalid")
     set_user_password(int(user_id), payload.new_password, revoke_sessions=False)
-    current_token = request.cookies.get(CONFIG.member_session_cookie_name, "")
+    current_token = member_session_token_from_request(request, request.headers.get("x-kp-member-session"))
     delete_other_member_sessions(int(user_id), current_token)
     insert_audit_event(
         actor_user_id=context.get("user_id"),
@@ -2439,7 +2473,7 @@ def member_auth_change_password(
 @app.post("/v1/auth/logout-others")
 def member_auth_logout_others(request: Request, context: dict[str, Any] = Depends(get_member_context)) -> dict[str, Any]:
     user_id = context.get("user_id")
-    current_token = request.cookies.get(CONFIG.member_session_cookie_name, "")
+    current_token = member_session_token_from_request(request, request.headers.get("x-kp-member-session"))
     before = list_member_sessions_for_user(int(user_id), current_token)
     delete_other_member_sessions(int(user_id), current_token)
     after = list_member_sessions_for_user(int(user_id), current_token)
@@ -2456,9 +2490,13 @@ def member_auth_logout_others(request: Request, context: dict[str, Any] = Depend
     )
     return {"ok": True, "revoked": revoked}
 @app.post("/v1/auth/logout")
-def member_auth_logout(request: Request, response: Response) -> dict[str, Any]:
-    context = get_member_context(request)
-    delete_member_session(request.cookies.get(CONFIG.member_session_cookie_name, ""))
+def member_auth_logout(
+    request: Request,
+    response: Response,
+    x_kp_member_session: str | None = Header(default=None),
+) -> dict[str, Any]:
+    context = get_member_context(request, x_kp_member_session=x_kp_member_session)
+    delete_member_session(member_session_token_from_request(request, x_kp_member_session))
     clear_session_cookie(response, CONFIG.member_session_cookie_name)
     insert_audit_event(
         actor_user_id=context.get("user_id"),
