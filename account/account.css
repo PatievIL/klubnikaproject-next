@@ -75,6 +75,32 @@
   font-weight: 600;
 }
 
+.account-status.is-error {
+  color: #8f2d1d;
+}
+
+.account-status.is-success {
+  color: var(--green);
+}
+
+.account-help-card {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(255, 250, 242, 0.78);
+  border: 1px solid rgba(0, 77, 43, 0.12);
+}
+
+.account-help-card strong {
+  font-size: 14px;
+}
+
+.account-help-card span {
+  color: var(--muted);
+  font-size: 14px;
+}
+
 .account-user {
   display: flex;
   flex-wrap: wrap;
@@ -95,6 +121,8 @@
   border: 1px dashed var(--line);
   color: var(--muted);
   background: rgba(255, 250, 242, 0.6);
+  display: grid;
+  gap: 12px;
 }
 
 .account-note-chip {

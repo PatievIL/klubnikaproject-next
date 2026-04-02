@@ -174,10 +174,16 @@ function bindLogin() {
     const login = document.getElementById("account-login-identity")?.value.trim() || "";
     const password = document.getElementById("account-login-password")?.value || "";
     if (!login || !password) {
-      if (status) status.textContent = "Введите логин и пароль.";
+      if (status) {
+        status.className = "account-status is-error";
+        status.textContent = "Введите логин и пароль.";
+      }
       return;
     }
-    if (status) status.textContent = "Выполняю вход...";
+    if (status) {
+      status.className = "account-status";
+      status.textContent = "Проверяю логин и доступ...";
+    }
     try {
       const response = await accountFetch("/auth/login", {
         method: "POST",
@@ -190,7 +196,10 @@ function bindLogin() {
       const next = isAllowedNextPath(nextCandidate) ? nextCandidate : preferredMemberPath(currentSessionUser);
       window.location.href = next;
     } catch (error) {
-      if (status) status.textContent = `Вход не удался: ${cleanupError(error.message)}`;
+      if (status) {
+        status.className = "account-status is-error";
+        status.textContent = `Не удалось войти: ${cleanupError(error.message)}`;
+      }
     }
   });
 }
@@ -309,12 +318,28 @@ async function renderMemberCatalog() {
     const payload = await accountFetch("/member/catalog/items");
     const items = payload.items || [];
     if (!items.length) {
-      container.innerHTML = '<div class="account-empty">В закрытом каталоге пока нет элементов.</div>';
+      container.innerHTML = `
+        <div class="account-empty">
+          <strong>В каталоге пока нет открытых позиций</strong>
+          <span>Когда для этого аккаунта появятся доступные страницы, они отобразятся здесь.</span>
+          <div class="account-actions">
+            <a class="btn btn-secondary" href="${memberPath("hubPath")}">Вернуться в кабинет</a>
+          </div>
+        </div>
+      `;
       return;
     }
     container.innerHTML = `<div class="account-grid-3">${items.map(renderCatalogCard).join("")}</div>`;
   } catch (error) {
-    container.innerHTML = `<div class="account-empty">Не удалось загрузить каталог: ${escapeHtml(cleanupError(error.message))}</div>`;
+    container.innerHTML = `
+      <div class="account-empty">
+        <strong>Не удалось открыть каталог</strong>
+        <span>${escapeHtml(cleanupError(error.message))}</span>
+        <div class="account-actions">
+          <a class="btn btn-secondary" href="${memberPath("hubPath")}">Вернуться в кабинет</a>
+        </div>
+      </div>
+    `;
   }
 }
 
@@ -326,12 +351,28 @@ async function renderSpecialPages() {
     const payload = await accountFetch("/member/special-pages");
     const items = payload.items || [];
     if (!items.length) {
-      container.innerHTML = '<div class="account-empty">Спецстраницы пока не заданы.</div>';
+      container.innerHTML = `
+        <div class="account-empty">
+          <strong>Закрытые материалы пока не добавлены</strong>
+          <span>Когда для этого аккаунта появятся материалы или дополнительные маршруты, они отобразятся здесь.</span>
+          <div class="account-actions">
+            <a class="btn btn-secondary" href="${memberPath("hubPath")}">Вернуться в кабинет</a>
+          </div>
+        </div>
+      `;
       return;
     }
     container.innerHTML = `<div class="account-grid">${items.map(renderSpecialCard).join("")}</div>`;
   } catch (error) {
-    container.innerHTML = `<div class="account-empty">Не удалось загрузить спецстраницы: ${escapeHtml(cleanupError(error.message))}</div>`;
+    container.innerHTML = `
+      <div class="account-empty">
+        <strong>Не удалось открыть материалы</strong>
+        <span>${escapeHtml(cleanupError(error.message))}</span>
+        <div class="account-actions">
+          <a class="btn btn-secondary" href="${memberPath("hubPath")}">Вернуться в кабинет</a>
+        </div>
+      </div>
+    `;
   }
 }
 
@@ -420,14 +461,23 @@ async function changeMemberPassword() {
   const currentPassword = document.getElementById("account-current-password")?.value || "";
   const newPassword = document.getElementById("account-new-password")?.value || "";
   if (!currentPassword || !newPassword) {
-    if (status) status.textContent = "Введите текущий и новый пароль.";
+    if (status) {
+      status.className = "account-status is-error";
+      status.textContent = "Введите текущий и новый пароль.";
+    }
     return;
   }
   if (newPassword.length < 10 || !/[A-Za-zА-Яа-я]/.test(newPassword) || !/\d/.test(newPassword)) {
-    if (status) status.textContent = "Новый пароль должен быть не короче 10 символов и содержать букву и цифру.";
+    if (status) {
+      status.className = "account-status is-error";
+      status.textContent = "Новый пароль должен быть не короче 10 символов и содержать букву и цифру.";
+    }
     return;
   }
-  if (status) status.textContent = "Обновляю пароль...";
+  if (status) {
+    status.className = "account-status";
+    status.textContent = "Обновляю пароль...";
+  }
   try {
     await accountFetch("/auth/change-password", {
       method: "POST",
@@ -437,24 +487,39 @@ async function changeMemberPassword() {
     const newField = document.getElementById("account-new-password");
     if (currentField) currentField.value = "";
     if (newField) newField.value = "";
-    if (status) status.textContent = "Пароль обновлён. Другие сессии закрыты.";
+    if (status) {
+      status.className = "account-status is-success";
+      status.textContent = "Пароль обновлён. Другие сессии закрыты.";
+    }
     loadMemberSessions();
   } catch (error) {
-    if (status) status.textContent = `Не удалось сменить пароль: ${cleanupError(error.message)}`;
+    if (status) {
+      status.className = "account-status is-error";
+      status.textContent = `Не удалось сменить пароль: ${cleanupError(error.message)}`;
+    }
   }
 }
 
 async function logoutOtherMemberSessions() {
   const status = document.getElementById("account-self-service-status");
-  if (status) status.textContent = "Закрываю другие сессии...";
+  if (status) {
+    status.className = "account-status";
+    status.textContent = "Закрываю другие сессии...";
+  }
   try {
     const payload = await accountFetch("/auth/logout-others", {
       method: "POST",
     });
-    if (status) status.textContent = `Другие сессии закрыты: ${payload.revoked || 0}.`;
+    if (status) {
+      status.className = "account-status is-success";
+      status.textContent = `Другие сессии закрыты: ${payload.revoked || 0}.`;
+    }
     loadMemberSessions();
   } catch (error) {
-    if (status) status.textContent = `Не удалось закрыть другие сессии: ${cleanupError(error.message)}`;
+    if (status) {
+      status.className = "account-status is-error";
+      status.textContent = `Не удалось закрыть другие сессии: ${cleanupError(error.message)}`;
+    }
   }
 }
 
@@ -500,6 +565,9 @@ function renderMembersDisabled(view) {
     container.innerHTML = `
       <div class="account-empty">
         Кабинет пользователя временно недоступен. Вернитесь на основной сайт или включите доступ позже.
+        <div class="account-actions">
+          <a class="btn btn-secondary" href="/">Вернуться на сайт</a>
+        </div>
       </div>
     `;
   }
@@ -515,6 +583,7 @@ function renderScopeDenied(scope) {
         ? "Для этого аккаунта каталог пока не открыт."
         : "Для этого аккаунта закрытые материалы пока не открыты."
       }
+      <span>Если это не ошибка, доступ можно выдать позже через админку.</span>
       <div class="account-actions">
         <a class="btn btn-secondary" href="${memberPath("hubPath")}">Вернуться в кабинет</a>
       </div>
@@ -531,6 +600,7 @@ function renderLoginReasonNotice() {
   if (!status) return;
   const reason = new URLSearchParams(window.location.search).get("reason") || "";
   if (reason === "session-expired") {
+    status.className = "account-status is-error";
     status.textContent = "Сессия истекла или была закрыта. Войдите снова.";
   }
 }

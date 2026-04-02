@@ -1807,7 +1807,7 @@ function resetInventoryRow(slug) {
 async function loginToBackend() {
   const token = getBackendToken();
   if (!token) {
-    els.sessionState.textContent = "Вставьте token, если вход по паролю недоступен.";
+    els.sessionState.textContent = "Вставьте token, только если обычный вход по паролю недоступен.";
     return;
   }
   try {
@@ -1834,7 +1834,7 @@ async function loginToBackendWithPassword() {
     return;
   }
   try {
-    els.sessionState.textContent = "Выполняю вход по логину...";
+    els.sessionState.textContent = "Проверяю логин и открываю кабинет...";
     const response = await adminFetch("/admin/auth/password-login", {
       method: "POST",
       body: JSON.stringify({ login, password }),
@@ -1860,7 +1860,7 @@ async function checkBackendSession() {
       : "Активная сессия не найдена.";
   } catch (error) {
     applyGuestAccessState();
-    els.sessionState.textContent = `Сессию не удалось подтвердить: ${error.message}`;
+    els.sessionState.textContent = `Сессия не подтверждена: ${error.message}`;
   }
 }
 
