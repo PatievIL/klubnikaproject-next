@@ -215,6 +215,10 @@ function bindGlobalEvents() {
 }
 
 function renderTabs() {
+  if (!backendUser) {
+    els.tabs.innerHTML = "";
+    return;
+  }
   const visibleSections = getVisibleSections();
   if (!visibleSections.some((section) => section.id === currentSection)) {
     currentSection = visibleSections[0]?.id || "dashboard";
@@ -268,6 +272,10 @@ function canAccessSection(sectionId) {
 }
 
 function renderCurrentSection() {
+  if (!backendUser) {
+    els.section.innerHTML = renderAccessGateSection();
+    return;
+  }
   const html = currentSection === "dashboard" ? renderDashboardSection()
     : currentSection === "site" ? renderSiteSection()
     : currentSection === "pages" ? renderPagesSection()
@@ -297,6 +305,35 @@ function renderCurrentSection() {
   if (currentSection === "inventory") {
     bindInventorySection();
   }
+}
+
+function renderAccessGateSection() {
+  return `
+    <div class="admin-section-stack admin-locked-state">
+      <div class="admin-section-intro">
+        <div class="tag">Вход и статус</div>
+        <h3 class="calc-card-title">Сначала войдите в кабинет</h3>
+        <p class="sublead">Настройки сайта, каталога, CRM, доступов и audit больше не показываются до подтверждённой admin-сессии.</p>
+      </div>
+
+      <div class="admin-block admin-locked-card">
+        <div class="admin-block-head">
+          <div>
+            <strong>Что откроется после входа</strong>
+            <span>Сайт, товары, CRM, роли и журнал действий остаются внутри кабинета.</span>
+          </div>
+        </div>
+        <div class="admin-pills">
+          <span class="admin-pill">Сайт</span>
+          <span class="admin-pill">Каталог</span>
+          <span class="admin-pill">Товары</span>
+          <span class="admin-pill">CRM</span>
+          <span class="admin-pill">Доступ</span>
+          <span class="admin-pill">Audit</span>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function renderDashboardSection() {
@@ -743,6 +780,7 @@ function updatePath(path, field, type) {
 }
 
 function renderSummary() {
+  updateWorkspaceVisibility();
   const crmStatus = draft.crm.enabled ? "включён" : "черновик";
   const publicPages = draft.pages.filter((page) => page.status === "published").length;
   const backendActive = Boolean(getApiBase());
@@ -775,6 +813,10 @@ function renderSummary() {
   els.status.textContent = isDefaultState()
     ? "Черновик совпадает с базовой конфигурацией."
     : "Есть несохранённые изменения. Скачайте JSON или перенесите его в backend/CMS.";
+}
+
+function updateWorkspaceVisibility() {
+  document.body.dataset.adminAuth = backendUser ? "authenticated" : "guest";
 }
 
 function downloadJson() {

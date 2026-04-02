@@ -12,7 +12,7 @@
     content="Рабочий кабинет Klubnika Project: настройки сайта, доступы, формы, лиды и внутренние разделы без публичной индексации."
   />
   <link rel="stylesheet" href="../styles.css?v=20260402c" />
-  <link rel="stylesheet" href="./admin.css?v=20260402m" />
+  <link rel="stylesheet" href="./admin.css?v=20260402o" />
   <!-- SEO:START -->
   <meta name="robots" content="noindex, nofollow" />
   <!-- SEO:END -->
@@ -166,30 +166,32 @@
                 </div>
               </div>
 
-                <div class="tag">Текущее состояние</div>
-                <h3 class="calc-card-title">Что сейчас загружено в кабинете</h3>
-                <p class="sublead">Эта сводка помогает быстро понять, что уже подтянулось из backend и какие разделы доступны прямо сейчас.</p>
+                <div class="admin-authenticated-only">
+                  <div class="tag">Текущее состояние</div>
+                  <h3 class="calc-card-title">Что сейчас загружено в кабинете</h3>
+                  <p class="sublead">Эта сводка помогает быстро понять, что уже подтянулось из backend и какие разделы доступны прямо сейчас.</p>
 
-                <div class="summary-grid" id="admin-summary-grid"></div>
+                  <div class="summary-grid" id="admin-summary-grid"></div>
 
-                <div class="admin-hub-links">
-                  <a class="btn btn-primary" href="../calc/admin/">Цены калькулятора</a>
-                  <a class="btn btn-secondary" href="../" target="_blank" rel="noreferrer">Открыть сайт</a>
+                  <div class="admin-hub-links">
+                    <a class="btn btn-primary" href="../calc/admin/">Цены калькулятора</a>
+                    <a class="btn btn-secondary" href="../" target="_blank" rel="noreferrer">Открыть сайт</a>
+                  </div>
+
+                  <div class="admin-json-actions">
+                    <button class="btn btn-primary" id="download-admin-json" type="button">Скачать admin-config.json</button>
+                    <button class="btn btn-secondary" id="copy-admin-json" type="button">Копировать JSON</button>
+                    <label class="btn btn-ghost admin-import-button">
+                      Импортировать JSON
+                      <input id="import-admin-json" type="file" accept="application/json" hidden />
+                    </label>
+                  </div>
+
+                  <div class="admin-status" id="admin-status">Черновик совпадает с базовой конфигурацией.</div>
+
+                  <label class="admin-json-label" for="admin-json-output">Текущая структура кабинета</label>
+                  <textarea class="admin-json-output" id="admin-json-output" spellcheck="false" readonly></textarea>
                 </div>
-
-                <div class="admin-json-actions">
-                  <button class="btn btn-primary" id="download-admin-json" type="button">Скачать admin-config.json</button>
-                  <button class="btn btn-secondary" id="copy-admin-json" type="button">Копировать JSON</button>
-                  <label class="btn btn-ghost admin-import-button">
-                    Импортировать JSON
-                    <input id="import-admin-json" type="file" accept="application/json" hidden />
-                  </label>
-                </div>
-
-                <div class="admin-status" id="admin-status">Черновик совпадает с базовой конфигурацией.</div>
-
-                <label class="admin-json-label" for="admin-json-output">Текущая структура кабинета</label>
-                <textarea class="admin-json-output" id="admin-json-output" spellcheck="false" readonly></textarea>
               </div>
             </aside>
           </div>

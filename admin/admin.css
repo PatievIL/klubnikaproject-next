@@ -222,6 +222,29 @@
   margin-top: 20px;
 }
 
+body[data-admin-auth="guest"] .admin-tabs,
+body[data-admin-auth="guest"] .admin-toolbar-actions,
+body[data-admin-auth="guest"] .admin-authenticated-only,
+body[data-admin-auth="guest"] .admin-self-service {
+  display: none;
+}
+
+body[data-admin-auth="guest"] .admin-sticky {
+  position: static;
+}
+
+body[data-admin-auth="guest"] .admin-auth-panel {
+  margin-top: 0;
+}
+
+.admin-locked-state {
+  align-content: start;
+}
+
+.admin-locked-card {
+  max-width: 760px;
+}
+
 .admin-auth-actions {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
