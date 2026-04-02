@@ -656,6 +656,34 @@
   color: var(--green);
 }
 
+.admin-inventory-edit {
+  display: grid;
+  gap: 6px;
+}
+
+.admin-inventory-edit + .admin-inventory-edit {
+  margin-top: 10px;
+}
+
+.admin-inventory-edit span,
+.admin-inventory-price-note,
+.admin-inventory-row-state {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.admin-inventory-input,
+.admin-inventory-select {
+  min-width: 140px;
+}
+
+.admin-inventory-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
 .admin-inventory-old-price {
   margin-top: 6px;
   color: var(--muted);
@@ -695,6 +723,14 @@
 
 .admin-inventory-open {
   margin-top: 10px;
+}
+
+.admin-inventory-table tr.is-dirty {
+  background: rgba(112, 86, 23, 0.05);
+}
+
+.admin-inventory-table tr.is-saving {
+  background: rgba(0, 77, 43, 0.05);
 }
 
 .admin-crm-pre {

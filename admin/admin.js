@@ -560,7 +560,7 @@ function renderInventorySection() {
                   <th>Категория</th>
                   <th>Цена</th>
                   <th>Наличие</th>
-                  <th>Маршрут</th>
+                  <th>Маршрут и действия</th>
                 </tr>
               </thead>
               <tbody>
@@ -1674,6 +1674,19 @@ function bindInventorySection() {
   if (copyButton) {
     copyButton.addEventListener("click", copyCatalogSnapshot);
   }
+  document.querySelectorAll("[data-inventory-row]").forEach((row) => {
+    row.querySelectorAll("[data-inventory-field]").forEach((field) => {
+      const eventName = field.tagName === "SELECT" ? "change" : "input";
+      field.addEventListener(eventName, () => updateInventoryRowState(row));
+    });
+    row.querySelector("[data-inventory-save]")?.addEventListener("click", () => {
+      saveInventoryRow(row.dataset.inventoryRow);
+    });
+    row.querySelector("[data-inventory-reset]")?.addEventListener("click", () => {
+      resetInventoryRow(row.dataset.inventoryRow);
+    });
+    updateInventoryRowState(row);
+  });
 
   if (!catalogSnapshotDraft) {
     pullCatalogSnapshot(false);
@@ -1749,6 +1762,46 @@ async function copyCatalogSnapshot() {
   } catch (error) {
     els.status.textContent = "Не удалось скопировать товарный snapshot.";
   }
+}
+
+async function saveInventoryRow(slug) {
+  const row = document.querySelector(`[data-inventory-row="${slug}"]`);
+  if (!row) return;
+  const payload = readInventoryRowDraft(row);
+  if (!Number.isFinite(payload.price) || payload.price <= 0) {
+    els.status.textContent = `Укажите корректную цену для ${slug}.`;
+    return;
+  }
+  try {
+    row.dataset.inventorySaving = "true";
+    updateInventoryRowState(row);
+    els.status.textContent = `Сохраняю товар ${slug}...`;
+    const response = await adminFetch(`/admin/catalog/inventory/${slug}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+    patchInventoryProductInSnapshot(response.product || null);
+    renderSummary();
+    if (currentSection === "inventory") {
+      renderCurrentSection();
+    }
+    els.status.textContent = `Товар ${slug} сохранён.`;
+  } catch (error) {
+    row.dataset.inventorySaving = "false";
+    updateInventoryRowState(row);
+    els.status.textContent = `Не удалось сохранить ${slug}: ${error.message}`;
+  }
+}
+
+function resetInventoryRow(slug) {
+  const row = document.querySelector(`[data-inventory-row="${slug}"]`);
+  const product = getInventoryProducts().find((item) => item.slug === slug);
+  if (!row || !product) return;
+  row.querySelector('[data-inventory-field="price"]').value = formatNumberInputValue(product.price);
+  row.querySelector('[data-inventory-field="oldPrice"]').value = formatNumberInputValue(product.oldPrice);
+  row.querySelector('[data-inventory-field="stockStatus"]').value = product.stockStatus || "in_stock";
+  updateInventoryRowState(row);
+  els.status.textContent = `Изменения по ${slug} сброшены.`;
 }
 
 async function loginToBackend() {
@@ -1990,6 +2043,16 @@ function getInventoryProducts() {
   return Array.isArray(catalogSnapshotDraft?.products) ? catalogSnapshotDraft.products : [];
 }
 
+function patchInventoryProductInSnapshot(product) {
+  if (!catalogSnapshotDraft || !product?.slug || !Array.isArray(catalogSnapshotDraft.products)) return;
+  const index = catalogSnapshotDraft.products.findIndex((item) => item.slug === product.slug);
+  if (index === -1) return;
+  catalogSnapshotDraft.products[index] = {
+    ...catalogSnapshotDraft.products[index],
+    ...product,
+  };
+}
+
 function buildInventoryCategoryOptions(categories) {
   return categories
     .slice()
@@ -2070,6 +2133,7 @@ function buildInventorySourceNote(snapshot) {
     `Категорий: ${counts.categories || 0}`,
     `Товаров: ${counts.products || 0}`,
     `Позиции manifest: ${counts.items || 0}`,
+    `Inventory overrides: ${counts.inventoryOverrides || 0}`,
   ].join("\n");
 }
 
@@ -2079,7 +2143,7 @@ function renderInventoryRow(product, categories) {
     ? `<div class="admin-inventory-badges">${product.badges.map((badge) => `<span class="admin-crm-chip">${escapeHtml(badge)}</span>`).join("")}</div>`
     : "";
   return `
-    <tr>
+    <tr data-inventory-row="${escapeAttribute(product.slug || "")}">
       <td class="admin-mono">${escapeHtml(product.article || "—")}</td>
       <td>
         <div class="admin-inventory-name">${escapeHtml(product.name || "Без названия")}</div>
@@ -2088,13 +2152,32 @@ function renderInventoryRow(product, categories) {
       </td>
       <td>${escapeHtml(category)}</td>
       <td>
-        <div class="admin-inventory-price">${formatMoney(product.price)}</div>
-        ${product.oldPrice ? `<div class="admin-inventory-old-price">${formatMoney(product.oldPrice)}</div>` : ""}
+        <label class="admin-inventory-edit">
+          <span>Текущая</span>
+          <input class="admin-input admin-inventory-input" data-inventory-field="price" type="number" min="0" step="1" value="${escapeAttribute(formatNumberInputValue(product.price))}" />
+        </label>
+        <label class="admin-inventory-edit">
+          <span>Старая</span>
+          <input class="admin-input admin-inventory-input" data-inventory-field="oldPrice" type="number" min="0" step="1" value="${escapeAttribute(formatNumberInputValue(product.oldPrice))}" placeholder="не задана" />
+        </label>
+        <div class="admin-inventory-price-note">Было: ${formatMoney(product.price)}${product.oldPrice ? ` · старая ${formatMoney(product.oldPrice)}` : ""}</div>
       </td>
-      <td><span class="admin-inventory-stock is-${escapeAttribute(product.stockStatus || "out_of_stock")}">${escapeHtml(formatInventoryStockLabel(product.stockStatus))}</span></td>
+      <td>
+        <select class="admin-select admin-inventory-select" data-inventory-field="stockStatus">
+          ${["in_stock", "limited", "preorder", "out_of_stock"].map((status) => `
+            <option value="${status}" ${(product.stockStatus || "in_stock") === status ? "selected" : ""}>${escapeHtml(formatInventoryStockLabel(status))}</option>
+          `).join("")}
+        </select>
+        <div class="admin-inventory-price-note">Сейчас: <span class="admin-inventory-stock is-${escapeAttribute(product.stockStatus || "out_of_stock")}">${escapeHtml(formatInventoryStockLabel(product.stockStatus))}</span></div>
+      </td>
       <td>
         <div class="admin-mono admin-inventory-path">${escapeHtml(product.path || "—")}</div>
-        ${product.path ? `<a class="btn btn-secondary admin-inventory-open" href="..${escapeAttribute(product.path)}" target="_blank" rel="noopener">Открыть</a>` : ""}
+        <div class="admin-inventory-actions">
+          <button class="btn btn-primary admin-inventory-open" data-inventory-save="${escapeAttribute(product.slug || "")}" type="button">Сохранить</button>
+          <button class="btn btn-secondary admin-inventory-open" data-inventory-reset="${escapeAttribute(product.slug || "")}" type="button">Сбросить</button>
+          ${product.path ? `<a class="btn btn-secondary admin-inventory-open" href="..${escapeAttribute(product.path)}" target="_blank" rel="noopener">Открыть</a>` : ""}
+        </div>
+        <div class="admin-inventory-row-state" data-inventory-state>Совпадает со snapshot.</div>
       </td>
     </tr>
   `;
@@ -2123,6 +2206,58 @@ function formatMoney(value) {
     return "по запросу";
   }
   return `${new Intl.NumberFormat("ru-RU").format(Math.round(amount))} ₽`;
+}
+
+function formatNumberInputValue(value) {
+  const amount = Number(value);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return "";
+  }
+  return String(Math.round(amount));
+}
+
+function readInventoryRowDraft(row) {
+  const price = Number(row.querySelector('[data-inventory-field="price"]').value || 0);
+  const oldPrice = Number(row.querySelector('[data-inventory-field="oldPrice"]').value || 0);
+  return {
+    price,
+    old_price: Number.isFinite(oldPrice) && oldPrice > 0 ? oldPrice : null,
+    stock_status: row.querySelector('[data-inventory-field="stockStatus"]').value || "in_stock",
+  };
+}
+
+function isInventoryRowDirty(row) {
+  const slug = row.dataset.inventoryRow;
+  const product = getInventoryProducts().find((item) => item.slug === slug);
+  if (!product) return false;
+  const draftRow = readInventoryRowDraft(row);
+  const currentPrice = Number(product.price || 0);
+  const currentOldPrice = Number(product.oldPrice || 0);
+  const normalizedCurrentOldPrice = Number.isFinite(currentOldPrice) && currentOldPrice > 0 ? currentOldPrice : null;
+  return draftRow.price !== currentPrice
+    || draftRow.old_price !== normalizedCurrentOldPrice
+    || draftRow.stock_status !== (product.stockStatus || "in_stock");
+}
+
+function updateInventoryRowState(row) {
+  const state = row.querySelector("[data-inventory-state]");
+  const saveButton = row.querySelector("[data-inventory-save]");
+  const resetButton = row.querySelector("[data-inventory-reset]");
+  if (!state || !saveButton || !resetButton) return;
+  const saving = row.dataset.inventorySaving === "true";
+  const dirty = isInventoryRowDirty(row);
+  saveButton.disabled = saving || !dirty;
+  resetButton.disabled = saving || !dirty;
+  if (saving) {
+    state.textContent = "Сохраняю...";
+    row.classList.add("is-saving");
+    row.classList.remove("is-dirty");
+    return;
+  }
+  row.dataset.inventorySaving = "false";
+  row.classList.toggle("is-dirty", dirty);
+  row.classList.remove("is-saving");
+  state.textContent = dirty ? "Есть несохранённые изменения." : "Совпадает со snapshot.";
 }
 
 function parseCommaValues(value) {

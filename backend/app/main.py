@@ -151,15 +151,15 @@ def load_default_catalog_items() -> list[dict[str, Any]]:
 def load_catalog_snapshot() -> dict[str, Any]:
     generated = read_generated_json(GENERATED_CATALOG_SNAPSHOT_PATH)
     if isinstance(generated, dict) and generated:
-        return generated
-    return {
+        return apply_catalog_inventory_overrides(generated)
+    return apply_catalog_inventory_overrides({
         "generatedAt": utc_now(),
         "source": "backend-fallback",
         "items": load_default_catalog_items(),
         "counts": {
             "items": len(load_default_catalog_items()),
         },
-    }
+    })
 
 
 DEFAULT_SITE_SETTINGS: dict[str, Any] = {
@@ -400,6 +400,12 @@ class CatalogItemRequest(BaseModel):
 
 class CatalogEnvelope(BaseModel):
     items: list[CatalogItemRequest] = Field(default_factory=list)
+
+
+class CatalogInventoryOverrideRequest(BaseModel):
+    price: float | None = None
+    old_price: float | None = None
+    stock_status: str = "in_stock"
 
 
 class SettingsEnvelope(BaseModel):
@@ -670,6 +676,15 @@ def init_db() -> None:
               updated_at TEXT NOT NULL
             );
 
+            CREATE TABLE IF NOT EXISTS catalog_inventory_overrides (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              slug TEXT NOT NULL UNIQUE,
+              price REAL,
+              old_price REAL,
+              stock_status TEXT NOT NULL DEFAULT 'in_stock',
+              updated_at TEXT NOT NULL
+            );
+
             CREATE TABLE IF NOT EXISTS lead_events (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               lead_id INTEGER NOT NULL,
@@ -898,6 +913,93 @@ def list_catalog_items(status_filter: str = "") -> list[dict[str, Any]]:
         }
         for row in rows
     ]
+
+
+def list_catalog_inventory_overrides() -> list[dict[str, Any]]:
+    with closing(db_connect()) as connection:
+        rows = connection.execute(
+            """
+            SELECT slug, price, old_price, stock_status, updated_at
+            FROM catalog_inventory_overrides
+            ORDER BY slug ASC
+            """
+        ).fetchall()
+    return [
+        {
+            "slug": row["slug"],
+            "price": row["price"],
+            "old_price": row["old_price"],
+            "stock_status": row["stock_status"],
+            "updated_at": row["updated_at"],
+        }
+        for row in rows
+    ]
+
+
+def apply_catalog_inventory_overrides(snapshot: dict[str, Any]) -> dict[str, Any]:
+    payload = json.loads(json.dumps(snapshot))
+    overrides = {item["slug"]: item for item in list_catalog_inventory_overrides()}
+    products = payload.get("products") if isinstance(payload.get("products"), list) else []
+    for product in products:
+        override = overrides.get(product.get("slug", ""))
+        if not override:
+            continue
+        if override.get("price") is not None:
+            product["price"] = int(round(float(override["price"])))
+        product["oldPrice"] = int(round(float(override["old_price"]))) if override.get("old_price") is not None else None
+        product["stockStatus"] = override.get("stock_status") or product.get("stockStatus") or "in_stock"
+        product["inventoryOverrideUpdatedAt"] = override.get("updated_at")
+    payload["inventoryOverrides"] = list(overrides.values())
+    if isinstance(payload.get("counts"), dict):
+        payload["counts"]["inventoryOverrides"] = len(overrides)
+    return payload
+
+
+def get_snapshot_product_by_slug(slug: str) -> dict[str, Any] | None:
+    snapshot = read_generated_json(GENERATED_CATALOG_SNAPSHOT_PATH)
+    if not isinstance(snapshot, dict):
+        return None
+    for product in snapshot.get("products") or []:
+        if product.get("slug") == slug:
+            return product
+    return None
+
+
+def upsert_catalog_inventory_override(slug: str, payload: CatalogInventoryOverrideRequest) -> dict[str, Any]:
+    base_product = get_snapshot_product_by_slug(slug)
+    if base_product is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Catalog product not found")
+    next_price = int(round(float(payload.price))) if payload.price is not None else None
+    next_old_price = int(round(float(payload.old_price))) if payload.old_price is not None else None
+    next_stock_status = (payload.stock_status or "in_stock").strip() or "in_stock"
+    base_price = int(round(float(base_product.get("price") or 0))) if base_product.get("price") is not None else None
+    base_old_price = int(round(float(base_product.get("oldPrice") or 0))) if base_product.get("oldPrice") is not None else None
+    if base_product.get("oldPrice") is None:
+        base_old_price = None
+    base_stock_status = base_product.get("stockStatus") or "in_stock"
+    should_clear = next_price == base_price and next_old_price == base_old_price and next_stock_status == base_stock_status
+    with closing(db_connect()) as connection:
+        if should_clear:
+            connection.execute("DELETE FROM catalog_inventory_overrides WHERE slug = ?", (slug,))
+        else:
+            connection.execute(
+                """
+                INSERT INTO catalog_inventory_overrides (slug, price, old_price, stock_status, updated_at)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT(slug) DO UPDATE SET
+                  price = excluded.price,
+                  old_price = excluded.old_price,
+                  stock_status = excluded.stock_status,
+                  updated_at = excluded.updated_at
+                """,
+                (slug, next_price, next_old_price, next_stock_status, utc_now()),
+            )
+        connection.commit()
+    updated_snapshot = load_catalog_snapshot()
+    for product in updated_snapshot.get("products") or []:
+        if product.get("slug") == slug:
+            return product
+    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Updated catalog product not found")
 
 
 def serialize_user(row: sqlite3.Row) -> dict[str, Any]:
@@ -2137,6 +2239,31 @@ def admin_list_catalog_items(_: dict[str, Any] = Depends(require_admin)) -> dict
 @app.get("/v1/admin/catalog/snapshot")
 def admin_catalog_snapshot(_: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
     return {"snapshot": load_catalog_snapshot()}
+
+
+@app.put("/v1/admin/catalog/inventory/{slug}")
+def admin_put_catalog_inventory_override(
+    slug: str,
+    payload: CatalogInventoryOverrideRequest,
+    _: dict[str, Any] = Depends(require_roles("owner", "admin", "editor", "manager")),
+) -> dict[str, Any]:
+    updated = upsert_catalog_inventory_override(slug, payload)
+    context = _
+    insert_audit_event(
+        actor_user_id=context.get("user_id"),
+        actor_name=context.get("user_name", "Admin"),
+        actor_role=context.get("user_role", "admin"),
+        area="catalog",
+        action="inventory_override_upsert",
+        target_type="catalog_product",
+        target_id=slug,
+        payload={
+            "price": payload.price,
+            "old_price": payload.old_price,
+            "stock_status": payload.stock_status,
+        },
+    )
+    return {"ok": True, "product": updated}
 
 
 @app.put("/v1/admin/catalog/items")
