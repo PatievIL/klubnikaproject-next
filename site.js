@@ -25,6 +25,147 @@ const SITE_ADMIN_DEFAULTS = {
   },
 };
 
+const LEGACY_CATALOG_REDIRECTS = {
+  "shop/products/blind-tube-white/": {
+    href: "catalog/fittings/tube-blank-16/",
+    label: "White Line 16 мм",
+    categoryLabel: "Фитинги и магистрали",
+    categoryHref: "catalog/fittings/",
+  },
+  "shop/products/blind-tube-white-roll/": {
+    href: "catalog/fittings/tube-blank-roll/",
+    label: "White Line 16 мм, бухта 100 м",
+    categoryLabel: "Фитинги и магистрали",
+    categoryHref: "catalog/fittings/",
+  },
+  "shop/products/disc-filter-3-4/": {
+    href: "catalog/fittings/disc-filter-34/",
+    label: "Clear Disc 3/4",
+    categoryLabel: "Фитинги и магистрали",
+    categoryHref: "catalog/fittings/",
+  },
+  "shop/products/dosatron/": {
+    href: "catalog/irrigation/",
+    label: "Раздел полива и дозирования",
+    categoryLabel: "Полив и дозирование",
+    categoryHref: "catalog/irrigation/",
+  },
+  "shop/products/farm-module/": {
+    href: "catalog/rack-frames/aisle-rack-kit/",
+    label: "Модуль Aisle Rack Kit",
+    categoryLabel: "Каркасы и модули",
+    categoryHref: "catalog/rack-frames/",
+  },
+  "shop/products/fittings-kit-module/": {
+    href: "catalog/irrigation-kits/starter-irrigation-96/",
+    label: "Стартовый набор полива Starter 96",
+    categoryLabel: "Готовые наборы полива",
+    categoryHref: "catalog/irrigation-kits/",
+  },
+  "shop/products/grodan-classic/": {
+    href: "catalog/substrate-slabs/rootslab-classic-100/",
+    label: "RootSlab Classic 100",
+    categoryLabel: "Субстратные маты",
+    categoryHref: "catalog/substrate-slabs/",
+  },
+  "shop/products/grodan-plug/": {
+    href: "catalog/propagation-plugs/plug-cube-36/",
+    label: "Plug Cube 36",
+    categoryLabel: "Кубики и стартовые пробки",
+    categoryHref: "catalog/propagation-plugs/",
+  },
+  "shop/products/grodan-prestige/": {
+    href: "catalog/substrate-slabs/rootslab-prestige-65/",
+    label: "RootSlab Prestige 65",
+    categoryLabel: "Субстратные маты",
+    categoryHref: "catalog/substrate-slabs/",
+  },
+  "shop/products/hole-punch-16-20/": {
+    href: "catalog/fittings/punch-16-20/",
+    label: "Quick Punch 16/20",
+    categoryLabel: "Фитинги и магистрали",
+    categoryHref: "catalog/fittings/",
+  },
+  "shop/products/irrigation-base-rack/": {
+    href: "catalog/irrigation-kits/starter-irrigation-96/",
+    label: "Starter 96",
+    categoryLabel: "Готовые наборы полива",
+    categoryHref: "catalog/irrigation-kits/",
+  },
+  "shop/products/irrigation-extra-rack/": {
+    href: "catalog/irrigation-kits/rack-irrigation-module/",
+    label: "Rack Module",
+    categoryLabel: "Готовые наборы полива",
+    categoryHref: "catalog/irrigation-kits/",
+  },
+  "shop/products/irrigation-kit/": {
+    href: "catalog/irrigation-kits/starter-irrigation-96/",
+    label: "Starter 96",
+    categoryLabel: "Готовые наборы полива",
+    categoryHref: "catalog/irrigation-kits/",
+  },
+  "shop/products/led-300wt/": {
+    href: "catalog/linear-led/luma-line-191/",
+    label: "Luma Line 191",
+    categoryLabel: "Линейные светильники",
+    categoryHref: "catalog/linear-led/",
+  },
+  "shop/products/led-300wt-140cm/": {
+    href: "catalog/greenhouse-led/canopy-boost-140/",
+    label: "Canopy Boost 140",
+    categoryLabel: "Тепличные световые модули",
+    categoryHref: "catalog/greenhouse-led/",
+  },
+  "shop/products/led-450wt-200cm/": {
+    href: "catalog/greenhouse-led/canopy-boost-200/",
+    label: "Canopy Boost 200",
+    categoryLabel: "Тепличные световые модули",
+    categoryHref: "catalog/greenhouse-led/",
+  },
+  "shop/products/led-50wt-60cm/": {
+    href: "catalog/linear-led/luma-line-60/",
+    label: "Luma Line 60",
+    categoryLabel: "Линейные светильники",
+    categoryHref: "catalog/linear-led/",
+  },
+  "shop/products/led-50wt-95cm/": {
+    href: "catalog/linear-led/luma-line-95/",
+    label: "Luma Line 95",
+    categoryLabel: "Линейные светильники",
+    categoryHref: "catalog/linear-led/",
+  },
+  "shop/products/metal-tray-210/": {
+    href: "catalog/trays-gutters/metal-gutter-210/",
+    label: "Metal Gutter 210",
+    categoryLabel: "Лотки и сервисные элементы",
+    categoryHref: "catalog/trays-gutters/",
+  },
+  "shop/products/rack-base-16mats/": {
+    href: "catalog/rack-frames/frame-plus-16/",
+    label: "Plus Frame 16",
+    categoryLabel: "Каркасы и модули",
+    categoryHref: "catalog/rack-frames/",
+  },
+  "shop/products/rack-extra-16mats/": {
+    href: "catalog/rack-frames/frame-plus-16/",
+    label: "Plus Frame 16",
+    categoryLabel: "Каркасы и модули",
+    categoryHref: "catalog/rack-frames/",
+  },
+  "shop/products/rack-system/": {
+    href: "catalog/rack-frames/aisle-rack-kit/",
+    label: "Aisle Rack Kit",
+    categoryLabel: "Каркасы и модули",
+    categoryHref: "catalog/rack-frames/",
+  },
+  "shop/products/rivulis-supertif-22/": {
+    href: "catalog/drippers/rivulet-dripper-22/",
+    label: "Rivulet 2,2 л/ч",
+    categoryLabel: "Капельницы и узлы подачи",
+    categoryHref: "catalog/drippers/",
+  },
+};
+
 let siteAdminConfig = cloneConfig(SITE_ADMIN_DEFAULTS);
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -48,6 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   normalizeSecondaryCtas();
   injectProductRail(root);
+  injectLegacyCatalogBanner(root);
   injectUiControls();
   markActiveCompactNav();
   bindTopbarMenus();
@@ -141,7 +283,7 @@ function injectCompactShell(root) {
           <nav class="compact-nav" aria-label="Основная навигация">
             <a href="${root}">Главная</a>
             <a href="${root}study/">Решения</a>
-            <a href="${root}shop/">Каталог</a>
+            <a href="${root}catalog/">Каталог</a>
             <a href="${root}calc/">Калькулятор</a>
           </nav>
         </div>
@@ -166,7 +308,7 @@ function injectSharedFooter(root) {
           <h3>Сценарии</h3>
           <ul class="footer-links">
             <li><a href="${root}farm/">Расчёт фермы</a></li>
-            <li><a href="${root}shop/">Магазин</a></li>
+            <li><a href="${root}catalog/">Каталог</a></li>
             <li><a href="${root}study/">Сопровождение</a></li>
             <li><a href="${root}klubhack/">Клубничный Хак</a></li>
             <li><a href="${root}seeds/">Посадочный материал</a></li>
@@ -343,6 +485,32 @@ function productRailItem(root, group, item, label) {
       <strong>${title}</strong>
     </a>
   `;
+}
+
+function injectLegacyCatalogBanner(root) {
+  const normalizedPath = normalizeSitePath(window.location.pathname);
+  const lookupKey = normalizedPath === "/" ? "/" : `${normalizedPath.replace(/^\/+/, "")}/`;
+  const legacyTarget = LEGACY_CATALOG_REDIRECTS[lookupKey];
+  if (!legacyTarget || document.querySelector(".legacy-catalog-banner")) return;
+
+  const banner = document.createElement("aside");
+  banner.className = "legacy-catalog-banner";
+  banner.innerHTML = `
+    <div class="legacy-catalog-banner-copy">
+      <span class="legacy-catalog-banner-label">Новый каталог</span>
+      <strong>Для этой legacy-страницы уже есть актуальный маршрут в новом каталоге.</strong>
+      <p>Открывайте новую карточку, чтобы работать с фильтрами, вариантами цен, корзиной и обновлённой структурой товара.</p>
+    </div>
+    <div class="legacy-catalog-banner-actions">
+      <a class="btn btn-primary" href="${root}${legacyTarget.href}">Открыть ${legacyTarget.label}</a>
+      <a class="btn btn-secondary" href="${root}${legacyTarget.categoryHref}">Перейти в раздел «${legacyTarget.categoryLabel}»</a>
+    </div>
+  `;
+
+  const anchor = document.querySelector(".product-rail") || document.querySelector(".crumbs");
+  if (anchor?.parentNode) {
+    anchor.insertAdjacentElement("afterend", banner);
+  }
 }
 
 function normalizeSitePath(pathname) {
@@ -872,8 +1040,8 @@ function markActiveCompactNav() {
     }
 
     if (
-      targetPath === "/shop/" &&
-      ["/shop/", "/seeds/"].some((prefix) => currentPath.startsWith(prefix))
+      targetPath === "/catalog/" &&
+      ["/catalog/", "/shop/", "/seeds/"].some((prefix) => currentPath.startsWith(prefix))
     ) {
       link.setAttribute("aria-current", "page");
       return;
