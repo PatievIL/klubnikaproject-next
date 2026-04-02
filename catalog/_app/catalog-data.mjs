@@ -2776,6 +2776,9 @@ const products = productsSeed.map((product) => {
     name: legacyOverride?.name || product.name,
     shortDescription: legacyOverride?.shortDescription || product.shortDescription,
     fullDescription: legacyOverride?.fullDescription || product.fullDescription,
+    attributes: legacyOverride?.attributes?.length ? legacyOverride.attributes : product.attributes,
+    faq: legacyOverride?.faq?.length ? legacyOverride.faq : product.faq,
+    documents: legacyOverride?.documents?.length ? legacyOverride.documents : product.documents,
   };
   productsById.set(normalized.id, normalized);
   productsBySlug.set(normalized.slug, normalized);
@@ -3063,6 +3066,7 @@ export function buildFacetData(items) {
     stockMap.set(product.stockStatus, (stockMap.get(product.stockStatus) || 0) + 1);
     product.badges.forEach((badge) => badgeMap.set(badge, (badgeMap.get(badge) || 0) + 1));
     product.attributes.forEach((attribute) => {
+      if (attribute.filterable === false) return;
       if (!attributeMap.has(attribute.key)) {
         attributeMap.set(attribute.key, {
           key: attribute.key,
