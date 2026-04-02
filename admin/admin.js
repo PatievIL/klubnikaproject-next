@@ -174,6 +174,7 @@ let currentSection = "dashboard";
 let catalogDraft = clone(DEFAULT_CATALOG_ITEMS);
 let usersDraft = [];
 let auditDraft = [];
+let backendUser = null;
 const crmWorkspace = {
   available: false,
   view: "kanban",
@@ -239,7 +240,11 @@ function bindGlobalEvents() {
 }
 
 function renderTabs() {
-  els.tabs.innerHTML = SECTIONS.map((section) => `
+  const visibleSections = getVisibleSections();
+  if (!visibleSections.some((section) => section.id === currentSection)) {
+    currentSection = visibleSections[0]?.id || "dashboard";
+  }
+  els.tabs.innerHTML = visibleSections.map((section) => `
     <button
       class="admin-tab"
       type="button"
@@ -256,6 +261,30 @@ function renderTabs() {
       renderCurrentSection();
     });
   });
+}
+
+function getVisibleSections() {
+  return SECTIONS.filter((section) => canAccessSection(section.id));
+}
+
+function canAccessSection(sectionId) {
+  const role = backendUser?.user_role || backendUser?.role || "";
+  const scopes = new Set(backendUser?.scopes || []);
+
+  if (!backendUser) {
+    return !["crm", "users", "audit"].includes(sectionId);
+  }
+
+  if (["owner", "admin"].includes(role)) return true;
+  if (role === "editor") {
+    return ["dashboard", "site", "pages", "forms", "catalog", "seo", "integrations"].includes(sectionId);
+  }
+  if (role === "manager") {
+    return ["dashboard", "crm"].includes(sectionId) || (sectionId === "catalog" && scopes.has("catalog"));
+  }
+  if (sectionId === "crm") return scopes.has("crm");
+  if (sectionId === "catalog") return scopes.has("catalog");
+  return sectionId === "dashboard";
 }
 
 function renderCurrentSection() {
@@ -1315,6 +1344,11 @@ function bindAuditSection() {
 }
 
 async function loadUsers() {
+  if (!canAccessSection("users")) {
+    usersDraft = [];
+    renderSummary();
+    return;
+  }
   const list = document.getElementById("admin-users-list");
   if (!list) return;
   list.innerHTML = '<div class="admin-lead-empty">Загружаю пользователей…</div>';
@@ -1460,6 +1494,11 @@ async function rotateUserKey(userId) {
 }
 
 async function loadAuditEvents() {
+  if (!canAccessSection("audit")) {
+    auditDraft = [];
+    renderSummary();
+    return;
+  }
   const list = document.getElementById("admin-audit-list");
   if (!list) return;
   list.innerHTML = '<div class="admin-lead-empty">Загружаю аудит…</div>';
@@ -1561,6 +1600,10 @@ async function loginToBackend() {
       body: JSON.stringify({ token }),
     });
     const user = response.user;
+    backendUser = user || null;
+    renderTabs();
+    renderCurrentSection();
+    renderSummary();
     els.sessionState.textContent = user
       ? `Сессия backend активна: ${user.display_name || user.user_name || "пользователь"} (${user.role || user.user_role || "role"})`
       : "Сессия backend активна.";
@@ -1583,6 +1626,10 @@ async function loginToBackendWithPassword() {
       body: JSON.stringify({ login, password }),
     });
     const user = response.user;
+    backendUser = user || null;
+    renderTabs();
+    renderCurrentSection();
+    renderSummary();
     els.sessionState.textContent = user
       ? `Сессия backend активна: ${user.display_name || "пользователь"} (${user.role || "role"}, ${user.account_type || "admin"})`
       : "Сессия backend активна.";
@@ -1596,10 +1643,18 @@ async function checkBackendSession() {
     els.sessionState.textContent = "Проверяю сессию...";
     const response = await adminFetch("/admin/auth/session");
     const user = response.user;
+    backendUser = user || null;
+    renderTabs();
+    renderCurrentSection();
+    renderSummary();
     els.sessionState.textContent = response.session
       ? `Сессия backend активна: ${user?.user_name || user?.display_name || "пользователь"} (${user?.user_role || user?.role || "role"}, ${user?.account_type || "admin"})`
       : "Сессия backend не найдена.";
   } catch (error) {
+    backendUser = null;
+    renderTabs();
+    renderCurrentSection();
+    renderSummary();
     els.sessionState.textContent = `Сессия не подтверждена: ${error.message}`;
   }
 }
@@ -1608,6 +1663,10 @@ async function logoutFromBackend() {
   try {
     els.sessionState.textContent = "Завершаю сессию...";
     await adminFetch("/admin/auth/logout", { method: "POST" });
+    backendUser = null;
+    renderTabs();
+    renderCurrentSection();
+    renderSummary();
     els.sessionState.textContent = "Сессия backend завершена.";
   } catch (error) {
     els.sessionState.textContent = `Не удалось завершить сессию: ${error.message}`;

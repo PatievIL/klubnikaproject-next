@@ -16,6 +16,7 @@ const DEFAULT_SETTINGS = {
 };
 
 let settings = clone(DEFAULT_SETTINGS);
+let currentSessionUser = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
   settings = loadCachedSettings();
@@ -24,7 +25,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   bindLogout();
 
   const view = document.body.dataset.accountView || "hub";
+  if (!isMembersEnabled()) {
+    renderMembersDisabled(view);
+    return;
+  }
+
   if (view === "login") {
+    const session = await fetchSession();
+    if (session?.ok) {
+      currentSessionUser = session.user;
+      redirectAuthenticatedMember(session.user);
+      return;
+    }
     bindLogin();
     return;
   }
@@ -35,11 +47,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
+  currentSessionUser = session.user;
   renderUser(session.user);
 
   if (view === "catalog") {
+    if (!hasScope(session.user, "catalog")) {
+      renderScopeDenied("catalog");
+      return;
+    }
     await renderMemberCatalog();
   } else if (view === "special") {
+    if (!hasScope(session.user, "special_pages")) {
+      renderScopeDenied("special_pages");
+      return;
+    }
     await renderSpecialPages();
   } else {
     renderHub(session.user);
@@ -94,6 +115,20 @@ function memberPath(key) {
   return settings.members?.[key] || DEFAULT_SETTINGS.members[key];
 }
 
+function isMembersEnabled() {
+  return Boolean(settings.members?.enabled);
+}
+
+function hasScope(user, scope) {
+  return Array.isArray(user?.scopes) && user.scopes.includes(scope);
+}
+
+function preferredMemberPath(user) {
+  if (hasScope(user, "catalog")) return memberPath("catalogPath");
+  if (hasScope(user, "special_pages")) return memberPath("specialPath");
+  return memberPath("hubPath");
+}
+
 function withNext(url) {
   const next = `${window.location.pathname}${window.location.search || ""}`;
   return `${url}?next=${encodeURIComponent(next)}`;
@@ -135,8 +170,10 @@ function bindLogin() {
         const text = await response.text();
         throw new Error(text || `HTTP ${response.status}`);
       }
+      const payload = await response.json();
+      currentSessionUser = payload.user || null;
       const nextCandidate = new URLSearchParams(window.location.search).get("next") || memberPath("hubPath");
-      const next = nextCandidate.startsWith("/") ? nextCandidate : memberPath("hubPath");
+      const next = nextCandidate.startsWith("/") ? nextCandidate : preferredMemberPath(currentSessionUser);
       window.location.href = next;
     } catch (error) {
       if (status) status.textContent = `Вход не удался: ${cleanupError(error.message)}`;
@@ -170,6 +207,8 @@ function renderUser(user) {
 function renderHub(user) {
   const container = document.getElementById("account-dynamic-content");
   if (!container) return;
+  const hasCatalog = hasScope(user, "catalog");
+  const hasSpecial = hasScope(user, "special_pages");
   container.innerHTML = `
     <div class="account-grid">
       <article class="card card-pad account-card">
@@ -177,7 +216,10 @@ function renderHub(user) {
         <h3 class="calc-card-title">Закрытый каталог пользователя</h3>
         <p class="sublead">Здесь можно быстро открыть ключевые входы каталога, не проходя заново через маркетинговый слой сайта.</p>
         <div class="account-actions">
-          <a class="btn btn-primary" href="${memberPath("catalogPath")}">Открыть каталог</a>
+          ${hasCatalog
+            ? `<a class="btn btn-primary" href="${memberPath("catalogPath")}">Открыть каталог</a>`
+            : `<span class="account-note-chip">Нет scope \`catalog\`</span>`
+          }
         </div>
       </article>
       <article class="card card-pad account-card">
@@ -185,7 +227,10 @@ function renderHub(user) {
         <h3 class="calc-card-title">Материалы и маршруты с доступом по аккаунту</h3>
         <p class="sublead">Отдельные страницы, которые не индексируются и доступны только авторизованным пользователям.</p>
         <div class="account-actions">
-          <a class="btn btn-secondary" href="${memberPath("specialPath")}">Открыть спецстраницы</a>
+          ${hasSpecial
+            ? `<a class="btn btn-secondary" href="${memberPath("specialPath")}">Открыть спецстраницы</a>`
+            : `<span class="account-note-chip">Нет scope \`special_pages\`</span>`
+          }
         </div>
       </article>
     </div>
@@ -194,6 +239,11 @@ function renderHub(user) {
       <h3 class="calc-card-title">Текущий доступ</h3>
       <p class="sublead">Вы вошли как <strong>${escapeHtml(user.user_name || user.display_name || "Пользователь")}</strong>. Если нужно сменить доступ, выйдите и войдите под другим логином.</p>
     </article>
+    ${!hasCatalog && !hasSpecial ? `
+      <div class="account-empty">
+        Для этого аккаунта пока не выданы маршруты \`catalog\` или \`special_pages\`. Настройте scopes в админке.
+      </div>
+    ` : ""}
   `;
 }
 
@@ -296,13 +346,59 @@ function bindLogout() {
       } catch (error) {
         // ignore
       }
-      window.location.href = memberPath("loginPath");
+      window.location.href = isMembersEnabled() ? memberPath("loginPath") : "/";
     });
   });
 }
 
 function redirectToLogin() {
+  if (!isMembersEnabled()) {
+    window.location.href = "/";
+    return;
+  }
   window.location.href = withNext(memberPath("loginPath"));
+}
+
+function redirectAuthenticatedMember(user) {
+  const nextCandidate = new URLSearchParams(window.location.search).get("next");
+  if (nextCandidate && nextCandidate.startsWith("/")) {
+    window.location.href = nextCandidate;
+    return;
+  }
+  window.location.href = preferredMemberPath(user);
+}
+
+function renderMembersDisabled(view) {
+  const title = document.querySelector(".hero-title-compact");
+  const lead = document.querySelector(".lead");
+  if (title) title.textContent = "Доступ по аккаунту сейчас отключён";
+  if (lead) lead.textContent = "Этот слой временно закрыт в настройках сайта. Публичный каталог и основные маршруты остаются доступными.";
+  const status = document.getElementById("account-login-status");
+  if (status) status.textContent = "Кабинет пользователя отключён в site settings.";
+  document.querySelectorAll(".account-input, #account-login-form button[type='submit']").forEach((el) => {
+    el.setAttribute("disabled", "disabled");
+  });
+  const container = document.getElementById("account-dynamic-content");
+  if (container) {
+    container.innerHTML = `
+      <div class="account-empty">
+        Внутренний кабинет пользователя временно отключён. Вернитесь на публичный сайт или включите members-layer в админке.
+      </div>
+    `;
+  }
+}
+
+function renderScopeDenied(scope) {
+  const container = document.getElementById("account-dynamic-content");
+  if (!container) return;
+  container.innerHTML = `
+    <div class="account-empty">
+      Для этого раздела нужен scope <strong>${escapeHtml(scope)}</strong>. Вернитесь в кабинет или измените права пользователя в админке.
+      <div class="account-actions">
+        <a class="btn btn-secondary" href="${memberPath("hubPath")}">Вернуться в кабинет</a>
+      </div>
+    </div>
+  `;
 }
 
 function cleanupError(message) {

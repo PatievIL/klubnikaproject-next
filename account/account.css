@@ -97,6 +97,18 @@
   background: rgba(255, 250, 242, 0.6);
 }
 
+.account-note-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(0, 77, 43, 0.08);
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 700;
+}
+
 @media (max-width: 960px) {
   .account-grid,
   .account-grid-3 {
