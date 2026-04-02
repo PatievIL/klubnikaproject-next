@@ -136,7 +136,7 @@
           <h1>Готовые наборы полива</h1>
           <p>Наборы под базовый модуль, дополнительный ряд и типовые схемы дооснащения.</p>
           <div class="catalog-page-hero__meta">
-            <span>2 товаров в разделе</span>
+            <span>4 товаров в разделе</span>
           </div>
         </div>
       </div>
@@ -204,22 +204,22 @@
             <input type="number" inputmode="numeric" data-filter-kind="price-max" value="" />
           </label>
         </div>
-        <div class="catalog-filter-note">Диапазон категории: 1 940 ₽ - 1 940 ₽</div>
+        <div class="catalog-filter-note">Диапазон категории: 1 940 ₽ - 45 000 ₽</div>
       </fieldset>
       <fieldset class="catalog-filter-group">
         <legend>Наличие</legend>
         <div class="catalog-filter-options">
           
                 <label class="catalog-check">
-                  <input type="checkbox" data-filter-kind="stock" value="in_stock"  />
-                  <span>В наличии</span>
-                  <small>1</small>
+                  <input type="checkbox" data-filter-kind="stock" value="preorder"  />
+                  <span>Под заказ</span>
+                  <small>2</small>
                 </label>
               
                 <label class="catalog-check">
-                  <input type="checkbox" data-filter-kind="stock" value="preorder"  />
-                  <span>Под заказ</span>
-                  <small>1</small>
+                  <input type="checkbox" data-filter-kind="stock" value="in_stock"  />
+                  <span>В наличии</span>
+                  <small>2</small>
                 </label>
               
         </div>
@@ -229,20 +229,39 @@
         <div class="catalog-filter-options">
           
                 <label class="catalog-check">
-                  <input type="checkbox" data-filter-kind="badge" value="hit"  />
-                  <span>Хит</span>
-                  <small>1</small>
+                  <input type="checkbox" data-filter-kind="badge" value="recommended"  />
+                  <span>Советуем</span>
+                  <small>3</small>
                 </label>
               
                 <label class="catalog-check">
-                  <input type="checkbox" data-filter-kind="badge" value="recommended"  />
-                  <span>Советуем</span>
+                  <input type="checkbox" data-filter-kind="badge" value="hit"  />
+                  <span>Хит</span>
                   <small>1</small>
                 </label>
               
         </div>
       </fieldset>
       
+    <fieldset class="catalog-filter-group">
+      <legend>Монтаж</legend>
+      <div class="catalog-filter-options">
+        
+              <label class="catalog-check">
+                <input
+                  type="checkbox"
+                  data-filter-kind="attribute"
+                  data-filter-key="mount"
+                  value="в узел полива"
+                  
+                />
+                <span>в узел полива</span>
+                <small>1</small>
+              </label>
+            
+      </div>
+    </fieldset>
+  
     <fieldset class="catalog-filter-group">
       <legend>Сборка</legend>
       <div class="catalog-filter-options">
@@ -259,22 +278,34 @@
                 <small>2</small>
               </label>
             
+              <label class="catalog-check">
+                <input
+                  type="checkbox"
+                  data-filter-kind="attribute"
+                  data-filter-key="assembly"
+                  value="готовый узел"
+                  
+                />
+                <span>готовый узел</span>
+                <small>1</small>
+              </label>
+            
       </div>
     </fieldset>
   
     <fieldset class="catalog-filter-group">
-      <legend>Длина линии</legend>
+      <legend>Сервис</legend>
       <div class="catalog-filter-options">
         
               <label class="catalog-check">
                 <input
                   type="checkbox"
                   data-filter-kind="attribute"
-                  data-filter-key="line"
-                  value="до 12 м"
+                  data-filter-key="service"
+                  value="проверка расхода и fit"
                   
                 />
-                <span>до 12 м</span>
+                <span>проверка расхода и fit</span>
                 <small>1</small>
               </label>
             
@@ -282,11 +313,11 @@
                 <input
                   type="checkbox"
                   data-filter-kind="attribute"
-                  data-filter-key="line"
-                  value="до 16 м"
+                  data-filter-key="service"
+                  value="первый запуск ряда"
                   
                 />
-                <span>до 16 м</span>
+                <span>первый запуск ряда</span>
                 <small>1</small>
               </label>
             
@@ -318,6 +349,61 @@
                   
                 />
                 <span>2 зоны подачи</span>
+                <small>1</small>
+              </label>
+            
+      </div>
+    </fieldset>
+  
+    <fieldset class="catalog-filter-group">
+      <legend>Линия</legend>
+      <div class="catalog-filter-options">
+        
+              <label class="catalog-check">
+                <input
+                  type="checkbox"
+                  data-filter-kind="attribute"
+                  data-filter-key="line"
+                  value="магистраль / бак"
+                  
+                />
+                <span>магистраль / бак</span>
+                <small>1</small>
+              </label>
+            
+              <label class="catalog-check">
+                <input
+                  type="checkbox"
+                  data-filter-kind="attribute"
+                  data-filter-key="line"
+                  value="до 12 м"
+                  
+                />
+                <span>до 12 м</span>
+                <small>1</small>
+              </label>
+            
+              <label class="catalog-check">
+                <input
+                  type="checkbox"
+                  data-filter-kind="attribute"
+                  data-filter-key="line"
+                  value="стартовый модуль"
+                  
+                />
+                <span>стартовый модуль</span>
+                <small>1</small>
+              </label>
+            
+              <label class="catalog-check">
+                <input
+                  type="checkbox"
+                  data-filter-kind="attribute"
+                  data-filter-key="line"
+                  value="до 16 м"
+                  
+                />
+                <span>до 16 м</span>
                 <small>1</small>
               </label>
             
@@ -364,10 +450,34 @@
                   type="checkbox"
                   data-filter-kind="attribute"
                   data-filter-key="scenario"
+                  value="дозирование раствора"
+                  
+                />
+                <span>дозирование раствора</span>
+                <small>1</small>
+              </label>
+            
+              <label class="catalog-check">
+                <input
+                  type="checkbox"
+                  data-filter-kind="attribute"
+                  data-filter-key="scenario"
                   value="базовый модуль"
                   
                 />
                 <span>базовый модуль</span>
+                <small>1</small>
+              </label>
+            
+              <label class="catalog-check">
+                <input
+                  type="checkbox"
+                  data-filter-kind="attribute"
+                  data-filter-key="scenario"
+                  value="базовый стеллаж"
+                  
+                />
+                <span>базовый стеллаж</span>
                 <small>1</small>
               </label>
             
@@ -388,7 +498,7 @@
   
       <div class="catalog-filter-panel__actions">
         <button type="button" class="catalog-primary-button" data-action="apply-filters">
-          Показать 2
+          Показать 4
         </button>
         <button type="button" class="catalog-secondary-button" data-action="reset-filters">Сбросить фильтры</button>
       </div>
@@ -400,7 +510,7 @@
     <section class="catalog-category-listing">
       <div class="catalog-listing-toolbar">
         <div>
-          <p class="catalog-listing-count">Найдено товаров: 2</p>
+          <p class="catalog-listing-count">Найдено товаров: 4</p>
           
         </div>
         <div class="catalog-listing-toolbar__controls">
@@ -506,6 +616,78 @@
         <div class="catalog-product-card__actions">
           <a class="catalog-secondary-button" href="../../catalog/irrigation-kits/rack-irrigation-module/index.html">Подробности</a>
           <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-rack-irrigation-module">В корзину</button>
+          
+        </div>
+      </div>
+    </article>
+  
+    <article class="catalog-product-card">
+      <div class="catalog-product-card__media">
+        
+    <div class="catalog-badge-list">
+      <span class="catalog-badge catalog-badge--green">Советуем</span>
+    </div>
+  
+        
+        <a href="../../catalog/irrigation-kits/irrigation-base-rack/index.html">
+          <img src="../../assets/catalog/65274928.webp" alt="Комплект оборудования для полива для базового стеллажа" loading="lazy" />
+        </a>
+      </div>
+      <div class="catalog-product-card__body">
+        <a class="catalog-product-card__title" href="../../catalog/irrigation-kits/irrigation-base-rack/index.html">Комплект оборудования для полива для базового стеллажа</a>
+        <div class="catalog-product-card__meta">
+          <span class="catalog-stock catalog-stock--green">В наличии</span>
+          <span>Артикул: 04-0005-686</span>
+        </div>
+        <p class="catalog-product-card__summary">Комплект полива для базового стеллажа: готовый узел под стартовый модуль клубничной фермы с проверкой состава и fit по схеме.</p>
+        <div class="catalog-product-card__price-row">
+          <div>
+            <strong>2 167 ₽</strong>
+            
+          </div>
+          <button type="button" class="catalog-link-button" data-action="open-price-tiers" data-product-id="prod-irrigation-base-rack">
+            Варианты цен
+          </button>
+        </div>
+        <div class="catalog-product-card__actions">
+          <a class="catalog-secondary-button" href="../../catalog/irrigation-kits/irrigation-base-rack/index.html">Подробности</a>
+          <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-irrigation-base-rack">В корзину</button>
+          
+        </div>
+      </div>
+    </article>
+  
+    <article class="catalog-product-card">
+      <div class="catalog-product-card__media">
+        
+    <div class="catalog-badge-list">
+      <span class="catalog-badge catalog-badge--green">Советуем</span>
+    </div>
+  
+        
+        <a href="../../catalog/irrigation-kits/dosatron/index.html">
+          <img src="../../assets/catalog/18341837.webp" alt="Насос дозирующий Dosatron" loading="lazy" />
+        </a>
+      </div>
+      <div class="catalog-product-card__body">
+        <a class="catalog-product-card__title" href="../../catalog/irrigation-kits/dosatron/index.html">Насос дозирующий Dosatron</a>
+        <div class="catalog-product-card__meta">
+          <span class="catalog-stock catalog-stock--blue">Под заказ</span>
+          <span>Артикул: 05-0004-590</span>
+        </div>
+        <p class="catalog-product-card__summary">Насос дозирующий Dosatron: узел дозирования для схемы полива клубничной фермы. Покупка имеет смысл только после проверки линии, расхода и логики подачи раствора.</p>
+        <div class="catalog-product-card__price-row">
+          <div>
+            <strong>45 000 ₽</strong>
+            
+          </div>
+          <button type="button" class="catalog-link-button" data-action="open-price-tiers" data-product-id="prod-dosatron">
+            Варианты цен
+          </button>
+        </div>
+        <div class="catalog-product-card__actions">
+          <a class="catalog-secondary-button" href="../../catalog/irrigation-kits/dosatron/index.html">Подробности</a>
+          <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-dosatron">В корзину</button>
           
         </div>
       </div>
@@ -757,22 +939,22 @@
             <input type="number" inputmode="numeric" data-filter-kind="price-max" value="" />
           </label>
         </div>
-        <div class="catalog-filter-note">Диапазон категории: 1 940 ₽ - 1 940 ₽</div>
+        <div class="catalog-filter-note">Диапазон категории: 1 940 ₽ - 45 000 ₽</div>
       </fieldset>
       <fieldset class="catalog-filter-group">
         <legend>Наличие</legend>
         <div class="catalog-filter-options">
           
                 <label class="catalog-check">
-                  <input type="checkbox" data-filter-kind="stock" value="in_stock"  />
-                  <span>В наличии</span>
-                  <small>1</small>
+                  <input type="checkbox" data-filter-kind="stock" value="preorder"  />
+                  <span>Под заказ</span>
+                  <small>2</small>
                 </label>
               
                 <label class="catalog-check">
-                  <input type="checkbox" data-filter-kind="stock" value="preorder"  />
-                  <span>Под заказ</span>
-                  <small>1</small>
+                  <input type="checkbox" data-filter-kind="stock" value="in_stock"  />
+                  <span>В наличии</span>
+                  <small>2</small>
                 </label>
               
         </div>
@@ -782,20 +964,39 @@
         <div class="catalog-filter-options">
           
                 <label class="catalog-check">
-                  <input type="checkbox" data-filter-kind="badge" value="hit"  />
-                  <span>Хит</span>
-                  <small>1</small>
+                  <input type="checkbox" data-filter-kind="badge" value="recommended"  />
+                  <span>Советуем</span>
+                  <small>3</small>
                 </label>
               
                 <label class="catalog-check">
-                  <input type="checkbox" data-filter-kind="badge" value="recommended"  />
-                  <span>Советуем</span>
+                  <input type="checkbox" data-filter-kind="badge" value="hit"  />
+                  <span>Хит</span>
                   <small>1</small>
                 </label>
               
         </div>
       </fieldset>
       
+    <fieldset class="catalog-filter-group">
+      <legend>Монтаж</legend>
+      <div class="catalog-filter-options">
+        
+              <label class="catalog-check">
+                <input
+                  type="checkbox"
+                  data-filter-kind="attribute"
+                  data-filter-key="mount"
+                  value="в узел полива"
+                  
+                />
+                <span>в узел полива</span>
+                <small>1</small>
+              </label>
+            
+      </div>
+    </fieldset>
+  
     <fieldset class="catalog-filter-group">
       <legend>Сборка</legend>
       <div class="catalog-filter-options">
@@ -812,22 +1013,34 @@
                 <small>2</small>
               </label>
             
+              <label class="catalog-check">
+                <input
+                  type="checkbox"
+                  data-filter-kind="attribute"
+                  data-filter-key="assembly"
+                  value="готовый узел"
+                  
+                />
+                <span>готовый узел</span>
+                <small>1</small>
+              </label>
+            
       </div>
     </fieldset>
   
     <fieldset class="catalog-filter-group">
-      <legend>Длина линии</legend>
+      <legend>Сервис</legend>
       <div class="catalog-filter-options">
         
               <label class="catalog-check">
                 <input
                   type="checkbox"
                   data-filter-kind="attribute"
-                  data-filter-key="line"
-                  value="до 12 м"
+                  data-filter-key="service"
+                  value="проверка расхода и fit"
                   
                 />
-                <span>до 12 м</span>
+                <span>проверка расхода и fit</span>
                 <small>1</small>
               </label>
             
@@ -835,11 +1048,11 @@
                 <input
                   type="checkbox"
                   data-filter-kind="attribute"
-                  data-filter-key="line"
-                  value="до 16 м"
+                  data-filter-key="service"
+                  value="первый запуск ряда"
                   
                 />
-                <span>до 16 м</span>
+                <span>первый запуск ряда</span>
                 <small>1</small>
               </label>
             
@@ -871,6 +1084,61 @@
                   
                 />
                 <span>2 зоны подачи</span>
+                <small>1</small>
+              </label>
+            
+      </div>
+    </fieldset>
+  
+    <fieldset class="catalog-filter-group">
+      <legend>Линия</legend>
+      <div class="catalog-filter-options">
+        
+              <label class="catalog-check">
+                <input
+                  type="checkbox"
+                  data-filter-kind="attribute"
+                  data-filter-key="line"
+                  value="магистраль / бак"
+                  
+                />
+                <span>магистраль / бак</span>
+                <small>1</small>
+              </label>
+            
+              <label class="catalog-check">
+                <input
+                  type="checkbox"
+                  data-filter-kind="attribute"
+                  data-filter-key="line"
+                  value="до 12 м"
+                  
+                />
+                <span>до 12 м</span>
+                <small>1</small>
+              </label>
+            
+              <label class="catalog-check">
+                <input
+                  type="checkbox"
+                  data-filter-kind="attribute"
+                  data-filter-key="line"
+                  value="стартовый модуль"
+                  
+                />
+                <span>стартовый модуль</span>
+                <small>1</small>
+              </label>
+            
+              <label class="catalog-check">
+                <input
+                  type="checkbox"
+                  data-filter-kind="attribute"
+                  data-filter-key="line"
+                  value="до 16 м"
+                  
+                />
+                <span>до 16 м</span>
                 <small>1</small>
               </label>
             
@@ -917,10 +1185,34 @@
                   type="checkbox"
                   data-filter-kind="attribute"
                   data-filter-key="scenario"
+                  value="дозирование раствора"
+                  
+                />
+                <span>дозирование раствора</span>
+                <small>1</small>
+              </label>
+            
+              <label class="catalog-check">
+                <input
+                  type="checkbox"
+                  data-filter-kind="attribute"
+                  data-filter-key="scenario"
                   value="базовый модуль"
                   
                 />
                 <span>базовый модуль</span>
+                <small>1</small>
+              </label>
+            
+              <label class="catalog-check">
+                <input
+                  type="checkbox"
+                  data-filter-kind="attribute"
+                  data-filter-key="scenario"
+                  value="базовый стеллаж"
+                  
+                />
+                <span>базовый стеллаж</span>
                 <small>1</small>
               </label>
             
@@ -941,7 +1233,7 @@
   
       <div class="catalog-filter-panel__actions">
         <button type="button" class="catalog-primary-button" data-action="apply-filters">
-          Показать 2
+          Показать 4
         </button>
         <button type="button" class="catalog-secondary-button" data-action="reset-filters">Сбросить фильтры</button>
       </div>

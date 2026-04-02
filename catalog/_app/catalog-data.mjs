@@ -1047,6 +1047,86 @@ const productsSeed = [
     quickViewEnabled: true,
   },
   {
+    id: "prod-dosatron",
+    categoryId: "irrigation-kits",
+    slug: "dosatron",
+    name: "Дозирующий узел Dosatron",
+    article: "IR-DS45",
+    shortDescription: "Узел дозирования под понятную схему полива, когда расход и логика подачи уже зафиксированы.",
+    fullDescription: fullDescriptionFrom({
+      overview:
+        "Dosatron нужен не сам по себе, а как часть уже описанного узла полива, где понятны расход, фильтрация и сценарий подачи раствора.",
+      fit:
+        "Обычно его берут для запуска новой линии, замены слабого узла или пересборки дозирования на действующей ферме.",
+      bullets: [
+        "Встаёт в понятную схему подачи и бака.",
+        "Используется там, где уже известен расход по линии.",
+        "Требует проверки fit по всей магистрали, а не только по цене самого дозатора.",
+      ],
+      wrapUp:
+        "Если вопрос звучит как «что-то не так с поливом», сначала лучше разобрать весь узел, а потом покупать дозатор.",
+    }),
+    price: 45000,
+    stockStatus: "preorder",
+    badges: ["recommended"],
+    popularity: 63,
+    images: [
+      "assets/catalog/18341837.webp",
+      "assets/photos/optimized/hero-process.webp",
+      "assets/photos/optimized/rack-aisle.webp",
+    ],
+    documents: [sharedDocuments["irrigation-passport"], sharedDocuments["nutrition-sheet"]],
+    attributes: [
+      attr("scenario", "Сценарий", "дозирование раствора", "Сценарий"),
+      attr("mount", "Монтаж", "в узел полива", "Монтаж"),
+      attr("line", "Линия", "магистраль / бак", "Основные"),
+      attr("service", "Сервис", "проверка расхода и fit", "Монтаж"),
+    ],
+    priceTiers: priceTiersFor(45000),
+    faq: [faq("Можно ли брать без схемы линии?", "Лучше нет: дозатор имеет смысл только после проверки расхода, бака и фильтрации.", "2026-02-28")],
+    quickViewEnabled: true,
+  },
+  {
+    id: "prod-fittings-kit-module",
+    categoryId: "fittings",
+    slug: "fittings-kit-module",
+    name: "Комплект фитингов для модульного стеллажа",
+    article: "IR-FKM-01",
+    shortDescription: "Типовой набор фитингов для уже понятного модуля, когда геометрия узла и линия подачи не плавают.",
+    fullDescription: fullDescriptionFrom({
+      overview:
+        "Комплект фитингов работает только внутри уже собранной схемы полива, где понятны переходы, магистраль и сценарий обслуживания.",
+      fit:
+        "Подходит для модульных стеллажей с известной геометрией и для сервисного добора типового набора.",
+      bullets: [
+        "Набор мелких фитингов под понятный узел.",
+        "Удобен, когда модуль уже описан по подаче.",
+        "Помогает не добирать переходники по одному в последний момент.",
+      ],
+      wrapUp:
+        "Если меняется сама логика узла, сначала нужно сверить состав линии, а уже потом забирать комплект фитингов.",
+    }),
+    price: 671,
+    stockStatus: "in_stock",
+    badges: [],
+    popularity: 57,
+    images: [
+      "assets/catalog/80999720.webp",
+      "assets/photos/optimized/greenhouse-rack.webp",
+      "assets/photos/optimized/hero-process.webp",
+    ],
+    documents: [sharedDocuments["irrigation-passport"]],
+    attributes: [
+      attr("type", "Тип позиции", "комплект фитингов"),
+      attr("scenario", "Сценарий", "модульный стеллаж", "Сценарий"),
+      attr("assembly", "Сборка", "типовой узел", "Монтаж"),
+      attr("service", "Сервис", "добор и замена", "Монтаж"),
+    ],
+    priceTiers: priceTiersFor(671),
+    faq: [faq("Подходит к любому модулю?", "Нет, комплект нужно сверять с геометрией и схемой именно вашего узла.", "2026-02-28")],
+    quickViewEnabled: true,
+  },
+  {
     id: "prod-starter-irrigation-96",
     categoryId: "irrigation-kits",
     slug: "starter-irrigation-96",
@@ -1088,6 +1168,46 @@ const productsSeed = [
       faq("Есть ли фитинги в комплекте?", "Да, набор рассчитан на запуск базового модуля без добора критичных мелочей.", "2026-01-30"),
       faq("Подходит ли для 120 растений?", "Лучше брать комплект после уточнения фактического числа точек подачи.", "2026-02-08"),
     ],
+    quickViewEnabled: true,
+  },
+  {
+    id: "prod-irrigation-base-rack",
+    categoryId: "irrigation-kits",
+    slug: "irrigation-base-rack",
+    name: "Комплект полива для базового стеллажа",
+    article: "IR-BR-BASE",
+    shortDescription: "Готовый узел полива под стартовый стеллажный модуль, когда геометрия ряда уже понятна.",
+    fullDescription: fullDescriptionFrom({
+      overview:
+        "Это стартовый поливочный узел под базовый модуль, когда вам нужен не набор случайных фитингов, а собранная логика под первый рабочий ряд.",
+      fit:
+        "Подходит для базового стеллажа с понятной геометрией и известной линией подачи.",
+      bullets: [
+        "Готовый комплект под базовый стеллаж.",
+        "Снижает число ошибок на первом запуске модуля.",
+        "Удобен, когда вы не хотите собирать узел по мелочам.",
+      ],
+      wrapUp:
+        "Если базовый стеллаж ещё меняется по конфигурации, сначала лучше зафиксировать модуль, а потом переходить к комплекту полива.",
+    }),
+    price: 2167,
+    stockStatus: "in_stock",
+    badges: ["recommended"],
+    popularity: 64,
+    images: [
+      "assets/catalog/65274928.webp",
+      "assets/photos/optimized/hero-process.webp",
+      "assets/photos/optimized/greenhouse-rack.webp",
+    ],
+    documents: [sharedDocuments["irrigation-passport"], sharedDocuments["rack-spec"]],
+    attributes: [
+      attr("scenario", "Сценарий", "базовый стеллаж", "Сценарий"),
+      attr("assembly", "Сборка", "готовый узел", "Монтаж"),
+      attr("line", "Подача", "стартовый модуль", "Основные"),
+      attr("service", "Сервис", "первый запуск ряда", "Монтаж"),
+    ],
+    priceTiers: priceTiersFor(2167),
+    faq: [faq("Это комплект под весь проект?", "Нет, это именно узел под базовый модуль, а не под всю очередь фермы.", "2026-02-28")],
     quickViewEnabled: true,
   },
   {
@@ -1252,6 +1372,46 @@ const productsSeed = [
     ],
     priceTiers: priceTiersFor(124000),
     faq: [faq("Это комплект под ключ?", "По каркасу да, но полив и свет добираются отдельно под вашу схему.", "2026-02-12")],
+    quickViewEnabled: true,
+  },
+  {
+    id: "prod-rack-extra-16mats",
+    categoryId: "rack-frames",
+    slug: "rack-extra-16mats",
+    name: "Дополнительный модуль на 16 матов",
+    article: "RK-EX16",
+    shortDescription: "Модуль под расширение уже работающего ряда, когда базовая геометрия фермы подтверждена.",
+    fullDescription: fullDescriptionFrom({
+      overview:
+        "Дополнительный модуль нужен не как отдельная покупка, а как шаг роста существующей линии, где уже подтверждены проход, свет и полив.",
+      fit:
+        "Подходит для расширения модульной фермы без пересборки стартового ядра.",
+      bullets: [
+        "Модуль на 16 матов и 800 Вт света.",
+        "Работает как шаг расширения готового ряда.",
+        "Требует проверки, выдержит ли объект следующий модуль без пересборки схемы.",
+      ],
+      wrapUp:
+        "Если расширение тянет за собой пересмотр проходов, света или полива, лучше сразу идти в расчёт всей очереди.",
+    }),
+    price: 104500,
+    stockStatus: "preorder",
+    badges: ["new"],
+    popularity: 60,
+    images: [
+      "assets/catalog/IMG_4924.webp",
+      "assets/catalog/IMG_6061.webp",
+      "assets/photos/optimized/rack-aisle.webp",
+    ],
+    documents: [sharedDocuments["rack-spec"], sharedDocuments["mounting-checklist"]],
+    attributes: [
+      attr("mats", "Число матов", "16"),
+      attr("power", "Мощность света", "800 Вт"),
+      attr("scenario", "Сценарий", "расширение модульного ряда", "Сценарий"),
+      attr("service", "Сервис", "рост без пересборки базы", "Монтаж"),
+    ],
+    priceTiers: priceTiersFor(104500),
+    faq: [faq("Это замена базовому модулю?", "Нет, это именно дополнительный шаг роста на уже подтверждённой базе.", "2026-02-28")],
     quickViewEnabled: true,
   },
   {

@@ -140,6 +140,20 @@ export const catalogLegacyOverrides = {
       "assets/photos/optimized/greenhouse-rack.webp"
     ]
   },
+  "dosatron": {
+    "sourceSlug": "dosatron",
+    "sourcePath": "shop/products/dosatron/",
+    "name": "Насос дозирующий Dosatron",
+    "article": "05-0004-590",
+    "shortDescription": "Насос дозирующий Dosatron: узел дозирования для схемы полива клубничной фермы. Покупка имеет смысл только после проверки линии, расхода и логики подачи раствора.",
+    "fullDescription": "<p>Dosatron не решает задачу сам по себе. Это узел дозирования, который имеет смысл тогда, когда уже понятны схема полива, расход линии, объём бака и логика подачи раствора на объекте.</p>\n<ul><li>Подачу рабочего раствора в линии полива без ручного смешивания на каждом цикле.</li><li>Стабильность дозирования в типовой схеме с понятным расходом.</li><li>Замену слабого или неподходящего дозирующего узла на действующей ферме.</li><li>Сколько линий и какой расход должен пройти через узел.</li><li>Как устроены бак, фильтрация и магистраль до и после дозатора.</li><li>Меняется ли только дозирование или вы одновременно пересобираете весь полив.</li></ul>",
+    "price": 45000,
+    "images": [
+      "assets/catalog/18341837.webp",
+      "assets/photos/optimized/hero-process.webp",
+      "assets/photos/optimized/rack-aisle.webp"
+    ]
+  },
   "starter-irrigation-96": {
     "sourceSlug": "irrigation-kit",
     "sourcePath": "shop/products/irrigation-kit/",
@@ -153,6 +167,20 @@ export const catalogLegacyOverrides = {
       "assets/photos/optimized/greenhouse-rack.webp",
       "assets/photos/optimized/rack-aisle.webp",
       "assets/catalog/IMG_6061.webp"
+    ]
+  },
+  "irrigation-base-rack": {
+    "sourceSlug": "irrigation-base-rack",
+    "sourcePath": "shop/products/irrigation-base-rack/",
+    "name": "Комплект оборудования для полива для базового стеллажа",
+    "article": "04-0005-686",
+    "shortDescription": "Комплект полива для базового стеллажа: готовый узел под стартовый модуль клубничной фермы с проверкой состава и fit по схеме.",
+    "fullDescription": "<p>Стартовый поливочный узел под базовый модуль. Это удобная точка входа, когда геометрия стеллажа уже понятна, и вам нужен не набор случайных фитингов, а собранный сценарий под первый рабочий ряд.</p>\n<ul><li>Быстрый вход в понятный поливочный узел без ручной сборки с нуля.</li><li>Сценарий базового ряда или стартового модуля.</li><li>Снижение числа ошибок по мелким комплектующим на первом запуске.</li><li>Точную версию базового стеллажа и его геометрию.</li><li>Как комплект встаёт в текущую линию подачи.</li><li>Нужен ли только узел полива или вместе с ним меняется вся схема.</li></ul>",
+    "price": 2167,
+    "images": [
+      "assets/catalog/65274928.webp",
+      "assets/photos/optimized/hero-process.webp",
+      "assets/photos/optimized/greenhouse-rack.webp"
     ]
   },
   "rack-irrigation-module": {
@@ -212,6 +240,20 @@ export const catalogLegacyOverrides = {
       "assets/photos/optimized/hero-process.webp"
     ]
   },
+  "fittings-kit-module": {
+    "sourceSlug": "fittings-kit-module",
+    "sourcePath": "shop/products/fittings-kit-module/",
+    "name": "Комплект фитингов для модульного стеллажа",
+    "article": "04-0013-768",
+    "shortDescription": "Комплект фитингов для модульного стеллажа: типовой набор для сборки поливочного узла под известную геометрию.",
+    "fullDescription": "<p>Набор для уже понятного модульного стеллажа. Здесь важна не красота названия, а то, что фитинги действительно совпадают с вашим узлом и схемой полива.</p>\n<ul><li>Комплект становится удобным, когда модуль уже понятен по геометрии и подаче.</li><li>Если меняется сама логика узла, сначала лучше сверить состав, а потом добирать расходники.</li><li>Даже небольшие фитинги должны совпасть с линией, переходами и сценарием обслуживания.</li></ul>",
+    "price": 671,
+    "images": [
+      "assets/catalog/80999720.webp",
+      "assets/photos/optimized/greenhouse-rack.webp",
+      "assets/photos/optimized/hero-process.webp"
+    ]
+  },
   "metal-gutter-210": {
     "sourceSlug": "metal-tray-210",
     "sourcePath": "shop/products/metal-tray-210/",
@@ -236,6 +278,19 @@ export const catalogLegacyOverrides = {
     "price": 121000,
     "images": [
       "assets/catalog/IMG_6063.webp",
+      "assets/catalog/IMG_6061.webp"
+    ]
+  },
+  "rack-extra-16mats": {
+    "sourceSlug": "rack-extra-16mats",
+    "sourcePath": "shop/products/rack-extra-16mats/",
+    "name": "Модульный стеллаж для земляники (дополнительный) 16 матов, 800Вт",
+    "article": "",
+    "shortDescription": "Дополнительный модульный стеллаж для земляники: позиция под расширение существующей модульной фермы.",
+    "fullDescription": "<p>Модуль для расширения уже существующей линии, когда базовая логика фермы собрана и нужно нарастить объём без пересборки стартового ядра.</p>\n<ul><li>Он работает как шаг роста, а не как отдельная покупка вне существующей линии.</li><li>Сначала проверяют, выдержит ли объект следующий ряд по свету, поливу и проходам.</li><li>Если расширение тянет за собой пересборку схемы, лучше сразу идти в расчёт.</li></ul>",
+    "price": 104500,
+    "images": [
+      "assets/catalog/IMG_4924.webp",
       "assets/catalog/IMG_6061.webp"
     ]
   },
