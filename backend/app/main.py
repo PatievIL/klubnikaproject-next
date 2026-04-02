@@ -2248,6 +2248,7 @@ def admin_put_catalog_inventory_override(
     _: dict[str, Any] = Depends(require_roles("owner", "admin", "editor", "manager")),
 ) -> dict[str, Any]:
     updated = upsert_catalog_inventory_override(slug, payload)
+    snapshot = load_catalog_snapshot()
     context = _
     insert_audit_event(
         actor_user_id=context.get("user_id"),
@@ -2263,7 +2264,7 @@ def admin_put_catalog_inventory_override(
             "stock_status": payload.stock_status,
         },
     )
-    return {"ok": True, "product": updated}
+    return {"ok": True, "product": updated, "snapshot": snapshot}
 
 
 @app.put("/v1/admin/catalog/items")

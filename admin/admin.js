@@ -1780,7 +1780,11 @@ async function saveInventoryRow(slug) {
       method: "PUT",
       body: JSON.stringify(payload),
     });
-    patchInventoryProductInSnapshot(response.product || null);
+    if (response.snapshot) {
+      catalogSnapshotDraft = response.snapshot;
+    } else {
+      patchInventoryProductInSnapshot(response.product || null);
+    }
     renderSummary();
     if (currentSection === "inventory") {
       renderCurrentSection();
