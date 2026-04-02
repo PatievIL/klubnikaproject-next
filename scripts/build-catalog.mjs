@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 await import("./build-catalog-legacy-overrides.mjs");
+await import("./build-catalog-data-exports.mjs");
 
 import {
   buildBreadcrumbListJsonLd,

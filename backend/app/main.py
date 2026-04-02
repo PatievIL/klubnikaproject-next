@@ -93,6 +93,73 @@ def load_config() -> AppConfig:
 
 
 CONFIG = load_config()
+BACKEND_ROOT = Path(__file__).resolve().parents[1]
+GENERATED_CATALOG_ITEMS_PATH = BACKEND_ROOT / "data" / "catalog-items.generated.json"
+GENERATED_CATALOG_SNAPSHOT_PATH = BACKEND_ROOT / "data" / "catalog-snapshot.generated.json"
+
+
+def read_generated_json(path: Path) -> Any:
+    try:
+        if not path.exists():
+            return None
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+FALLBACK_CATALOG_ITEMS: list[dict[str, Any]] = [
+    {
+        "slug": "catalog-category-led",
+        "title": "LED-освещение",
+        "kind": "category",
+        "category": "led",
+        "path": "/catalog/led/",
+        "cta_mode": "choose",
+        "status": "published",
+        "summary": "Свет под ярус, стеллаж и controlled-environment логику.",
+    },
+    {
+        "slug": "catalog-category-irrigation",
+        "title": "Полив и дозирование",
+        "kind": "category",
+        "category": "irrigation",
+        "path": "/catalog/irrigation/",
+        "cta_mode": "choose",
+        "status": "published",
+        "summary": "Схема полива, магистраль, капельницы и узлы под объект.",
+    },
+    {
+        "slug": "catalog-product-luma-line-191",
+        "title": "Светодиодный светильник 100Вт, 191см",
+        "kind": "product",
+        "category": "linear-led",
+        "path": "/catalog/linear-led/luma-line-191/",
+        "cta_mode": "buy",
+        "status": "published",
+        "summary": "Серия M23 с двумя режимами мощности и логикой выбора под стеллажную ферму.",
+    },
+]
+
+
+def load_default_catalog_items() -> list[dict[str, Any]]:
+    generated = read_generated_json(GENERATED_CATALOG_ITEMS_PATH)
+    if isinstance(generated, list) and generated:
+        return generated
+    return FALLBACK_CATALOG_ITEMS
+
+
+def load_catalog_snapshot() -> dict[str, Any]:
+    generated = read_generated_json(GENERATED_CATALOG_SNAPSHOT_PATH)
+    if isinstance(generated, dict) and generated:
+        return generated
+    return {
+        "generatedAt": utc_now(),
+        "source": "backend-fallback",
+        "items": load_default_catalog_items(),
+        "counts": {
+            "items": len(load_default_catalog_items()),
+        },
+    }
 
 
 DEFAULT_SITE_SETTINGS: dict[str, Any] = {
@@ -128,7 +195,7 @@ DEFAULT_SITE_SETTINGS: dict[str, Any] = {
     },
     "seo": {
         "titleSuffix": "— Klubnika Project",
-        "defaultDescription": "Расчёт, магазин, подбор и сопровождение для клубничных ферм в контролируемой среде.",
+        "defaultDescription": "Расчёт, каталог, подбор и сопровождение для клубничных ферм в контролируемой среде.",
         "canonicalOrigin": "https://klubnikaproject.ru",
         "indexPublicPages": True,
         "indexAdminPages": False,
@@ -142,7 +209,7 @@ DEFAULT_SITE_SETTINGS: dict[str, Any] = {
         "leadSources": [
             "Главная форма",
             "Калькулятор",
-            "Магазин",
+            "Каталог",
             "Консультации",
             "Курс",
             "Telegram",
@@ -172,12 +239,12 @@ DEFAULT_SITE_SETTINGS: dict[str, Any] = {
             "label": "Главная",
             "goal": "Маршрутизатор",
             "primaryCta": "Рассчитать ферму",
-            "secondaryCta": "Перейти в магазин",
+            "secondaryCta": "Перейти в каталог",
             "status": "published",
         },
         {
             "id": "shop",
-            "label": "Магазин",
+            "label": "Каталог",
             "goal": "Выбор категории и товара",
             "primaryCta": "Подобрать комплект",
             "secondaryCta": "Смотреть категории",
@@ -219,7 +286,7 @@ DEFAULT_SITE_SETTINGS: dict[str, Any] = {
     "integrations": {
         "calculatorPricingAdmin": "/calc/admin/",
         "siteAdmin": "/admin/",
-        "catalogSource": "static-html",
+        "catalogSource": "generated-static-build",
         "futureCms": "JSON/CMS-lite",
         "futureCrm": "Lead inbox + pipeline",
         "apiBase": "https://api.klubnikaproject.ru/site/v1",
@@ -246,9 +313,9 @@ ADMIN_SECTION_MATRIX = {
 DEFAULT_MEMBER_SPECIAL_PAGES: list[dict[str, Any]] = [
     {
         "slug": "solutions-access",
-        "title": "Линия готовых решений",
-        "summary": "Быстрый вход в решения, где важнее состав и сценарий, чем обычная розница.",
-        "path": "/shop/solutions/",
+        "title": "Новый каталог магазина",
+        "summary": "Быстрый вход в категории, карточки товара, фильтры и обновлённые SKU в новом каталоге.",
+        "path": "/catalog/",
         "kind": "public-route",
     },
     {
@@ -267,68 +334,7 @@ DEFAULT_MEMBER_SPECIAL_PAGES: list[dict[str, Any]] = [
     },
 ]
 
-DEFAULT_CATALOG_ITEMS: list[dict[str, Any]] = [
-    {
-        "slug": "shop-led",
-        "title": "LED-освещение",
-        "kind": "category",
-        "category": "led",
-        "path": "/shop/led/",
-        "cta_mode": "choose",
-        "status": "published",
-        "summary": "Свет под ярус, стеллаж и controlled-environment логику.",
-    },
-    {
-        "slug": "shop-poliv",
-        "title": "Полив и дозирование",
-        "kind": "category",
-        "category": "poliv",
-        "path": "/shop/poliv/",
-        "cta_mode": "choose",
-        "status": "published",
-        "summary": "Схема полива, магистраль, капельницы и узлы под объект.",
-    },
-    {
-        "slug": "shop-stellaj",
-        "title": "Стеллажные решения",
-        "kind": "category",
-        "category": "stellaj",
-        "path": "/shop/stellaj/",
-        "cta_mode": "estimate",
-        "status": "published",
-        "summary": "Стеллаж как часть системы, а не отдельное железо.",
-    },
-    {
-        "slug": "shop-substrate",
-        "title": "Субстрат и корневая зона",
-        "kind": "category",
-        "category": "substrate",
-        "path": "/shop/substrate/",
-        "cta_mode": "choose",
-        "status": "published",
-        "summary": "Маты, пробки и совместимость с посадочным материалом и поливом.",
-    },
-    {
-        "slug": "seed-soraya",
-        "title": "Soraya F1",
-        "kind": "product",
-        "category": "seeds",
-        "path": "/seeds/soraya-f1/",
-        "cta_mode": "consult",
-        "status": "published",
-        "summary": "Сорт для controlled-environment, выбора канала сбыта и плотности ягоды.",
-    },
-    {
-        "slug": "seed-frigo",
-        "title": "FRIGO",
-        "kind": "product",
-        "category": "seeds",
-        "path": "/seeds/frigo/",
-        "cta_mode": "consult",
-        "status": "published",
-        "summary": "Посадочный материал для быстрого старта и управляемого цикла.",
-    },
-]
+DEFAULT_CATALOG_ITEMS: list[dict[str, Any]] = load_default_catalog_items()
 
 DEFAULT_USERS: list[dict[str, Any]] = [
     {
@@ -397,6 +403,26 @@ class CatalogEnvelope(BaseModel):
 
 class SettingsEnvelope(BaseModel):
     settings: dict[str, Any]
+
+
+class CrmContactMergeRequest(BaseModel):
+    primary_contact_id: int | None = None
+    resolution_note: str = ""
+    keep_duplicate_contact: bool = False
+
+
+class CrmResolutionNoteRequest(BaseModel):
+    resolution_note: str = ""
+
+
+class CrmLeadDuplicateResolveRequest(BaseModel):
+    action: str = "merge"
+    resolution_note: str = ""
+
+
+class CrmDataQualityAutoResolveRequest(BaseModel):
+    limit: int = 0
+    dry_run: bool = True
 
 
 class LeadCreateRequest(BaseModel):
@@ -1905,6 +1931,11 @@ def public_catalog_items(status_filter: str = "published") -> dict[str, Any]:
     return {"items": list_catalog_items(status_filter=status_filter)}
 
 
+@app.get("/v1/public/catalog/snapshot")
+def public_catalog_snapshot() -> dict[str, Any]:
+    return {"snapshot": load_catalog_snapshot()}
+
+
 @app.post("/v1/public/leads", status_code=status.HTTP_201_CREATED)
 def create_lead(payload: LeadCreateRequest, request: Request) -> dict[str, Any]:
     enforce_rate_limit(request, "public_leads", limit=12, window_seconds=600)
@@ -2056,8 +2087,6 @@ def admin_auth_logout_others(request: Request, context: dict[str, Any] = Depends
         payload={"revoked": revoked},
     )
     return {"ok": True, "revoked": revoked}
-
-
 @app.post("/v1/admin/auth/logout")
 def admin_auth_logout(request: Request, response: Response) -> dict[str, Any]:
     context = get_admin_context(request)
@@ -2101,6 +2130,11 @@ def admin_put_settings(payload: SettingsEnvelope, _: dict[str, Any] = Depends(re
 @app.get("/v1/admin/catalog/items")
 def admin_list_catalog_items(_: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
     return {"items": list_catalog_items()}
+
+
+@app.get("/v1/admin/catalog/snapshot")
+def admin_catalog_snapshot(_: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
+    return {"snapshot": load_catalog_snapshot()}
 
 
 @app.put("/v1/admin/catalog/items")
@@ -2291,8 +2325,6 @@ def member_auth_logout_others(request: Request, context: dict[str, Any] = Depend
         payload={"revoked": revoked},
     )
     return {"ok": True, "revoked": revoked}
-
-
 @app.post("/v1/auth/logout")
 def member_auth_logout(request: Request, response: Response) -> dict[str, Any]:
     context = get_member_context(request)
@@ -2322,6 +2354,13 @@ def member_catalog_items(
     _: dict[str, Any] = Depends(require_member_scopes("catalog")),
 ) -> dict[str, Any]:
     return {"items": list_catalog_items(status_filter=status_filter)}
+
+
+@app.get("/v1/member/catalog/snapshot")
+def member_catalog_snapshot(
+    _: dict[str, Any] = Depends(require_member_scopes("catalog")),
+) -> dict[str, Any]:
+    return {"snapshot": load_catalog_snapshot()}
 
 
 @app.get("/v1/member/special-pages")
@@ -2537,6 +2576,19 @@ def admin_crm_run_delivery_retries(
     )
 
 
+@app.post("/v1/admin/crm/task-overdue-check/run")
+def admin_crm_run_task_overdue_check(
+    limit: int = 0,
+    context: dict[str, Any] = Depends(require_roles("owner", "admin", "manager")),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        "/v1/internal/task-overdue-check/run",
+        method="POST",
+        query={"limit": max(0, min(limit, 200))},
+        actor=context,
+    )
+
+
 @app.get("/v1/admin/crm/webhook-endpoints")
 def admin_crm_webhook_endpoints(_: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
     return crm_proxy_request("/v1/internal/webhook-endpoints")
@@ -2545,6 +2597,229 @@ def admin_crm_webhook_endpoints(_: dict[str, Any] = Depends(require_admin)) -> d
 @app.get("/v1/admin/crm/contact-config")
 def admin_crm_contact_config(_: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
     return crm_proxy_request("/v1/internal/contact-config")
+
+
+@app.get("/v1/admin/crm/assignment-config")
+def admin_crm_assignment_config(_: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
+    return crm_proxy_request("/v1/internal/assignment-config")
+
+
+@app.get("/v1/admin/crm/data-quality")
+def admin_crm_data_quality(_: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
+    return crm_proxy_request("/v1/internal/data-quality")
+
+
+@app.get("/v1/admin/crm/event-registry")
+def admin_crm_event_registry(_: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
+    return crm_proxy_request("/v1/internal/event-registry")
+
+
+@app.get("/v1/admin/crm/duplicate-leads")
+def admin_crm_duplicate_leads(
+    limit: int = 100,
+    canonical_lead_id: int = 0,
+    status_filter: str = "open",
+    _: dict[str, Any] = Depends(require_admin),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        "/v1/internal/duplicate-leads",
+        query={
+            "limit": max(1, min(limit, 200)),
+            "canonical_lead_id": max(0, canonical_lead_id),
+            "status_filter": status_filter,
+        },
+    )
+
+
+@app.get("/v1/admin/crm/contact-merge-candidates")
+def admin_crm_contact_merge_candidates(
+    limit: int = 100,
+    status_filter: str = "open",
+    _: dict[str, Any] = Depends(require_admin),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        "/v1/internal/contact-merge-candidates",
+        query={
+            "limit": max(1, min(limit, 200)),
+            "status_filter": status_filter,
+        },
+    )
+
+
+@app.post("/v1/admin/crm/contact-merge-candidates/{candidate_id}/merge")
+def admin_crm_merge_contact_candidate(
+    candidate_id: int,
+    payload: CrmContactMergeRequest,
+    context: dict[str, Any] = Depends(require_roles("owner", "admin", "manager")),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        f"/v1/internal/contact-merge-candidates/{candidate_id}/merge",
+        method="POST",
+        body=payload.model_dump(),
+        actor=context,
+    )
+
+
+@app.post("/v1/admin/crm/contact-merge-candidates/{candidate_id}/dismiss")
+def admin_crm_dismiss_contact_candidate(
+    candidate_id: int,
+    payload: CrmResolutionNoteRequest,
+    context: dict[str, Any] = Depends(require_roles("owner", "admin", "manager")),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        f"/v1/internal/contact-merge-candidates/{candidate_id}/dismiss",
+        method="POST",
+        body=payload.model_dump(),
+        actor=context,
+    )
+
+
+@app.post("/v1/admin/crm/duplicate-leads/{duplicate_id}/resolve")
+def admin_crm_resolve_duplicate_lead(
+    duplicate_id: int,
+    payload: CrmLeadDuplicateResolveRequest,
+    context: dict[str, Any] = Depends(require_roles("owner", "admin", "manager")),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        f"/v1/internal/duplicate-leads/{duplicate_id}/resolve",
+        method="POST",
+        body=payload.model_dump(),
+        actor=context,
+    )
+
+
+@app.get("/v1/admin/crm/data-quality/review-queue")
+def admin_crm_data_quality_review_queue(
+    limit: int = 100,
+    only_auto_resolve: bool = False,
+    _: dict[str, Any] = Depends(require_admin),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        "/v1/internal/data-quality/review-queue",
+        query={
+            "limit": max(1, min(limit, 200)),
+            "only_auto_resolve": int(bool(only_auto_resolve)),
+        },
+    )
+
+
+@app.get("/v1/admin/crm/data-quality/runs")
+def admin_crm_data_quality_runs(
+    limit: int = 100,
+    status_filter: str = "",
+    trigger_source: str = "",
+    _: dict[str, Any] = Depends(require_admin),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        "/v1/internal/data-quality/runs",
+        query={
+            "limit": max(1, min(limit, 200)),
+            "status_filter": status_filter,
+            "trigger_source": trigger_source,
+        },
+    )
+
+
+@app.post("/v1/admin/crm/data-quality/auto-resolve")
+def admin_crm_data_quality_auto_resolve(
+    payload: CrmDataQualityAutoResolveRequest,
+    context: dict[str, Any] = Depends(require_roles("owner", "admin", "manager")),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        "/v1/internal/data-quality/auto-resolve",
+        method="POST",
+        body=payload.model_dump(),
+        actor=context,
+    )
+
+
+@app.post("/v1/admin/crm/data-quality/worker/run")
+def admin_crm_data_quality_worker_run(
+    payload: CrmDataQualityAutoResolveRequest,
+    context: dict[str, Any] = Depends(require_roles("owner", "admin", "manager")),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        "/v1/internal/data-quality/worker/run",
+        method="POST",
+        body=payload.model_dump(),
+        actor=context,
+    )
+
+
+@app.get("/v1/admin/crm/owner-queue")
+def admin_crm_owner_queue(
+    limit: int = 100,
+    source_filter: str = "",
+    _: dict[str, Any] = Depends(require_admin),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        "/v1/internal/owner-queue",
+        query={
+            "limit": max(1, min(limit, 200)),
+            "source_filter": source_filter,
+        },
+    )
+
+
+@app.get("/v1/admin/crm/owner-workload")
+def admin_crm_owner_workload(_: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
+    return crm_proxy_request("/v1/internal/owner-workload")
+
+
+@app.post("/v1/admin/crm/owner-assignment/run")
+def admin_crm_run_owner_assignment(
+    limit: int = 0,
+    context: dict[str, Any] = Depends(require_roles("owner", "admin", "manager")),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        "/v1/internal/owner-assignment/run",
+        method="POST",
+        query={"limit": max(0, min(limit, 200))},
+        actor=context,
+    )
+
+
+@app.post("/v1/admin/crm/data-quality/run")
+def admin_crm_run_data_quality(
+    limit: int = 0,
+    context: dict[str, Any] = Depends(require_roles("owner", "admin", "manager")),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        "/v1/internal/data-quality/run",
+        method="POST",
+        query={"limit": max(0, min(limit, 200))},
+        actor=context,
+    )
+
+
+@app.get("/v1/admin/crm/automation-runs")
+def admin_crm_automation_runs(
+    limit: int = 100,
+    rule_code: str = "",
+    lead_id: int = 0,
+    _: dict[str, Any] = Depends(require_admin),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        "/v1/internal/automation-runs",
+        query={
+            "limit": max(1, min(limit, 200)),
+            "rule_code": rule_code,
+            "lead_id": max(0, lead_id),
+        },
+    )
+
+
+@app.post("/v1/admin/crm/automation/run")
+def admin_crm_run_automation(
+    limit: int = 0,
+    context: dict[str, Any] = Depends(require_roles("owner", "admin", "manager")),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        "/v1/internal/automation/run",
+        method="POST",
+        query={"limit": max(0, min(limit, 200))},
+        actor=context,
+    )
 
 
 @app.get("/v1/admin/crm/sync-jobs")

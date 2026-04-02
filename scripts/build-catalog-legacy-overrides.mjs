@@ -156,8 +156,10 @@ function parseBlockArticles(text, className) {
     .map((match) => {
       const content = match[1];
       const badge = matchFirst(content, /<div class="(?:badge|tag)">([\s\S]*?)<\/div>/i);
-      const title = matchFirst(content, /<h3>([\s\S]*?)<\/h3>/i);
-      const body = matchFirst(content, /<p>([\s\S]*?)<\/p>/i);
+      const title = matchFirst(content, /<h3>([\s\S]*?)<\/h3>/i) || matchFirst(content, /<strong>([\s\S]*?)<\/strong>/i);
+      const body =
+        matchFirst(content, /<p>([\s\S]*?)<\/p>/i) ||
+        matchFirst(content, /<span>([\s\S]*?)<\/span>/i);
       const bullets = parseListItems(content);
       if (!badge && !title && !body && !bullets.length) return null;
       return {
@@ -170,8 +172,28 @@ function parseBlockArticles(text, className) {
     .filter(Boolean);
 }
 
+function parseNotePanels(text) {
+  return Array.from(text.matchAll(/<div class="[^"]*product-next-panel[^"]*"[^>]*>([\s\S]*?)<div class="btn-row">/g))
+    .map((match) => {
+      const content = match[1];
+      const badge = matchFirst(content, /<div class="badge">([\s\S]*?)<\/div>/i);
+      const title = matchFirst(content, /<strong>([\s\S]*?)<\/strong>/i);
+      const body = matchFirst(content, /<p>([\s\S]*?)<\/p>/i);
+      if (!badge && !title && !body) return null;
+      return { badge, title, body, bullets: [] };
+    })
+    .filter(Boolean);
+}
+
+function parsePhotoCaptions(text) {
+  return Array.from(text.matchAll(/<div class="photo-card-caption">([\s\S]*?)<\/div>/g))
+    .map((match) => stripTags(match[1]))
+    .filter(Boolean);
+}
+
 function parseSplitSections(text) {
   const sections = [];
+  const bulletSignatures = new Set();
   const splitCopyMatches = Array.from(
     text.matchAll(/<div class="section-split-(?:copy|card)">([\s\S]*?)<\/div>\s*<div class="section-split-visual"/g)
   );
@@ -181,12 +203,28 @@ function parseSplitSections(text) {
     const title = matchFirst(content, /<h3>([\s\S]*?)<\/h3>/i);
     const bullets = parseListItems(content);
     if (!badge && !title && !bullets.length) return;
+    if (bullets.length) bulletSignatures.add(bullets.join("||"));
+    sections.push({ badge, title, bullets });
+  });
+  const splitCardMatches = Array.from(
+    text.matchAll(/<div class="section-split-card">\s*<div>([\s\S]*?)<\/div>\s*<div class="section-photo-rail"/g)
+  );
+  splitCardMatches.forEach((match) => {
+    const content = match[1];
+    const badge = matchFirst(content, /<div class="badge">([\s\S]*?)<\/div>/i);
+    const title = matchFirst(content, /<h3>([\s\S]*?)<\/h3>/i);
+    const bullets = parseListItems(content);
+    if (!badge && !title && !bullets.length) return;
+    if (bullets.length) bulletSignatures.add(bullets.join("||"));
     sections.push({ badge, title, bullets });
   });
   const simpleListMatches = Array.from(text.matchAll(/<ul class="simple-list">([\s\S]*?)<\/ul>/g));
   simpleListMatches.forEach((match) => {
     const bullets = parseListItems(match[0]);
     if (!bullets.length) return;
+    const signature = bullets.join("||");
+    if (bulletSignatures.has(signature)) return;
+    bulletSignatures.add(signature);
     sections.push({ badge: "", title: "", bullets });
   });
   return sections;
@@ -257,13 +295,17 @@ function buildSectionHtml(section) {
   return parts.join("\n");
 }
 
-function buildFullDescription({ sublead, fitCards, infoCards, splitSections, fallbackBullets }) {
+function buildFullDescription({ sublead, fitCards, infoCards, splitSections, contextCards, notePanels, fallbackBullets, photoCaptions }) {
   const parts = [];
   if (sublead) parts.push(`<p>${sublead}</p>`);
-  [...fitCards, ...infoCards, ...splitSections].forEach((section) => {
+  [...fitCards, ...infoCards, ...splitSections, ...contextCards, ...notePanels].forEach((section) => {
     const html = buildSectionHtml(section);
     if (html) parts.push(html);
   });
+  if (photoCaptions.length) {
+    parts.push(`<h3>Контекст и примечания</h3>`);
+    parts.push(`<ul>${photoCaptions.map((item) => `<li>${item}</li>`).join("")}</ul>`);
+  }
   if (!parts.length && fallbackBullets.length) {
     parts.push(`<ul>${fallbackBullets.map((item) => `<li>${item}</li>`).join("")}</ul>`);
   }
@@ -290,6 +332,13 @@ function extractLegacyProduct(html, legacySlug) {
   const fitCards = parseBlockArticles(html, "fit-card");
   const infoCards = parseBlockArticles(html, "info-card");
   const splitSections = parseSplitSections(html);
+  const contextCards = [
+    ...parseBlockArticles(html, "signal-card"),
+    ...parseBlockArticles(html, "product-context-card"),
+    ...parseBlockArticles(html, "product-next-aside"),
+  ];
+  const notePanels = parseNotePanels(html);
+  const photoCaptions = parsePhotoCaptions(html);
   const parsedFaq = parseFaq(html);
   const documents = parseDocuments(html, legacySlug);
 
@@ -304,7 +353,10 @@ function extractLegacyProduct(html, legacySlug) {
       fitCards,
       infoCards,
       splitSections,
+      contextCards,
+      notePanels,
       fallbackBullets: bullets,
+      photoCaptions,
     }),
     price,
     images,

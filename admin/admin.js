@@ -1,3 +1,5 @@
+import { DEFAULT_CATALOG_ITEMS } from "./catalog-defaults.generated.js";
+
 const STORAGE_KEY = "klubnikaproject.site.admin.draft.v1";
 const BACKEND_TOKEN_KEY = "klubnikaproject.site.admin.token.v1";
 
@@ -34,7 +36,7 @@ const DEFAULT_CONFIG = {
   },
   seo: {
     titleSuffix: "— Klubnika Project",
-    defaultDescription: "Расчёт, магазин, подбор и сопровождение для клубничных ферм в контролируемой среде.",
+    defaultDescription: "Расчёт, каталог, подбор и сопровождение для клубничных ферм в контролируемой среде.",
     canonicalOrigin: "https://klubnikaproject.ru",
     indexPublicPages: true,
     indexAdminPages: false,
@@ -48,7 +50,7 @@ const DEFAULT_CONFIG = {
     leadSources: [
       "Главная форма",
       "Калькулятор",
-      "Магазин",
+      "Каталог",
       "Консультации",
       "Курс",
       "Telegram"
@@ -73,8 +75,8 @@ const DEFAULT_CONFIG = {
     note: "Следующий этап: lead inbox, история касаний, owner, дедлайны и webhook в CRM.",
   },
   pages: [
-    { id: "home", label: "Главная", goal: "Маршрутизатор", primaryCta: "Рассчитать ферму", secondaryCta: "Перейти в магазин", status: "published" },
-    { id: "shop", label: "Магазин", goal: "Выбор категории и товара", primaryCta: "Подобрать комплект", secondaryCta: "Смотреть категории", status: "published" },
+    { id: "home", label: "Главная", goal: "Маршрутизатор", primaryCta: "Рассчитать ферму", secondaryCta: "Перейти в каталог", status: "published" },
+    { id: "shop", label: "Каталог", goal: "Выбор категории и товара", primaryCta: "Подобрать комплект", secondaryCta: "Смотреть категории", status: "published" },
     { id: "farm", label: "Расчёт фермы", goal: "Собрать вводные и рамку сметы", primaryCta: "Передать вводные", secondaryCta: "Открыть калькулятор", status: "published" },
     { id: "study", label: "Сопровождение", goal: "Длинная работа по действующей ферме", primaryCta: "Оставить задачу", secondaryCta: "Посмотреть форматы", status: "published" },
     { id: "consultations", label: "Консультации", goal: "Точечный разбор", primaryCta: "Разобрать задачу", secondaryCta: "Сравнить с сопровождением", status: "published" },
@@ -83,56 +85,13 @@ const DEFAULT_CONFIG = {
   integrations: {
     calculatorPricingAdmin: "/calc/admin/",
     siteAdmin: "/admin/",
-    catalogSource: "static-html",
+    catalogSource: "generated-static-build",
     futureCms: "JSON/CMS-lite",
     futureCrm: "Lead inbox + pipeline",
     apiBase: "https://api.klubnikaproject.ru/site/v1",
     note: "Под этот JSON дальше можно подвязать backend, не меняя логику секций.",
   },
 };
-
-const DEFAULT_CATALOG_ITEMS = [
-  {
-    slug: "shop-led",
-    title: "LED-освещение",
-    kind: "category",
-    category: "led",
-    path: "/shop/led/",
-    cta_mode: "choose",
-    status: "published",
-    summary: "Свет под ярус, стеллаж и controlled-environment логику.",
-  },
-  {
-    slug: "shop-poliv",
-    title: "Полив и дозирование",
-    kind: "category",
-    category: "poliv",
-    path: "/shop/poliv/",
-    cta_mode: "choose",
-    status: "published",
-    summary: "Схема полива, магистраль, капельницы и узлы под объект.",
-  },
-  {
-    slug: "shop-stellaj",
-    title: "Стеллажные решения",
-    kind: "category",
-    category: "stellaj",
-    path: "/shop/stellaj/",
-    cta_mode: "estimate",
-    status: "published",
-    summary: "Стеллаж как часть системы, а не отдельное железо.",
-  },
-  {
-    slug: "shop-substrate",
-    title: "Субстрат и корневая зона",
-    kind: "category",
-    category: "substrate",
-    path: "/shop/substrate/",
-    cta_mode: "choose",
-    status: "published",
-    summary: "Маты, пробки и совместимость с посадочным материалом и поливом.",
-  },
-];
 
 const SECTIONS = [
   { id: "dashboard", label: "Обзор" },
@@ -1782,7 +1741,6 @@ async function logoutOtherAdminSessions() {
     els.sessionState.textContent = `Не удалось закрыть другие сессии: ${error.message}`;
   }
 }
-
 function isDefaultState() {
   return JSON.stringify(draft) === JSON.stringify(DEFAULT_CONFIG);
 }
