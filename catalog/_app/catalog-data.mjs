@@ -2600,8 +2600,10 @@ const averageRating = (productId) => {
 const products = productsSeed.map((product) => {
   const rating = averageRating(product.id);
   const reviewCount = (reviewsByProductId.get(product.id) || []).length;
+  const categorySlug = getCategoryById(product.categoryId)?.slug || "";
   const normalized = {
     ...product,
+    categorySlug,
     rating,
     reviewCount,
   };
@@ -2720,6 +2722,11 @@ export function getProductById(productId) {
 
 export function getProductReviews(productId) {
   return (reviewsByProductId.get(productId) || []).slice();
+}
+
+export function getProductCatalogPath(product) {
+  const categorySlug = product?.categorySlug || getCategoryById(product?.categoryId)?.slug || "";
+  return `${CATALOG_BASE_PATH}${categorySlug}/${product.slug}/`;
 }
 
 export function summarizeReviewStats(items) {
@@ -2995,7 +3002,7 @@ export function getSearchResults(query, scope = "catalog") {
     .filter((product) => `${product.name} ${product.article} ${product.shortDescription}`.toLowerCase().includes(normalized))
     .map((product) => ({
       ...product,
-      categorySlug: getCategoryById(product.categoryId)?.slug || "",
+      categorySlug: product.categorySlug || getCategoryById(product.categoryId)?.slug || "",
     }));
   const siteLinks =
     scope === "site"

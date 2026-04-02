@@ -15,6 +15,7 @@ import {
   getChildCategories,
   getCategoryPageData,
   getLandingPageData,
+  getProductCatalogPath,
   getProductById,
   getProductPageData,
   getSearchResults,
@@ -163,6 +164,7 @@ function renderCategoryCard(ctx, category, compact = false) {
 function renderProductCard(ctx, state, categorySlug, product, options = {}) {
   const inCart = isInCart(state, product.id);
   const stock = STOCK_META[product.stockStatus] || STOCK_META.out_of_stock;
+  const productHref = getProductCatalogPath(product);
   return `
     <article class="catalog-product-card">
       <div class="catalog-product-card__media">
@@ -171,16 +173,16 @@ function renderProductCard(ctx, state, categorySlug, product, options = {}) {
           product.reviewCount
             ? `<a class="catalog-product-card__reviews" href="${resolveHref(
                 ctx,
-                `/catalog/${categorySlug}/${product.slug}/#reviews`
+                `${productHref}#reviews`
               )}">${product.reviewCount} отзывов</a>`
             : ""
         }
-        <a href="${resolveHref(ctx, `/catalog/${categorySlug}/${product.slug}/`)}">
+        <a href="${resolveHref(ctx, productHref)}">
           <img src="${resolveAsset(ctx, product.images[0])}" alt="${escapeHtml(product.name)}" loading="lazy" />
         </a>
       </div>
       <div class="catalog-product-card__body">
-        <a class="catalog-product-card__title" href="${resolveHref(ctx, `/catalog/${categorySlug}/${product.slug}/`)}">${escapeHtml(
+        <a class="catalog-product-card__title" href="${resolveHref(ctx, productHref)}">${escapeHtml(
           product.name
         )}</a>
         <div class="catalog-product-card__meta">
@@ -198,7 +200,7 @@ function renderProductCard(ctx, state, categorySlug, product, options = {}) {
           </button>
         </div>
         <div class="catalog-product-card__actions">
-          <a class="catalog-secondary-button" href="${resolveHref(ctx, `/catalog/${categorySlug}/${product.slug}/`)}">Подробности</a>
+          <a class="catalog-secondary-button" href="${resolveHref(ctx, productHref)}">Подробности</a>
           ${
             stock.purchasable
               ? `<button type="button" class="catalog-primary-button${inCart ? " is-active" : ""}" data-action="toggle-cart" data-product-id="${
@@ -414,7 +416,9 @@ function renderTableView(ctx, state, categorySlug, products, selectedProductIds 
       <div class="catalog-table">
         ${products
           .map(
-            (product) => `
+            (product) => {
+              const productHref = getProductCatalogPath(product);
+              return `
               <div class="catalog-table-row">
                 <div class="catalog-table-cell catalog-table-cell--check">
                   <label class="catalog-check">
@@ -425,7 +429,7 @@ function renderTableView(ctx, state, categorySlug, products, selectedProductIds 
                   </label>
                 </div>
                 <div class="catalog-table-cell catalog-table-cell--product">
-                  <a class="catalog-table-product" href="${resolveHref(ctx, `/catalog/${categorySlug}/${product.slug}/`)}">
+                  <a class="catalog-table-product" href="${resolveHref(ctx, productHref)}">
                     <img src="${resolveAsset(ctx, product.images[0])}" alt="${escapeHtml(product.name)}" loading="lazy" />
                     <div>
                       ${renderBadgeList(product.badges)}
@@ -447,7 +451,8 @@ function renderTableView(ctx, state, categorySlug, products, selectedProductIds 
                   }</button>
                 </div>
               </div>
-            `
+            `;
+            }
           )
           .join("")}
       </div>
@@ -822,7 +827,7 @@ function renderProductPage(ctx, state, data) {
                 <div>${renderBadgeList(data.product.badges)}</div>
                 <div class="catalog-product-rating">
                   ${renderRatingStars(data.product.rating || 0)}
-                  <span>${data.product.reviewCount} отзывов</span>
+                  <button type="button" class="catalog-link-button" data-action="set-tab" data-tab="reviews">${data.product.reviewCount} отзывов</button>
                 </div>
               </div>
               ${renderProductTabs(ctx, state, data)}
@@ -1159,6 +1164,7 @@ function renderQuickViewPanel(ctx, state) {
                 isInCart(state, product.id) ? "В корзине" : "В корзину"
               }</button>
               <button type="button" class="catalog-secondary-button" data-action="open-price-tiers" data-product-id="${product.id}">Варианты цен</button>
+              <a class="catalog-secondary-button" href="${resolveHref(ctx, getProductCatalogPath(product))}">Полная карточка</a>
             </div>
           </div>
         </div>
