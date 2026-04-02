@@ -21,6 +21,32 @@
   background: var(--accent);
 }
 
+body[data-calc-admin-auth="guest"] .calc-admin-authenticated-only {
+  display: none !important;
+}
+
+body[data-calc-admin-auth="authenticated"] .calc-admin-guest-only {
+  display: none !important;
+}
+
+.calc-admin-access-gate {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.calc-admin-auth-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.calc-admin-session-state {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .admin-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.14fr) minmax(360px, 0.86fr);
@@ -215,6 +241,7 @@
 
 @media (max-width: 760px) {
   .admin-grid,
+  .calc-admin-auth-actions,
   .admin-price-row,
   .admin-section-top {
     grid-template-columns: 1fr;

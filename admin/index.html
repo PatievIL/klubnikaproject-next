@@ -17,7 +17,7 @@
   <meta name="robots" content="noindex, nofollow" />
   <!-- SEO:END -->
 </head>
-<body>
+<body data-admin-auth="guest">
   <header class="hero">
     <div class="container">
       <div class="hero-shell">
@@ -43,7 +43,7 @@
             <a href="../">Сайт</a>
             <a href="../catalog/">Каталог</a>
             <a href="../calc/">Калькулятор</a>
-            <a href="../calc/admin/">Цены калькулятора</a>
+            <a class="admin-authenticated-only" href="../calc/admin/">Цены калькулятора</a>
           </nav>
         </div>
 
@@ -60,7 +60,7 @@
 
             <div class="btn-row hero-cta">
               <a class="btn btn-primary" href="#admin-workspace">Открыть кабинет</a>
-              <a class="btn btn-secondary" href="../calc/admin/">Перейти в админку калькулятора</a>
+              <a class="btn btn-secondary admin-authenticated-only" href="../calc/admin/">Перейти в админку калькулятора</a>
             </div>
 
             <div class="hero-stats">
