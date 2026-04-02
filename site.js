@@ -1,5 +1,15 @@
 const SITE_ADMIN_STORAGE_KEY = "klubnikaproject.site.admin.draft.v1";
 const SITE_ADMIN_BACKEND_CACHE_KEY = "klubnikaproject.site.backend.settings.v1";
+
+function withStaticIndexPath(path) {
+  if (!path) return path;
+  const [hashless, hash = ""] = path.split("#");
+  const [pathname, query = ""] = hashless.split("?");
+  if (/\.[a-z0-9]+$/i.test(pathname)) return path;
+  const normalizedPath = pathname.endsWith("/") ? `${pathname}index.html` : pathname;
+  return `${normalizedPath}${query ? `?${query}` : ""}${hash ? `#${hash}` : ""}`;
+}
+
 const SITE_ADMIN_DEFAULTS = {
   site: {
     supportTelegram: "@patiev_admin",
@@ -283,7 +293,7 @@ function injectCompactShell(root) {
           <nav class="compact-nav" aria-label="Основная навигация">
             <a href="${root}">Главная</a>
             <a href="${root}study/">Решения</a>
-            <a href="${root}catalog/">Каталог</a>
+            <a href="${root}${withStaticIndexPath("catalog/")}">Каталог</a>
             <a href="${root}calc/">Калькулятор</a>
           </nav>
         </div>
@@ -308,7 +318,7 @@ function injectSharedFooter(root) {
           <h3>Сценарии</h3>
           <ul class="footer-links">
             <li><a href="${root}farm/">Расчёт фермы</a></li>
-            <li><a href="${root}catalog/">Каталог</a></li>
+            <li><a href="${root}${withStaticIndexPath("catalog/")}">Каталог</a></li>
             <li><a href="${root}study/">Сопровождение</a></li>
             <li><a href="${root}klubhack/">Клубничный Хак</a></li>
             <li><a href="${root}seeds/">Посадочный материал</a></li>
@@ -502,8 +512,8 @@ function injectLegacyCatalogBanner(root) {
       <p>Открывайте новую карточку, чтобы работать с фильтрами, вариантами цен, корзиной и обновлённой структурой товара.</p>
     </div>
     <div class="legacy-catalog-banner-actions">
-      <a class="btn btn-primary" href="${root}${legacyTarget.href}">Открыть ${legacyTarget.label}</a>
-      <a class="btn btn-secondary" href="${root}${legacyTarget.categoryHref}">Перейти в раздел «${legacyTarget.categoryLabel}»</a>
+      <a class="btn btn-primary" href="${root}${withStaticIndexPath(legacyTarget.href)}">Открыть ${legacyTarget.label}</a>
+      <a class="btn btn-secondary" href="${root}${withStaticIndexPath(legacyTarget.categoryHref)}">Перейти в раздел «${legacyTarget.categoryLabel}»</a>
     </div>
   `;
 

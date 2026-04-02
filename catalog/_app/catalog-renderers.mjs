@@ -53,12 +53,21 @@ function slugToId(value) {
   return value.replace(/[^a-z0-9_-]/gi, "-");
 }
 
+function withStaticIndexDocument(href) {
+  const [hashless, hash = ""] = href.split("#");
+  const [pathname, query = ""] = hashless.split("?");
+  if (/\.[a-z0-9]+$/i.test(pathname)) return href;
+  const normalizedPath = pathname.endsWith("/") ? `${pathname}index.html` : pathname;
+  return `${normalizedPath}${query ? `?${query}` : ""}${hash ? `#${hash}` : ""}`;
+}
+
 function resolveHref(ctx, href) {
   if (!href) return "#";
   if (href.startsWith("http") || href.startsWith("mailto:") || href.startsWith("tel:")) return href;
   if (href.startsWith("#")) return href;
-  if (href.startsWith("/")) return `${ctx.siteRoot}${href.replace(/^\//, "")}`;
-  return `${ctx.siteRoot}${href}`;
+  const normalizedHref = withStaticIndexDocument(href);
+  if (normalizedHref.startsWith("/")) return `${ctx.siteRoot}${normalizedHref.replace(/^\//, "")}`;
+  return `${ctx.siteRoot}${normalizedHref}`;
 }
 
 function resolveAsset(ctx, path) {
