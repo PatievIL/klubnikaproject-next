@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /admin/
+Disallow: /account/
 Disallow: /calc/admin/
 Disallow: /calc/klubnika/
 

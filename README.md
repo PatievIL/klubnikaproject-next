@@ -259,12 +259,15 @@ Backend уже поднят на существующей VM `farms-vm` в Googl
 - backend session login / logout
 - secure cookie session для `/admin/`
 - users / roles как первый access-layer
+- admin login по token и по паролю
+- member login / logout и отдельная member-session
+- закрытые маршруты `/account/login/`, `/account/`, `/account/catalog/`, `/account/special/`
+- `noindex` и исключение `/account/` из sitemap/robots
 - lead events / history
 - временный SSH-ключ удалён с VM
 
 Что ещё относится сюда:
 
-- нормальный login flow вместо access key everywhere
 - audit log действий в админке
 - rate limiting на auth и формы
 - cleanup по CORS / cookie / admin access

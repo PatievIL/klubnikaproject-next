@@ -14,6 +14,13 @@ const DEFAULT_CONFIG = {
     defaultTheme: "light",
     activeLogoSystem: "manual-primary",
   },
+  members: {
+    enabled: true,
+    loginPath: "/account/login/",
+    hubPath: "/account/",
+    catalogPath: "/account/catalog/",
+    specialPath: "/account/special/",
+  },
   forms: {
     mode: "backend_submit",
     primaryChannel: "crm",
@@ -145,6 +152,8 @@ const els = {
   summary: document.getElementById("admin-summary-grid"),
   status: document.getElementById("admin-status"),
   backendToken: document.getElementById("admin-backend-token"),
+  loginIdentity: document.getElementById("admin-login-identity"),
+  loginPassword: document.getElementById("admin-login-password"),
   jsonOutput: document.getElementById("admin-json-output"),
   downloadButton: document.getElementById("download-admin-json"),
   copyButton: document.getElementById("copy-admin-json"),
@@ -153,6 +162,7 @@ const els = {
   pullBackendButton: document.getElementById("pull-backend-config"),
   pushBackendButton: document.getElementById("push-backend-config"),
   loginButton: document.getElementById("admin-login-button"),
+  passwordLoginButton: document.getElementById("admin-password-login-button"),
   sessionButton: document.getElementById("admin-session-button"),
   logoutButton: document.getElementById("admin-logout-button"),
   sessionState: document.getElementById("admin-session-state"),
@@ -162,6 +172,24 @@ let draft = clone(DEFAULT_CONFIG);
 let currentSection = "dashboard";
 let catalogDraft = clone(DEFAULT_CATALOG_ITEMS);
 let usersDraft = [];
+const crmWorkspace = {
+  available: false,
+  view: "kanban",
+  pipelines: [],
+  users: [],
+  sources: [],
+  leads: [],
+  selectedLeadId: null,
+  selectedLead: null,
+  filters: {
+    status_filter: "",
+    owner_id: 0,
+    source_filter: "",
+    tag: "",
+    follow_up_state: "",
+    search: "",
+  },
+};
 
 init();
 
@@ -202,6 +230,7 @@ function bindGlobalEvents() {
   els.pullBackendButton.addEventListener("click", pullBackendDraft);
   els.pushBackendButton.addEventListener("click", pushBackendDraft);
   els.loginButton.addEventListener("click", loginToBackend);
+  els.passwordLoginButton.addEventListener("click", loginToBackendWithPassword);
   els.sessionButton.addEventListener("click", checkBackendSession);
   els.logoutButton.addEventListener("click", logoutFromBackend);
   els.backendToken.addEventListener("input", persistBackendToken);
@@ -241,7 +270,7 @@ function renderCurrentSection() {
   els.section.innerHTML = html;
   bindSectionFields();
   if (currentSection === "crm") {
-    loadLeadInbox();
+    initCrmWorkspace();
   }
   if (currentSection === "users") {
     bindUsersSection();
@@ -313,6 +342,21 @@ function renderSiteSection() {
         ${selectField("site.defaultLanguage", "Язык по умолчанию", draft.site.defaultLanguage, [["ru","Русский"],["en","English"]], "Начальное состояние переключателя языка")}
         ${selectField("site.defaultTheme", "Тема по умолчанию", draft.site.defaultTheme, [["light","Светлая"],["dark","Тёмная"]], "Начальное состояние темы")}
       </div>
+      <div class="admin-block">
+        <div class="admin-block-head">
+          <div>
+            <strong>Кабинет пользователя</strong>
+            <span>Закрытый слой для каталога, спецстраниц и будущих клиентских маршрутов.</span>
+          </div>
+        </div>
+        <div class="admin-grid">
+          ${checkboxField("members.enabled", "Кабинет пользователя включён", draft.members.enabled)}
+          ${inputField("members.loginPath", "Login path", draft.members.loginPath, "Страница входа пользователя")}
+          ${inputField("members.hubPath", "Hub path", draft.members.hubPath, "Главная страница кабинета")}
+          ${inputField("members.catalogPath", "Catalog path", draft.members.catalogPath, "Закрытый каталог")}
+          ${inputField("members.specialPath", "Special path", draft.members.specialPath, "Спецстраницы и private routes")}
+        </div>
+      </div>
     </div>
   `;
 }
@@ -376,8 +420,8 @@ function renderCrmSection() {
     <div class="admin-section-stack">
       <div class="admin-section-intro">
         <div class="tag">CRM</div>
-        <h3 class="calc-card-title">Задел под свой lead inbox и pipeline</h3>
-        <p class="sublead">Это не рабочая CRM, а согласованная схема: какие поля, какие источники, какие стадии и где потом цеплять webhook.</p>
+        <h3 class="calc-card-title">Sales workspace и CRM-операционка</h3>
+        <p class="sublead">Здесь теперь не только схема CRM, но и рабочий кабинет продаж: стадии, доска, карточка лида, owner, follow-up, комментарии и sync-статус внешних интеграций.</p>
       </div>
       <div class="admin-grid">
         ${checkboxField("crm.enabled", "CRM слой включён", draft.crm.enabled)}
@@ -397,11 +441,61 @@ function renderCrmSection() {
       <div class="admin-block">
         <div class="admin-block-head">
           <div>
-            <strong>Lead inbox</strong>
-            <span>Последние лиды из backend. Работает, если указан API base и вставлен backend token.</span>
+            <strong>CRM workspace</strong>
+            <span>Работает через backend proxy к отдельному CRM-сервису. Если CRM ещё не настроен, ниже останется legacy inbox.</span>
+          </div>
+          <div class="admin-toolbar-actions">
+            <button class="btn btn-secondary" id="crm-workspace-refresh" type="button">Обновить</button>
+            <button class="btn btn-secondary" id="crm-workspace-view-toggle" type="button">Переключить вид</button>
           </div>
         </div>
-        <div class="admin-lead-list" id="admin-lead-list">
+        <div class="admin-crm-filters" id="admin-crm-filters">
+          <label class="admin-field">
+            <span class="admin-field-label">Поиск</span>
+            <input class="admin-input" id="crm-filter-search" type="text" placeholder="Имя, телефон, email, brief" />
+          </label>
+          <label class="admin-field">
+            <span class="admin-field-label">Стадия</span>
+            <select class="admin-select" id="crm-filter-status">
+              <option value="">Все стадии</option>
+            </select>
+          </label>
+          <label class="admin-field">
+            <span class="admin-field-label">Owner</span>
+            <select class="admin-select" id="crm-filter-owner">
+              <option value="0">Все owner</option>
+            </select>
+          </label>
+          <label class="admin-field">
+            <span class="admin-field-label">Источник</span>
+            <select class="admin-select" id="crm-filter-source">
+              <option value="">Все источники</option>
+            </select>
+          </label>
+          <label class="admin-field">
+            <span class="admin-field-label">Tag</span>
+            <input class="admin-input" id="crm-filter-tag" type="text" placeholder="например hot" />
+          </label>
+          <label class="admin-field">
+            <span class="admin-field-label">Follow-up</span>
+            <select class="admin-select" id="crm-filter-follow-up">
+              <option value="">Все</option>
+              <option value="overdue">Просрочено</option>
+              <option value="scheduled">Запланировано</option>
+              <option value="none">Без follow-up</option>
+              <option value="archived">Архив</option>
+            </select>
+          </label>
+        </div>
+        <div class="admin-crm-layout">
+          <div class="admin-crm-board" id="admin-crm-board">
+            <div class="admin-lead-empty">CRM workspace пока не загружен.</div>
+          </div>
+          <aside class="admin-crm-detail" id="admin-crm-detail">
+            <div class="admin-lead-empty">Выберите лид, чтобы открыть карточку.</div>
+          </aside>
+        </div>
+        <div class="admin-lead-list" id="admin-lead-list" hidden>
           <div class="admin-lead-empty">Lead inbox пока не загружен.</div>
         </div>
       </div>
@@ -436,7 +530,7 @@ function renderUsersSection() {
       <div class="admin-section-intro">
         <div class="tag">Доступ</div>
         <h3 class="calc-card-title">Пользователи и роли доступа</h3>
-        <p class="sublead">Этот слой убирает зависимость от одного общего токена. Здесь можно увидеть текущих пользователей, роли и выпустить новый access key под конкретного человека.</p>
+        <p class="sublead">Админы получают доступ к CRM и внутренним настройкам. Пользователи получают доступ к закрытому каталогу и спецстраницам. Access key остаётся резервным каналом, но основной вход теперь можно строить через логин и пароль.</p>
       </div>
       <div class="admin-toolbar-actions">
         <button class="btn btn-secondary" id="load-users-button" type="button">Загрузить пользователей</button>
@@ -668,7 +762,409 @@ async function pushBackendDraft() {
   }
 }
 
-async function loadLeadInbox() {
+function getCrmApiBaseConfigured() {
+  return Boolean(getApiBase());
+}
+
+function bindCrmWorkspaceControls() {
+  const refreshButton = document.getElementById("crm-workspace-refresh");
+  const viewButton = document.getElementById("crm-workspace-view-toggle");
+  const searchField = document.getElementById("crm-filter-search");
+  const statusField = document.getElementById("crm-filter-status");
+  const ownerField = document.getElementById("crm-filter-owner");
+  const sourceField = document.getElementById("crm-filter-source");
+  const tagField = document.getElementById("crm-filter-tag");
+  const followUpField = document.getElementById("crm-filter-follow-up");
+
+  if (refreshButton) {
+    refreshButton.onclick = () => loadCrmWorkspace(true);
+  }
+  if (viewButton) {
+    viewButton.textContent = crmWorkspace.view === "kanban" ? "Показать список" : "Показать канбан";
+    viewButton.onclick = () => {
+      crmWorkspace.view = crmWorkspace.view === "kanban" ? "list" : "kanban";
+      renderCrmWorkspace();
+      bindCrmWorkspaceControls();
+    };
+  }
+
+  const fields = [searchField, statusField, ownerField, sourceField, tagField, followUpField].filter(Boolean);
+  fields.forEach((field) => {
+    const eventName = field.tagName === "SELECT" ? "change" : "input";
+    const handler = () => {
+      crmWorkspace.filters = {
+        status_filter: statusField?.value || "",
+        owner_id: Number(ownerField?.value || 0),
+        source_filter: sourceField?.value || "",
+        tag: tagField?.value.trim() || "",
+        follow_up_state: followUpField?.value || "",
+        search: searchField?.value.trim() || "",
+      };
+      loadCrmWorkspace();
+    };
+    field[`on${eventName}`] = handler;
+  });
+}
+
+async function initCrmWorkspace() {
+  bindCrmWorkspaceControls();
+  await loadCrmWorkspace();
+}
+
+async function loadCrmWorkspace(forceReloadDetail = false) {
+  const board = document.getElementById("admin-crm-board");
+  const detail = document.getElementById("admin-crm-detail");
+  const legacyList = document.getElementById("admin-lead-list");
+  if (!board || !detail) return;
+
+  if (!getCrmApiBaseConfigured()) {
+    board.innerHTML = '<div class="admin-lead-empty">Чтобы увидеть CRM workspace, укажите integrations.apiBase.</div>';
+    detail.innerHTML = '<div class="admin-lead-empty">Сначала настройте API base.</div>';
+    if (legacyList) legacyList.hidden = false;
+    await loadLegacyLeadInbox();
+    return;
+  }
+
+  board.innerHTML = '<div class="admin-lead-empty">Загружаю CRM workspace…</div>';
+  try {
+    const [statusResponse, pipelinesResponse, usersResponse, leadsResponse] = await Promise.all([
+      adminFetch("/admin/crm/status"),
+      adminFetch("/admin/crm/pipelines"),
+      adminFetch("/admin/crm/users"),
+      adminFetch(`/admin/crm/leads?${new URLSearchParams({
+        limit: "100",
+        status_filter: crmWorkspace.filters.status_filter || "",
+        owner_id: String(crmWorkspace.filters.owner_id || 0),
+        source_filter: crmWorkspace.filters.source_filter || "",
+        tag: crmWorkspace.filters.tag || "",
+        follow_up_state: crmWorkspace.filters.follow_up_state || "",
+        search: crmWorkspace.filters.search || "",
+      })}`),
+    ]);
+    crmWorkspace.available = Boolean(statusResponse?.item);
+    crmWorkspace.pipelines = pipelinesResponse.items || [];
+    crmWorkspace.users = usersResponse.items || [];
+    crmWorkspace.leads = leadsResponse.items || [];
+    crmWorkspace.sources = leadsResponse.sources || [];
+    if (!crmWorkspace.selectedLeadId && crmWorkspace.leads.length) {
+      crmWorkspace.selectedLeadId = crmWorkspace.leads[0].id;
+    }
+    if (!crmWorkspace.leads.some((lead) => lead.id === crmWorkspace.selectedLeadId)) {
+      crmWorkspace.selectedLeadId = crmWorkspace.leads[0]?.id || null;
+    }
+    renderCrmWorkspace();
+    bindCrmWorkspaceControls();
+    if (crmWorkspace.selectedLeadId && (forceReloadDetail || !crmWorkspace.selectedLead || crmWorkspace.selectedLead.item?.id !== crmWorkspace.selectedLeadId)) {
+      await loadCrmLeadDetail(crmWorkspace.selectedLeadId);
+    } else {
+      renderCrmLeadDetail();
+    }
+    if (legacyList) legacyList.hidden = true;
+  } catch (error) {
+    board.innerHTML = `<div class="admin-lead-empty">CRM workspace недоступен: ${escapeHtml(error.message)}</div>`;
+    detail.innerHTML = '<div class="admin-lead-empty">Переключаюсь на legacy inbox.</div>';
+    if (legacyList) legacyList.hidden = false;
+    await loadLegacyLeadInbox();
+  }
+}
+
+function renderCrmWorkspace() {
+  const board = document.getElementById("admin-crm-board");
+  const statusField = document.getElementById("crm-filter-status");
+  const ownerField = document.getElementById("crm-filter-owner");
+  const sourceField = document.getElementById("crm-filter-source");
+  if (!board) return;
+
+  const statuses = crmWorkspace.pipelines[0]?.statuses || [];
+  if (statusField) {
+    statusField.innerHTML = `<option value="">Все стадии</option>${statuses.map((item) => `<option value="${escapeAttribute(item.code)}" ${crmWorkspace.filters.status_filter === item.code ? "selected" : ""}>${escapeHtml(item.name)}</option>`).join("")}`;
+  }
+  if (ownerField) {
+    ownerField.innerHTML = `<option value="0">Все owner</option>${crmWorkspace.users.map((user) => `<option value="${user.id}" ${Number(crmWorkspace.filters.owner_id) === Number(user.id) ? "selected" : ""}>${escapeHtml(user.display_name)}</option>`).join("")}`;
+  }
+  if (sourceField) {
+    sourceField.innerHTML = `<option value="">Все источники</option>${crmWorkspace.sources.map((source) => `<option value="${escapeAttribute(source)}" ${crmWorkspace.filters.source_filter === source ? "selected" : ""}>${escapeHtml(source)}</option>`).join("")}`;
+  }
+  const searchField = document.getElementById("crm-filter-search");
+  const tagField = document.getElementById("crm-filter-tag");
+  const followUpField = document.getElementById("crm-filter-follow-up");
+  if (searchField) searchField.value = crmWorkspace.filters.search || "";
+  if (tagField) tagField.value = crmWorkspace.filters.tag || "";
+  if (followUpField) followUpField.value = crmWorkspace.filters.follow_up_state || "";
+
+  if (!crmWorkspace.leads.length) {
+    board.innerHTML = '<div class="admin-lead-empty">По текущим фильтрам лидов нет.</div>';
+    return;
+  }
+
+  if (crmWorkspace.view === "list" || !statuses.length) {
+    board.innerHTML = `<div class="admin-crm-list">${crmWorkspace.leads.map(renderCrmLeadCard).join("")}</div>`;
+  } else {
+    board.innerHTML = `<div class="admin-crm-kanban">${statuses.map((status) => {
+      const items = crmWorkspace.leads.filter((lead) => lead.status_code === status.code);
+      return `
+        <section class="admin-crm-column">
+          <div class="admin-crm-column-head">
+            <strong>${escapeHtml(status.name)}</strong>
+            <span>${items.length}</span>
+          </div>
+          <div class="admin-crm-column-body">
+            ${items.length ? items.map(renderCrmLeadCard).join("") : '<div class="admin-lead-empty">Пусто</div>'}
+          </div>
+        </section>
+      `;
+    }).join("")}</div>`;
+  }
+
+  board.querySelectorAll("[data-crm-open]").forEach((button) => {
+    button.addEventListener("click", () => {
+      crmWorkspace.selectedLeadId = Number(button.dataset.crmOpen);
+      loadCrmLeadDetail(crmWorkspace.selectedLeadId);
+      renderCrmWorkspace();
+    });
+  });
+}
+
+function renderCrmLeadCard(lead) {
+  const selected = Number(crmWorkspace.selectedLeadId) === Number(lead.id);
+  return `
+    <article class="admin-crm-card ${selected ? "is-selected" : ""}">
+      <div class="admin-crm-card-head">
+        <strong>#${lead.id} · ${escapeHtml(lead.name || "Без имени")}</strong>
+        <span class="admin-crm-follow-up is-${escapeAttribute(lead.follow_up_state || "none")}">${escapeHtml(lead.status_name || lead.status_code)}</span>
+      </div>
+      <div class="admin-crm-card-meta">
+        <span>${escapeHtml(lead.owner_name || "Без owner")}</span>
+        <span>${escapeHtml(lead.source || "Без источника")}</span>
+      </div>
+      <p>${escapeHtml(lead.request_type || lead.message || "Без описания")}</p>
+      <div class="admin-crm-chip-row">
+        ${(lead.tags || []).slice(0, 4).map((tag) => `<span class="admin-crm-chip">${escapeHtml(tag)}</span>`).join("")}
+        ${lead.sync?.sync_status ? `<span class="admin-crm-chip is-sync">${escapeHtml(lead.sync.sync_status)}</span>` : ""}
+      </div>
+      <div class="admin-crm-card-meta">
+        <span>${escapeHtml(lead.phone || lead.email || lead.telegram || "Нет контакта")}</span>
+        <span>${escapeHtml(formatFollowUpLabel(lead.next_action_at, lead.follow_up_state))}</span>
+      </div>
+      <button class="btn btn-secondary" data-crm-open="${lead.id}" type="button">Открыть карточку</button>
+    </article>
+  `;
+}
+
+async function loadCrmLeadDetail(leadId) {
+  const detail = document.getElementById("admin-crm-detail");
+  if (!detail) return;
+  detail.innerHTML = '<div class="admin-lead-empty">Загружаю карточку лида…</div>';
+  try {
+    const [response, eventsResponse, commentsResponse] = await Promise.all([
+      adminFetch(`/admin/crm/leads/${leadId}`),
+      adminFetch(`/admin/crm/leads/${leadId}/events`),
+      adminFetch(`/admin/crm/leads/${leadId}/comments`),
+    ]);
+    crmWorkspace.selectedLead = {
+      ...response,
+      events: eventsResponse.items || [],
+      comments: commentsResponse.items || response.comments || [],
+    };
+    renderCrmLeadDetail();
+  } catch (error) {
+    detail.innerHTML = `<div class="admin-lead-empty">Не удалось загрузить карточку: ${escapeHtml(error.message)}</div>`;
+  }
+}
+
+function renderCrmLeadDetail() {
+  const detail = document.getElementById("admin-crm-detail");
+  if (!detail) return;
+  const bundle = crmWorkspace.selectedLead;
+  if (!bundle?.item) {
+    detail.innerHTML = '<div class="admin-lead-empty">Выберите лид, чтобы открыть карточку.</div>';
+    return;
+  }
+  const lead = bundle.item;
+  const contact = bundle.contact || {};
+  const events = bundle.events || [];
+  const comments = bundle.comments || [];
+  const statuses = crmWorkspace.pipelines[0]?.statuses || [];
+  detail.innerHTML = `
+    <div class="admin-crm-detail-head">
+      <div>
+        <strong>#${lead.id} · ${escapeHtml(lead.name || "Без имени")}</strong>
+        <span>${escapeHtml(lead.request_type || lead.message || "")}</span>
+      </div>
+      <button class="btn btn-secondary" id="crm-lead-retry-sync" type="button">Retry sync</button>
+    </div>
+    <div class="admin-grid">
+      <label class="admin-field">
+        <span class="admin-field-label">Стадия</span>
+        <select class="admin-select" id="crm-lead-status">${statuses.map((status) => `<option value="${escapeAttribute(status.code)}" ${lead.status_code === status.code ? "selected" : ""}>${escapeHtml(status.name)}</option>`).join("")}</select>
+      </label>
+      <label class="admin-field">
+        <span class="admin-field-label">Owner</span>
+        <select class="admin-select" id="crm-lead-owner">
+          <option value="0">Без owner</option>
+          ${crmWorkspace.users.map((user) => `<option value="${user.id}" ${Number(lead.owner_id) === Number(user.id) ? "selected" : ""}>${escapeHtml(user.display_name)}</option>`).join("")}
+        </select>
+      </label>
+      <label class="admin-field">
+        <span class="admin-field-label">Источник</span>
+        <input class="admin-input" id="crm-lead-source" type="text" value="${escapeAttribute(lead.source || "")}" />
+      </label>
+      <label class="admin-field">
+        <span class="admin-field-label">Follow-up</span>
+        <input class="admin-input" id="crm-lead-follow-up" type="datetime-local" value="${escapeAttribute(toDatetimeLocal(lead.next_action_at))}" />
+      </label>
+      <label class="admin-field">
+        <span class="admin-field-label">Теги</span>
+        <input class="admin-input" id="crm-lead-tags" type="text" value="${escapeAttribute((lead.tags || []).join(", "))}" />
+      </label>
+      <label class="admin-field">
+        <span class="admin-field-label">Архив</span>
+        <input class="admin-input" id="crm-lead-archived" type="checkbox" ${lead.is_archived ? "checked" : ""} />
+      </label>
+      <label class="admin-field admin-lead-note">
+        <span class="admin-field-label">Заметка</span>
+        <textarea class="admin-textarea" id="crm-lead-note">${escapeHtml(lead.note || "")}</textarea>
+      </label>
+    </div>
+    <div class="admin-toolbar-actions">
+      <button class="btn btn-primary" id="crm-lead-save" type="button">Сохранить карточку</button>
+    </div>
+    <div class="admin-crm-detail-block">
+      <strong>Контакт</strong>
+      <div class="admin-crm-detail-meta">
+        <span>${escapeHtml(contact.phone || lead.phone || "Телефон не указан")}</span>
+        <span>${escapeHtml(contact.email || lead.email || "Email не указан")}</span>
+        <span>${escapeHtml(contact.telegram || lead.telegram || "Telegram не указан")}</span>
+      </div>
+    </div>
+    <div class="admin-crm-detail-block">
+      <strong>Бриф</strong>
+      <pre class="admin-crm-pre">${escapeHtml(lead.brief_text || JSON.stringify(lead.payload || {}, null, 2))}</pre>
+    </div>
+    <div class="admin-crm-detail-block">
+      <strong>Комментарии</strong>
+      <div class="admin-crm-thread">
+        ${comments.length ? comments.map((comment) => `
+          <div class="admin-history-item">
+            <strong>${escapeHtml(comment.author_name || "Команда")}</strong>
+            <span>${escapeHtml(comment.created_at || "")}</span>
+            <span>${escapeHtml(comment.body || "")}</span>
+          </div>
+        `).join("") : '<div class="admin-lead-empty">Комментариев пока нет.</div>'}
+      </div>
+      <label class="admin-field admin-lead-note">
+        <span class="admin-field-label">Новый комментарий</span>
+        <textarea class="admin-textarea" id="crm-lead-comment-body" placeholder="Что важно сделать, что уже обсудили, какой следующий шаг"></textarea>
+      </label>
+      <button class="btn btn-secondary" id="crm-lead-comment-save" type="button">Добавить комментарий</button>
+    </div>
+    <div class="admin-crm-detail-block">
+      <strong>История</strong>
+      <div class="admin-crm-thread">
+        ${events.length ? events.map((item) => `
+          <div class="admin-history-item">
+            <strong>${escapeHtml(item.event_type)}</strong>
+            <span>${escapeHtml(item.created_at || "")}</span>
+            <span>${escapeHtml(JSON.stringify(item.payload || {}))}</span>
+          </div>
+        `).join("") : '<div class="admin-lead-empty">Истории пока нет.</div>'}
+      </div>
+    </div>
+    <div class="admin-crm-detail-block">
+      <strong>Sync</strong>
+      <div class="admin-crm-detail-meta">
+        <span>${escapeHtml(lead.sync?.sync_status || bundle.sync?.sync_status || "no sync")}</span>
+        <span>${escapeHtml(lead.sync?.external_id || bundle.sync?.external_id || "")}</span>
+        <span>${escapeHtml(lead.sync?.last_error || bundle.sync?.last_error || "")}</span>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("crm-lead-save")?.addEventListener("click", saveCrmLeadDetail);
+  document.getElementById("crm-lead-comment-save")?.addEventListener("click", createCrmLeadComment);
+  document.getElementById("crm-lead-retry-sync")?.addEventListener("click", retryCrmLeadSync);
+}
+
+async function saveCrmLeadDetail() {
+  const leadId = crmWorkspace.selectedLead?.item?.id;
+  if (!leadId) return;
+  const payload = {
+    status_code: document.getElementById("crm-lead-status")?.value || "new",
+    owner_id: Number(document.getElementById("crm-lead-owner")?.value || 0) || null,
+    source: document.getElementById("crm-lead-source")?.value.trim() || "",
+    note: document.getElementById("crm-lead-note")?.value || "",
+    tags: parseTagInput(document.getElementById("crm-lead-tags")?.value || ""),
+    next_action_at: fromDatetimeLocal(document.getElementById("crm-lead-follow-up")?.value || ""),
+    is_archived: Boolean(document.getElementById("crm-lead-archived")?.checked),
+  };
+  try {
+    els.status.textContent = `Сохраняю CRM-карточку #${leadId}...`;
+    await adminFetch(`/admin/crm/leads/${leadId}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    });
+    els.status.textContent = `CRM-карточка #${leadId} обновлена.`;
+    await loadCrmWorkspace(true);
+  } catch (error) {
+    els.status.textContent = `Не удалось сохранить CRM-карточку #${leadId}: ${error.message}`;
+  }
+}
+
+async function createCrmLeadComment() {
+  const leadId = crmWorkspace.selectedLead?.item?.id;
+  const body = document.getElementById("crm-lead-comment-body")?.value.trim() || "";
+  if (!leadId || !body) return;
+  try {
+    await adminFetch(`/admin/crm/leads/${leadId}/comments`, {
+      method: "POST",
+      body: JSON.stringify({ body }),
+    });
+    els.status.textContent = `Комментарий к лиду #${leadId} добавлен.`;
+    await loadCrmLeadDetail(leadId);
+  } catch (error) {
+    els.status.textContent = `Не удалось добавить комментарий: ${error.message}`;
+  }
+}
+
+async function retryCrmLeadSync() {
+  const leadId = crmWorkspace.selectedLead?.item?.id;
+  if (!leadId) return;
+  try {
+    await adminFetch(`/admin/crm/leads/${leadId}/retry-sync`, { method: "POST" });
+    els.status.textContent = `Sync для лида #${leadId} перезапущен.`;
+    await loadCrmLeadDetail(leadId);
+    await loadCrmWorkspace();
+  } catch (error) {
+    els.status.textContent = `Не удалось перезапустить sync: ${error.message}`;
+  }
+}
+
+function parseTagInput(value) {
+  return Array.from(new Set(value.split(",").map((item) => item.trim()).filter(Boolean)));
+}
+
+function toDatetimeLocal(value) {
+  if (!value) return "";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "";
+  const offset = parsed.getTimezoneOffset();
+  const normalized = new Date(parsed.getTime() - offset * 60_000);
+  return normalized.toISOString().slice(0, 16);
+}
+
+function fromDatetimeLocal(value) {
+  if (!value) return "";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "";
+  return parsed.toISOString();
+}
+
+function formatFollowUpLabel(value, state) {
+  if (!value) return state === "none" ? "Без follow-up" : "Follow-up не задан";
+  return `${state === "overdue" ? "Просрочено" : "Follow-up"} · ${value.slice(0, 16).replace("T", " ")}`;
+}
+
+async function loadLegacyLeadInbox() {
   const list = document.getElementById("admin-lead-list");
   if (!list) return;
 
@@ -744,7 +1240,7 @@ async function saveLead(leadId) {
       }),
     });
     els.status.textContent = `Лид #${leadId} обновлён.`;
-    loadLeadInbox();
+    loadLegacyLeadInbox();
   } catch (error) {
     els.status.textContent = `Не удалось обновить лид #${leadId}: ${error.message}`;
   }
@@ -810,6 +1306,11 @@ async function loadUsers() {
           <span>${escapeHtml(user.slug)}</span>
           <span>${escapeHtml(user.email || "email не указан")}</span>
         </div>
+        <div class="admin-pills">
+          <span class="admin-pill">${escapeHtml(user.account_type || "admin")}</span>
+          ${(user.scopes || []).map((scope) => `<span class="admin-pill">${escapeHtml(scope)}</span>`).join("")}
+          <span class="admin-pill">${user.has_password ? "password" : "no password"}</span>
+        </div>
         <div class="admin-lead-actions">
           <label class="admin-field">
             <span class="admin-field-label">Имя</span>
@@ -826,10 +1327,21 @@ async function loadUsers() {
             </select>
           </label>
           <label class="admin-field">
+            <span class="admin-field-label">Тип аккаунта</span>
+            <select class="admin-select" data-user-account-type="${user.id}">
+              ${["admin","member"].map((accountType) => `<option value="${accountType}" ${user.account_type === accountType ? "selected" : ""}>${accountType}</option>`).join("")}
+            </select>
+          </label>
+          <label class="admin-field admin-lead-note">
+            <span class="admin-field-label">Scopes</span>
+            <textarea class="admin-textarea" data-user-scopes="${user.id}" placeholder="catalog, special_pages, crm">${escapeHtml((user.scopes || []).join(", "))}</textarea>
+          </label>
+          <label class="admin-field">
             <span class="admin-field-label">Активен</span>
             <input class="admin-input" data-user-active="${user.id}" type="checkbox" ${user.is_active ? "checked" : ""} />
           </label>
           <button class="btn btn-primary admin-user-save" data-user-save="${user.id}" type="button">Сохранить пользователя</button>
+          <button class="btn btn-secondary admin-user-password" data-user-password="${user.id}" type="button">Задать пароль</button>
           <button class="btn btn-secondary admin-user-rotate" data-user-rotate="${user.id}" type="button">Сменить access key</button>
         </div>
       </article>
@@ -839,6 +1351,9 @@ async function loadUsers() {
     });
     list.querySelectorAll("[data-user-rotate]").forEach((button) => {
       button.addEventListener("click", () => rotateUserKey(button.dataset.userRotate));
+    });
+    list.querySelectorAll("[data-user-password]").forEach((button) => {
+      button.addEventListener("click", () => setUserPassword(button.dataset.userPassword));
     });
   } catch (error) {
     list.innerHTML = `<div class="admin-lead-empty">Не удалось загрузить пользователей: ${escapeHtml(error.message)}</div>`;
@@ -851,11 +1366,23 @@ async function createUser() {
   const displayName = window.prompt("Имя пользователя");
   if (!displayName) return;
   const email = window.prompt("Email пользователя", "") || "";
+  const accountType = (window.prompt("Тип аккаунта: admin/member", "member") || "member").trim().toLowerCase();
   const role = window.prompt("Роль: owner/admin/manager/editor/viewer", "manager") || "manager";
+  const defaultScopes = accountType === "admin" ? "admin, crm, catalog, special_pages" : "catalog, special_pages";
+  const scopesRaw = window.prompt("Scopes через запятую", defaultScopes) || defaultScopes;
+  const password = window.prompt("Пароль (минимум 8 символов, можно оставить пустым)", "") || "";
   try {
     const response = await adminFetch("/admin/users", {
       method: "POST",
-      body: JSON.stringify({ slug, display_name: displayName, email, role }),
+      body: JSON.stringify({
+        slug,
+        display_name: displayName,
+        email,
+        account_type: accountType,
+        role,
+        scopes: parseCommaValues(scopesRaw),
+        password,
+      }),
     });
     els.status.textContent = `Пользователь создан. Access key: ${response.access_key}`;
     loadUsers();
@@ -868,6 +1395,8 @@ async function saveUser(userId) {
   const nameField = document.querySelector(`[data-user-name="${userId}"]`);
   const emailField = document.querySelector(`[data-user-email="${userId}"]`);
   const roleField = document.querySelector(`[data-user-role="${userId}"]`);
+  const accountTypeField = document.querySelector(`[data-user-account-type="${userId}"]`);
+  const scopesField = document.querySelector(`[data-user-scopes="${userId}"]`);
   const activeField = document.querySelector(`[data-user-active="${userId}"]`);
   try {
     await adminFetch(`/admin/users/${userId}`, {
@@ -875,7 +1404,9 @@ async function saveUser(userId) {
       body: JSON.stringify({
         display_name: nameField?.value || "",
         email: emailField?.value || "",
+        account_type: accountTypeField?.value || "member",
         role: roleField?.value || "manager",
+        scopes: parseCommaValues(scopesField?.value || ""),
         is_active: Boolean(activeField?.checked),
       }),
     });
@@ -895,6 +1426,25 @@ async function rotateUserKey(userId) {
     loadUsers();
   } catch (error) {
     els.status.textContent = `Не удалось сменить ключ пользователя #${userId}: ${error.message}`;
+  }
+}
+
+async function setUserPassword(userId) {
+  const password = window.prompt("Новый пароль пользователя (минимум 8 символов)");
+  if (!password) return;
+  if (password.length < 8) {
+    els.status.textContent = "Пароль должен быть не короче 8 символов.";
+    return;
+  }
+  try {
+    await adminFetch(`/admin/users/${userId}/set-password`, {
+      method: "POST",
+      body: JSON.stringify({ password }),
+    });
+    els.status.textContent = `Пароль пользователя #${userId} обновлён.`;
+    loadUsers();
+  } catch (error) {
+    els.status.textContent = `Не удалось обновить пароль пользователя #${userId}: ${error.message}`;
   }
 }
 
@@ -956,13 +1506,35 @@ async function loginToBackend() {
   }
 }
 
+async function loginToBackendWithPassword() {
+  const login = (els.loginIdentity?.value || "").trim();
+  const password = els.loginPassword?.value || "";
+  if (!login || !password) {
+    els.sessionState.textContent = "Введите admin login и пароль.";
+    return;
+  }
+  try {
+    els.sessionState.textContent = "Выполняю вход по логину...";
+    const response = await adminFetch("/admin/auth/password-login", {
+      method: "POST",
+      body: JSON.stringify({ login, password }),
+    });
+    const user = response.user;
+    els.sessionState.textContent = user
+      ? `Сессия backend активна: ${user.display_name || "пользователь"} (${user.role || "role"}, ${user.account_type || "admin"})`
+      : "Сессия backend активна.";
+  } catch (error) {
+    els.sessionState.textContent = `Вход по логину не удался: ${error.message}`;
+  }
+}
+
 async function checkBackendSession() {
   try {
     els.sessionState.textContent = "Проверяю сессию...";
     const response = await adminFetch("/admin/auth/session");
     const user = response.user;
     els.sessionState.textContent = response.session
-      ? `Сессия backend активна: ${user?.user_name || user?.display_name || "пользователь"} (${user?.user_role || user?.role || "role"})`
+      ? `Сессия backend активна: ${user?.user_name || user?.display_name || "пользователь"} (${user?.user_role || user?.role || "role"}, ${user?.account_type || "admin"})`
       : "Сессия backend не найдена.";
   } catch (error) {
     els.sessionState.textContent = `Сессия не подтверждена: ${error.message}`;
@@ -1043,6 +1615,10 @@ function buildLeadExample() {
       request: "Нужен расчёт и состав фермы",
     },
   };
+}
+
+function parseCommaValues(value) {
+  return Array.from(new Set(String(value).split(",").map((item) => item.trim()).filter(Boolean)));
 }
 
 function deepMerge(base, patch) {

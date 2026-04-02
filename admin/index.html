@@ -12,7 +12,7 @@
     content="Внутренний кабинет настройки сайта Klubnika Project: контент, формы, CRM-схема, SEO-рамка и экспорт структуры для будущей CMS/CRM."
   />
   <link rel="stylesheet" href="../styles.css?v=20260402c" />
-  <link rel="stylesheet" href="./admin.css?v=20260402e" />
+  <link rel="stylesheet" href="./admin.css?v=20260402f" />
   <!-- SEO:START -->
   <meta name="robots" content="noindex, nofollow" />
   <!-- SEO:END -->
@@ -128,13 +128,26 @@
                 </div>
 
               <div class="admin-auth-panel">
+                <label class="admin-field">
+                  <span class="admin-field-label">Bootstrap token / access key</span>
+                  <span class="admin-field-note">Остаётся аварийным способом входа. Для постоянной работы лучше входить по логину и паролю admin-пользователя.</span>
+                  <input class="admin-input" id="admin-backend-token" type="password" autocomplete="off" placeholder="Bearer token or access key" />
+                </label>
+                <div class="admin-grid">
                   <label class="admin-field">
-                    <span class="admin-field-label">Backend token</span>
-                    <span class="admin-field-note">Нужен для первого входа в админ-сессию. Дальше кабинет работает через secure cookie на API-домене.</span>
-                    <input class="admin-input" id="admin-backend-token" type="password" autocomplete="off" placeholder="Bearer token" />
+                    <span class="admin-field-label">Admin login</span>
+                    <span class="admin-field-note">Slug или email admin-пользователя.</span>
+                    <input class="admin-input" id="admin-login-identity" type="text" autocomplete="username" placeholder="admin login or email" />
                   </label>
+                  <label class="admin-field">
+                    <span class="admin-field-label">Admin password</span>
+                    <span class="admin-field-note">Пароль для входа в `/admin/` и CRM-слой.</span>
+                    <input class="admin-input" id="admin-login-password" type="password" autocomplete="current-password" placeholder="Password" />
+                  </label>
+                </div>
                   <div class="admin-auth-actions">
-                    <button class="btn btn-primary" id="admin-login-button" type="button">Войти в backend</button>
+                    <button class="btn btn-primary" id="admin-login-button" type="button">Войти по token</button>
+                    <button class="btn btn-primary" id="admin-password-login-button" type="button">Войти по логину</button>
                     <button class="btn btn-secondary" id="admin-session-button" type="button">Проверить сессию</button>
                     <button class="btn btn-secondary" id="admin-logout-button" type="button">Выйти</button>
                   </div>
@@ -163,6 +176,6 @@
   </main>
 
   <script src="../site.js?v=20260402d" defer></script>
-  <script src="./admin.js?v=20260402e" type="module"></script>
+  <script src="./admin.js?v=20260402f" type="module"></script>
 </body>
 </html>

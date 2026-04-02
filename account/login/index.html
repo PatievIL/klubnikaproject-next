@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+  <title>Вход пользователя — Klubnika Project</title>
+  <link rel="stylesheet" href="../../styles.css?v=20260402f" />
+  <link rel="stylesheet" href="../account.css?v=20260402a" />
+  <!-- SEO:START -->
+  <meta name="robots" content="noindex, nofollow" />
+  <!-- SEO:END -->
+</head>
+<body data-account-view="login">
+  <header class="hero">
+    <div class="container">
+      <div class="hero-shell">
+        <div class="hero-grid hero-grid-lean">
+          <div class="hero-copy">
+            <span class="eyebrow">Кабинет пользователя</span>
+            <h1 class="hero-title-compact">Вход в закрытый каталог и специальные страницы</h1>
+            <p class="lead">Этот слой не индексируется и работает только для авторизованных пользователей.</p>
+          </div>
+          <aside class="visual-panel">
+            <div class="tag">Что внутри</div>
+            <ul class="calc-list">
+              <li>Закрытый каталог пользователя.</li>
+              <li>Специальные маршруты и материалы.</li>
+              <li>Отдельный доступ без смешивания с CRM-слоем админов.</li>
+            </ul>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="container">
+        <div class="section-frame">
+          <div class="account-shell">
+            <article class="card card-pad account-panel">
+              <div class="tag">Login</div>
+              <h2 class="calc-card-title">Войти по логину и паролю</h2>
+              <form class="account-form" id="account-login-form">
+                <label class="account-label">
+                  <span>Логин или email</span>
+                  <input class="account-input" id="account-login-identity" type="text" autocomplete="username" placeholder="member login or email" />
+                </label>
+                <label class="account-label">
+                  <span>Пароль</span>
+                  <input class="account-input" id="account-login-password" type="password" autocomplete="current-password" placeholder="Password" />
+                </label>
+                <div class="account-actions">
+                  <button class="btn btn-primary" type="submit">Войти</button>
+                  <a class="btn btn-secondary" href="../../">Вернуться на сайт</a>
+                </div>
+              </form>
+              <div class="account-status" id="account-login-status"></div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../../site.js?v=20260402f" defer></script>
+  <script src="../account.js?v=20260402a" type="module"></script>
+</body>
+</html>

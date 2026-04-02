@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+  <title>Кабинет пользователя — Klubnika Project</title>
+  <link rel="stylesheet" href="../styles.css?v=20260402f" />
+  <link rel="stylesheet" href="./account.css?v=20260402a" />
+  <!-- SEO:START -->
+  <meta name="robots" content="noindex, nofollow" />
+  <!-- SEO:END -->
+</head>
+<body data-account-view="hub">
+  <header class="hero">
+    <div class="container">
+      <div class="hero-shell">
+        <div class="hero-grid hero-grid-lean">
+          <div class="hero-copy">
+            <span class="eyebrow">Кабинет пользователя</span>
+            <h1 class="hero-title-compact">Закрытый слой каталога и специальных маршрутов</h1>
+            <p class="lead">Публичный сайт остаётся SEO-слоем. Этот раздел нужен для пользователей с доступом по аккаунту.</p>
+            <div class="account-user" data-account-user></div>
+            <div class="btn-row">
+              <a class="btn btn-primary" data-account-link="catalog" href="./catalog/">Открыть каталог</a>
+              <a class="btn btn-secondary" data-account-link="special" href="./special/">Открыть спецстраницы</a>
+              <button class="btn btn-ghost" data-account-logout type="button">Выйти</button>
+            </div>
+          </div>
+          <aside class="visual-panel">
+            <div class="tag">Для чего нужен кабинет</div>
+            <ul class="calc-list">
+              <li>Дать доступ к частям каталога без вмешательства в SEO-слой.</li>
+              <li>Открывать специальные маршруты только авторизованным пользователям.</li>
+              <li>Дальше на этот слой можно посадить историю заказов, доступы и private pages.</li>
+            </ul>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="container">
+        <div class="section-frame">
+          <div id="account-dynamic-content"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../site.js?v=20260402f" defer></script>
+  <script src="./account.js?v=20260402a" type="module"></script>
+</body>
+</html>

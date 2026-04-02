@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+  <title>Закрытый каталог — Klubnika Project</title>
+  <link rel="stylesheet" href="../../styles.css?v=20260402f" />
+  <link rel="stylesheet" href="../account.css?v=20260402a" />
+  <!-- SEO:START -->
+  <meta name="robots" content="noindex, nofollow" />
+  <!-- SEO:END -->
+</head>
+<body data-account-view="catalog">
+  <header class="hero">
+    <div class="container">
+      <div class="hero-shell">
+        <div class="hero-grid hero-grid-lean">
+          <div class="hero-copy">
+            <span class="eyebrow">Member catalog</span>
+            <h1 class="hero-title-compact">Закрытый каталог пользователя</h1>
+            <p class="lead">Здесь отображаются категории и ключевые позиции, доступные по member-session.</p>
+            <div class="account-user" data-account-user></div>
+            <div class="btn-row">
+              <a class="btn btn-secondary" data-account-link="hub" href="../">Назад в кабинет</a>
+              <button class="btn btn-ghost" data-account-logout type="button">Выйти</button>
+            </div>
+          </div>
+          <aside class="visual-panel">
+            <div class="tag">Что внутри</div>
+            <ul class="calc-list">
+              <li>Те же category/product routes, но через закрытый кабинет.</li>
+              <li>Можно дальше расширять под индивидуальные подборки и private SKU.</li>
+            </ul>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="container">
+        <div class="section-frame">
+          <div id="account-dynamic-content"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../../site.js?v=20260402f" defer></script>
+  <script src="../account.js?v=20260402a" type="module"></script>
+</body>
+</html>

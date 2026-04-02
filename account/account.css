@@ -1,0 +1,105 @@
+.account-shell {
+  display: grid;
+  gap: 24px;
+}
+
+.account-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.account-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.account-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.account-card {
+  display: grid;
+  gap: 12px;
+  min-height: 100%;
+}
+
+.account-card p,
+.account-card .sublead {
+  margin: 0;
+}
+
+.account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.account-form {
+  display: grid;
+  gap: 14px;
+}
+
+.account-label {
+  display: grid;
+  gap: 8px;
+}
+
+.account-label span {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.account-input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 77, 43, 0.18);
+  background: #fff;
+  color: var(--text);
+}
+
+.account-input:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(0, 77, 43, 0.08);
+}
+
+.account-status {
+  min-height: 22px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.account-user {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.account-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.account-empty {
+  padding: 22px;
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--line);
+  color: var(--muted);
+  background: rgba(255, 250, 242, 0.6);
+}
+
+@media (max-width: 960px) {
+  .account-grid,
+  .account-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}

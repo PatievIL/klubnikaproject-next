@@ -5,11 +5,15 @@ import os
 import sqlite3
 import hashlib
 import secrets
+import base64
 from contextlib import closing
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib import error as urllib_error
+from urllib import parse as urllib_parse
+from urllib import request as urllib_request
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -30,8 +34,13 @@ class AppConfig:
     api_public_base: str
     admin_token: str
     session_cookie_name: str
+    member_session_cookie_name: str
     db_path: Path
     cors_origins: list[str]
+    crm_base_url: str
+    crm_public_token: str
+    crm_forward_timeout_seconds: float
+    crm_internal_token: str
 
 
 def load_config() -> AppConfig:
@@ -50,8 +59,13 @@ def load_config() -> AppConfig:
         api_public_base=os.environ.get("KP_API_PUBLIC_BASE", "https://api.klubnikaproject.ru/site/v1"),
         admin_token=os.environ.get("KP_ADMIN_TOKEN", "change-me"),
         session_cookie_name=os.environ.get("KP_SESSION_COOKIE_NAME", "kp_admin_session"),
+        member_session_cookie_name=os.environ.get("KP_MEMBER_SESSION_COOKIE_NAME", "kp_member_session"),
         db_path=db_path,
         cors_origins=[origin.strip() for origin in raw_origins.split(",") if origin.strip()],
+        crm_base_url=os.environ.get("KP_CRM_BASE_URL", "").rstrip("/"),
+        crm_public_token=os.environ.get("KP_CRM_PUBLIC_TOKEN", ""),
+        crm_forward_timeout_seconds=float(os.environ.get("KP_CRM_FORWARD_TIMEOUT_SECONDS", "4")),
+        crm_internal_token=os.environ.get("KP_CRM_INTERNAL_TOKEN", ""),
     )
 
 
@@ -70,6 +84,13 @@ DEFAULT_SITE_SETTINGS: dict[str, Any] = {
         "defaultLanguage": "ru",
         "defaultTheme": "light",
         "activeLogoSystem": "manual-primary",
+    },
+    "members": {
+        "enabled": True,
+        "loginPath": "/account/login/",
+        "hubPath": "/account/",
+        "catalogPath": "/account/catalog/",
+        "specialPath": "/account/special/",
     },
     "forms": {
         "mode": "backend_submit",
@@ -183,6 +204,33 @@ DEFAULT_SITE_SETTINGS: dict[str, Any] = {
     },
 }
 
+ADMIN_DEFAULT_SCOPES = ["admin", "crm", "catalog", "special_pages"]
+MEMBER_DEFAULT_SCOPES = ["catalog", "special_pages"]
+
+DEFAULT_MEMBER_SPECIAL_PAGES: list[dict[str, Any]] = [
+    {
+        "slug": "solutions-access",
+        "title": "Линия готовых решений",
+        "summary": "Быстрый вход в решения, где важнее состав и сценарий, чем обычная розница.",
+        "path": "/shop/solutions/",
+        "kind": "public-route",
+    },
+    {
+        "slug": "calc-access",
+        "title": "Калькулятор проекта",
+        "summary": "Быстрый расчёт состава фермы и ориентир по рамке бюджета.",
+        "path": "/calc/",
+        "kind": "public-route",
+    },
+    {
+        "slug": "consultation-access",
+        "title": "Разбор по задаче",
+        "summary": "Точечный маршрут, если нужно понять следующий шаг, а не просто открыть каталог.",
+        "path": "/consultations/",
+        "kind": "public-route",
+    },
+]
+
 DEFAULT_CATALOG_ITEMS: list[dict[str, Any]] = [
     {
         "slug": "shop-led",
@@ -251,7 +299,9 @@ DEFAULT_USERS: list[dict[str, Any]] = [
         "slug": "ilya",
         "display_name": "Илья",
         "email": "",
+        "account_type": "admin",
         "role": "owner",
+        "scopes": ADMIN_DEFAULT_SCOPES,
         "is_active": True,
     }
 ]
@@ -261,18 +311,32 @@ class AuthRequest(BaseModel):
     token: str = Field(min_length=1)
 
 
+class CredentialLoginRequest(BaseModel):
+    login: str = Field(min_length=1)
+    password: str = Field(min_length=1)
+
+
 class UserCreateRequest(BaseModel):
     slug: str = Field(min_length=1)
     display_name: str = Field(min_length=1)
     email: str = ""
+    account_type: str = Field(default="admin", min_length=1)
     role: str = Field(default="manager", min_length=1)
+    scopes: list[str] = Field(default_factory=list)
+    password: str = ""
 
 
 class UserUpdateRequest(BaseModel):
     display_name: str | None = None
     email: str | None = None
+    account_type: str | None = None
     role: str | None = None
+    scopes: list[str] | None = None
     is_active: bool | None = None
+
+
+class PasswordSetRequest(BaseModel):
+    password: str = Field(min_length=8)
 
 
 class CatalogItemRequest(BaseModel):
@@ -319,8 +383,77 @@ class LeadUpdateRequest(BaseModel):
     note: str | None = None
 
 
+class CrmWorkspaceLeadUpdateRequest(BaseModel):
+    status_code: str | None = None
+    owner_id: int | None = None
+    note: str | None = None
+    source: str | None = None
+    tags: list[str] | None = None
+    next_action_at: str | None = None
+    is_archived: bool | None = None
+
+
+class CrmLeadCommentCreateRequest(BaseModel):
+    body: str = Field(min_length=1)
+
+
+class CrmLeadDispatchRequest(BaseModel):
+    trigger_event: str = "lead.manual_dispatch"
+
+
+class CrmLeadTaskCreateRequest(BaseModel):
+    title: str = Field(min_length=1)
+    status: str = "open"
+    due_at: str = ""
+    owner_id: int | None = None
+
+
+class CrmLeadTaskUpdateRequest(BaseModel):
+    title: str | None = None
+    status: str | None = None
+    due_at: str | None = None
+    owner_id: int | None = None
+
+
 def hash_token(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def default_scopes_for_account_type(account_type: str) -> list[str]:
+    return list(ADMIN_DEFAULT_SCOPES if account_type == "admin" else MEMBER_DEFAULT_SCOPES)
+
+
+def normalize_scopes(scopes: list[str], account_type: str) -> list[str]:
+    base = scopes or default_scopes_for_account_type(account_type)
+    cleaned = []
+    for scope in base:
+        value = (scope or "").strip()
+        if value and value not in cleaned:
+            cleaned.append(value)
+    return cleaned
+
+
+def hash_password(password: str) -> str:
+    salt = secrets.token_hex(16)
+    iterations = 390000
+    digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("utf-8"), iterations)
+    encoded = base64.urlsafe_b64encode(digest).decode("ascii")
+    return f"pbkdf2_sha256${iterations}${salt}${encoded}"
+
+
+def verify_password(password: str, stored_hash: str) -> bool:
+    if not stored_hash:
+        return False
+    try:
+        scheme, iterations_raw, salt, encoded = stored_hash.split("$", 3)
+        if scheme != "pbkdf2_sha256":
+            return False
+        iterations = int(iterations_raw)
+    except ValueError:
+        return False
+    digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("utf-8"), iterations)
+    expected = base64.urlsafe_b64encode(digest).decode("ascii")
+    return secrets.compare_digest(expected, encoded)
 
 
 def ensure_parent(path: Path) -> None:
@@ -366,7 +499,11 @@ def init_db() -> None:
               payload_json TEXT NOT NULL,
               status TEXT NOT NULL,
               owner TEXT NOT NULL,
-              note TEXT NOT NULL
+              note TEXT NOT NULL,
+              crm_delivery_status TEXT NOT NULL DEFAULT '',
+              crm_delivery_error TEXT NOT NULL DEFAULT '',
+              crm_lead_id INTEGER,
+              crm_delivered_at TEXT NOT NULL DEFAULT ''
             );
 
             CREATE TABLE IF NOT EXISTS admin_sessions (
@@ -379,12 +516,26 @@ def init_db() -> None:
               expires_at TEXT NOT NULL
             );
 
+            CREATE TABLE IF NOT EXISTS member_sessions (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              token_hash TEXT NOT NULL UNIQUE,
+              user_id INTEGER NOT NULL,
+              user_role TEXT NOT NULL DEFAULT '',
+              user_name TEXT NOT NULL DEFAULT '',
+              scope_json TEXT NOT NULL DEFAULT '[]',
+              created_at TEXT NOT NULL,
+              expires_at TEXT NOT NULL
+            );
+
             CREATE TABLE IF NOT EXISTS users (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               slug TEXT NOT NULL UNIQUE,
               display_name TEXT NOT NULL,
               email TEXT NOT NULL,
+              account_type TEXT NOT NULL DEFAULT 'admin',
               role TEXT NOT NULL,
+              scope_json TEXT NOT NULL DEFAULT '[]',
+              password_hash TEXT NOT NULL DEFAULT '',
               access_key_hash TEXT NOT NULL,
               access_key_hint TEXT NOT NULL,
               is_active INTEGER NOT NULL DEFAULT 1,
@@ -427,6 +578,31 @@ def init_db() -> None:
             connection.execute("ALTER TABLE admin_sessions ADD COLUMN user_role TEXT NOT NULL DEFAULT ''")
         if "user_name" not in existing_session_columns:
             connection.execute("ALTER TABLE admin_sessions ADD COLUMN user_name TEXT NOT NULL DEFAULT ''")
+        existing_member_session_columns = {
+            row["name"] for row in connection.execute("PRAGMA table_info(member_sessions)").fetchall()
+        }
+        if "scope_json" not in existing_member_session_columns:
+            connection.execute("ALTER TABLE member_sessions ADD COLUMN scope_json TEXT NOT NULL DEFAULT '[]'")
+        existing_user_columns = {
+            row["name"] for row in connection.execute("PRAGMA table_info(users)").fetchall()
+        }
+        if "account_type" not in existing_user_columns:
+            connection.execute("ALTER TABLE users ADD COLUMN account_type TEXT NOT NULL DEFAULT 'admin'")
+        if "scope_json" not in existing_user_columns:
+            connection.execute("ALTER TABLE users ADD COLUMN scope_json TEXT NOT NULL DEFAULT '[]'")
+        if "password_hash" not in existing_user_columns:
+            connection.execute("ALTER TABLE users ADD COLUMN password_hash TEXT NOT NULL DEFAULT ''")
+        existing_lead_columns = {
+            row["name"] for row in connection.execute("PRAGMA table_info(leads)").fetchall()
+        }
+        if "crm_delivery_status" not in existing_lead_columns:
+            connection.execute("ALTER TABLE leads ADD COLUMN crm_delivery_status TEXT NOT NULL DEFAULT ''")
+        if "crm_delivery_error" not in existing_lead_columns:
+            connection.execute("ALTER TABLE leads ADD COLUMN crm_delivery_error TEXT NOT NULL DEFAULT ''")
+        if "crm_lead_id" not in existing_lead_columns:
+            connection.execute("ALTER TABLE leads ADD COLUMN crm_lead_id INTEGER")
+        if "crm_delivered_at" not in existing_lead_columns:
+            connection.execute("ALTER TABLE leads ADD COLUMN crm_delivered_at TEXT NOT NULL DEFAULT ''")
         row = connection.execute("SELECT payload_json FROM site_settings WHERE id = 1").fetchone()
         if row is None:
             connection.execute(
@@ -440,14 +616,17 @@ def init_db() -> None:
                 connection.execute(
                     """
                     INSERT INTO users (
-                      slug, display_name, email, role, access_key_hash, access_key_hint, is_active, created_at, updated_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                      slug, display_name, email, account_type, role, scope_json, password_hash, access_key_hash, access_key_hint, is_active, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         user["slug"],
                         user["display_name"],
                         user["email"],
+                        user["account_type"],
                         user["role"],
+                        json.dumps(user["scopes"], ensure_ascii=False),
+                        "",
                         hash_token(CONFIG.admin_token),
                         "bootstrap token",
                         1,
@@ -455,6 +634,24 @@ def init_db() -> None:
                         now,
                     ),
                 )
+        connection.execute(
+            """
+            UPDATE users
+            SET account_type = COALESCE(NULLIF(account_type, ''), 'admin'),
+                scope_json = CASE
+                  WHEN scope_json IS NULL OR scope_json = '' OR scope_json = '[]'
+                  THEN CASE
+                    WHEN account_type = 'member' THEN ?
+                    ELSE ?
+                  END
+                  ELSE scope_json
+                END
+            """,
+            (
+                json.dumps(MEMBER_DEFAULT_SCOPES, ensure_ascii=False),
+                json.dumps(ADMIN_DEFAULT_SCOPES, ensure_ascii=False),
+            ),
+        )
         catalog_row = connection.execute("SELECT COUNT(*) AS count FROM catalog_items").fetchone()
         if catalog_row["count"] == 0:
             now = utc_now()
@@ -520,6 +717,13 @@ def sanitize_public_settings(payload: dict[str, Any]) -> dict[str, Any]:
             "defaultTheme": payload.get("site", {}).get("defaultTheme", DEFAULT_SITE_SETTINGS["site"]["defaultTheme"]),
             "activeLogoSystem": payload.get("site", {}).get("activeLogoSystem", DEFAULT_SITE_SETTINGS["site"]["activeLogoSystem"]),
         },
+        "members": {
+            "enabled": payload.get("members", {}).get("enabled", DEFAULT_SITE_SETTINGS["members"]["enabled"]),
+            "loginPath": payload.get("members", {}).get("loginPath", DEFAULT_SITE_SETTINGS["members"]["loginPath"]),
+            "hubPath": payload.get("members", {}).get("hubPath", DEFAULT_SITE_SETTINGS["members"]["hubPath"]),
+            "catalogPath": payload.get("members", {}).get("catalogPath", DEFAULT_SITE_SETTINGS["members"]["catalogPath"]),
+            "specialPath": payload.get("members", {}).get("specialPath", DEFAULT_SITE_SETTINGS["members"]["specialPath"]),
+        },
         "forms": {
             "mode": payload.get("forms", {}).get("mode", DEFAULT_SITE_SETTINGS["forms"]["mode"]),
             "primaryChannel": payload.get("forms", {}).get("primaryChannel", DEFAULT_SITE_SETTINGS["forms"]["primaryChannel"]),
@@ -576,7 +780,10 @@ def serialize_user(row: sqlite3.Row) -> dict[str, Any]:
         "slug": row["slug"],
         "display_name": row["display_name"],
         "email": row["email"],
+        "account_type": row["account_type"],
         "role": row["role"],
+        "scopes": json.loads(row["scope_json"] or "[]"),
+        "has_password": bool(row["password_hash"]),
         "access_key_hint": row["access_key_hint"],
         "is_active": bool(row["is_active"]),
         "created_at": row["created_at"],
@@ -599,21 +806,60 @@ def find_user_by_access_key(token: str) -> sqlite3.Row | None:
     return row
 
 
+def find_user_by_id(user_id: int) -> sqlite3.Row | None:
+    with closing(db_connect()) as connection:
+        row = connection.execute("SELECT * FROM users WHERE id = ? LIMIT 1", (user_id,)).fetchone()
+    return row
+
+
+def find_user_by_login(login: str, account_type: str | None = None) -> sqlite3.Row | None:
+    normalized = login.strip().lower()
+    if not normalized:
+        return None
+    query = """
+        SELECT * FROM users
+        WHERE is_active = 1
+          AND (lower(slug) = ? OR lower(email) = ?)
+    """
+    params: list[Any] = [normalized, normalized]
+    if account_type:
+        query += " AND account_type = ?"
+        params.append(account_type)
+    query += " LIMIT 1"
+    with closing(db_connect()) as connection:
+        row = connection.execute(query, params).fetchone()
+    return row
+
+
+def authenticate_user_password(login: str, password: str, account_type: str | None = None) -> sqlite3.Row | None:
+    user_row = find_user_by_login(login, account_type=account_type)
+    if user_row is None:
+        return None
+    if not verify_password(password, user_row["password_hash"] or ""):
+        return None
+    return user_row
+
+
 def create_user(payload: UserCreateRequest) -> tuple[dict[str, Any], str]:
     access_key = secrets.token_urlsafe(18)
     now = utc_now()
+    scopes = normalize_scopes(payload.scopes, payload.account_type)
+    password_hash = hash_password(payload.password) if payload.password else ""
     with closing(db_connect()) as connection:
         cursor = connection.execute(
             """
             INSERT INTO users (
-              slug, display_name, email, role, access_key_hash, access_key_hint, is_active, created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+              slug, display_name, email, account_type, role, scope_json, password_hash, access_key_hash, access_key_hint, is_active, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 payload.slug,
                 payload.display_name,
                 payload.email,
+                payload.account_type,
                 payload.role,
+                json.dumps(scopes, ensure_ascii=False),
+                password_hash,
                 hash_token(access_key),
                 f"{payload.slug}-key",
                 1,
@@ -631,16 +877,24 @@ def update_user(user_id: int, payload: UserUpdateRequest) -> dict[str, Any]:
         row = connection.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
         if row is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        next_account_type = payload.account_type if payload.account_type is not None else row["account_type"]
+        next_scopes = (
+            normalize_scopes(payload.scopes, next_account_type)
+            if payload.scopes is not None
+            else json.loads(row["scope_json"] or "[]")
+        )
         connection.execute(
             """
             UPDATE users
-            SET display_name = ?, email = ?, role = ?, is_active = ?, updated_at = ?
+            SET display_name = ?, email = ?, account_type = ?, role = ?, scope_json = ?, is_active = ?, updated_at = ?
             WHERE id = ?
             """,
             (
                 payload.display_name if payload.display_name is not None else row["display_name"],
                 payload.email if payload.email is not None else row["email"],
+                next_account_type,
                 payload.role if payload.role is not None else row["role"],
+                json.dumps(next_scopes, ensure_ascii=False),
                 int(payload.is_active) if payload.is_active is not None else row["is_active"],
                 utc_now(),
                 user_id,
@@ -664,6 +918,20 @@ def rotate_user_key(user_id: int) -> tuple[dict[str, Any], str]:
         connection.commit()
         fresh = connection.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
     return serialize_user(fresh), access_key
+
+
+def set_user_password(user_id: int, password: str) -> dict[str, Any]:
+    with closing(db_connect()) as connection:
+        row = connection.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+        if row is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        connection.execute(
+            "UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?",
+            (hash_password(password), utc_now(), user_id),
+        )
+        connection.commit()
+        fresh = connection.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    return serialize_user(fresh)
 
 
 def replace_catalog_items(items: list[CatalogItemRequest]) -> list[dict[str, Any]]:
@@ -717,11 +985,43 @@ def create_admin_session(user_id: int | None, user_role: str, user_name: str) ->
     return raw_token
 
 
+def create_member_session(user_row: sqlite3.Row) -> str:
+    raw_token = secrets.token_urlsafe(32)
+    now = datetime.now(timezone.utc)
+    expires_at = now.replace(microsecond=0).timestamp() + 60 * 60 * 24 * 14
+    with closing(db_connect()) as connection:
+        connection.execute(
+            """
+            INSERT INTO member_sessions (token_hash, user_id, user_role, user_name, scope_json, created_at, expires_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                hash_token(raw_token),
+                user_row["id"],
+                user_row["role"],
+                user_row["display_name"],
+                user_row["scope_json"],
+                utc_now(),
+                datetime.fromtimestamp(expires_at, timezone.utc).replace(microsecond=0).isoformat(),
+            ),
+        )
+        connection.commit()
+    return raw_token
+
+
 def delete_admin_session(raw_token: str) -> None:
     if not raw_token:
         return
     with closing(db_connect()) as connection:
         connection.execute("DELETE FROM admin_sessions WHERE token_hash = ?", (hash_token(raw_token),))
+        connection.commit()
+
+
+def delete_member_session(raw_token: str) -> None:
+    if not raw_token:
+        return
+    with closing(db_connect()) as connection:
+        connection.execute("DELETE FROM member_sessions WHERE token_hash = ?", (hash_token(raw_token),))
         connection.commit()
 
 
@@ -743,6 +1043,28 @@ def resolve_admin_session(raw_token: str) -> dict[str, Any] | None:
         "user_id": row["user_id"],
         "user_role": row["user_role"],
         "user_name": row["user_name"],
+    }
+
+
+def resolve_member_session(raw_token: str) -> dict[str, Any] | None:
+    if not raw_token:
+        return None
+    now = utc_now()
+    with closing(db_connect()) as connection:
+        connection.execute("DELETE FROM member_sessions WHERE expires_at <= ?", (now,))
+        row = connection.execute(
+            "SELECT id, user_id, user_role, user_name, scope_json FROM member_sessions WHERE token_hash = ? AND expires_at > ?",
+            (hash_token(raw_token), now),
+        ).fetchone()
+        connection.commit()
+    if row is None:
+        return None
+    return {
+        "session_id": row["id"],
+        "user_id": row["user_id"],
+        "user_role": row["user_role"],
+        "user_name": row["user_name"],
+        "scopes": json.loads(row["scope_json"] or "[]"),
     }
 
 
@@ -850,6 +1172,213 @@ def insert_lead(lead: LeadCreateRequest, resolved_settings: dict[str, Any]) -> d
     return {"id": lead_id, "status": status_value, "owner": owner_value}
 
 
+def build_crm_forward_payload(lead: LeadCreateRequest) -> dict[str, Any]:
+    return {
+        "source": "site",
+        "channel": "web_form",
+        "route": lead.route,
+        "page_path": lead.page_path,
+        "page_title": lead.page_title,
+        "form_name": lead.form_name,
+        "name": lead.name,
+        "phone": lead.phone,
+        "email": lead.email,
+        "telegram": lead.telegram,
+        "project_stage": lead.stage,
+        "request_type": lead.what_needed,
+        "message": lead.message,
+        "brief_text": lead.brief_text,
+        "payload": lead.payload,
+    }
+
+
+def update_lead_crm_delivery(
+    lead_id: int,
+    *,
+    delivery_status: str,
+    delivery_error: str = "",
+    crm_lead_id: int | None = None,
+    delivered_at: str = "",
+) -> None:
+    with closing(db_connect()) as connection:
+        connection.execute(
+            """
+            UPDATE leads
+            SET crm_delivery_status = ?, crm_delivery_error = ?, crm_lead_id = ?, crm_delivered_at = ?, updated_at = ?
+            WHERE id = ?
+            """,
+            (delivery_status, delivery_error, crm_lead_id, delivered_at, utc_now(), lead_id),
+        )
+        connection.commit()
+
+
+def forward_lead_to_crm(lead_id: int, lead: LeadCreateRequest) -> dict[str, Any]:
+    if not CONFIG.crm_base_url:
+        update_lead_crm_delivery(lead_id, delivery_status="disabled")
+        insert_lead_event(
+            lead_id=lead_id,
+            event_type="crm.forward.disabled",
+            actor_user_id=None,
+            actor_name="CRM bridge",
+            actor_role="system",
+            payload={"reason": "KP_CRM_BASE_URL is empty"},
+        )
+        return {"delivery_status": "disabled", "crm_lead_id": None, "error": ""}
+
+    payload = build_crm_forward_payload(lead)
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    if CONFIG.crm_public_token:
+        headers["X-CRM-Token"] = CONFIG.crm_public_token
+
+    request = urllib_request.Request(
+        f"{CONFIG.crm_base_url}/v1/public/leads",
+        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+        headers=headers,
+        method="POST",
+    )
+    try:
+        with urllib_request.urlopen(request, timeout=CONFIG.crm_forward_timeout_seconds) as response:
+            raw_body = response.read().decode("utf-8")
+    except urllib_error.HTTPError as error:
+        error_body = error.read().decode("utf-8", errors="replace")
+        update_lead_crm_delivery(
+            lead_id,
+            delivery_status="failed",
+            delivery_error=f"HTTP {error.code}: {error_body[:500]}",
+        )
+        insert_lead_event(
+            lead_id=lead_id,
+            event_type="crm.forward.failed",
+            actor_user_id=None,
+            actor_name="CRM bridge",
+            actor_role="system",
+            payload={"status_code": error.code, "body": error_body[:500]},
+        )
+        return {"delivery_status": "failed", "crm_lead_id": None, "error": f"HTTP {error.code}"}
+    except Exception as error:
+        update_lead_crm_delivery(
+            lead_id,
+            delivery_status="failed",
+            delivery_error=str(error)[:500],
+        )
+        insert_lead_event(
+            lead_id=lead_id,
+            event_type="crm.forward.failed",
+            actor_user_id=None,
+            actor_name="CRM bridge",
+            actor_role="system",
+            payload={"error": str(error)[:500]},
+        )
+        return {"delivery_status": "failed", "crm_lead_id": None, "error": str(error)}
+
+    try:
+        parsed = json.loads(raw_body or "{}")
+    except json.JSONDecodeError:
+        update_lead_crm_delivery(
+            lead_id,
+            delivery_status="failed",
+            delivery_error="CRM bridge returned invalid JSON",
+        )
+        insert_lead_event(
+            lead_id=lead_id,
+            event_type="crm.forward.failed",
+            actor_user_id=None,
+            actor_name="CRM bridge",
+            actor_role="system",
+            payload={"error": "invalid_json", "body": raw_body[:500]},
+        )
+        return {"delivery_status": "failed", "crm_lead_id": None, "error": "invalid_json"}
+
+    crm_lead_id = parsed.get("item", {}).get("id")
+    delivered_at = utc_now()
+    update_lead_crm_delivery(
+        lead_id,
+        delivery_status="succeeded",
+        crm_lead_id=crm_lead_id,
+        delivered_at=delivered_at,
+    )
+    insert_lead_event(
+        lead_id=lead_id,
+        event_type="crm.forward.succeeded",
+        actor_user_id=None,
+        actor_name="CRM bridge",
+        actor_role="system",
+        payload={"crm_lead_id": crm_lead_id},
+    )
+    return {
+        "delivery_status": "succeeded",
+        "crm_lead_id": crm_lead_id,
+        "error": "",
+        "delivered_at": delivered_at,
+    }
+
+
+def crm_proxy_request(
+    path: str,
+    *,
+    method: str = "GET",
+    query: dict[str, Any] | None = None,
+    body: dict[str, Any] | None = None,
+    actor: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    if not CONFIG.crm_base_url:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="CRM service is not configured")
+    if not CONFIG.crm_internal_token:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="CRM internal token is not configured")
+
+    url = f"{CONFIG.crm_base_url}{path}"
+    if query:
+        encoded = urllib_parse.urlencode(
+            {key: value for key, value in query.items() if value not in (None, "", [], False)},
+            doseq=True,
+        )
+        if encoded:
+            url = f"{url}?{encoded}"
+
+    headers = {
+        "Authorization": f"Bearer {CONFIG.crm_internal_token}",
+        "Accept": "application/json",
+    }
+    if actor:
+        headers["X-Actor-Id"] = str(actor.get("user_id") or "")
+        headers["X-Actor-Name"] = str(actor.get("user_name") or "")
+        headers["X-Actor-Role"] = str(actor.get("user_role") or "")
+
+    data = None
+    if body is not None:
+        headers["Content-Type"] = "application/json"
+        data = json.dumps(body, ensure_ascii=False).encode("utf-8")
+
+    request = urllib_request.Request(url, data=data, headers=headers, method=method)
+    try:
+        with urllib_request.urlopen(request, timeout=10) as response:
+            raw = response.read().decode("utf-8")
+    except urllib_error.HTTPError as error:
+        error_body = error.read().decode("utf-8", errors="replace")
+        raise HTTPException(
+            status_code=error.code,
+            detail=error_body[:1000] or f"CRM service returned {error.code}",
+        ) from error
+    except Exception as error:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"CRM proxy failed: {str(error)[:500]}",
+        ) from error
+
+    if not raw:
+        return {"ok": True}
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError as error:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"CRM service returned invalid JSON: {error}",
+        ) from error
+
+
 def serialize_lead(row: sqlite3.Row) -> dict[str, Any]:
     return {
         "id": row["id"],
@@ -874,28 +1403,56 @@ def serialize_lead(row: sqlite3.Row) -> dict[str, Any]:
         "status": row["status"],
         "owner": row["owner"],
         "note": row["note"],
+        "crm_delivery_status": row["crm_delivery_status"],
+        "crm_delivery_error": row["crm_delivery_error"],
+        "crm_lead_id": row["crm_lead_id"],
+        "crm_delivered_at": row["crm_delivered_at"],
+    }
+
+
+def build_user_context(row: sqlite3.Row) -> dict[str, Any]:
+    return {
+        "user_id": row["id"],
+        "user_role": row["role"],
+        "user_name": row["display_name"],
+        "account_type": row["account_type"],
+        "scopes": json.loads(row["scope_json"] or "[]"),
+        "email": row["email"],
+        "slug": row["slug"],
     }
 
 
 def get_admin_context(request: Request, authorization: str | None = Header(default=None)) -> dict[str, Any]:
     token = (authorization or "").removeprefix("Bearer ").strip()
     if token and token == CONFIG.admin_token:
-        return {"user_id": None, "user_role": "owner", "user_name": "Bootstrap admin"}
+        return {
+            "user_id": None,
+            "user_role": "owner",
+            "user_name": "Bootstrap admin",
+            "account_type": "admin",
+            "scopes": list(ADMIN_DEFAULT_SCOPES),
+            "email": "",
+            "slug": "bootstrap-admin",
+        }
     if token:
         user_row = find_user_by_access_key(token)
-        if user_row is not None:
-            return {
-                "user_id": user_row["id"],
-                "user_role": user_row["role"],
-                "user_name": user_row["display_name"],
-            }
+        if user_row is not None and user_row["account_type"] == "admin":
+            return build_user_context(user_row)
     session_token = request.cookies.get(CONFIG.session_cookie_name, "")
     session_ctx = resolve_admin_session(session_token)
     if session_ctx:
+        if session_ctx["user_id"]:
+            user_row = find_user_by_id(session_ctx["user_id"])
+            if user_row is not None and user_row["is_active"]:
+                return build_user_context(user_row)
         return {
             "user_id": session_ctx["user_id"],
             "user_role": session_ctx["user_role"],
             "user_name": session_ctx["user_name"],
+            "account_type": "admin",
+            "scopes": list(ADMIN_DEFAULT_SCOPES),
+            "email": "",
+            "slug": "",
         }
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid admin token")
 
@@ -908,6 +1465,25 @@ def require_roles(*roles: str):
     def checker(context: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
         if context.get("user_role") not in roles:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient role")
+        return context
+    return checker
+
+
+def get_member_context(request: Request) -> dict[str, Any]:
+    session_token = request.cookies.get(CONFIG.member_session_cookie_name, "")
+    session_ctx = resolve_member_session(session_token)
+    if session_ctx:
+        user_row = find_user_by_id(session_ctx["user_id"])
+        if user_row is not None and user_row["is_active"] and user_row["account_type"] == "member":
+            return build_user_context(user_row)
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Member session not found")
+
+
+def require_member_scopes(*scopes: str):
+    def checker(context: dict[str, Any] = Depends(get_member_context)) -> dict[str, Any]:
+        available = set(context.get("scopes") or [])
+        if not set(scopes).issubset(available):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient member scope")
         return context
     return checker
 
@@ -953,6 +1529,8 @@ def public_catalog_items(status_filter: str = "published") -> dict[str, Any]:
 def create_lead(payload: LeadCreateRequest) -> dict[str, Any]:
     settings = read_settings()
     created = insert_lead(payload, settings)
+    crm_forward = forward_lead_to_crm(created["id"], payload)
+    created["crm"] = crm_forward
     return {
         "ok": True,
         "lead": created,
@@ -996,6 +1574,28 @@ def admin_auth_login(payload: AuthRequest, response: Response) -> dict[str, Any]
         path="/",
     )
     return {"ok": True, "user": user_payload}
+
+
+@app.post("/v1/admin/auth/password-login")
+def admin_auth_password_login(payload: CredentialLoginRequest, response: Response) -> dict[str, Any]:
+    user_row = authenticate_user_password(payload.login, payload.password, account_type="admin")
+    if user_row is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid login or password")
+    session_token = create_admin_session(
+        user_id=user_row["id"],
+        user_role=user_row["role"],
+        user_name=user_row["display_name"],
+    )
+    response.set_cookie(
+        key=CONFIG.session_cookie_name,
+        value=session_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        max_age=60 * 60 * 24 * 14,
+        path="/",
+    )
+    return {"ok": True, "user": serialize_user(user_row)}
 
 
 @app.get("/v1/admin/auth/session")
@@ -1048,10 +1648,267 @@ def admin_patch_user(user_id: int, payload: UserUpdateRequest, _: dict[str, Any]
     return {"ok": True, "item": update_user(user_id, payload)}
 
 
+@app.post("/v1/admin/users/{user_id}/set-password")
+def admin_set_user_password(
+    user_id: int,
+    payload: PasswordSetRequest,
+    _: dict[str, Any] = Depends(require_roles("owner", "admin")),
+) -> dict[str, Any]:
+    return {"ok": True, "item": set_user_password(user_id, payload.password)}
+
+
 @app.post("/v1/admin/users/{user_id}/rotate-key")
 def admin_rotate_user_key(user_id: int, _: dict[str, Any] = Depends(require_roles("owner", "admin"))) -> dict[str, Any]:
     user, access_key = rotate_user_key(user_id)
     return {"ok": True, "item": user, "access_key": access_key}
+
+
+@app.post("/v1/auth/login")
+def member_auth_login(payload: CredentialLoginRequest, response: Response) -> dict[str, Any]:
+    user_row = authenticate_user_password(payload.login, payload.password, account_type="member")
+    if user_row is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid login or password")
+    session_token = create_member_session(user_row)
+    response.set_cookie(
+        key=CONFIG.member_session_cookie_name,
+        value=session_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        max_age=60 * 60 * 24 * 14,
+        path="/",
+    )
+    return {"ok": True, "user": serialize_user(user_row)}
+
+
+@app.get("/v1/auth/session")
+def member_auth_session(context: dict[str, Any] = Depends(get_member_context)) -> dict[str, Any]:
+    return {"ok": True, "session": True, "user": context}
+
+
+@app.post("/v1/auth/logout")
+def member_auth_logout(request: Request, response: Response) -> dict[str, Any]:
+    delete_member_session(request.cookies.get(CONFIG.member_session_cookie_name, ""))
+    response.delete_cookie(CONFIG.member_session_cookie_name, path="/", samesite="none", secure=True)
+    return {"ok": True}
+
+
+@app.get("/v1/member/catalog/items")
+def member_catalog_items(
+    status_filter: str = "published",
+    _: dict[str, Any] = Depends(require_member_scopes("catalog")),
+) -> dict[str, Any]:
+    return {"items": list_catalog_items(status_filter=status_filter)}
+
+
+@app.get("/v1/member/special-pages")
+def member_special_pages(_: dict[str, Any] = Depends(require_member_scopes("special_pages"))) -> dict[str, Any]:
+    return {"items": DEFAULT_MEMBER_SPECIAL_PAGES}
+
+
+@app.get("/v1/admin/crm/status")
+def admin_crm_status(_: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
+    return crm_proxy_request("/v1/internal/integrations/amocrm/status")
+
+
+@app.get("/v1/admin/crm/pipelines")
+def admin_crm_pipelines(_: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
+    return crm_proxy_request("/v1/internal/pipelines")
+
+
+@app.get("/v1/admin/crm/users")
+def admin_crm_users(_: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
+    return crm_proxy_request("/v1/internal/users")
+
+
+@app.get("/v1/admin/crm/leads")
+def admin_crm_leads(
+    limit: int = 100,
+    status_filter: str = "",
+    owner_id: int = 0,
+    source_filter: str = "",
+    tag: str = "",
+    follow_up_state: str = "",
+    search: str = "",
+    _: dict[str, Any] = Depends(require_admin),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        "/v1/internal/leads",
+        query={
+            "limit": max(1, min(limit, 200)),
+            "status_filter": status_filter,
+            "owner_id": owner_id,
+            "source_filter": source_filter,
+            "tag": tag,
+            "follow_up_state": follow_up_state,
+            "search": search,
+        },
+    )
+
+
+@app.get("/v1/admin/crm/leads/{lead_id}")
+def admin_crm_lead(lead_id: int, _: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
+    return crm_proxy_request(f"/v1/internal/leads/{lead_id}")
+
+
+@app.patch("/v1/admin/crm/leads/{lead_id}")
+def admin_crm_patch_lead(
+    lead_id: int,
+    payload: CrmWorkspaceLeadUpdateRequest,
+    context: dict[str, Any] = Depends(require_roles("owner", "admin", "manager", "editor")),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        f"/v1/internal/leads/{lead_id}",
+        method="PATCH",
+        body=payload.model_dump(exclude_none=True),
+        actor=context,
+    )
+
+
+@app.get("/v1/admin/crm/leads/{lead_id}/events")
+def admin_crm_lead_events(lead_id: int, _: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
+    return crm_proxy_request(f"/v1/internal/leads/{lead_id}/events")
+
+
+@app.get("/v1/admin/crm/leads/{lead_id}/comments")
+def admin_crm_lead_comments(lead_id: int, _: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
+    return crm_proxy_request(f"/v1/internal/leads/{lead_id}/comments")
+
+
+@app.get("/v1/admin/crm/tasks")
+def admin_crm_tasks(
+    limit: int = 100,
+    lead_id: int = 0,
+    owner_id: int = 0,
+    status_filter: str = "",
+    due_state: str = "",
+    _: dict[str, Any] = Depends(require_admin),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        "/v1/internal/tasks",
+        query={
+            "limit": max(1, min(limit, 200)),
+            "lead_id": lead_id,
+            "owner_id": owner_id,
+            "status_filter": status_filter,
+            "due_state": due_state,
+        },
+    )
+
+
+@app.get("/v1/admin/crm/leads/{lead_id}/tasks")
+def admin_crm_lead_tasks(lead_id: int, _: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
+    return crm_proxy_request(f"/v1/internal/leads/{lead_id}/tasks")
+
+
+@app.post("/v1/admin/crm/leads/{lead_id}/tasks")
+def admin_crm_create_lead_task(
+    lead_id: int,
+    payload: CrmLeadTaskCreateRequest,
+    context: dict[str, Any] = Depends(require_roles("owner", "admin", "manager", "editor")),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        f"/v1/internal/leads/{lead_id}/tasks",
+        method="POST",
+        body=payload.model_dump(),
+        actor=context,
+    )
+
+
+@app.patch("/v1/admin/crm/tasks/{task_id}")
+def admin_crm_patch_task(
+    task_id: int,
+    payload: CrmLeadTaskUpdateRequest,
+    context: dict[str, Any] = Depends(require_roles("owner", "admin", "manager", "editor")),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        f"/v1/internal/tasks/{task_id}",
+        method="PATCH",
+        body=payload.model_dump(exclude_none=True),
+        actor=context,
+    )
+
+
+@app.post("/v1/admin/crm/leads/{lead_id}/comments")
+def admin_crm_create_lead_comment(
+    lead_id: int,
+    payload: CrmLeadCommentCreateRequest,
+    context: dict[str, Any] = Depends(require_roles("owner", "admin", "manager", "editor")),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        f"/v1/internal/leads/{lead_id}/comments",
+        method="POST",
+        body=payload.model_dump(),
+        actor=context,
+    )
+
+
+@app.post("/v1/admin/crm/leads/{lead_id}/retry-sync")
+def admin_crm_retry_sync(lead_id: int, context: dict[str, Any] = Depends(require_roles("owner", "admin", "manager"))) -> dict[str, Any]:
+    return crm_proxy_request(
+        f"/v1/internal/leads/{lead_id}/retry-sync",
+        method="POST",
+        body={"provider": "amocrm"},
+        actor=context,
+    )
+
+
+@app.post("/v1/admin/crm/leads/{lead_id}/dispatch")
+def admin_crm_dispatch_lead(
+    lead_id: int,
+    payload: CrmLeadDispatchRequest,
+    context: dict[str, Any] = Depends(require_roles("owner", "admin", "manager")),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        f"/v1/internal/leads/{lead_id}/dispatch",
+        method="POST",
+        body=payload.model_dump(),
+        actor=context,
+    )
+
+
+@app.get("/v1/admin/crm/notification-deliveries")
+def admin_crm_notification_deliveries(lead_id: int = 0, _: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
+    return crm_proxy_request("/v1/internal/notification-deliveries", query={"lead_id": lead_id})
+
+
+@app.post("/v1/admin/crm/notification-deliveries/{delivery_id}/retry")
+def admin_crm_retry_notification_delivery(
+    delivery_id: int,
+    context: dict[str, Any] = Depends(require_roles("owner", "admin", "manager")),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        f"/v1/internal/notification-deliveries/{delivery_id}/retry",
+        method="POST",
+        actor=context,
+    )
+
+
+@app.get("/v1/admin/crm/webhook-endpoints")
+def admin_crm_webhook_endpoints(_: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
+    return crm_proxy_request("/v1/internal/webhook-endpoints")
+
+
+@app.get("/v1/admin/crm/contact-config")
+def admin_crm_contact_config(_: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
+    return crm_proxy_request("/v1/internal/contact-config")
+
+
+@app.get("/v1/admin/crm/webhook-deliveries")
+def admin_crm_webhook_deliveries(lead_id: int = 0, _: dict[str, Any] = Depends(require_admin)) -> dict[str, Any]:
+    return crm_proxy_request("/v1/internal/webhook-deliveries", query={"lead_id": lead_id})
+
+
+@app.post("/v1/admin/crm/webhook-deliveries/{delivery_id}/retry")
+def admin_crm_retry_webhook_delivery(
+    delivery_id: int,
+    context: dict[str, Any] = Depends(require_roles("owner", "admin", "manager")),
+) -> dict[str, Any]:
+    return crm_proxy_request(
+        f"/v1/internal/webhook-deliveries/{delivery_id}/retry",
+        method="POST",
+        actor=context,
+    )
 
 
 @app.get("/v1/admin/leads")
