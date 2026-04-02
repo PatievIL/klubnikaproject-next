@@ -15,8 +15,8 @@
   <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png" />
   <link rel="manifest" href="../../site.webmanifest" />
-  <link rel="stylesheet" href="../../styles.css?v=20260402c" />
-  <link rel="stylesheet" href="../_app/catalog-app.css?v=20260402c" />
+  <link rel="stylesheet" href="../../styles.css?v=20260402h" />
+  <link rel="stylesheet" href="../_app/catalog-app.css?v=20260402h" />
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -49,33 +49,58 @@
     <div class="catalog-app-shell">
       
     <header class="catalog-header">
-      <div class="catalog-header__top">
-        <div class="catalog-brand">
-          <a href="../../catalog/index.html">
-            <img src="../../assets/brand-berry-beige.svg" alt="Klubnika Project" />
-            <div>
-              <strong>Klubnika Project</strong>
-              <span>Свет, полив, стеллажи, посадочный материал и сервисные позиции для controlled-environment фермы.</span>
+      <div class="catalog-header__top catalog-topbar">
+        <div class="catalog-brand brand">
+          <a class="brand-home" href="../../index.html">
+            <div class="brand-logo">
+              <img src="../../assets/brand-berry-beige.svg" alt="Знак Klubnika Project" />
+            </div>
+            <div class="brand-copy">
+              <div class="brand-title">
+                <span class="brand-title-line">Klubnika</span>
+                <span class="brand-title-line">Project</span>
+              </div>
+              <div class="brand-note">Магазин, комплектация и закупка в логике всего проекта</div>
             </div>
           </a>
         </div>
-        <form class="catalog-header-search" data-header-search>
-          <input type="search" value="" placeholder="Поиск по каталогу, артикулу или сценарию" />
-          <div class="catalog-scope-toggle" role="group" aria-label="Область поиска">
-            <button type="button" class="catalog-chip-button" data-action="set-search-mode" data-value="site">По всему сайту</button>
-            <button type="button" class="catalog-chip-button is-active" data-action="set-search-mode" data-value="catalog">По каталогу</button>
+        <button
+          class="nav-toggle catalog-nav-toggle"
+          type="button"
+          data-action="open-menu"
+          aria-label="Открыть меню"
+          aria-expanded="false"
+        >
+          <span></span>
+        </button>
+        <nav class="catalog-main-nav nav" aria-label="Основная навигация">
+          <a class="nav-link" href="../../index.html">Главная</a>
+          <div class="nav-group">
+            <button class="nav-trigger" type="button">Решения</button>
+            <div class="nav-menu">
+              <a href="../../farm/index.html"><strong>Расчёт фермы</strong><span>Состав запуска, рамка бюджета и следующий шаг.</span></a>
+              <a href="../../study/index.html"><strong>Сопровождение</strong><span>Разбор действующей фермы, узких мест и технологии.</span></a>
+              <a href="../../consultations/index.html"><strong>Консультации</strong><span>Точечный разбор задачи, совместимости и выбора.</span></a>
+              <a href="../../klubhack/index.html"><strong>Клубничный Хак</strong><span>База знаний по controlled-environment клубнике.</span></a>
+            </div>
           </div>
-          <button type="submit" class="catalog-primary-button">Найти</button>
-        </form>
-        <div class="catalog-header-actions">
-          <div class="catalog-header-phones">
-            <a href="tel:+78005552417">+7 (800) 555-24-17</a><a href="tel:+74951200630">+7 (495) 120-06-30</a>
+          <div class="nav-group">
+            <button class="nav-trigger" type="button">Каталог</button>
+            <div class="nav-menu nav-menu-wide">
+              <a href="../../catalog/index.html"><strong>Магазин</strong><span>Весь storefront и вход в рабочие категории.</span></a>
+              <a href="../../catalog/led/index.html"><strong>LED</strong><span>Линейные и тепличные сценарии досветки.</span></a>
+              <a href="../../catalog/irrigation/index.html"><strong>Полив</strong><span>Полив, дозирование и расходники по узлам.</span></a>
+              <a href="../../catalog/racks/index.html"><strong>Стеллажи</strong><span>Каркасы, лотки и модульные ряды.</span></a>
+              <a href="../../catalog/substrates/index.html"><strong>Субстрат</strong><span>Маты, кубики и старт корневой зоны.</span></a>
+              <a href="../../seeds/index.html"><strong>Семена и Frigo</strong><span>Посадочный материал под запуск и докупку.</span></a>
+            </div>
           </div>
-          <button type="button" class="catalog-secondary-button" data-action="open-assistant" data-intent="callback">Заказать звонок</button>
-          <button type="button" class="catalog-secondary-button" data-action="open-assistant" data-intent="question">Задать вопрос</button>
-          <button type="button" class="catalog-icon-pill" data-action="open-account">Личный кабинет</button>
-          <button type="button" class="catalog-icon-pill" data-action="open-cart">Корзина <span>0</span></button>
-        </div>
+          <a class="nav-link" href="../../calc/index.html">Калькулятор</a>
+          <a class="nav-link catalog-nav-link-button" href="../../account/index.html">Кабинет</a>
+          <button type="button" class="nav-cta catalog-nav-cart" data-action="open-cart">
+            Корзина <span>0</span>
+          </button>
+        </nav>
         <div class="catalog-header-mobile-actions">
           <button type="button" class="catalog-icon-pill" data-action="open-search" aria-label="Открыть поиск">Поиск</button>
           <button type="button" class="catalog-icon-pill" data-action="open-cart" aria-label="Открыть корзину">Корзина <span>0</span></button>
@@ -83,20 +108,25 @@
         </div>
       </div>
       <div class="catalog-header__bottom">
-        <nav class="catalog-main-nav" aria-label="Основная навигация">
-          <a href="../../catalog/index.html">Каталог</a>
-          <a href="#catalog-how-buy">Как купить</a>
-          <a href="#catalog-contacts">Контакты</a>
-          <details class="catalog-nav-more">
-            <summary>Ещё</summary>
-            <div class="catalog-nav-more__menu">
-              <a href="../../farm/index.html">Расчёт фермы</a>
-              <a href="../../consultations/index.html">Консультации</a>
-              <a href="../../study/index.html">Сопровождение</a>
-              <a href="../../calc/index.html">Калькулятор</a>
+        <div class="catalog-header-panel">
+          <form class="catalog-header-search" data-header-search>
+            <input type="search" value="" placeholder="Поиск по каталогу, артикулу или сценарию" />
+            <div class="catalog-scope-toggle" role="group" aria-label="Область поиска">
+              <button type="button" class="catalog-chip-button" data-action="set-search-mode" data-value="site">По всему сайту</button>
+              <button type="button" class="catalog-chip-button is-active" data-action="set-search-mode" data-value="catalog">По магазину</button>
             </div>
-          </details>
-        </nav>
+            <button type="submit" class="catalog-primary-button">Найти</button>
+          </form>
+          <div class="catalog-header-actions">
+            <div class="catalog-header-phones">
+              <a href="tel:+78005552417">+7 (800) 555-24-17</a><a href="tel:+74951200630">+7 (495) 120-06-30</a>
+            </div>
+            <a class="catalog-icon-pill catalog-header-anchor" href="#catalog-how-buy">Как купить</a>
+            <a class="catalog-icon-pill catalog-header-anchor" href="#catalog-contacts">Контакты</a>
+            <button type="button" class="catalog-secondary-button" data-action="open-assistant" data-intent="callback">Заказать звонок</button>
+            <button type="button" class="catalog-secondary-button" data-action="open-assistant" data-intent="question">Задать вопрос</button>
+          </div>
+        </div>
       </div>
     </header>
   
@@ -122,7 +152,8 @@
     </nav>
   
       <div class="catalog-page-hero__content">
-        <div>
+        <div class="catalog-page-hero__copy">
+          <span class="catalog-eyebrow">Категория магазина</span>
           <h1>Питание и сервис раствора</h1>
           <p>Базовые растворы, буферы, корректоры pH/EC и сервисные наборы контроля.</p>
           <div class="catalog-page-hero__meta">
@@ -805,19 +836,6 @@
       </div>
     </div>
   
-      
-    <div class="catalog-overlay " data-overlay="account" aria-hidden="true">
-      <div class="catalog-overlay__backdrop" data-action="close-dialog" data-dialog="account"></div>
-      <div class="catalog-overlay__panel catalog-overlay__panel--side" role="dialog" aria-modal="true" aria-labelledby="catalog-account-title">
-        <div class="catalog-overlay__head">
-          <h2 id="catalog-account-title">Личный кабинет</h2>
-          <button type="button" class="catalog-icon-button" data-action="close-dialog" data-dialog="account" aria-label="Закрыть личный кабинет">×</button>
-        </div>
-        <p>Контур кабинета подготовлен под сохранённые корзины, историю запросов и персональные цены. Пока быстрый сценарий идёт через менеджера.</p>
-        <button type="button" class="catalog-primary-button" data-action="open-assistant" data-intent="account">Запросить доступ</button>
-      </div>
-    </div>
-  
       <div class="catalog-overlay" data-overlay="quick-view" aria-hidden="true"></div>
       <div class="catalog-overlay" data-overlay="price-tiers" aria-hidden="true"></div>
       
@@ -829,10 +847,15 @@
           <button type="button" class="catalog-icon-button" data-action="close-dialog" data-dialog="menu" aria-label="Закрыть меню">×</button>
         </div>
         <nav class="catalog-mobile-nav">
-          <a href="../../catalog/index.html">Каталог</a>
+          <a href="../../index.html">Главная</a>
+          <a href="../../farm/index.html">Расчёт фермы</a>
+          <a href="../../consultations/index.html">Консультации</a>
+          <a href="../../study/index.html">Сопровождение</a>
+          <a href="../../calc/index.html">Калькулятор</a>
+          <a href="../../catalog/index.html">Магазин</a>
           <a href="#catalog-how-buy">Как купить</a>
           <a href="#catalog-contacts">Контакты</a>
-          <button type="button" class="catalog-mobile-nav__link" data-action="open-account">Личный кабинет</button>
+          <a class="catalog-mobile-nav__link" href="../../account/index.html">Личный кабинет</a>
           <button type="button" class="catalog-mobile-nav__link" data-action="open-cart">Корзина</button>
         </nav>
         <div class="catalog-mobile-category-tree">
@@ -1198,6 +1221,6 @@
     window.__CATALOG_ROUTE__ = {"type":"category","categorySlug":"nutrition"};
     window.__CATALOG_CONTEXT__ = {"route":{"type":"category","categorySlug":"nutrition"},"siteRoot":"../../","catalogRoot":"../"};
   </script>
-  <script type="module" src="../_app/catalog-app.js?v=20260402c"></script>
+  <script type="module" src="../_app/catalog-app.js?v=20260402h"></script>
 </body>
 </html>

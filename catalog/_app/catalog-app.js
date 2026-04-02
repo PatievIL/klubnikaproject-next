@@ -264,18 +264,8 @@ function handleClick(event) {
     setDialog("menu", true);
     return;
   }
-  if (action === "open-menu-category") {
-    state.menuCategorySlug = target.dataset.categorySlug;
-    render();
-    return;
-  }
-  if (action === "back-menu-category") {
-    state.menuCategorySlug = null;
-    render();
-    return;
-  }
   if (action === "open-account") {
-    setDialog("account", true);
+    window.location.href = `${ctx.siteRoot}account/index.html`;
     return;
   }
   if (action === "open-assistant") {
@@ -386,6 +376,16 @@ function handleClick(event) {
   }
   if (action === "set-search-mode") {
     state.search.mode = target.dataset.value;
+    render();
+    return;
+  }
+  if (action === "open-menu-category") {
+    state.menuCategorySlug = target.dataset.categorySlug;
+    render();
+    return;
+  }
+  if (action === "back-menu-category") {
+    state.menuCategorySlug = null;
     render();
     return;
   }
