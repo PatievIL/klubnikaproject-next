@@ -19,6 +19,7 @@ let settings = clone(DEFAULT_SETTINGS);
 let currentSessionUser = null;
 let memberAccessPolicy = null;
 let memberSessions = [];
+const currentAccountView = document.body.dataset.accountView || "hub";
 
 document.addEventListener("DOMContentLoaded", async () => {
   settings = loadCachedSettings();
@@ -26,7 +27,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   hydrateStaticLinks();
   bindLogout();
 
-  const view = document.body.dataset.accountView || "hub";
+  const view = currentAccountView;
   if (!isMembersEnabled()) {
     renderMembersDisabled(view);
     return;
@@ -40,6 +41,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       redirectAuthenticatedMember(session.user);
       return;
     }
+    renderLoginReasonNotice();
     bindLogin();
     return;
   }
@@ -143,6 +145,14 @@ function withNext(url) {
   return `${url}?next=${encodeURIComponent(next)}`;
 }
 
+function withNextAndReason(url, reason = "") {
+  const next = `${window.location.pathname}${window.location.search || ""}`;
+  const params = new URLSearchParams();
+  params.set("next", next);
+  if (reason) params.set("reason", reason);
+  return `${url}?${params.toString()}`;
+}
+
 function hydrateStaticLinks() {
   document.querySelectorAll("[data-account-link]").forEach((link) => {
     const key = link.dataset.accountLink;
@@ -169,17 +179,11 @@ function bindLogin() {
     }
     if (status) status.textContent = "Выполняю вход...";
     try {
-      const response = await fetch(`${apiBase()}/auth/login`, {
+      const response = await accountFetch("/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        credentials: "include",
         body: JSON.stringify({ login, password }),
-      });
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error(text || `HTTP ${response.status}`);
-      }
-      const payload = await response.json();
+      }, { allowUnauthorizedRedirect: false });
+      const payload = response;
       currentSessionUser = payload.user || null;
       await refreshAccessPolicy();
       const nextCandidate = new URLSearchParams(window.location.search).get("next") || memberPath("hubPath");
@@ -193,12 +197,7 @@ function bindLogin() {
 
 async function fetchSession() {
   try {
-    const response = await fetch(`${apiBase()}/auth/session`, {
-      headers: { Accept: "application/json" },
-      credentials: "include",
-    });
-    if (!response.ok) return null;
-    return response.json();
+    return await accountFetch("/auth/session");
   } catch (error) {
     return null;
   }
@@ -210,15 +209,7 @@ async function refreshAccessPolicy() {
     return;
   }
   try {
-    const response = await fetch(`${apiBase()}/auth/access-policy`, {
-      headers: { Accept: "application/json" },
-      credentials: "include",
-    });
-    if (!response.ok) {
-      memberAccessPolicy = null;
-      return;
-    }
-    const payload = await response.json();
+    const payload = await accountFetch("/auth/access-policy");
     memberAccessPolicy = payload.policy || null;
   } catch (error) {
     memberAccessPolicy = null;
@@ -308,18 +299,7 @@ async function renderMemberCatalog() {
   if (!container) return;
   container.innerHTML = '<div class="account-empty">Загружаю каталог…</div>';
   try {
-    const response = await fetch(`${apiBase()}/member/catalog/items`, {
-      headers: { Accept: "application/json" },
-      credentials: "include",
-    });
-    if (!response.ok) {
-      if (response.status === 401 || response.status === 403) {
-        redirectToLogin();
-        return;
-      }
-      throw new Error(`HTTP ${response.status}`);
-    }
-    const payload = await response.json();
+    const payload = await accountFetch("/member/catalog/items");
     const items = payload.items || [];
     if (!items.length) {
       container.innerHTML = '<div class="account-empty">В закрытом каталоге пока нет элементов.</div>';
@@ -336,18 +316,7 @@ async function renderSpecialPages() {
   if (!container) return;
   container.innerHTML = '<div class="account-empty">Загружаю спецстраницы…</div>';
   try {
-    const response = await fetch(`${apiBase()}/member/special-pages`, {
-      headers: { Accept: "application/json" },
-      credentials: "include",
-    });
-    if (!response.ok) {
-      if (response.status === 401 || response.status === 403) {
-        redirectToLogin();
-        return;
-      }
-      throw new Error(`HTTP ${response.status}`);
-    }
-    const payload = await response.json();
+    const payload = await accountFetch("/member/special-pages");
     const items = payload.items || [];
     if (!items.length) {
       container.innerHTML = '<div class="account-empty">Спецстраницы пока не заданы.</div>';
@@ -394,11 +363,7 @@ function bindLogout() {
   document.querySelectorAll("[data-account-logout]").forEach((button) => {
     button.addEventListener("click", async () => {
       try {
-        await fetch(`${apiBase()}/auth/logout`, {
-          method: "POST",
-          headers: { Accept: "application/json" },
-          credentials: "include",
-        });
+        await accountFetch("/auth/logout", { method: "POST" }, { allowUnauthorizedRedirect: false });
       } catch (error) {
         // ignore
       }
@@ -423,18 +388,7 @@ async function loadMemberSessions() {
   if (!container || !currentSessionUser) return;
   container.innerHTML = '<div class="account-empty">Сессии загружаются…</div>';
   try {
-    const response = await fetch(`${apiBase()}/auth/sessions`, {
-      headers: { Accept: "application/json" },
-      credentials: "include",
-    });
-    if (!response.ok) {
-      if (response.status === 401) {
-        redirectToLogin();
-        return;
-      }
-      throw new Error(`HTTP ${response.status}`);
-    }
-    const payload = await response.json();
+    const payload = await accountFetch("/auth/sessions");
     memberSessions = payload.items || [];
     if (!memberSessions.length) {
       container.innerHTML = '<div class="account-empty">Активных сессий не найдено.</div>';
@@ -469,16 +423,10 @@ async function changeMemberPassword() {
   }
   if (status) status.textContent = "Обновляю пароль...";
   try {
-    const response = await fetch(`${apiBase()}/auth/change-password`, {
+    await accountFetch("/auth/change-password", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      credentials: "include",
       body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
     });
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(text || `HTTP ${response.status}`);
-    }
     const currentField = document.getElementById("account-current-password");
     const newField = document.getElementById("account-new-password");
     if (currentField) currentField.value = "";
@@ -494,16 +442,9 @@ async function logoutOtherMemberSessions() {
   const status = document.getElementById("account-self-service-status");
   if (status) status.textContent = "Закрываю другие сессии...";
   try {
-    const response = await fetch(`${apiBase()}/auth/logout-others`, {
+    const payload = await accountFetch("/auth/logout-others", {
       method: "POST",
-      headers: { Accept: "application/json" },
-      credentials: "include",
     });
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(text || `HTTP ${response.status}`);
-    }
-    const payload = await response.json();
     if (status) status.textContent = `Другие сессии закрыты: ${payload.revoked || 0}.`;
     loadMemberSessions();
   } catch (error) {
@@ -511,12 +452,12 @@ async function logoutOtherMemberSessions() {
   }
 }
 
-function redirectToLogin() {
+function redirectToLogin(reason = "") {
   if (!isMembersEnabled()) {
     window.location.href = "/";
     return;
   }
-  window.location.href = withNext(memberPath("loginPath"));
+  window.location.href = withNextAndReason(memberPath("loginPath"), reason);
 }
 
 function redirectAuthenticatedMember(user) {
@@ -573,6 +514,40 @@ function renderScopeDenied(scope) {
 
 function cleanupError(message) {
   return String(message || "").replace(/^Error:\s*/u, "");
+}
+
+function renderLoginReasonNotice() {
+  const status = document.getElementById("account-login-status");
+  if (!status) return;
+  const reason = new URLSearchParams(window.location.search).get("reason") || "";
+  if (reason === "session-expired") {
+    status.textContent = "Сессия истекла или была закрыта. Войдите снова.";
+  }
+}
+
+async function accountFetch(path, options = {}, extra = {}) {
+  const headers = new Headers(options.headers || {});
+  headers.set("Accept", "application/json");
+  headers.set("X-KP-Requested-With", "klubnikaproject");
+  if (options.body && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+  const response = await fetch(`${apiBase()}${path}`, {
+    ...options,
+    headers,
+    credentials: "include",
+  });
+  if (!response.ok) {
+    const text = await response.text();
+    if (response.status === 401 && extra.allowUnauthorizedRedirect !== false && currentAccountView !== "login") {
+      currentSessionUser = null;
+      memberAccessPolicy = null;
+      memberSessions = [];
+      redirectToLogin("session-expired");
+    }
+    throw new Error(text || `HTTP ${response.status}`);
+  }
+  return response.json();
 }
 
 function formatDateTime(value) {

@@ -795,6 +795,7 @@ async function adminFetch(path, options = {}) {
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
   }
+  headers.set("X-KP-Requested-With", "klubnikaproject");
   if (options.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
@@ -802,7 +803,13 @@ async function adminFetch(path, options = {}) {
   const response = await fetch(`${apiBase}${path}`, { ...options, headers, credentials: "include" });
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(text || `Backend returned ${response.status}`);
+    if (response.status === 401) {
+      applyGuestAccessState();
+      els.sessionState.textContent = "Сессия истекла или была отозвана. Войдите снова.";
+    }
+    const error = new Error(text || `Backend returned ${response.status}`);
+    error.status = response.status;
+    throw error;
   }
   return response.json();
 }

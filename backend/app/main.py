@@ -1783,7 +1783,23 @@ def clear_session_cookie(response: Response, key: str) -> None:
     response.delete_cookie(key, path="/", samesite="none", secure=True)
 
 
+def enforce_session_request_guard(request: Request, authorization: str | None = None) -> None:
+    if request.method in {"GET", "HEAD", "OPTIONS"}:
+        return
+    token = (authorization or "").removeprefix("Bearer ").strip()
+    if token:
+        return
+    origin = normalize_origin(request.headers.get("origin", ""))
+    requested_with = request.headers.get("x-kp-requested-with", "")
+    if not origin or origin not in CONFIG.cors_origins or requested_with != "klubnikaproject":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cross-site session request blocked",
+        )
+
+
 def get_admin_context(request: Request, authorization: str | None = Header(default=None)) -> dict[str, Any]:
+    enforce_session_request_guard(request, authorization)
     token = (authorization or "").removeprefix("Bearer ").strip()
     if token and token == CONFIG.admin_token:
         return {
@@ -1833,6 +1849,7 @@ def require_roles(*roles: str):
 
 
 def get_member_context(request: Request) -> dict[str, Any]:
+    enforce_session_request_guard(request, None)
     session_token = request.cookies.get(CONFIG.member_session_cookie_name, "")
     session_ctx = resolve_member_session(session_token)
     if session_ctx:
