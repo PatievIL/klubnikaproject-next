@@ -117,7 +117,7 @@ function buildSchema(relativePath, html, canonicalUrl, noindex) {
       "@id": `${SITE_ORIGIN}/#organization`,
       name: "Klubnika Project",
       url: `${SITE_ORIGIN}/`,
-      logo: `${SITE_ORIGIN}/documents/logo/header-lockup-v1-close-compact-light.svg?v=20260403u`
+      logo: `${SITE_ORIGIN}/documents/logo/header-lockup-v1-close-compact-light.svg?v=20260403aa`
     });
     items.push({
       "@context": "https://schema.org",

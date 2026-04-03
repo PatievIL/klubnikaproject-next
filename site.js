@@ -281,7 +281,7 @@ function injectCompactShell(root) {
       <div class="compact-shell-inner">
         <div class="compact-topbar">
           <a class="compact-brand" href="${root}">
-            <img class="compact-brand-logo" src="${root}documents/logo/header-lockup-v1-close-compact-dark.svg?v=20260403u" alt="KLUBNIKA PROJECT" />
+            <img class="compact-brand-logo" src="${root}documents/logo/header-lockup-v1-close-compact-dark.svg?v=20260403aa" alt="KLUBNIKA PROJECT" />
           </a>
           <nav class="compact-nav" aria-label="Основная навигация">
             <a href="${root}">Главная</a>
