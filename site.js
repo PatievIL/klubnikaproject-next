@@ -14,7 +14,10 @@ const SITE_ADMIN_DEFAULTS = {
   site: {
     supportTelegram: "@patiev_admin",
     supportTelegramUrl: "https://t.me/patiev_admin",
-    supportEmail: "hello@klubnikaproject.ru",
+    supportEmail: "info@klubnikaproject.ru",
+    supportWhatsapp: "https://wa.me/79891250150",
+    supportInstagramUrl: "https://www.instagram.com/ilya_patiev/",
+    supportYoutubeUrl: "https://www.youtube.com/@Ilya_patiev",
   },
   forms: {
     mode: "backend_submit",

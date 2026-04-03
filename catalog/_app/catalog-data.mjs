@@ -13,16 +13,17 @@ export const CATALOG_META = {
   phones: [
     {
       label: "Связь",
-      href: "tel:+79672429633",
-      value: "+7 967 242-96-33",
+      href: "tel:+79255831669",
+      value: "+7 925 583-16-69",
     },
   ],
-  email: "hello@klubnikaproject.ru",
+  email: "info@klubnikaproject.ru",
   address: "Москва, проектная комплектация с отгрузкой по РФ",
   socialLinks: [
     { label: "Telegram", href: "https://t.me/patiev_admin" },
-    { label: "VK", href: "https://vk.com" },
-    { label: "YouTube", href: "https://youtube.com" },
+    { label: "WhatsApp", href: "https://wa.me/79891250150" },
+    { label: "Instagram", href: "https://www.instagram.com/ilya_patiev/" },
+    { label: "YouTube", href: "https://www.youtube.com/@Ilya_patiev" },
   ],
   siteLinks: [
     {
