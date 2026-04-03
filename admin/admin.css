@@ -1,11 +1,25 @@
+.admin-hub-layout,
+.admin-hub-layout *,
+.admin-hub-layout *::before,
+.admin-hub-layout *::after {
+  box-sizing: border-box;
+}
+
 .admin-hub-hero {
   grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
 }
 
+.admin-hub-hero .hero-copy {
+  max-width: 700px;
+}
+
 .admin-hub-note {
   align-self: start;
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.14);
+  min-height: 100%;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(245, 236, 223, 0.08)),
+    rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
 }
 
 .admin-hub-note .tag {
@@ -31,14 +45,19 @@
 .admin-hub-main {
   display: grid;
   gap: 18px;
+  min-width: 0;
 }
 
 .admin-hub-sidebar {
   display: grid;
+  min-width: 0;
 }
 
 .admin-card {
   background: var(--surface-3);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .admin-sticky {
@@ -51,6 +70,9 @@
   justify-content: space-between;
   gap: 16px;
   align-items: center;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .admin-toolbar-actions {
@@ -58,12 +80,18 @@
   flex-wrap: wrap;
   gap: 10px;
   justify-content: flex-end;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .admin-tabs {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .admin-tab {
@@ -86,18 +114,26 @@
 
 .admin-section {
   min-height: 620px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .admin-section-stack {
   display: grid;
   gap: 18px;
+  min-width: 0;
 }
 
 .admin-section-intro {
+  width: 100%;
+  min-width: 0;
   max-width: 760px;
 }
 
 .admin-block {
+  width: 100%;
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: #fff;
@@ -224,8 +260,12 @@
 
 body[data-admin-auth="guest"] .admin-tabs,
 body[data-admin-auth="guest"] .admin-toolbar-actions,
-body[data-admin-auth="guest"] .admin-authenticated-only,
-body[data-admin-auth="guest"] .admin-self-service {
+body[data-admin-auth="guest"] #admin-summary-grid,
+body[data-admin-auth="guest"] .admin-hub-links,
+body[data-admin-auth="guest"] .admin-json-actions,
+body[data-admin-auth="guest"] .admin-status,
+body[data-admin-auth="guest"] .admin-json-label,
+body[data-admin-auth="guest"] .admin-json-output {
   display: none;
 }
 
@@ -235,6 +275,10 @@ body[data-admin-auth="guest"] .admin-sticky {
 
 body[data-admin-auth="guest"] .admin-auth-panel {
   margin-top: 0;
+}
+
+body[data-admin-auth="guest"] .admin-hub-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
 }
 
 .admin-locked-state {
@@ -252,58 +296,10 @@ body[data-admin-auth="guest"] .admin-auth-panel {
   margin-top: 12px;
 }
 
-.admin-auth-actions-2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
 .admin-session-state {
   margin-top: 10px;
   color: var(--muted);
   font-size: 13px;
-}
-
-.admin-self-service {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(0, 77, 43, 0.12);
-  display: grid;
-  gap: 12px;
-}
-
-.admin-self-service-head {
-  display: grid;
-  gap: 4px;
-}
-
-.admin-self-service-head span {
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.admin-session-list {
-  display: grid;
-  gap: 10px;
-}
-
-.admin-session-item {
-  display: grid;
-  gap: 6px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(0, 77, 43, 0.12);
-  background: rgba(255, 255, 255, 0.72);
-}
-
-.admin-session-item strong {
-  font-size: 14px;
-}
-
-.admin-session-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 12px;
 }
 
 .admin-import-button {
@@ -354,9 +350,13 @@ body[data-admin-auth="guest"] .admin-auth-panel {
   display: grid;
   gap: 12px;
   margin-top: 18px;
+  width: 100%;
+  min-width: 0;
 }
 
 .admin-mini-metric {
+  width: 100%;
+  min-width: 0;
   padding: 14px 16px;
   border-radius: 16px;
   background: #fff;
@@ -477,11 +477,22 @@ body[data-admin-auth="guest"] .admin-auth-panel {
   font-size: 12px;
 }
 
+.admin-crm-presets,
 .admin-crm-filters {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   margin-top: 16px;
+}
+
+.admin-crm-presets {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.admin-crm-preset.is-active {
+  background: rgba(0, 77, 43, 0.1);
+  border-color: rgba(0, 77, 43, 0.22);
+  color: var(--green);
 }
 
 .admin-crm-layout {
@@ -490,6 +501,26 @@ body[data-admin-auth="guest"] .admin-auth-panel {
   gap: 16px;
   margin-top: 16px;
   align-items: start;
+}
+
+.admin-crm-layout,
+.admin-crm-layout > *,
+.admin-crm-board,
+.admin-crm-detail,
+.admin-crm-kanban,
+.admin-crm-column,
+.admin-crm-column-body,
+.admin-crm-card,
+.admin-crm-list,
+.admin-crm-thread,
+.admin-crm-detail-block,
+.admin-crm-next-step,
+.admin-crm-next-step-card,
+.admin-crm-next-step-copy,
+.admin-crm-action-strip,
+.admin-crm-pre,
+.admin-history-item {
+  min-width: 0;
 }
 
 .admin-crm-kanban {
@@ -505,10 +536,12 @@ body[data-admin-auth="guest"] .admin-auth-panel {
 .admin-crm-detail {
   display: grid;
   gap: 12px;
+  width: 100%;
   padding: 14px;
   border-radius: 18px;
   background: rgba(250, 247, 240, 0.82);
   border: 1px solid var(--line);
+  overflow-x: hidden;
 }
 
 .admin-crm-column-head,
@@ -545,15 +578,32 @@ body[data-admin-auth="guest"] .admin-auth-panel {
   border-radius: 16px;
   background: #fff;
   border: 1px solid rgba(0, 77, 43, 0.12);
+  cursor: pointer;
 }
 
 .admin-crm-card.is-selected {
   box-shadow: 0 0 0 2px rgba(0, 77, 43, 0.16);
 }
 
+.admin-crm-card:focus-visible {
+  outline: 2px solid rgba(0, 77, 43, 0.28);
+  outline-offset: 2px;
+}
+
 .admin-crm-card p,
 .admin-crm-pre {
   margin: 0;
+}
+
+.admin-crm-card-title {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-crm-card-title span {
+  color: var(--muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
 }
 
 .admin-crm-chip {
@@ -565,6 +615,12 @@ body[data-admin-auth="guest"] .admin-auth-panel {
   border: 1px solid rgba(0, 77, 43, 0.1);
   color: rgba(0, 77, 43, 0.9);
   font-size: 11px;
+}
+
+.admin-crm-chip.is-stage {
+  background: rgba(0, 77, 43, 0.08);
+  border-color: rgba(0, 77, 43, 0.15);
+  color: rgba(0, 77, 43, 0.95);
 }
 
 .admin-crm-chip.is-sync {
@@ -604,6 +660,86 @@ body[data-admin-auth="guest"] .admin-auth-panel {
 .admin-crm-detail-block {
   display: grid;
   gap: 10px;
+}
+
+.admin-crm-next-step,
+.admin-crm-next-step-card,
+.admin-crm-next-step-copy,
+.admin-crm-action-strip {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-crm-next-step {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(0, 77, 43, 0.05);
+  border: 1px solid rgba(0, 77, 43, 0.08);
+}
+
+.admin-crm-next-step strong,
+.admin-crm-next-step-card strong {
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.admin-crm-next-step span,
+.admin-crm-next-step-copy span {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.admin-crm-next-step-card {
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(112, 86, 23, 0.06);
+  border: 1px solid rgba(112, 86, 23, 0.1);
+}
+
+.admin-crm-action-strip {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-crm-settings-panel[open] {
+  gap: 16px;
+}
+
+.admin-crm-settings-summary {
+  display: flex;
+  list-style: none;
+  cursor: pointer;
+}
+
+.admin-crm-settings-summary::-webkit-details-marker {
+  display: none;
+}
+
+.admin-crm-settings-summary > div {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-crm-settings-summary span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.admin-crm-detail .admin-grid {
+  min-width: 0;
+}
+
+.admin-crm-detail .admin-grid > * {
+  min-width: 0;
+}
+
+.admin-crm-detail .admin-input,
+.admin-crm-detail .admin-select,
+.admin-crm-detail .admin-textarea {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 .admin-inventory-filters {
@@ -769,8 +905,16 @@ body[data-admin-auth="guest"] .admin-auth-panel {
 @media (max-width: 1100px) {
   .admin-hub-hero,
   .admin-hub-layout,
+  .admin-crm-presets,
   .admin-crm-layout {
     grid-template-columns: 1fr;
+  }
+
+  .admin-crm-kanban {
+    grid-auto-flow: row;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-template-columns: 1fr;
+    overflow-x: visible;
   }
 
   .admin-sticky {
@@ -784,6 +928,8 @@ body[data-admin-auth="guest"] .admin-auth-panel {
   .admin-grid,
   .admin-grid-3,
   .admin-crm-filters,
+  .admin-crm-presets,
+  .admin-crm-action-strip,
   .admin-inventory-filters,
   .admin-inventory-metrics {
     grid-template-columns: 1fr;
@@ -795,11 +941,13 @@ body[data-admin-auth="guest"] .admin-auth-panel {
   }
 
   .admin-toolbar-actions {
+    width: 100%;
     justify-content: stretch;
   }
 
   .admin-toolbar-actions .btn {
     width: 100%;
+    box-sizing: border-box;
   }
 
   .admin-auth-actions,

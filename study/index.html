@@ -11,7 +11,7 @@
     name="description"
     content="Сопровождение и консультации для клубничных ферм в логике контролируемой среды: запуск, диагностика проблем, корректировка решений и разбор действующего проекта."
   />
-  <link rel="stylesheet" href="../styles.css?v=20260401f" />
+  <link rel="stylesheet" href="../styles.css?v=20260403k" />
   <!-- SEO:START -->
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <link rel="canonical" href="https://klubnikaproject.ru/study/" />
@@ -47,7 +47,7 @@
           "name": "Можно ли обратиться с действующей фермой?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Да. Это один из самых частых сценариев: нестабильное качество, реактивное управление параметрами или пересборка части схемы."
+            "text": "Да. Это один из самых частых запросов: нестабильное качество, реактивное управление параметрами или пересборка части схемы."
           }
         },
         {
@@ -71,7 +71,7 @@
           "name": "Можно ли потом перейти в магазин?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Да. Если после разбора становится понятно, какие позиции нужны, проект переводится в нормальный путь через магазин или расчёт комплекта."
+            "text": "Да. Если после разбора становится понятно, какие позиции нужны, их потом можно спокойно добрать через магазин или расчёт комплекта."
           }
         },
         {
@@ -91,12 +91,12 @@
 <body>
   <header class="hero">
     <div class="container">
-      <div class="hero-shell">
+      <div class="hero-shell hero-shell-service hero-shell-study">
         <div class="topbar">
           <div class="brand">
             <a class="brand-home" href="../">
               <div class="brand-logo">
-                <img src="../assets/brand-berry-beige.svg" alt="Знак Klubnika Project" />
+                <img src="../assets/brand-berry-green.svg" alt="Знак Klubnika Project" />
               </div>
               <div class="brand-copy">
                 <div class="brand-title">
@@ -107,35 +107,50 @@
               </div>
             </a>
           </div>
-          <button class="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false">
-            <span></span>
-          </button>
 
           <nav class="nav">
             <a class="nav-link" href="../">Главная</a>
             <div class="nav-group">
               <button class="nav-trigger" type="button">Решения</button>
               <div class="nav-menu">
-                <a href="../farm/"><strong>Расчёт фермы</strong><span>Состав комплекта, рамка бюджета и следующий шаг.</span></a>
+              <a href="../farm/"><strong>Расчёт фермы</strong><span>Состав комплекта, рамка бюджета и что делать дальше.</span></a>
                 <a href="../study/"><strong>Сопровождение</strong><span>Разбор действующей фермы, критических узлов и технологии.</span></a>
-                <a href="../consultations/"><strong>Консультации</strong><span>Точечный разбор задачи, совместимости и следующего шага.</span></a>
-                <a href="../klubhack/"><strong>Клубничный Хак</strong><span>Система по клубнике без проектной сметы.</span></a>
+                <a href="../consultations/"><strong>Консультации</strong><span>Точечный разбор задачи, совместимости и того, как лучше действовать дальше.</span></a>
+                <a href="../klubhack/"><strong>Клубничный Хак</strong><span>База по клубнике без проектной сметы.</span></a>
               </div>
             </div>
             <div class="nav-group">
               <button class="nav-trigger" type="button">Каталог</button>
               <div class="nav-menu nav-menu-wide">
-                <a href="../shop/"><strong>Магазин</strong><span>Весь каталог решений для клубничной фермы.</span></a>
-                <a href="../shop/led/"><strong>LED</strong><span>Светильники M23 и тепличные модели.</span></a>
-                <a href="../shop/poliv/"><strong>Полив</strong><span>Комплектующие, узлы и типовые комплекты.</span></a>
-                <a href="../shop/stellaj/"><strong>Стеллажи</strong><span>Модули, каркасы и конструктив фермы.</span></a>
-                <a href="../shop/substrate/"><strong>Субстрат</strong><span>Grodan и корневая зона под controlled environment.</span></a>
+                <a href="../catalog/index.html"><strong>Магазин</strong><span>Весь каталог решений для клубничной фермы.</span></a>
+                <a href="../catalog/led/index.html"><strong>LED</strong><span>Светильники M23 и тепличные модели.</span></a>
+                <a href="../catalog/irrigation/index.html"><strong>Полив</strong><span>Комплектующие, узлы и типовые комплекты.</span></a>
+                <a href="../catalog/racks/index.html"><strong>Стеллажи</strong><span>Модули, каркасы и конструктив фермы.</span></a>
+                <a href="../catalog/substrates/index.html"><strong>Субстрат</strong><span>Grodan и корневая зона под controlled environment.</span></a>
                 <a href="../seeds/"><strong>Семена и Frigo</strong><span>Посадочный материал под фермерский запуск.</span></a>
               </div>
             </div>
             <a class="nav-link" href="../calc/">Калькулятор</a>
-            <a class="nav-cta" href="#request">Оставить задачу</a>
+            <div class="nav-mobile-utility">
+              <a class="site-header-link" href="../catalog/index.html">Поиск в каталоге</a>
+              <a class="site-header-link site-phone-link" href="tel:+79672429633">+7 967 242-96-33</a>
+              <a class="site-header-link" href="../account/">Кабинет</a>
+              <a class="site-header-link" href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">Telegram</a>
+              <a class="nav-cta" href="#request">Обсудить задачу</a>
+            </div>
           </nav>
+
+          <div class="site-header-actions">
+            <a class="site-header-link site-search-trigger" href="../catalog/index.html" aria-label="Поиск в каталоге"><span class="sr-only">Поиск</span></a>
+            <a class="site-header-link site-phone-link" href="tel:+79672429633">Связь</a>
+            <a class="site-header-link" href="../account/">Кабинет</a>
+            <a class="nav-cta" href="#request">Обсудить задачу</a>
+          </div>
+
+          <a class="site-mobile-quick" href="tel:+79672429633">Связь</a>
+          <button class="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false">
+            <span></span>
+          </button>
         </div>
 
         <div class="hero-grid">
@@ -147,8 +162,8 @@
               Здесь не продаётся абстрактное обучение, а предлагается участие в реальных решениях по ферме.
             </p>
             <p class="sublead">
-              Если вопрос упирается в качество ягоды, свет, полив, корневую зону, логику запуска или критический этап проекта,
-              правильный путь — разбор ситуации и план действий, а не случайная покупка.
+              Если вопрос упирается в качество ягоды, свет, полив, корневую зону, запуск или критический этап проекта,
+              лучше сначала разобрать ситуацию и собрать план действий, а не покупать наугад.
             </p>
 
             <div class="btn-row hero-cta">
@@ -157,24 +172,34 @@
             </div>
             <div class="text-link-row">
               <a href="../shop/">Я уже понимаю, что нужно купить</a>
-              <a href="../klubhack/">Нужна базовая система по клубнике</a>
+              <a href="../klubhack/">Нужна база по клубнике</a>
             </div>
           </div>
 
-          <aside class="visual-panel">
+          <aside class="visual-panel visual-panel-service visual-panel-study">
             <div class="visual-grid">
               <img
                 class="visual-main"
-                src="../assets/catalog/20880535.webp"
-                alt="Клубника и проектная работа"
+                src="../assets/photos/optimized/hero-process.webp"
+                alt="Разбор и сопровождение клубничной фермы"
               />
               <div class="visual-stack">
-                <img src="../assets/catalog/IMG_6061.webp" alt="Качество ягоды" />
-                <img src="../assets/catalog/IMG_4724.webp" alt="Работа на ферме" />
+                <img class="visual-top" src="../assets/photos/optimized/greenhouse-rack.webp" alt="Система фермы и свет" />
+                <img class="visual-bottom" src="../assets/catalog/IMG_4724.webp" alt="Работа на ферме" />
               </div>
             </div>
             <div class="visual-note">
               Если проблема цепляется за несколько узлов сразу, разовая покупка редко решает её полностью.
+            </div>
+            <div class="service-hero-meta">
+              <div class="service-hero-meta-card">
+                <strong>Диагностика цепочки</strong>
+                <span>Разбираем связку свет, полив, корневая зона и этап развития, чтобы не лечить только симптом.</span>
+              </div>
+              <div class="service-hero-meta-card">
+                <strong>План сопровождения</strong>
+                <span>Фиксируем, что проверять сейчас, что вести в следующем цикле и где уже нужен длинный формат работы.</span>
+              </div>
             </div>
           </aside>
         </div>
@@ -195,7 +220,7 @@
 
         <div class="grid grid-3">
           <article class="path-card">
-            <div class="kicker">Сценарий 01</div>
+            <div class="kicker">Ситуация 01</div>
             <h3>Запуск фермы</h3>
             <ul>
               <li>Нужно проверить логику конфигурации до закупок и монтажа.</li>
@@ -204,7 +229,7 @@
           </article>
 
           <article class="path-card">
-            <div class="kicker">Сценарий 02</div>
+            <div class="kicker">Ситуация 02</div>
             <h3>Действующая ферма</h3>
             <ul>
               <li>Качество ягоды нестабильно, параметры держатся реактивно.</li>
@@ -213,7 +238,7 @@
           </article>
 
           <article class="path-card">
-            <div class="kicker">Сценарий 03</div>
+            <div class="kicker">Ситуация 03</div>
             <h3>Критический этап, пересборка или рост</h3>
             <ul>
               <li>Нужно пройти важный участок проекта, менять схему или масштабировать объект.</li>
@@ -351,10 +376,10 @@
       <div class="action-panel">
         <div class="split-hero">
           <div>
-            <span class="eyebrow">Отдельный маршрут</span>
+            <span class="eyebrow">Если нужна база</span>
             <h2>Если нужна база по технологии, а не разбор проекта, для этого есть Клубничный Хак</h2>
             <p class="sublead">
-              Это отдельный маршрут для тех, кому сначала нужно собрать систему фермы в голове, а не разбирать свой объект.
+              Это для тех, кому сначала хочется спокойно собрать основу по технологии, а не разбирать свой объект.
             </p>
             <div class="btn-row">
               <a class="btn btn-primary" href="../klubhack/">Открыть страницу курса</a>
@@ -365,9 +390,9 @@
           <div class="card form-card">
             <div class="tag">Когда идти туда</div>
             <ul>
-              <li>Нужна пошаговая система выращивания, а не проектная работа по вашему объекту.</li>
-              <li>Хотите пройти путь от старта фермы до качества ягоды и масштабирования.</li>
-              <li>Нужен учебный маршрут, закрытый чат и практические задания.</li>
+              <li>Нужна понятная база по выращиванию, а не проектная работа по вашему объекту.</li>
+              <li>Хочется спокойно разобраться от старта фермы до качества ягоды и масштабирования.</li>
+              <li>Нужны обучение, закрытый чат и практические задания.</li>
             </ul>
           </div>
         </div>
@@ -379,8 +404,8 @@
     <div class="container">
         <div class="note-panel product-next-panel">
           <div class="badge">Результат</div>
-        <strong>На выходе у проекта появляется не ещё один совет, а более управляемая логика решений.</strong>
-        <p>Понятно, что менять сначала, где первопричина и когда без сопровождения дальше лучше не двигаться.</p>
+        <strong>После сопровождения у проекта остаётся не набор разрозненных советов, а более понятный план действий.</strong>
+        <p>Понятно, что менять сначала, где первопричина и когда дальше лучше идти уже вместе с сопровождением.</p>
       </div>
     </div>
   </section>
@@ -457,7 +482,7 @@
             <div class="tag">Ситуация 03</div>
             <h3>Нужно пройти критический этап без хаоса</h3>
             <p><strong>Что происходит:</strong> любое неправильное действие на этом участке стоит дороже обычного.</p>
-            <p><strong>Что даёт сопровождение:</strong> проект получает более контролируемый маршрут без лишних скачков между гипотезами.</p>
+            <p><strong>Что даёт сопровождение:</strong> проект получает более спокойный и понятный порядок действий без лишних скачков между гипотезами.</p>
           </article>
         </div>
       </div>
@@ -479,7 +504,7 @@
           </article>
           <article class="card faq-box">
             <strong>Можно ли обратиться с действующей фермой?</strong>
-            <p>Да. Это один из самых частых сценариев: нестабильное качество, реактивное управление параметрами или пересборка части схемы.</p>
+            <p>Да. Это один из самых частых запросов: нестабильное качество, реактивное управление параметрами или пересборка части схемы.</p>
           </article>
           <article class="card faq-box">
             <strong>Нужен ли сначала расчёт фермы?</strong>
@@ -491,7 +516,7 @@
           </article>
           <article class="card faq-box">
             <strong>Можно ли потом перейти в магазин?</strong>
-            <p>Да. Если после разбора становится понятно, какие позиции нужны, проект переводится в нормальный путь через магазин или расчёт комплекта.</p>
+            <p>Да. Если после разбора становится понятно, какие позиции нужны, их потом можно спокойно добрать через магазин или расчёт комплекта.</p>
           </article>
           <article class="card faq-box">
             <strong>Что происходит после заявки?</strong>
@@ -594,6 +619,6 @@
       </div>
     </div>
   </footer>
-  <script src="../site.js?v=20260402d" defer></script>
+  <script src="../site.js?v=20260403j" defer></script>
 </body>
 </html>

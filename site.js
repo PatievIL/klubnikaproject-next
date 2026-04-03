@@ -20,7 +20,7 @@ const SITE_ADMIN_DEFAULTS = {
     mode: "backend_submit",
     primaryChannel: "crm",
     handoffPrefix: "Новая заявка с сайта Klubnika Project",
-    successHint: "Вводные сохранены в системе. Если нужен быстрый ручной контакт, их можно продублировать в Telegram.",
+    successHint: "Сообщение подготовлено. Если нужен быстрый контакт, его можно сразу продублировать в Telegram.",
     openTelegramAfterCopy: false,
     collectEmail: true,
     collectPhone: true,
@@ -312,7 +312,7 @@ function injectSharedFooter(root) {
       <div class="footer-grid">
         <div class="footer-card">
           <h3>Klubnika Project</h3>
-          <p class="sublead">Расчёт, магазин, подбор и сопровождение для клубничных ферм в контролируемой среде.</p>
+          <p class="sublead">Расчёт, каталог, подбор и сопровождение для клубничной фермы без лишней суеты.</p>
         </div>
         <div class="footer-card">
           <h3>Сценарии</h3>
@@ -335,7 +335,7 @@ function injectSharedFooter(root) {
       </div>
       <div class="footer-row">
         <div>© Klubnika Project</div>
-        <div>Расчёт, магазин, подбор и сопровождение решений</div>
+        <div>Расчёт, каталог, подбор и сопровождение без лишней суеты</div>
       </div>
     </div>
   `;
@@ -354,7 +354,7 @@ function normalizeExistingFooter() {
 
   const footerRowCells = footer.querySelectorAll(".footer-row > div");
   if (footerRowCells[0]) footerRowCells[0].textContent = "© Klubnika Project";
-  if (footerRowCells[1]) footerRowCells[1].textContent = "Расчёт, магазин, подбор и сопровождение решений";
+  if (footerRowCells[1]) footerRowCells[1].textContent = "Расчёт, каталог, подбор и сопровождение без лишней суеты";
 }
 
 function applyGlobalContactLayer(config) {
@@ -536,11 +536,21 @@ function injectUiControls() {
     const tools = document.createElement("div");
     tools.className = "topbar-tools";
     tools.innerHTML = buildUiControlsMarkup();
-    const toggle = topbar.querySelector(".nav-toggle");
-    if (toggle) {
-      topbar.insertBefore(tools, toggle);
+    const actionZone = topbar.querySelector(".site-header-actions");
+    if (actionZone) {
+      const cta = actionZone.querySelector(".nav-cta");
+      if (cta) {
+        actionZone.insertBefore(tools, cta);
+      } else {
+        actionZone.appendChild(tools);
+      }
     } else {
-      topbar.appendChild(tools);
+      const toggle = topbar.querySelector(".nav-toggle");
+      if (toggle) {
+        topbar.insertBefore(tools, toggle);
+      } else {
+        topbar.appendChild(tools);
+      }
     }
   }
 
@@ -753,7 +763,7 @@ function bindDraftForms(config) {
         if (status) {
           status.textContent = lang === "en"
             ? `Fill in required fields: ${missing.join(", ")}.`
-            : `Заполните обязательные поля: ${missing.join(", ")}.`;
+            : `Заполните обязательные поля, и мы подготовим сообщение: ${missing.join(", ")}.`;
         }
         return;
       }
@@ -762,7 +772,7 @@ function bindDraftForms(config) {
         if (status) {
           status.textContent = lang === "en"
             ? "Fill in at least one field to prepare the brief."
-            : "Заполните хотя бы одно поле, чтобы собрать вводные.";
+            : "Добавьте хотя бы одно поле, чтобы подготовить сообщение по задаче.";
         }
         return;
       }
@@ -806,27 +816,27 @@ function bindDraftForms(config) {
         if (latestConfig.forms.mode === "backend_submit") {
           status.textContent = backendLeadId
             ? (lang === "en"
-              ? `The brief has been stored in the backend as lead #${backendLeadId}.`
-              : `Вводные сохранены в backend как лид #${backendLeadId}.`)
+              ? `The brief has been stored in the system as lead #${backendLeadId}.`
+              : `Задача сохранена в системе как лид #${backendLeadId}.`)
             : (lang === "en"
-              ? "The brief is prepared, but the backend is unavailable. A local handoff copy was kept."
-              : "Вводные подготовлены, но backend сейчас недоступен. Локальная копия для handoff сохранена.");
+              ? "The brief is prepared, but the system is unavailable right now. A local handoff copy was kept."
+              : "Сообщение подготовлено, но система сейчас недоступна. Локальная копия для передачи сохранена.");
         } else if (copied && openedTelegram) {
           status.textContent = lang === "en"
             ? "The brief has been copied and Telegram opened in a new tab."
-            : (latestConfig.forms.successHint || "Вводные скопированы, Telegram открыт в новой вкладке.");
+            : (latestConfig.forms.successHint || "Сообщение скопировано, Telegram открыт в новой вкладке.");
         } else if (copied) {
           status.textContent = lang === "en"
             ? "The brief has been copied. Open the selected channel and paste it there."
-            : (latestConfig.forms.successHint || "Вводные скопированы. Откройте выбранный канал и вставьте их туда.");
+            : (latestConfig.forms.successHint || "Сообщение скопировано. Откройте нужный канал и вставьте его туда.");
         } else if (openedTelegram) {
           status.textContent = lang === "en"
             ? "Telegram is open. If the text did not copy, use the direct Telegram button and transfer the brief manually."
-            : "Telegram открыт. Если текст не скопировался, откройте диалог и перенесите вводные вручную.";
+            : "Telegram открыт. Если текст не скопировался, просто перенесите сообщение вручную.";
         } else {
           status.textContent = lang === "en"
             ? "Automatic copy failed. Use the direct channel button or transfer the brief manually."
-            : "Не удалось скопировать автоматически. Используйте кнопку канала или перенесите вводные вручную.";
+            : "Не удалось скопировать автоматически. Используйте кнопку канала или перенесите сообщение вручную.";
         }
       }
 
@@ -928,19 +938,19 @@ function applyBriefFormPresentation(config, lang) {
         note.innerHTML = lang === "en"
           ? "The button will prepare the brief and copy it to the clipboard. If needed, send it manually in Telegram: "
             + `<a href="${href}" target="_blank" rel="noopener noreferrer">${handle}</a>.`
-          : "Кнопка соберёт вводные и скопирует их в буфер. При необходимости отправьте их вручную в Telegram: "
+          : "Кнопка подготовит сообщение и скопирует его в буфер. При необходимости отправьте его вручную в Telegram: "
             + `<a href="${href}" target="_blank" rel="noopener noreferrer">${handle}</a>.`;
       } else if (config.forms.mode === "backend_submit") {
         note.innerHTML = lang === "en"
-          ? "The brief is stored in the backend. If a fast manual follow-up is needed, it can also be duplicated in Telegram: "
+          ? "The brief is stored in the system. If a fast manual follow-up is needed, it can also be duplicated in Telegram: "
             + `<a href="${href}" target="_blank" rel="noopener noreferrer">${handle}</a>.`
-          : "Вводные сохраняются в backend. Если нужен быстрый ручной контакт, их можно продублировать в Telegram: "
+          : "Задача сохранится в системе. Если нужен быстрый ручной контакт, сообщение можно сразу продублировать в Telegram: "
             + `<a href="${href}" target="_blank" rel="noopener noreferrer">${handle}</a>.`;
       } else {
         note.innerHTML = lang === "en"
           ? "The button will prepare the brief, copy it, and open the working Telegram. Working Telegram: "
             + `<a href="${href}" target="_blank" rel="noopener noreferrer">${handle}</a>.`
-          : "Кнопка соберёт вводные, скопирует их и откроет рабочий Telegram. Рабочий Telegram: "
+          : "Кнопка подготовит сообщение, скопирует его и откроет рабочий Telegram: "
             + `<a href="${href}" target="_blank" rel="noopener noreferrer">${handle}</a>.`;
       }
     }
@@ -955,7 +965,7 @@ function getBriefUi(config, lang) {
   const english = lang === "en";
   if (config.forms.mode === "copy_only") {
     return {
-      buttonLabel: english ? "Prepare and copy brief" : "Собрать и скопировать вводные",
+      buttonLabel: english ? "Prepare and copy brief" : "Подготовить и скопировать сообщение",
       doneLabel: english ? "Copied" : "Скопировано",
       linkLabel: english ? "Open Telegram" : "Открыть Telegram",
     };
@@ -963,14 +973,14 @@ function getBriefUi(config, lang) {
 
   if (config.forms.mode === "backend_submit") {
     return {
-      buttonLabel: english ? "Prepare brief" : "Собрать вводные",
+      buttonLabel: english ? "Prepare brief" : "Подготовить сообщение",
       doneLabel: english ? "Prepared" : "Подготовлено",
       linkLabel: english ? "Open Telegram" : "Открыть Telegram",
     };
   }
 
   return {
-    buttonLabel: english ? "Prepare brief and open Telegram" : "Собрать вводные и открыть Telegram",
+    buttonLabel: english ? "Prepare brief and open Telegram" : "Подготовить сообщение и открыть Telegram",
     doneLabel: english ? "Copied and opened" : "Скопировано и открыто",
     linkLabel: english ? "Open Telegram" : "Открыть Telegram",
   };
@@ -1184,6 +1194,12 @@ function bindTopbarMenus() {
 }
 
 const TRANSLATIONS_EN = {
+  "Поиск": "Search",
+  "Поиск в каталоге": "Search catalog",
+  "Связь": "Contact",
+  "Кабинет": "Account",
+  "Связь": "Contact",
+  "Обсудить задачу": "Discuss project",
   "Klubnika Project — расчёт, комплектация и запуск клубничных ферм": "Klubnika Project — farm planning, sourcing, and launch for strawberry farms",
   "Расчёт, комплектация и запуск клубничных ферм": "Farm planning, sourcing, and launch for strawberry farms",
   "Главная": "Home",
@@ -1216,8 +1232,8 @@ const TRANSLATIONS_EN = {
   "Консультации": "Consultations",
   "Точечный разбор задачи, совместимости и следующего шага.": "Focused review of the task, compatibility, and the next step.",
   "Клубничный Хак": "Strawberry Hack",
-  "База по клубнике в контролируемой среде без проектной сметы.": "Core strawberry know-how for controlled environment farming without a project estimate.",
-  "Клубничный Хак — это практическая база по клубнике в контролируемой среде.": "Strawberry Hack is a practical foundation for strawberries in controlled environments.",
+  "База по технологии клубничной фермы без проектной сметы.": "Core strawberry know-how for a strawberry farm without a project estimate.",
+  "Клубничный Хак — это практическая база по технологии клубничной фермы.": "Strawberry Hack is a practical foundation for strawberry farm technology.",
   "Магазин": "Shop",
   "Весь каталог решений для клубничной фермы.": "The full catalog of solutions for a strawberry farm.",
   "LED": "LED",
@@ -1227,30 +1243,35 @@ const TRANSLATIONS_EN = {
   "Стеллажи": "Racks",
   "Модули, каркасы и конструктив фермы.": "Modules, frames, and farm structure.",
   "Субстрат": "Substrate",
-  "Grodan и корневая зона под controlled environment.": "Grodan and root-zone media for controlled environments.",
+  "Grodan и корневая зона под рабочую схему фермы.": "Grodan and root-zone media for a working farm setup.",
   "Семена и Frigo": "Seeds and Frigo",
   "Посадочный материал под фермерский запуск.": "Planting material for farm launches.",
   "© Klubnika Project": "© Klubnika Project",
-  "Расчёт, магазин, подбор и сопровождение решений": "Planning, shopping, selection, and support",
-  "Расчёт, магазин, подбор и сопровождение для клубничных ферм в контролируемой среде.": "Planning, shopping, selection, and support for strawberry farms in controlled environments.",
+  "Расчёт, каталог, подбор и сопровождение без лишней суеты": "Planning, catalog, selection, and support without unnecessary fuss",
+  "Расчёт, каталог, подбор и сопровождение для клубничной фермы без лишней суеты.": "Planning, catalog, selection, and support for a strawberry farm without unnecessary fuss.",
   "Сценарии": "Paths",
   "Информация": "Info",
   "Оферта": "Offer",
   "Гарантия на товары": "Product warranty",
   "Политика конфиденциальности": "Privacy policy",
-  "Клубничные фермы в контролируемой среде": "Controlled-environment strawberry farms",
+  "Клубничные фермы в контролируемой среде": "Strawberry farms in controlled environments",
+  "Расчёт, закупка и запуск клубничной фермы без лишней суеты": "Planning, sourcing, and launch for a strawberry farm without unnecessary fuss",
+  "Расчёт, закупка и запуск в одной логике": "Planning, sourcing, and launch in one clear workflow",
+  "Быстрый расчёт фермы, чтобы спокойно понять следующий шаг": "A quick farm estimate to calmly understand the next step",
+  "Каталог и закупка без потери логики всего проекта": "Catalog and sourcing without losing the logic of the whole project",
+  "Внутренний кабинет сайта, каталога и рабочих процессов": "Internal workspace for the site, catalog, and operating processes",
   "Быстрый выбор": "Quick choice",
   "Куда идти дальше": "Where to go next",
   "Что получите": "What you get",
   "Кому подходит": "Who it fits",
   "Результат": "Result",
   "FAQ": "FAQ",
-  "Клубничная ферма: расчёт, комплектация и запуск в одной логике": "Strawberry farm: estimate, sourcing, and launch in one workflow",
-  "КлубникаПро помогает не гадать по отдельным товарам, а быстро понять, какой путь нужен именно вам: расчёт фермы, магазин, подбор решения или сопровождение действующего проекта.": "KlubnikaPro helps you stop guessing by individual products and quickly understand the right path: farm estimate, shop, solution selection, or support for an operating project.",
-  "Здесь не пытаются продать всё сразу. Сначала задача разводится по правильному сценарию, потом вы идёте в расчёт, каталог, курс или работу по проекту.": "This site does not try to sell everything at once. First, your task is routed to the right path, then you move into estimate, catalog, course, or project work.",
-  "Рассчитать ферму": "Estimate the farm",
-  "Перейти в магазин": "Go to the shop",
-  "Не уверен, какой сценарий мне подходит": "Not sure which route fits me",
+  "Помогаем спокойно пройти путь к клубничной ферме: от первого расчёта до закупки": "We help you calmly move toward a strawberry farm, from the first estimate to sourcing",
+  "Если вы только начинаете или уже упёрлись в узкое место, здесь можно быстро понять, с чего лучше начать: с расчёта, с каталога или с разбора вашей ситуации.": "If you are just starting out or already stuck at a bottleneck, this is where you can quickly understand whether to begin with an estimate, the catalog, or a review of your situation.",
+  "Мы не ведём в случайную витрину и не заставляем заполнять лишнее. Сначала определяем сценарий, потом показываем понятный следующий шаг.": "We do not send you to a random catalog page or make you fill in extra fields. First we determine the scenario, then we show the clearest next step.",
+  "Начать с расчёта": "Start with an estimate",
+  "Открыть каталог": "Open the catalog",
+  "Помочь выбрать правильный сценарий": "Help me choose the right path",
   "Навигация по товарам": "Product navigation",
   "Все позиции раздела": "All items in this section",
   "Предыдущая позиция": "Previous item",
@@ -1305,10 +1326,13 @@ const TRANSLATIONS_EN = {
   "Открыть калькулятор": "Open calculator",
   "Запросить расчёт под проект": "Request a project estimate",
   "Запуск фермы по шагам: от вводных до запуска": "Farm launch step by step: from inputs to launch",
+  "Как идёт запуск": "How the launch unfolds",
+  "Проект движется по порядку: от рамки задачи к рабочей схеме": "The project moves in order, from the task outline to a working setup",
+  "Так меньше хаоса, меньше лишних закупок и меньше риска перепутать этапы.": "This means less chaos, fewer unnecessary purchases, and less risk of mixing up the stages.",
   "Типовые проектные ситуации, в которых уже была практическая польза": "Typical project situations where the approach has already proven useful",
   "Что это дало": "What it gave",
   "КлубникаПро — это не просто каталог товаров": "KlubnikaPro is more than a product catalog",
-  "Не просто витрина": "Not just a storefront",
+  "Не набор разрозненных товаров": "Not a scattered set of products",
   "Каталог, расчёт и сопровождение собираются вокруг одной задачи: чтобы ферма работала как система.": "Catalog, estimate, and support are built around one task: making the farm work as a system.",
   "Оставить задачу": "Submit a task",
   "Вопросы, которые нужно закрыть до заявки": "Questions to resolve before you submit a request",
@@ -1350,7 +1374,7 @@ const TRANSLATIONS_EN = {
   "Корневая зона меняется не сама по себе.": "The root zone does not change in isolation.",
   "Расход, длина линии и дозирование начинают влиять на растение сразу, а не только на список деталей.": "Flow rate, line length, and dosing affect the plant immediately, not just the parts list.",
   "Узел дозирования почти всегда требует проверки всей связки.": "The dosing node almost always requires checking the whole chain.",
-  "Если в вопросе появляется Dosatron, это уже ближе к подбору и составу, чем к обычной витрине.": "If Dosatron enters the conversation, it is already closer to selection and composition than to a regular storefront.",
+  "Если в вопросе появляется Dosatron, это уже ближе к подбору и составу, чем к обычному каталогу.": "If Dosatron enters the conversation, it is already closer to selection and system composition than to a standard catalog.",
   "Когда модуль уже понятен, категория помогает быстро добрать детали. Когда модуль ещё не определён, важнее сначала разобрать схему.": "When the module is already clear, the category helps you quickly complete the parts. When the module is not yet defined, it matters more to sort out the scheme first.",
   "Перед покупкой важнее понять роль узла в системе, чем название товара": "Before buying, it matters more to understand the node’s role in the system than the product name",
   "Что за объект": "What kind of site",
@@ -1463,7 +1487,7 @@ const TRANSLATIONS_EN = {
   "Консультации по клубничной ферме: когда нужен точный разбор без длинного сопровождения": "Consultations for a strawberry farm: when you need a precise review without long-term support",
   "Записаться на консультацию": "Book a consultation",
   "Записаться": "Sign up",
-  "Клубничный Хак: практический курс по выращиванию клубники в контролируемой среде": "Strawberry Hack: a practical course on growing strawberries in controlled environments",
+  "Клубничный Хак: практический курс по технологии клубничной фермы": "Strawberry Hack: a practical course on strawberry farm technology",
   "Записаться на курс": "Join the course",
   "Смотреть программу": "View the program",
   "Курс нужен тем, кому нужна системная база, а не разовый ответ на один объект": "The course is for people who need a system-level foundation, not a one-off answer for one site",
@@ -1487,13 +1511,13 @@ const TRANSLATIONS_EN = {
   "Скопировать ссылку": "Copy link",
   "Сбросить расчёт": "Reset estimate",
   "Если хотите передать расчёт вручную": "If you want to hand the estimate off manually",
-  "Скопируйте вводные и сразу отправьте их в рабочий Telegram. Так вы не потеряете расчёт и быстрее перейдёте к следующему шагу.": "Copy the brief and send it straight to the working Telegram. This way you do not lose the estimate and move to the next step faster.",
+  "Скопируйте вводные и сразу отправьте их в рабочий Telegram. Так расчёт останется под рукой, а следующий шаг не потеряется.": "Copy the brief and send it straight to the working Telegram. This keeps the estimate at hand and makes sure the next step is not lost.",
   "Открыть Telegram": "Open Telegram",
   "Перейти к проектному расчёту": "Go to project estimate",
   "Вот что уже видно по вашим вводным": "Here is what is already visible from your inputs",
   "Рамка зафиксирована. Теперь важен правильный следующий шаг": "The outline is fixed. Now the right next step matters",
   "Маршрут уже начинает читаться по текущим вводным": "The route is already becoming clear from the current inputs",
-  "Открыть проектный расчёт": "Open project estimate",
+  "Открыть детальный расчёт": "Open the detailed estimate",
   "Сценарии по урожайности и денежному потоку модели": "Yield and cash-flow scenarios for the model",
   "Скопировать вводные": "Copy brief",
   "Если проект сложный или объект уже работает, калькулятор — это только первый шаг": "If the project is complex or the site is already running, the calculator is only the first step",
@@ -1719,6 +1743,7 @@ const TRANSLATIONS_EN = {
   "Если вам нужен именно образовательный маршрут, а не разбор проекта, отсюда начинается нормальный вход в курс.": "If you need an educational route rather than a project review, this is the right entry point into the course.",
   "Короткая форма для записи на курс.": "A short form for course enrollment.",
   "Почему доверяют": "Why they trust us",
+  "Почему здесь меньше хаоса": "Why there is less chaos here",
   "Что вы реально даёте": "What you actually provide",
   "Кейсы и проекты": "Cases and projects",
   "О проекте": "About the project",
@@ -1750,11 +1775,29 @@ const TRANSLATIONS_EN = {
   "Тем, кто только входит в тему и хочет собрать систему без хаоса.": "For people entering the topic who want to build a system without chaos.",
   "Действующим фермерам, которым нужно структурировать опыт и пересобрать базу.": "For active growers who need to structure their experience and rebuild the foundation.",
   "Инвесторам и предпринимателям, которым важно понять логику проекта до входа в расчёт.": "For investors and entrepreneurs who need to understand the project logic before moving into an estimate.",
-  "Основание для доверия": "Why you can trust this",
-  "4 года работы в нише клубничных ферм и сопутствующих решений": "4 years of work in the strawberry farm niche and related solutions",
-  "10 000+ м² проектов по площади": "10,000+ m² of project area",
-  "50 000+ растений в проектах": "50,000+ plants in projects",
-  "1 система расчёт, магазин, сопровождение и обучение в одной логике": "1 system with estimates, shop, support, and training in one logic",
+  "Здесь проще собрать ферму в рабочую систему, а не в список разрозненных покупок": "It is easier here to assemble the farm into a working system rather than a list of disconnected purchases",
+  "Сначала проясняется маршрут, потом уже подбираются узлы. Так свет, полив, конструкция, субстрат и посадка не расходятся между собой.": "First the route becomes clear, then the nodes are selected. This keeps lighting, irrigation, structure, substrate, and planting aligned instead of drifting apart.",
+  "Ясный маршрут": "A clear route",
+  "Сразу видно: считать, подбирать или покупать.": "You can immediately see whether to estimate, select, or buy.",
+  "Связка решений": "Linked decisions",
+  "Свет, полив и конструкция смотрятся вместе.": "Lighting, irrigation, and structure are considered together.",
+  "Меньше ошибки": "Less room for error",
+  "Карточка товара не подменяет проектное решение.": "A product page does not replace a project decision.",
+  "Меньше лишних закупок": "Fewer unnecessary purchases",
+  "Сначала логика фермы, потом список позиций.": "First the farm logic, then the item list.",
+  "Почему это работает на практике": "Why this works in practice",
+  "Опыт и масштаб здесь важны не как витрина, а как способ быстрее убрать лишние решения и ошибки на входе.": "Experience and scale matter here not as a showcase, but as a way to remove unnecessary decisions and mistakes earlier.",
+  "Рабочий контекст": "Working context",
+  "10 000+ м² площадей, где свет, полив, конструкция и закупка собирались как одна схема, а не как отдельные решения": "10,000+ m² of projects where lighting, irrigation, structure, and purchasing were assembled as one system rather than separate decisions",
+  "6 лет": "6 years",
+  "мы создали эту нишу и в ней лидируем": "we created this niche and have led it ever since",
+  "50 000+ растений в проектах, где важна связка узлов и цикла": "50,000+ plants in projects where the connection between nodes and cycle matters",
+  "1 логика расчёт, каталог и разбор не спорят между собой": "1 logic where estimate, catalog, and review do not contradict each other",
+  "Что это меняет для клиента": "What this changes for the client",
+  "Быстрее понятно, с чего начинать и куда не идти раньше времени.": "It becomes clear faster where to start and where not to go too early.",
+  "Меньше риск купить узел, который не встанет в общую схему.": "There is less risk of buying a node that will not fit the overall system.",
+  "Закупка собирается по логике фермы, а не по случайным карточкам.": "Purchasing is assembled by the farm logic, not by random product cards.",
+  "Если нужен расчёт или разбор, это становится ясно до покупки.": "If an estimate or review is needed, that becomes clear before the purchase.",
   "LED-освещение": "LED lighting",
   "Стартовый комплект": "Starter kit",
   "Кому подходит: пилотному запуску, тестовой схеме и первой рабочей очереди.": "Who it fits: a pilot launch, a test setup, and the first working phase.",
@@ -1766,10 +1809,13 @@ const TRANSLATIONS_EN = {
   "Понимание, какие позиции потом уйдут в магазин, а какие в смету.": "Understanding which positions will later go to the shop and which will go into the estimate.",
   "Понятный переход в расчёт под объект, если типовой рамки уже мало.": "A clear move into a site-specific estimate if the standard outline is no longer enough.",
   "Если объект нестандартный, вы не начинаете всё заново: вводные уже собраны, и их можно передать дальше в проектную работу.": "If the site is non-standard, you do not start from scratch: the inputs are already collected and can be passed into project work.",
-  "Площадь, формат объекта, стадия проекта и ограничения.": "Area, site format, project stage, and constraints.",
-  "Конфигурация ключевых узлов и состав решения.": "The configuration of key nodes and the solution composition.",
-  "Что отправляется как товар, а что идёт как проектная позиция.": "What goes out as a product and what moves as a project position.",
-  "Переход от комплекта на бумаге к рабочей схеме на объекте.": "The transition from a kit on paper to a working scheme on the site.",
+  "Здесь фиксируются реальные рамки объекта, чтобы дальше не собирать решение вслепую.": "This is where the real boundaries of the site are fixed so the solution is not assembled blindly later.",
+  "На этом этапе становится ясно, какие узлы действительно нужны и что пока рано покупать.": "At this stage it becomes clear which nodes are actually needed and what is still too early to buy.",
+  "Готовые товарные позиции отделяются от того, что ещё остаётся проектной частью.": "Ready-made product positions are separated from what still remains a project-specific part.",
+  "Решение переходит из списка и схемы в рабочую конфигурацию, которая должна спокойно заработать на объекте.": "The solution moves from a list and diagram into a working configuration that should start up calmly on site.",
+  "Порядок важнее деталей: сначала логика фермы, потом выбор конкретных позиций.": "Order matters more than details: first the farm logic, then the choice of specific items.",
+  "Узлы подбираются под уже понятную схему, а не покупаются по одному наугад.": "Nodes are selected for an already clear setup, not bought one by one at random.",
+  "На объекте появляется не просто комплект, а более предсказуемая и управляемая работа фермы.": "What appears on site is not just a kit, but a more predictable and controllable farm operation.",
   "FAQ Вопросы, которые нужно закрыть до заявки": "FAQ Questions to close before submitting a request",
   "Расчёт фермы и состав комплекта под объект": "Farm estimate and kit composition for the site",
   "Если вы считаете ферму как систему, начните с вводных по объекту, а не с отдельных SKU.": "If you calculate the farm as a system, start with the site inputs, not with individual SKUs.",
@@ -1946,4 +1992,91 @@ const TRANSLATIONS_EN = {
   ,"Покупка становится быстрой, когда сама линия уже собрана на бумаге.": "The purchase becomes fast when the line itself has already been assembled on paper."
   ,"Неравномерность подачи редко выглядит критичной сразу, но быстро уходит в стресс по корню и нестабильность ряда.": "Uneven delivery rarely looks critical at once, but it quickly turns into root stress and row instability."
   ,"Если сам модуль ещё не собран, лучше сначала сверить схему линии, а потом уже добирать такие позиции.": "If the module itself is not assembled yet, it is better to verify the line scheme first and only then add positions like this."
+  ,"Объекты, где решение собирали по порядку": "Projects where the solution was assembled in the right order"
+  ,"Клубника остаётся ядром проекта. Огуречный объект здесь нужен не как новая витрина, а как смежный proof-case: когда controlled-environment объект собирают как систему, меньше хаоса, случайных закупок и возвратов к базовой логике.": "Strawberry remains the core of the project. The cucumber site appears here not as a new showcase, but as an adjacent proof case: when a controlled-environment site is assembled as a system, there is less chaos, fewer random purchases, and fewer returns to the core logic."
+  ,"Клубника · Новый запуск": "Strawberry · New launch"
+  ,"Новая конфигурация фермы без распада на отдельные закупки": "A new farm configuration without breaking into separate purchases"
+  ,"На старте нужно было задать рабочую рамку объекта до того, как проект уйдёт в разрозненные решения.": "At the start, the goal was to set a working outline for the site before the project drifted into disconnected decisions."
+  ,"Что собрали:": "What was assembled:"
+  ,"стеллажи, свет, полив и расходники в одной схеме с понятной границей между товарной и проектной частью.": "racks, lighting, irrigation, and consumables in one scheme with a clear line between the product part and the project part."
+  ,"На закупку проект вышел с понятным составом и без возвратов к базовой логике.": "The project moved into procurement with a clear composition and without returning to the basic logic."
+  ,"Перейти к расчёту": "Go to the estimate"
+  ,"Клубника · Стабилизация": "Strawberry · Stabilization"
+  ,"Действующая ферма, где результат держался реактивно": "An operating farm where the result was managed reactively"
+  ,"Качество ягоды и параметры среды плавали, а решения принимались по симптомам.": "Berry quality and environment parameters drifted, and decisions were made by symptoms."
+  ,"Что сделали:": "What was done:"
+  ,"связали свет, полив и корневую зону в одну логику и отделили первичные корректировки от вторичных.": "lighting, irrigation, and the root zone were tied into one logic, separating primary adjustments from secondary ones."
+  ,"Появился понятный порядок действий и более точный выбор узлов для замены.": "A clear order of actions appeared along with a more precise choice of nodes for replacement."
+  ,"Разобрать свою ферму": "Review your farm"
+  ,"Смежный объект · Огурец": "Adjacent site · Cucumber"
+  ,"Огуречный объект как proof-case по инженерной логике": "A cucumber site as a proof case of engineering logic"
+  ,"Это не новый фокус бренда, а смежный controlled-environment объект, где критичной оказалась та же последовательность решений.": "This is not a new brand focus, but an adjacent controlled-environment site where the same sequence of decisions proved critical."
+  ,"Свет, ритм среды, рабочие проходы и обслуживание как одну объектную схему.": "Lighting, the environmental rhythm, working aisles, and maintenance as one site-level scheme."
+  ,"Кейс подтверждает: сильный результат начинается не с культуры как таковой, а с правильно собранной системы.": "This case confirms that a strong result begins not with the crop itself, but with a properly assembled system."
+  ,"Открыть proof-case": "Open the proof case"
+  ,"Смежный proof-case": "Adjacent proof case"
+  ,"Огуречный объект как подтверждение системного подхода": "A cucumber site as confirmation of the systems approach"
+  ,"Это не поворот бренда в новую нишу и не отдельная витрина под огурец. Это реальный controlled-environment объект, где важным оказался тот же порядок решений: сначала схема, потом узлы, потом запуск.": "This is not the brand turning to a new niche or a separate cucumber showcase. It is a real controlled-environment site where the same order of decisions mattered: first the scheme, then the nodes, then the launch."
+  ,"Для клиента KlubnikaProject этот кейс важен не культурой, а доказательством подхода: когда объект собирается как система, меньше хаоса, меньше случайных узлов и понятнее, где проходит граница между товаром и проектной частью.": "For a KlubnikaProject client, this case matters not because of the crop, but because it proves the approach: when a site is assembled as a system, there is less chaos, fewer random nodes, and a clearer line between the product part and the project part."
+  ,"Обсудить свой объект": "Discuss your site"
+  ,"Вернуться на главную": "Return to the homepage"
+  ,"Если нужна новая клубничная конфигурация": "If you need a new strawberry configuration"
+  ,"Если нужно разобрать действующую ферму": "If you need to review an operating farm"
+  ,"Что важно в этом кейсе": "What matters in this case"
+  ,"Смежный объект, а не новая культура в фокусе бренда.": "An adjacent site, not a new crop in the brand focus."
+  ,"Критична была не витрина оборудования, а порядок решений по объекту.": "What mattered was not an equipment showcase, but the order of site-level decisions."
+  ,"Кейс нужен, чтобы показать устойчивость подхода в controlled environment.": "The case is here to show the resilience of the approach in a controlled environment."
+  ,"Здесь важен не огурец сам по себе, а то, как объект перестаёт распадаться на отдельные локальные решения.": "What matters here is not cucumber by itself, but how the site stops falling apart into separate local decisions."
+  ,"Роль кейса": "Role of the case"
+  ,"Смежный proof-case, который усиливает доверие к инженерной логике без смены ядра бренда.": "An adjacent proof case that reinforces trust in engineering logic without changing the brand core."
+  ,"Главная задача": "Main task"
+  ,"Собрать свет, режим среды, проходы и обслуживание в одну рабочую схему до запуска.": "To assemble lighting, the environmental regime, aisles, and maintenance into one working scheme before launch."
+  ,"Что это был за объект": "What kind of site it was"
+  ,"Controlled-environment объект, где порядок решений оказался важнее скорости закупки": "A controlled-environment site where the order of decisions mattered more than procurement speed"
+  ,"Задача была не в том, чтобы быстро подобрать набор оборудования под огурец. Нужно было собрать рабочую схему объекта так, чтобы режим среды, доступ к узлам и обслуживание не конфликтовали между собой.": "The task was not to quickly pick an equipment set for cucumber. The goal was to build a working site scheme so that the environmental regime, access to nodes, and maintenance would not conflict with one another."
+  ,"Смежный controlled-environment кейс без смены клубники как ядра бренда.": "An adjacent controlled-environment case without replacing strawberry as the brand core."
+  ,"Собрать систему, а не список отдельных узлов под быстрый запуск.": "To assemble a system, not a list of separate nodes for a quick launch."
+  ,"Ошибка в одном блоке тянула бы за собой всю схему и обслуживание объекта.": "A mistake in one block would drag down the whole scheme and site maintenance."
+  ,"Что было критично": "What was critical"
+  ,"Не перепутать этапы: сначала логика объекта, потом подбор узлов, потом переход в рабочую эксплуатацию.": "Not to mix up the stages: first the site logic, then node selection, then transition into working operation."
+  ,"Связку света, ритма среды, рабочих проходов, обслуживания и порядка внедрения как одну объектную логику.": "The link between lighting, environmental rhythm, working aisles, maintenance, and rollout order as one site-level logic."
+  ,"Более собранную и управляемую схему без распада на случайные локальные решения.": "A more coherent and manageable scheme without collapsing into random local decisions."
+  ,"Что подтверждает кейс": "What the case confirms"
+  ,"Сильный объект начинается не с витрины товаров, а с ясной схемы": "A strong site does not start with a product showcase, but with a clear scheme"
+  ,"Этот кейс важен не культурой сам по себе, а тем, что показывает цену порядка решений внутри controlled-environment объекта.": "This case matters not because of the crop itself, but because it shows the value of ordered decisions inside a controlled-environment site."
+  ,"Что подтвердил сам объект": "What the site itself confirmed"
+  ,"Узлы начинают работать лучше, когда собираются в правильной последовательности.": "Nodes begin to work better when they are assembled in the right sequence."
+  ,"Свет, среда, проходы и обслуживание нельзя подбирать как отдельные фрагменты.": "Lighting, environment, aisles, and maintenance cannot be selected as separate fragments."
+  ,"Смежная культура показывает ту же цену системной ошибки, если объект собирают кусками.": "An adjacent crop shows the same price of a system-level mistake when the site is assembled in pieces."
+  ,"Почему это важно клиенту KlubnikaProject": "Why this matters to a KlubnikaProject client"
+  ,"Для клубники так же критична связка света, среды, проходов и обслуживания.": "For strawberry, the link between lighting, environment, aisles, and maintenance is just as critical."
+  ,"Быстрее видно, что сначала считать, а что уже можно переводить в закупку.": "It becomes clear faster what should be estimated first and what can already move into procurement."
+  ,"Меньше шанс собрать дорогую системную ошибку ещё на старте проекта.": "There is less chance of assembling an expensive system-level mistake at the very start of the project."
+  ,"Зачем этот кейс на сайте": "Why this case is on the site"
+  ,"Огурец здесь не меняет бренд, а усиливает доверие к подходу": "Cucumber does not change the brand here; it reinforces trust in the approach"
+  ,"Клубника остаётся ядром KlubnikaProject. Этот proof-case нужен, чтобы спокойнее показать, как работает объектная логика там, где цена случайного выбора особенно заметна.": "Strawberry remains the core of KlubnikaProject. This proof case is here to calmly show how site logic works where the cost of random choices becomes especially visible."
+  ,"Клубника остаётся ядром": "Strawberry remains the core"
+  ,"Кейс не разворачивает бренд в новую нишу и не делает огурец новым продуктовым фокусом.": "The case does not pivot the brand into a new niche or make cucumber a new product focus."
+  ,"Огурец здесь как proof-case": "Cucumber is here as a proof case"
+  ,"Он показывает, что системный подход держится не только на знакомой культуре, но и на логике controlled environment.": "It shows that the systems approach does not rely only on a familiar crop, but on controlled-environment logic."
+  ,"Польза для клиента": "Value for the client"
+  ,"Становится понятнее, где проходит граница между типовым товаром и проектной частью объекта.": "It becomes clearer where the line runs between a standard product and the project-specific part of the site."
+  ,"Главный вывод": "Main takeaway"
+  ,"Система важнее случайного набора решений, особенно там, где запуск зависит от связки узлов.": "The system matters more than a random bundle of decisions, especially where launch depends on the link between nodes."
+  ,"Следующий шаг": "Next step"
+  ,"Если задача уже шире одной покупки, лучше сначала собрать схему": "If the task is already larger than one purchase, it is better to assemble the scheme first"
+  ,"Для таких объектов важнее не просто посмотреть кейс, а понять свой порядок действий: что считать, что подбирать и где заканчивается товарная часть и начинается объектная логика.": "For such sites, it matters more not just to view the case, but to understand your own order of actions: what to estimate, what to select, and where the product part ends and the site logic begins."
+  ,"Смежные proof-case нужны здесь, чтобы яснее показать логику проектных решений": "Adjacent proof cases are here to show the logic of project decisions more clearly"
+  ,"Смежный proof-case системного подхода": "An adjacent proof case of the systems approach"
+  ,"Огуречный объект как proof-case системного подхода": "A cucumber site as a proof case of the systems approach"
+  ,"Это не смена фокуса бренда, а смежный объект, на котором видно: тот же порядок решений работает и вне клубничного сценария.": "This is not a shift in the brand focus, but an adjacent site that shows the same order of decisions works outside the strawberry scenario as well."
+  ,"Для клиента по клубнике этот кейс важен как подтверждение подхода. Здесь критичной была не культура сама по себе, а то, как свет, ритм обслуживания, проходы и рабочие узлы собираются в устойчивую схему объекта.": "For a strawberry client, this case matters as confirmation of the approach. What was critical here was not the crop itself, but how lighting, the service rhythm, aisles, and working nodes come together into a stable site scheme."
+  ,"Этот объект нужен здесь не ради новой ниши, а как подтверждение: системная логика работает на уровне объекта, а не только внутри клубничного сценария.": "This site is here not for a new niche, but as confirmation that system logic works at the site level, not only inside the strawberry scenario."
+  ,"Не ради новой ниши, а чтобы показать: сильный объект не распадается на отдельные узлы даже в смежном сценарии.": "Not for a new niche, but to show that a strong site does not fall apart into separate nodes even in an adjacent scenario."
+  ,"Смежный объект, где решающей оказалась не культура, а собранная схема среды": "An adjacent site where the decisive factor was not the crop, but the assembled environmental scheme"
+  ,"Этот кейс не размывает бренд в сторону \"мы про всё подряд\". Он показывает более важную вещь: если объект controlled environment собрать как систему, логика остаётся рабочей и вне клубничного ядра.": "This case does not blur the brand toward 'we do everything.' It shows something more important: if a controlled-environment site is assembled as a system, the logic remains workable outside the strawberry core."
+  ,"Этот кейс усиливает доверие: подход держится на объектной логике, а не на наборе случайных решений.": "This case strengthens trust: the approach is grounded in site logic, not in a bundle of random decisions."
+  ,"Объект в работе": "The site in operation"
+  ,"Ряды, проходы и обслуживание как часть одной схемы": "Rows, aisles, and maintenance as part of one scheme"
+  ,"Здесь важны не красивые кадры сами по себе, а то, как читается объект: проходы, плотность, доступ к узлам и режим обслуживания.": "What matters here is not pretty shots by themselves, but how the site reads: aisles, density, access to nodes, and the maintenance rhythm."
 };

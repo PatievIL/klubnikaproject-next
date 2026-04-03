@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-04-02T11:49:37.945Z",
+  "generatedAt": "2026-04-03T09:41:22.341Z",
   "source": "catalogData",
   "basePath": "/catalog/",
-  "shopName": "Каталог оборудования для клубничной фермы",
-  "slogan": "Свет, полив, стеллажи, посадочный материал и сервисные позиции для controlled-environment фермы.",
+  "shopName": "Каталог для клубничной фермы",
+  "slogan": "Свет, полив, стеллажи, субстрат, посадочный материал и сервисные позиции для рабочей закупки клубничной фермы.",
   "counts": {
     "categories": 27,
     "products": 48,
@@ -772,7 +772,7 @@
       "productCount": 5,
       "sortOrder": 10,
       "seoTitle": "LED-освещение для клубничной фермы",
-      "seoDescription": "Линейные и тепличные светильники для controlled-environment фермы: длина, мощность, подвес и логика ряда.",
+      "seoDescription": "Линейные и тепличные светильники для клубничной фермы: длина, мощность, подвес и логика ряда.",
       "topLevelSlug": "led",
       "path": "/catalog/led/"
     },
@@ -814,7 +814,7 @@
       "productCount": 12,
       "sortOrder": 20,
       "seoTitle": "Полив и дозирование для клубничной фермы",
-      "seoDescription": "Капельницы, магистрали, фильтры, фитинги и комплекты полива для controlled-environment фермы.",
+      "seoDescription": "Капельницы, магистрали, фильтры, фитинги и комплекты полива для клубничной фермы.",
       "topLevelSlug": "irrigation",
       "path": "/catalog/irrigation/"
     },
@@ -870,7 +870,7 @@
       "productCount": 7,
       "sortOrder": 30,
       "seoTitle": "Стеллажные системы для клубничной фермы",
-      "seoDescription": "Каркасы, ряды, сервисные узлы и лотки для controlled-environment фермы.",
+      "seoDescription": "Каркасы, ряды, сервисные узлы и лотки для клубничной фермы.",
       "topLevelSlug": "racks",
       "path": "/catalog/racks/"
     },
@@ -912,7 +912,7 @@
       "productCount": 5,
       "sortOrder": 40,
       "seoTitle": "Субстраты для клубничной фермы",
-      "seoDescription": "Маты, кубики и стартовые решения для controlled-environment корневой зоны клубники.",
+      "seoDescription": "Маты, кубики и стартовые решения для корневой зоны клубничной фермы.",
       "topLevelSlug": "substrates",
       "path": "/catalog/substrates/"
     },
@@ -954,7 +954,7 @@
       "productCount": 5,
       "sortOrder": 50,
       "seoTitle": "Посадочный материал для клубничной фермы",
-      "seoDescription": "Frigo и семенные серии для controlled-environment запуска и ротации клубничной фермы.",
+      "seoDescription": "Frigo и семенные серии для запуска и ротации клубничной фермы.",
       "topLevelSlug": "planting-material",
       "path": "/catalog/planting-material/"
     },
@@ -982,7 +982,7 @@
       "productCount": 3,
       "sortOrder": 52,
       "seoTitle": "Семенные серии клубники",
-      "seoDescription": "Семенные серии клубники для controlled-environment запуска и повторяемой продукции.",
+      "seoDescription": "Семенные серии клубники для управляемого запуска и повторяемой продукции.",
       "topLevelSlug": "planting-material",
       "path": "/catalog/seed-series/"
     },
@@ -1024,7 +1024,7 @@
       "productCount": 2,
       "sortOrder": 62,
       "seoTitle": "Увлажнение и туман",
-      "seoDescription": "Увлажнение и станции тумана для клубничной фермы в контролируемой среде.",
+      "seoDescription": "Увлажнение и станции тумана для клубничной фермы.",
       "topLevelSlug": "climate",
       "path": "/catalog/humidification/"
     },
@@ -1052,7 +1052,7 @@
       "productCount": 2,
       "sortOrder": 71,
       "seoTitle": "Базовые линии питания",
-      "seoDescription": "Базовые линии питания для controlled-environment клубничной фермы.",
+      "seoDescription": "Базовые линии питания для клубничной фермы.",
       "topLevelSlug": "nutrition",
       "path": "/catalog/base-nutrition/"
     },

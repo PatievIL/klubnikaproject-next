@@ -143,7 +143,7 @@ function addToCart(productId) {
     return;
   }
   updateCart(productId, 1);
-  state.flashMessage = "Товар добавлен в корзину";
+  state.flashMessage = "Позиция добавлена в корзину";
   render();
 }
 
@@ -458,7 +458,7 @@ function handleSubmit(event) {
 
   if (form.matches("[data-newsletter-form]")) {
     event.preventDefault();
-    state.newsletterStatus = "Подписка сохранена локально. Следующий шаг: подключить backend endpoint.";
+    state.newsletterStatus = "Контакт сохранён локально. Чтобы это заработало в проде, нужно подключить backend endpoint.";
     render();
     return;
   }

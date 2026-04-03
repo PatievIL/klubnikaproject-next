@@ -13,8 +13,8 @@ const STORAGE_KEY = "klubnikaproject.calc.state.v2";
 
 const STEP_META = [
   {
-    title: "Сценарий проекта",
-    intro: "От сценария зависит, когда хватит предварительной рамки, а когда уже нужен разговор по объекту."
+    title: "Что считаем",
+    intro: "Сначала важно понять саму задачу. Этого достаточно, чтобы расчёт был полезным."
   },
   {
     title: "Формат объекта",
@@ -30,7 +30,7 @@ const STEP_META = [
   },
   {
     title: "Цель расчёта",
-    intro: "Нужно понять, чего вы ждёте от результата: комплект, бюджет, сравнение сценариев или подготовку к запуску."
+    intro: "Нужно понять, чего вы ждёте от результата: комплект, бюджет, сравнение вариантов или подготовку к запуску."
   },
   {
     title: "Канал реализации и ожидания",
@@ -158,11 +158,16 @@ const elements = {
   expenseModeToggle: document.getElementById("expense-mode-toggle"),
   resultStatusTitle: document.getElementById("result-status-title"),
   resultStatusText: document.getElementById("result-status-text"),
+  resultPersonalTitle: document.getElementById("result-personal-title"),
+  resultPersonalText: document.getElementById("result-personal-text"),
+  resultPersonalMetrics: document.getElementById("result-personal-metrics"),
   resultRouteTitle: document.getElementById("result-route-title"),
   resultRouteText: document.getElementById("result-route-text"),
   resultProjectLink: document.getElementById("result-project-link"),
   resultSecondaryLink: document.getElementById("result-secondary-link"),
-  assumptionList: document.getElementById("assumption-list"),
+  resultIncludesList: document.getElementById("result-includes-list"),
+  resultRelatedSection: document.getElementById("result-related"),
+  resultRelatedGrid: document.getElementById("result-related-grid"),
   copyLinkButton: document.getElementById("copy-link-button"),
   resetButton: document.getElementById("reset-button")
 };
@@ -503,7 +508,7 @@ function renderWizard() {
   });
 
   elements.wizardBack.disabled = stepIndex === 0;
-  elements.wizardNext.textContent = stepIndex === STEP_META.length - 1 ? "Открыть результат" : "Продолжить расчёт";
+  elements.wizardNext.textContent = stepIndex === STEP_META.length - 1 ? "Показать результат" : "Продолжить";
 }
 
 function renderSummary(calculation) {
@@ -553,31 +558,33 @@ function renderPreviewState(calculation) {
   elements.resultProjectLink.textContent = route.primary.label;
   elements.resultSecondaryLink.href = route.secondary.href;
   elements.resultSecondaryLink.textContent = route.secondary.label;
+  renderPersonalResult(calculation);
+  renderRelatedRecommendations(calculation);
 
   if (state.submitted) {
-    elements.resultStatusTitle.textContent = "Рамка зафиксирована. Теперь важен правильный следующий шаг";
-    elements.resultStatusText.textContent = "Основные вводные уже собраны. Теперь можно либо передать расчёт дальше, либо сразу сверить, нужен ли объектный разбор вместо типового пути.";
+    elements.resultStatusTitle.textContent = "Расчёт по вашим вводным готов";
+    elements.resultStatusText.textContent = "Данные сохранены. Ниже уже собрана рамка по вашей конфигурации, масштабу и бюджету.";
   } else {
-    elements.resultStatusTitle.textContent = "Маршрут уже начинает читаться по текущим вводным";
-    elements.resultStatusText.textContent = "Калькулятор показывает не только цифры, но и следующий логичный путь. Завершите wizard, чтобы зафиксировать расчёт и передать его дальше без повторного набора.";
+    elements.resultStatusTitle.textContent = "Расчёт уже собирается по текущим вводным";
+    elements.resultStatusText.textContent = "Завершите шаги и оставьте контакт, чтобы сохранить персональный результат и спокойно вернуться к нему позже.";
   }
 }
 
 function buildRouteAdvice(calculation) {
   const farmLink = buildFarmLink(calculation);
-  const solutionsLink = "../shop/solutions/";
   const consultationsLink = "../consultations/#request";
+  const managerLink = state.objectState === "active" || state.scenarioType === "existing" ? "../study/" : consultationsLink;
 
   if (state.goal === "bottleneck") {
     return {
-      title: "Если задача в узком месте, не идите сразу в каталог",
-      text: "Здесь важнее не подобрать случайную позицию, а разобрать причину просадки по узлу, качеству ягоды, поливу, корневой зоне или свету.",
+      title: "Сначала соберите расчёт именно по вашей ферме",
+      text: "Когда речь о узком месте, важнее понять текущую схему и вводные, чем сразу искать отдельную позицию в каталоге.",
       primary: {
-        label: "Открыть консультации",
-        href: consultationsLink
+        label: "Продолжить по моей ферме",
+        href: farmLink
       },
       secondary: {
-        label: "Открыть сопровождение",
+        label: "Разобрать с менеджером",
         href: "../study/"
       }
     };
@@ -585,60 +592,147 @@ function buildRouteAdvice(calculation) {
 
   if (state.objectState === "active" || state.scenarioType === "existing" || state.goal === "bottleneck") {
     return {
-      title: "Для действующей фермы сначала нужен разбор текущей схемы",
-      text: "У вас уже не старт с нуля. Здесь важнее проверить совместимость узлов, ограничения объекта и логику текущей технологии, а потом уже решать, считать новую очередь или корректировать действующую схему.",
+      title: "Лучше обсудить расчёт действующей фермы",
+      text: "У вас не типовой старт. Здесь важнее сверить текущую схему, ограничения объекта и совместимость узлов, а уже потом решать, что менять или докупать.",
       primary: {
-        label: "Открыть сопровождение",
-        href: "../study/"
-      },
-      secondary: {
-        label: "Открыть консультации",
-        href: consultationsLink
-      }
-    };
-  }
-
-  if (state.scaleType === "pilot" && state.goal === "kit") {
-    return {
-      title: "Для пилотного запуска можно идти в готовое решение",
-      text: "Если нужен быстрый вход и типовой модуль, дальше можно смотреть готовые решения. Если хотя бы один параметр объекта нестандартный, лучше сразу передавать вводные в объектный расчёт.",
-      primary: {
-        label: "Открыть готовые решения",
-        href: solutionsLink
-      },
-      secondary: {
-        label: "Передать вводные на расчёт",
+        label: "Открыть расчёт фермы",
         href: farmLink
+      },
+      secondary: {
+        label: "Разобрать с менеджером",
+        href: managerLink
       }
     };
   }
 
   if (state.scaleType === "current" || state.scaleType === "expand" || state.scenarioType === "expand") {
     return {
-      title: "На расширении следующий шаг — расчёт под объект",
-      text: "На этом этапе уже важны проходы, высота, этапность закупки, связка света, полива и стеллажей. Магазин здесь полезен только после объектного расчёта и проверки текущей инфраструктуры.",
+      title: "Лучше продолжить расчёт уже по вашему объекту",
+      text: "На расширении уже важны проходы, высота, этапность закупки и связка стеллажей, света и полива. Здесь нужен персональный расчёт, а не общий ориентир.",
       primary: {
-        label: "Передать вводные на расчёт",
+        label: "Продолжить по моей ферме",
         href: farmLink
       },
       secondary: {
-        label: "Открыть магазин",
-        href: "../shop/"
+        label: "Обсудить объект",
+        href: managerLink
       }
     };
   }
 
   return {
-    title: "Для типового запуска дальше нужен расчёт или добор типовых позиций",
-    text: "Если задача в типовой первой очереди, можно передать вводные на расчёт и затем добрать понятные позиции через магазин. Если объект уже начинает выходить за типовую схему, не задерживайтесь на каталоге.",
+    title: "Дальше можно перейти к подробному расчёту фермы",
+    text: "Даже если задача выглядит типовой, персональный расчёт всё равно помогает не ошибиться с составом. Каталог и готовые решения лучше смотреть после него.",
     primary: {
-      label: "Передать вводные на расчёт",
+      label: "Открыть расчёт фермы",
       href: farmLink
     },
     secondary: {
-      label: "Открыть готовые решения",
-      href: solutionsLink
+      label: "Разобрать с менеджером",
+      href: managerLink
     }
+  };
+}
+
+function renderPersonalResult(calculation) {
+  const budgetRange = buildBudgetRange(calculation.totalEquipmentCost);
+  const objectLabel = `${formatSmart(state.a0)} × ${formatSmart(state.a1)} м`;
+
+  elements.resultPersonalTitle.textContent = state.submitted
+    ? "Персональная рамка фермы по вашим вводным"
+    : "Предварительный ориентир по текущим вводным";
+
+  elements.resultPersonalText.textContent = [
+    LABELS.scenarioType[state.scenarioType],
+    LABELS.growingFormat[state.growingFormat],
+    `${objectLabel}, ${LABELS.scaleType[state.scaleType].toLowerCase()}`
+  ].join(" · ");
+
+  const metrics = [
+    { label: "Объект и масштаб", value: `${objectLabel} · ${formatSmart(calculation.area)} м²` },
+    { label: "Конфигурация", value: `${formatSmart(calculation.totalRacks)} стеллажей · ${formatSmart(calculation.plantCount)} кустов` },
+    { label: "Ориентир по бюджету", value: `${formatRub(budgetRange.min)} – ${formatRub(budgetRange.max)}` },
+    { label: "Расходы / выручка", value: `${formatRub(calculation.monthlyCosts.total)} / мес · ${formatRub(calculation.activeScenario.annualRevenue)} / год` }
+  ];
+
+  elements.resultPersonalMetrics.innerHTML = metrics.map((item) => `
+    <div class="result-personal-metric">
+      <span>${item.label}</span>
+      <strong>${item.value}</strong>
+    </div>
+  `).join("");
+
+  elements.resultIncludesList.innerHTML = [
+    `По узлам уже собрана базовая рамка: стеллажи, свет, полив и корневая зона под ${formatSmart(calculation.totalRacks)} модулей.`,
+    `Ориентир по закупке оборудования и посадочного материала на ${formatRub(calculation.totalEquipmentCost)} в текущей модели.`,
+    `Сценарная экономика: ${formatRub(calculation.monthlyCosts.total)} расходов в месяц и ${formatRub(calculation.activeScenario.annualRevenue)} выручки в год.`,
+    `Понимание, что лучше делать дальше: считать подробнее, обсудить объект или уже потом добирать релевантные решения.`
+  ].map((item) => `<li>${item}</li>`).join("");
+}
+
+function renderRelatedRecommendations(calculation) {
+  if (!elements.resultRelatedSection || !elements.resultRelatedGrid) {
+    return;
+  }
+
+  if (!state.submitted) {
+    elements.resultRelatedSection.hidden = true;
+    elements.resultRelatedGrid.innerHTML = "";
+    return;
+  }
+
+  const cards = buildRelatedRecommendations(calculation);
+  elements.resultRelatedSection.hidden = false;
+  elements.resultRelatedGrid.innerHTML = cards.map((card) => `
+    <article class="card result-card result-related-card">
+      <div class="tag">${card.tag}</div>
+      <h3>${card.title}</h3>
+      <p class="sublead">${card.text}</p>
+      <div class="btn-row">
+        <a class="btn btn-secondary" href="${card.href}">${card.label}</a>
+      </div>
+    </article>
+  `).join("");
+}
+
+function buildRelatedRecommendations(calculation) {
+  const managerLink = state.objectState === "active" || state.scenarioType === "existing" ? "../study/" : "../consultations/#request";
+  const needsTypicalSolutions = state.scaleType === "pilot" || state.goal === "kit";
+  const nodeLink = state.growingFormat === "multi-tier" ? "../catalog/racks/index.html" : "../catalog/index.html";
+  const lightingLink = "../catalog/led/index.html";
+  const solutionLink = "../shop/solutions/";
+
+  return [
+    {
+      tag: "Подходящие узлы",
+      title: needsTypicalSolutions ? "Стеллажи и базовые узлы для первого контура" : "Релевантные узлы каталога под вашу конфигурацию",
+      text: needsTypicalSolutions
+        ? `Для рамки на ${formatSmart(calculation.totalRacks)} модулей сначала стоит смотреть конструкцию и базовую связку узлов.`
+        : "После персонального расчёта уже проще перейти к узлам каталога и смотреть только то, что действительно подходит.",
+      label: "Открыть узлы каталога",
+      href: nodeLink
+    },
+    {
+      tag: "Типовые решения",
+      title: "Если нужен быстрый вход, посмотрите типовые решения",
+      text: "Это уже следующий уровень: сначала расчёт вашей фермы, потом типовые решения и каталог.",
+      label: "Открыть готовые решения",
+      href: needsTypicalSolutions ? solutionLink : lightingLink
+    },
+    {
+      tag: "Что дальше",
+      title: "Сверить расчёт с менеджером или перейти к разбору",
+      text: "Если объект нестандартный, действующий или поэтапный, полезнее не каталог, а разговор по вашей схеме.",
+      label: "Открыть разбор",
+      href: managerLink
+    }
+  ];
+}
+
+function buildBudgetRange(total) {
+  return {
+    min: Math.round(total * 0.9),
+    max: Math.round(total * 1.15)
   };
 }
 
@@ -802,13 +896,7 @@ function renderRevenueBlock(calculation) {
   elements.annualModelOpex.textContent = formatRub(calculation.annualModelOpex);
 }
 
-function renderAssumptions(calculation) {
-  elements.assumptionList.innerHTML = [
-    `Если у вас уже есть объект или действующая ферма, каталог не должен быть первым шагом. Сначала нужен разбор текущей схемы.`,
-    `${calculation.basicRacks} базовых и ${calculation.extraRacks} дополнительных стеллажей. Всего ${calculation.totalRacks} модулей в текущей рамке.`,
-    `${pricing.constants.plantsPerRack} растений на стеллаж. В модели это ${formatSmart(calculation.plantCount)} растений, но фактическая схема потом уточняется по объекту.`,
-    `Блок сценариев использует модельные допущения по свету, расходам и урожайности. Их задача — сравнить порядок цифр, а не обещать финальный результат.`
-  ].map((item) => `<li>${item}</li>`).join("");
+function renderAssumptions() {
 }
 
 function formatValueWithUnit(value, unit) {

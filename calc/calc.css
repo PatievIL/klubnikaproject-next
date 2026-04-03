@@ -1,7 +1,8 @@
-.hero-title-compact {
-  font-size: clamp(24px, 2.8vw, 34px);
-  line-height: 0.98;
-  max-width: 12ch;
+.calc-wizard-layout,
+.calc-wizard-layout *,
+.calc-wizard-layout *::before,
+.calc-wizard-layout *::after {
+  box-sizing: border-box;
 }
 
 .hero-output-list {
@@ -47,6 +48,9 @@
 .calc-wizard,
 .calc-summary {
   background: var(--surface-3);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .calc-summary {
@@ -60,6 +64,10 @@
   justify-content: space-between;
   gap: 20px;
   align-items: start;
+}
+
+.wizard-top > * {
+  min-width: 0;
 }
 
 .wizard-progress-meta {
@@ -782,12 +790,6 @@ code {
 }
 
 @media (max-width: 760px) {
-  .hero-title-compact {
-    max-width: 10ch;
-    font-size: clamp(22px, 10vw, 30px);
-    line-height: 0.98;
-  }
-
   .hero-output-list {
     gap: 10px;
     margin-top: 20px;
@@ -857,8 +859,9 @@ code {
   }
 
   .wizard-step-list {
-    margin-right: -8px;
+    margin-right: 0;
     padding-bottom: 4px;
+    padding-right: 8px;
   }
 
   .wizard-step-chip {

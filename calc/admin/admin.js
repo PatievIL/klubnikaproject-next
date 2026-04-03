@@ -8,8 +8,6 @@ import {
 } from "../calc-core.js";
 
 const STORAGE_KEY = "klubnikaproject.calc.admin.draft.v1";
-const BACKEND_TOKEN_KEY = "klubnikaproject.site.admin.token.v1";
-const DEFAULT_API_BASE = "https://api.klubnikaproject.ru/site/v1";
 
 const CONSTANT_FIELDS = [
   {
@@ -80,20 +78,8 @@ const PRICE_GROUPS = [
 let publishedPricing = null;
 let draftPricing = null;
 let previewState = null;
-let backendUser = null;
-let workspaceReady = false;
 
 const elements = {
-  accessGate: document.getElementById("calc-admin-access-gate"),
-  workspace: document.getElementById("calc-admin-workspace"),
-  backendToken: document.getElementById("calc-admin-backend-token"),
-  loginIdentity: document.getElementById("calc-admin-login-identity"),
-  loginPassword: document.getElementById("calc-admin-login-password"),
-  loginButton: document.getElementById("calc-admin-login-button"),
-  passwordLoginButton: document.getElementById("calc-admin-password-login-button"),
-  sessionButton: document.getElementById("calc-admin-session-button"),
-  logoutButton: document.getElementById("calc-admin-logout-button"),
-  sessionState: document.getElementById("calc-admin-session-state"),
   constantsGrid: document.getElementById("constants-grid"),
   defaultsGrid: document.getElementById("defaults-grid"),
   priceGroups: document.getElementById("price-groups"),
@@ -116,10 +102,11 @@ init().catch((error) => {
 });
 
 async function init() {
-  hydrateBackendToken();
-  bindAuthEvents();
-  renderAccessState();
-  await checkBackendSession();
+  publishedPricing = await loadPricing();
+  hydrateDraft();
+
+  renderAll();
+  bindEvents();
 }
 
 async function loadPricing() {
@@ -150,174 +137,11 @@ function loadStoredDraft() {
   }
 }
 
-function bindAuthEvents() {
-  elements.backendToken?.addEventListener("input", persistBackendToken);
-  elements.loginButton?.addEventListener("click", loginToBackend);
-  elements.passwordLoginButton?.addEventListener("click", loginToBackendWithPassword);
-  elements.sessionButton?.addEventListener("click", checkBackendSession);
-  elements.logoutButton?.addEventListener("click", logoutFromBackend);
-}
-
-function bindWorkspaceEvents() {
+function bindEvents() {
   elements.priceSearch.addEventListener("input", renderPriceGroups);
   elements.downloadJsonButton.addEventListener("click", downloadJson);
   elements.copyJsonButton.addEventListener("click", copyJson);
   elements.resetDraftButton.addEventListener("click", resetDraft);
-}
-
-function hydrateBackendToken() {
-  if (elements.backendToken) {
-    elements.backendToken.value = window.localStorage.getItem(BACKEND_TOKEN_KEY) || "";
-  }
-}
-
-function persistBackendToken() {
-  if (!elements.backendToken) return;
-  window.localStorage.setItem(BACKEND_TOKEN_KEY, elements.backendToken.value.trim());
-}
-
-function getBackendToken() {
-  return (elements.backendToken?.value || "").trim();
-}
-
-function getApiBase() {
-  return DEFAULT_API_BASE.replace(/\/+$/, "");
-}
-
-function isAllowedCalcAdminUser(user) {
-  const role = user?.user_role || user?.role || "";
-  const accountType = user?.account_type || "";
-  return accountType === "admin" || ["owner", "admin", "editor"].includes(role);
-}
-
-function renderAccessState() {
-  const authenticated = Boolean(backendUser);
-  document.body.dataset.calcAdminAuth = authenticated ? "authenticated" : "guest";
-  if (elements.accessGate) {
-    elements.accessGate.hidden = authenticated;
-  }
-  if (elements.workspace) {
-    elements.workspace.hidden = !authenticated;
-  }
-}
-
-async function ensureWorkspaceReady() {
-  if (workspaceReady) return;
-  publishedPricing = await loadPricing();
-  hydrateDraft();
-  renderAll();
-  bindWorkspaceEvents();
-  workspaceReady = true;
-}
-
-async function adminFetch(path, options = {}) {
-  const headers = new Headers(options.headers || {});
-  const token = getBackendToken();
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
-  headers.set("X-KP-Requested-With", "klubnikaproject");
-  if (options.body && !headers.has("Content-Type")) {
-    headers.set("Content-Type", "application/json");
-  }
-
-  const response = await fetch(`${getApiBase()}${path}`, {
-    ...options,
-    headers,
-    credentials: "include",
-  });
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text || `Backend returned ${response.status}`);
-  }
-  return response.json();
-}
-
-async function applyBackendAccessState(user) {
-  backendUser = user || null;
-  renderAccessState();
-  await ensureWorkspaceReady();
-}
-
-function applyGuestAccessState() {
-  backendUser = null;
-  renderAccessState();
-}
-
-async function loginToBackend() {
-  const token = getBackendToken();
-  if (!token) {
-    elements.sessionState.textContent = "Сначала вставьте backend token.";
-    return;
-  }
-  try {
-    elements.sessionState.textContent = "Выполняю вход...";
-    const response = await adminFetch("/admin/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ token }),
-    });
-    const user = response.user;
-    if (!isAllowedCalcAdminUser(user)) {
-      throw new Error("Недостаточно прав для админки калькулятора.");
-    }
-    await applyBackendAccessState(user);
-    elements.sessionState.textContent = `Сессия backend активна: ${user?.display_name || user?.user_name || "пользователь"}`;
-  } catch (error) {
-    applyGuestAccessState();
-    elements.sessionState.textContent = `Вход не удался: ${error.message}`;
-  }
-}
-
-async function loginToBackendWithPassword() {
-  const login = (elements.loginIdentity?.value || "").trim();
-  const password = elements.loginPassword?.value || "";
-  if (!login || !password) {
-    elements.sessionState.textContent = "Введите admin login и пароль.";
-    return;
-  }
-  try {
-    elements.sessionState.textContent = "Выполняю вход по логину...";
-    const response = await adminFetch("/admin/auth/password-login", {
-      method: "POST",
-      body: JSON.stringify({ login, password }),
-    });
-    const user = response.user;
-    if (!isAllowedCalcAdminUser(user)) {
-      throw new Error("Недостаточно прав для админки калькулятора.");
-    }
-    await applyBackendAccessState(user);
-    elements.sessionState.textContent = `Сессия backend активна: ${user?.display_name || user?.user_name || "пользователь"}`;
-  } catch (error) {
-    applyGuestAccessState();
-    elements.sessionState.textContent = `Вход по логину не удался: ${error.message}`;
-  }
-}
-
-async function checkBackendSession() {
-  try {
-    elements.sessionState.textContent = "Проверяю сессию...";
-    const response = await adminFetch("/admin/auth/session");
-    const user = response.user;
-    if (!response.session || !isAllowedCalcAdminUser(user)) {
-      throw new Error("Сессия не подходит для админки калькулятора.");
-    }
-    await applyBackendAccessState(user);
-    elements.sessionState.textContent = `Сессия backend активна: ${user?.display_name || user?.user_name || "пользователь"}`;
-  } catch (error) {
-    applyGuestAccessState();
-    elements.sessionState.textContent = `Сессия не подтверждена: ${error.message}`;
-  }
-}
-
-async function logoutFromBackend() {
-  try {
-    elements.sessionState.textContent = "Завершаю сессию...";
-    await adminFetch("/admin/auth/logout", { method: "POST" });
-    applyGuestAccessState();
-    elements.sessionState.textContent = "Сессия backend завершена.";
-  } catch (error) {
-    elements.sessionState.textContent = `Не удалось завершить сессию: ${error.message}`;
-  }
 }
 
 function renderAll() {

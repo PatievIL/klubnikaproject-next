@@ -4,19 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Семенные серии клубники — Klubnika Project</title>
-  <meta name="description" content="Семенные серии клубники для controlled-environment запуска и повторяемой продукции." />
+  <meta name="description" content="Семенные серии клубники для управляемого запуска и повторяемой продукции." />
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <link rel="canonical" href="https://klubnikaproject.ru/catalog/seed-series/" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Семенные серии клубники — Klubnika Project" />
-  <meta property="og:description" content="Семенные серии клубники для controlled-environment запуска и повторяемой продукции." />
+  <meta property="og:description" content="Семенные серии клубники для управляемого запуска и повторяемой продукции." />
   <meta property="og:url" content="https://klubnikaproject.ru/catalog/seed-series/" />
   <meta property="og:image" content="https://klubnikaproject.ru/assets/photos/optimized/berry-cluster.webp" />
   <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png" />
   <link rel="manifest" href="../../site.webmanifest" />
-  <link rel="stylesheet" href="../../styles.css?v=20260402h" />
-  <link rel="stylesheet" href="../_app/catalog-app.css?v=20260402h" />
+  <link rel="stylesheet" href="../../styles.css?v=20260403d" />
+  <link rel="stylesheet" href="../_app/catalog-app.css?v=20260403d" />
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -66,7 +66,6 @@
                 <span class="brand-title-line">Klubnika</span>
                 <span class="brand-title-line">Project</span>
               </div>
-              <div class="brand-note">Магазин, комплектация и закупка в логике всего проекта</div>
             </div>
           </a>
         </div>
@@ -87,13 +86,13 @@
               <a href="../../farm/index.html"><strong>Расчёт фермы</strong><span>Состав запуска, рамка бюджета и следующий шаг.</span></a>
               <a href="../../study/index.html"><strong>Сопровождение</strong><span>Разбор действующей фермы, узких мест и технологии.</span></a>
               <a href="../../consultations/index.html"><strong>Консультации</strong><span>Точечный разбор задачи, совместимости и выбора.</span></a>
-              <a href="../../klubhack/index.html"><strong>Клубничный Хак</strong><span>База знаний по controlled-environment клубнике.</span></a>
+              <a href="../../klubhack/index.html"><strong>Клубничный Хак</strong><span>Практическая база по технологии клубничной фермы.</span></a>
             </div>
           </div>
           <div class="nav-group">
             <button class="nav-trigger" type="button">Каталог</button>
             <div class="nav-menu nav-menu-wide">
-              <a href="../../catalog/index.html"><strong>Магазин</strong><span>Весь storefront и вход в рабочие категории.</span></a>
+              <a href="../../catalog/index.html"><strong>Магазин</strong><span>Вход в рабочие категории и закупку без лишней витринности.</span></a>
               <a href="../../catalog/led/index.html"><strong>LED</strong><span>Линейные и тепличные сценарии досветки.</span></a>
               <a href="../../catalog/irrigation/index.html"><strong>Полив</strong><span>Полив, дозирование и расходники по узлам.</span></a>
               <a href="../../catalog/racks/index.html"><strong>Стеллажи</strong><span>Каркасы, лотки и модульные ряды.</span></a>
@@ -102,11 +101,14 @@
             </div>
           </div>
           <a class="nav-link" href="../../calc/index.html">Калькулятор</a>
-          <a class="nav-link catalog-nav-link-button" href="../../account/index.html">Кабинет</a>
-          <button type="button" class="nav-cta catalog-nav-cart" data-action="open-cart">
+        </nav>
+        <div class="catalog-header-utility">
+          <a class="catalog-icon-pill catalog-header-utility-link" href="#catalog-how-buy">Как купить</a>
+          <a class="catalog-icon-pill catalog-header-utility-link" href="../../account/index.html">Кабинет</a>
+          <button type="button" class="catalog-header-cart" data-action="open-cart">
             Корзина <span>0</span>
           </button>
-        </nav>
+        </div>
         <div class="catalog-header-mobile-actions">
           <button type="button" class="catalog-icon-pill" data-action="open-search" aria-label="Открыть поиск">Поиск</button>
           <button type="button" class="catalog-icon-pill" data-action="open-cart" aria-label="Открыть корзину">Корзина <span>0</span></button>
@@ -114,23 +116,27 @@
         </div>
       </div>
       <div class="catalog-header__bottom">
-        <div class="catalog-header-panel">
+        <div class="catalog-header-workbar">
           <form class="catalog-header-search" data-header-search>
-            <input type="search" value="" placeholder="Поиск по каталогу, артикулу или сценарию" />
-            <div class="catalog-scope-toggle" role="group" aria-label="Область поиска">
-              <button type="button" class="catalog-chip-button" data-action="set-search-mode" data-value="site">По всему сайту</button>
-              <button type="button" class="catalog-chip-button is-active" data-action="set-search-mode" data-value="catalog">По магазину</button>
+            <div class="catalog-search-shell">
+              <input type="search" value="" placeholder="Название, артикул или рабочий узел" />
+              <button type="submit" class="catalog-search-submit" aria-label="Искать по магазину">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M10.5 4a6.5 6.5 0 1 0 4.018 11.61l4.436 4.436 1.06-1.06-4.436-4.436A6.5 6.5 0 0 0 10.5 4Zm0 1.5a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z" />
+                </svg>
+                <span class="sr-only">Искать</span>
+              </button>
             </div>
-            <button type="submit" class="catalog-primary-button">Найти</button>
           </form>
-          <div class="catalog-header-actions">
-            <div class="catalog-header-phones">
-              <a href="tel:+78005552417">+7 (800) 555-24-17</a><a href="tel:+74951200630">+7 (495) 120-06-30</a>
+          <div class="catalog-header-support">
+            <div class="catalog-header-contactline">
+              <a href="tel:+79672429633">+7 967 242-96-33</a>
             </div>
-            <a class="catalog-icon-pill catalog-header-anchor" href="#catalog-how-buy">Как купить</a>
-            <a class="catalog-icon-pill catalog-header-anchor" href="#catalog-contacts">Контакты</a>
-            <button type="button" class="catalog-secondary-button" data-action="open-assistant" data-intent="callback">Заказать звонок</button>
-            <button type="button" class="catalog-secondary-button" data-action="open-assistant" data-intent="question">Задать вопрос</button>
+            <div class="catalog-header-actions">
+              <a class="catalog-icon-pill catalog-header-anchor" href="#catalog-contacts">Контакты</a>
+              <button type="button" class="catalog-secondary-button" data-action="open-assistant" data-intent="callback">Попросить звонок</button>
+              <button type="button" class="catalog-secondary-button" data-action="open-assistant" data-intent="question">Задать вопрос</button>
+            </div>
           </div>
         </div>
       </div>
@@ -168,58 +174,170 @@
           <p>Семенные гибриды и серии под плановую загрузку фермы и стабильную фасовку.</p>
           <div class="catalog-page-hero__meta">
             <span>3 товаров в разделе</span>
+            
           </div>
-        </div>
-      </div>
-      <div class="catalog-sibling-row" aria-label="Соседние категории">
+          <div class="catalog-page-hero__actions">
+            <a class="catalog-primary-button" href="#catalog-products">Смотреть товары</a>
+            <a class="catalog-secondary-button" href="../../consultations/index.html">Сверить задачу</a>
+          </div>
+          <div class="catalog-page-hero__rail">
+            <div class="catalog-page-hero__rail-head">
+              <span class="catalog-sibling-row__label">Карта каталога</span>
+              <p>Переключайтесь между верхнеуровневыми разделами без возврата на главную магазина.</p>
+            </div>
+            <div class="catalog-sibling-grid" aria-label="Соседние категории">
+              
+                    <a class="catalog-sibling-card" href="../../catalog/led/index.html">
+                      <span class="catalog-sibling-card__media">
+                        <img src="../../assets/photos/optimized/greenhouse-rack.webp" alt="LED-освещение" loading="lazy" />
+                      </span>
+                      <span class="catalog-sibling-card__body">
+                        <strong>LED-освещение</strong>
+                        <span>5 товаров</span>
+                      </span>
+                    </a>
+                  
+                    <a class="catalog-sibling-card" href="../../catalog/irrigation/index.html">
+                      <span class="catalog-sibling-card__media">
+                        <img src="../../assets/catalog/80128135.webp" alt="Полив и дозирование" loading="lazy" />
+                      </span>
+                      <span class="catalog-sibling-card__body">
+                        <strong>Полив и дозирование</strong>
+                        <span>12 товаров</span>
+                      </span>
+                    </a>
+                  
+                    <a class="catalog-sibling-card" href="../../catalog/racks/index.html">
+                      <span class="catalog-sibling-card__media">
+                        <img src="../../assets/photos/optimized/rack-aisle.webp" alt="Стеллажные системы" loading="lazy" />
+                      </span>
+                      <span class="catalog-sibling-card__body">
+                        <strong>Стеллажные системы</strong>
+                        <span>7 товаров</span>
+                      </span>
+                    </a>
+                  
+                    <a class="catalog-sibling-card" href="../../catalog/substrates/index.html">
+                      <span class="catalog-sibling-card__media">
+                        <img src="../../assets/catalog/grodan_prestige_6_ho.webp" alt="Субстраты и старт-корневая зона" loading="lazy" />
+                      </span>
+                      <span class="catalog-sibling-card__body">
+                        <strong>Субстраты и старт-корневая зона</strong>
+                        <span>5 товаров</span>
+                      </span>
+                    </a>
+                  
+                    <a class="catalog-sibling-card is-active" href="../../catalog/planting-material/index.html">
+                      <span class="catalog-sibling-card__media">
+                        <img src="../../assets/photos/optimized/berry-red.webp" alt="Посадочный материал" loading="lazy" />
+                      </span>
+                      <span class="catalog-sibling-card__body">
+                        <strong>Посадочный материал</strong>
+                        <span>5 товаров</span>
+                      </span>
+                    </a>
+                  
+                    <a class="catalog-sibling-card" href="../../catalog/climate/index.html">
+                      <span class="catalog-sibling-card__media">
+                        <img src="../../assets/photos/optimized/hero-process.webp" alt="Климат и воздух" loading="lazy" />
+                      </span>
+                      <span class="catalog-sibling-card__body">
+                        <strong>Климат и воздух</strong>
+                        <span>4 товаров</span>
+                      </span>
+                    </a>
+                  
+                    <a class="catalog-sibling-card" href="../../catalog/nutrition/index.html">
+                      <span class="catalog-sibling-card__media">
+                        <img src="../../assets/catalog/IMG_4924.webp" alt="Питание и сервис раствора" loading="lazy" />
+                      </span>
+                      <span class="catalog-sibling-card__body">
+                        <strong>Питание и сервис раствора</strong>
+                        <span>4 товаров</span>
+                      </span>
+                    </a>
+                  
+                    <a class="catalog-sibling-card" href="../../catalog/monitoring/index.html">
+                      <span class="catalog-sibling-card__media">
+                        <img src="../../assets/catalog/92611106.webp" alt="Датчики и автоматика" loading="lazy" />
+                      </span>
+                      <span class="catalog-sibling-card__body">
+                        <strong>Датчики и автоматика</strong>
+                        <span>4 товаров</span>
+                      </span>
+                    </a>
+                  
+                    <a class="catalog-sibling-card" href="../../catalog/packaging/index.html">
+                      <span class="catalog-sibling-card__media">
+                        <img src="../../assets/photos/optimized/berry-close.webp" alt="Упаковка и отгрузка" loading="lazy" />
+                      </span>
+                      <span class="catalog-sibling-card__body">
+                        <strong>Упаковка и отгрузка</strong>
+                        <span>2 товаров</span>
+                      </span>
+                    </a>
+                  
+            </div>
+          </div>
+          
+                <div class="catalog-page-hero__support">
+                  <div class="catalog-page-hero__support-head">
+                    <strong>С чего обычно начинают в этом разделе</strong>
+                    <p>Если подкатегорий нет, удобнее начать с самых типовых позиций, а уже потом докручивать состав.</p>
+                  </div>
+                  <div class="catalog-page-hero__shortcut-grid">
+                    
+          <a class="catalog-page-hero__shortcut-card" href="../../catalog/seed-series/berry-start-f1/index.html">
+            <strong>Berry Start F1</strong>
+            <p>Семенная серия под выровненный старт и спокойную фасовку ягоды в коротком цикле.</p>
+            <span>3 290 ₽</span>
+          </a>
         
-              <a class="catalog-sibling-link" href="../../catalog/led/index.html">
-                LED-освещение
-              </a>
-            
-              <a class="catalog-sibling-link" href="../../catalog/irrigation/index.html">
-                Полив и дозирование
-              </a>
-            
-              <a class="catalog-sibling-link" href="../../catalog/racks/index.html">
-                Стеллажные системы
-              </a>
-            
-              <a class="catalog-sibling-link" href="../../catalog/substrates/index.html">
-                Субстраты и старт-корневая зона
-              </a>
-            
-              <a class="catalog-sibling-link is-active" href="../../catalog/planting-material/index.html">
-                Посадочный материал
-              </a>
-            
-              <a class="catalog-sibling-link" href="../../catalog/climate/index.html">
-                Климат и воздух
-              </a>
-            
-              <a class="catalog-sibling-link" href="../../catalog/nutrition/index.html">
-                Питание и сервис раствора
-              </a>
-            
-              <a class="catalog-sibling-link" href="../../catalog/monitoring/index.html">
-                Датчики и автоматика
-              </a>
-            
-              <a class="catalog-sibling-link" href="../../catalog/packaging/index.html">
-                Упаковка и отгрузка
-              </a>
-            
+          <a class="catalog-page-hero__shortcut-card" href="../../catalog/seed-series/city-harvest-f1/index.html">
+            <strong>City Harvest F1</strong>
+            <p>Семенная серия под стабильную фасовку и аккуратную товарную ягоду.</p>
+            <span>3 490 ₽</span>
+          </a>
+        
+          <a class="catalog-page-hero__shortcut-card" href="../../catalog/seed-series/compact-sweet-f1/index.html">
+            <strong>Compact Sweet F1</strong>
+            <p>Компактная серия под короткий модуль и ограниченную площадь без потери управляемости.</p>
+            <span>2 990 ₽</span>
+          </a>
+        
+                  </div>
+                </div>
+              
+        </div>
+        <aside class="catalog-page-hero__aside">
+          <div class="catalog-page-hero__card">
+            <strong>Как смотреть этот раздел</strong>
+            <ul>
+              <li>Сначала выберите подкатегорию или сценарий узла, потом уже сравнивайте позиции.</li>
+              <li>3 товаров уже разложены по фильтрам, документам и быстрым действиям.</li>
+              <li>Здесь лучше покупать сразу только те позиции, чья совместимость вам уже понятна.</li>
+            </ul>
+          </div>
+          <div class="catalog-page-hero__card catalog-page-hero__card--accent">
+            <strong>Когда лучше не идти в корзину сразу</strong>
+            <p>Если товар влияет на схему света, полива, стеллажа или запуска в целом, лучше сначала уточнить сценарий, а не собирать модуль поштучно.</p>
+            <div class="catalog-page-hero__actions">
+              <a class="catalog-secondary-button" href="../../consultations/index.html">Сверить задачу</a>
+              <a class="catalog-link-button" href="../../farm/index.html">Перейти к расчёту</a>
+            </div>
+          </div>
+        </aside>
       </div>
     </section>
     
-    <section class="catalog-category-layout">
+    <section class="catalog-category-layout" id="catalog-products">
       <aside class="catalog-category-sidebar">
         
     <form class="catalog-filter-panel" data-filter-form="desktop">
       <div class="catalog-filter-panel__head">
         <div>
           <h2>Фильтры</h2>
-          <p>Выбрано параметров: 0</p>
+          <p>Выбрано фильтров: 0</p>
         </div>
         
       </div>
@@ -487,7 +605,7 @@
         </div>
         <div class="catalog-product-card__actions">
           <a class="catalog-secondary-button" href="../../catalog/seed-series/city-harvest-f1/index.html">Подробности</a>
-          <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-city-harvest-f1">В корзину</button>
+          <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-city-harvest-f1">Добавить в корзину</button>
           
         </div>
       </div>
@@ -523,7 +641,7 @@
         </div>
         <div class="catalog-product-card__actions">
           <a class="catalog-secondary-button" href="../../catalog/seed-series/berry-start-f1/index.html">Подробности</a>
-          <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-berry-start-f1">В корзину</button>
+          <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-berry-start-f1">Добавить в корзину</button>
           
         </div>
       </div>
@@ -559,7 +677,7 @@
         </div>
         <div class="catalog-product-card__actions">
           <a class="catalog-secondary-button" href="../../catalog/seed-series/compact-sweet-f1/index.html">Подробности</a>
-          <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-compact-sweet-f1">В корзину</button>
+          <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-compact-sweet-f1">Добавить в корзину</button>
           
         </div>
       </div>
@@ -575,7 +693,7 @@
     <section class="catalog-info-strip" id="catalog-how-buy">
       <div class="catalog-section-head">
         <h2>Как купить</h2>
-        <p>Каталог позволяет купить типовой товар сразу, а проектные позиции перевести в консультацию без потери контекста.</p>
+        <p>Если задача уже понятна, здесь можно быстро собрать закупку. Если нет, каталог помогает не потерять контекст и перейти к вопросу или расчёту.</p>
       </div>
       <div class="catalog-how-buy-grid">
         <article>
@@ -584,11 +702,11 @@
         </article>
         <article>
           <strong>2. Сравните цены и характеристики</strong>
-          <p>У каждой позиции есть price tiers, quick view, документы и краткий блок с тем, что важно проверить до оплаты.</p>
+          <p>У каждой позиции есть варианты цен, быстрый просмотр, документы и короткий список того, что важно проверить до оплаты.</p>
         </article>
         <article>
           <strong>3. Добавьте в корзину или задайте вопрос</strong>
-          <p>Типовые товары отправляются в корзину сразу, а спорные позиции можно отдать в быстрый вопрос без ухода со страницы.</p>
+          <p>Понятные позиции можно сразу положить в корзину, а спорные лучше быстро уточнить, не уходя со страницы.</p>
         </article>
       </div>
     </section>
@@ -599,7 +717,7 @@
       <div class="catalog-footer__grid">
         <div>
           <h2>Klubnika Project</h2>
-          <p>Свет, полив, стеллажи, посадочный материал и сервисные позиции для controlled-environment фермы.</p>
+          <p>Свет, полив, стеллажи, субстрат, посадочный материал и сервисные позиции для рабочей закупки клубничной фермы.</p>
           <div class="catalog-footer__socials">
             <a href="https://t.me/patiev_admin" target="_blank" rel="noreferrer">Telegram</a><a href="https://vk.com" target="_blank" rel="noreferrer">VK</a><a href="https://youtube.com" target="_blank" rel="noreferrer">YouTube</a>
           </div>
@@ -622,7 +740,7 @@
         <div>
           <h3>Контакты</h3>
           <ul class="catalog-footer__contacts">
-            <li><a href="tel:+78005552417">+7 (800) 555-24-17</a></li><li><a href="tel:+74951200630">+7 (495) 120-06-30</a></li>
+            <li><a href="tel:+79672429633">+7 967 242-96-33</a></li>
             <li><a href="mailto:hello@klubnikaproject.ru">hello@klubnikaproject.ru</a></li>
             <li>Москва, проектная комплектация с отгрузкой по РФ</li>
           </ul>
@@ -656,13 +774,9 @@
         </div>
         <div class="catalog-search-form">
           <input type="search" value="" placeholder="Название, артикул, категория" data-action="search-input" />
-          <div class="catalog-scope-toggle" role="group" aria-label="Область поиска">
-            <button type="button" class="catalog-chip-button" data-action="set-search-mode" data-value="site">По всему сайту</button>
-            <button type="button" class="catalog-chip-button is-active" data-action="set-search-mode" data-value="catalog">По каталогу</button>
-          </div>
         </div>
         <div class="catalog-search-results">
-          <p>Введите запрос, чтобы искать по каталогу или всему сайту.</p>
+          <p>Введите название, артикул или рабочий узел, чтобы начать поиск.</p>
         </div>
       </div>
     </div>
@@ -675,7 +789,7 @@
           <h2 id="catalog-cart-title">Корзина</h2>
           <button type="button" class="catalog-icon-button" data-action="close-dialog" data-dialog="cart" aria-label="Закрыть корзину">×</button>
         </div>
-        <p>В корзине пока пусто. Добавляйте позиции прямо из списка или карточки товара.</p>
+        <p>Корзина пока пустая. Добавляйте позиции из списка или из карточки товара.</p>
       </div>
     </div>
   
@@ -684,12 +798,12 @@
       <div class="catalog-overlay__backdrop" data-action="close-dialog" data-dialog="assistant"></div>
       <div class="catalog-overlay__panel catalog-overlay__panel--assistant" role="dialog" aria-modal="true" aria-labelledby="catalog-assistant-title">
         <div class="catalog-overlay__head">
-          <h2 id="catalog-assistant-title">Нужна помощь по каталогу</h2>
+          <h2 id="catalog-assistant-title">Нужна помощь с выбором или заказом</h2>
           <button type="button" class="catalog-icon-button" data-action="close-dialog" data-dialog="assistant" aria-label="Закрыть панель помощи">×</button>
         </div>
-        <p>Можно сразу передать задачу в продажу или техподбор, не теряя контекст страницы.</p>
+        <p>Можно сразу передать задачу в работу или на подбор, не теряя контекст страницы и выбранных позиций.</p>
         <div class="catalog-assistant-actions">
-          <a class="catalog-primary-button" href="tel:+78005552417">Продажи: +7 (800) 555-24-17</a><a class="catalog-primary-button" href="tel:+74951200630">Техподбор: +7 (495) 120-06-30</a>
+          <a class="catalog-primary-button" href="tel:+79672429633">+7 967 242-96-33</a>
           <a class="catalog-secondary-button" href="mailto:hello@klubnikaproject.ru">Написать на hello@klubnikaproject.ru</a>
           <a class="catalog-secondary-button" href="https://t.me/patiev_admin" target="_blank" rel="noreferrer">Открыть Telegram</a>
         </div>
@@ -768,7 +882,7 @@
                     
         </div>
         <div class="catalog-mobile-contacts">
-          <a href="tel:+78005552417">+7 (800) 555-24-17</a><a href="tel:+74951200630">+7 (495) 120-06-30</a>
+          <a href="tel:+79672429633">+7 967 242-96-33</a>
           <a href="mailto:hello@klubnikaproject.ru">hello@klubnikaproject.ru</a>
         </div>
       </div>
@@ -787,7 +901,7 @@
       <div class="catalog-filter-panel__head">
         <div>
           <h2>Фильтры</h2>
-          <p>Выбрано параметров: 0</p>
+          <p>Выбрано фильтров: 0</p>
         </div>
         <button type="button" class="catalog-icon-button" data-action="close-filters" aria-label="Закрыть фильтры">×</button>
       </div>
@@ -989,6 +1103,6 @@
     window.__CATALOG_ROUTE__ = {"type":"category","categorySlug":"seed-series"};
     window.__CATALOG_CONTEXT__ = {"route":{"type":"category","categorySlug":"seed-series"},"siteRoot":"../../","catalogRoot":"../"};
   </script>
-  <script type="module" src="../_app/catalog-app.js?v=20260402h"></script>
+  <script type="module" src="../_app/catalog-app.js?v=20260403d"></script>
 </body>
 </html>

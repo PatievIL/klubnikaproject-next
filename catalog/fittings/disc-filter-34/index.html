@@ -15,8 +15,8 @@
   <link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png" />
   <link rel="manifest" href="../../../site.webmanifest" />
-  <link rel="stylesheet" href="../../../styles.css?v=20260402h" />
-  <link rel="stylesheet" href="../../_app/catalog-app.css?v=20260402h" />
+  <link rel="stylesheet" href="../../../styles.css?v=20260403d" />
+  <link rel="stylesheet" href="../../_app/catalog-app.css?v=20260403d" />
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -98,7 +98,6 @@
                 <span class="brand-title-line">Klubnika</span>
                 <span class="brand-title-line">Project</span>
               </div>
-              <div class="brand-note">Магазин, комплектация и закупка в логике всего проекта</div>
             </div>
           </a>
         </div>
@@ -119,13 +118,13 @@
               <a href="../../../farm/index.html"><strong>Расчёт фермы</strong><span>Состав запуска, рамка бюджета и следующий шаг.</span></a>
               <a href="../../../study/index.html"><strong>Сопровождение</strong><span>Разбор действующей фермы, узких мест и технологии.</span></a>
               <a href="../../../consultations/index.html"><strong>Консультации</strong><span>Точечный разбор задачи, совместимости и выбора.</span></a>
-              <a href="../../../klubhack/index.html"><strong>Клубничный Хак</strong><span>База знаний по controlled-environment клубнике.</span></a>
+              <a href="../../../klubhack/index.html"><strong>Клубничный Хак</strong><span>Практическая база по технологии клубничной фермы.</span></a>
             </div>
           </div>
           <div class="nav-group">
             <button class="nav-trigger" type="button">Каталог</button>
             <div class="nav-menu nav-menu-wide">
-              <a href="../../../catalog/index.html"><strong>Магазин</strong><span>Весь storefront и вход в рабочие категории.</span></a>
+              <a href="../../../catalog/index.html"><strong>Магазин</strong><span>Вход в рабочие категории и закупку без лишней витринности.</span></a>
               <a href="../../../catalog/led/index.html"><strong>LED</strong><span>Линейные и тепличные сценарии досветки.</span></a>
               <a href="../../../catalog/irrigation/index.html"><strong>Полив</strong><span>Полив, дозирование и расходники по узлам.</span></a>
               <a href="../../../catalog/racks/index.html"><strong>Стеллажи</strong><span>Каркасы, лотки и модульные ряды.</span></a>
@@ -134,11 +133,14 @@
             </div>
           </div>
           <a class="nav-link" href="../../../calc/index.html">Калькулятор</a>
-          <a class="nav-link catalog-nav-link-button" href="../../../account/index.html">Кабинет</a>
-          <button type="button" class="nav-cta catalog-nav-cart" data-action="open-cart">
+        </nav>
+        <div class="catalog-header-utility">
+          <a class="catalog-icon-pill catalog-header-utility-link" href="#catalog-how-buy">Как купить</a>
+          <a class="catalog-icon-pill catalog-header-utility-link" href="../../../account/index.html">Кабинет</a>
+          <button type="button" class="catalog-header-cart" data-action="open-cart">
             Корзина <span>0</span>
           </button>
-        </nav>
+        </div>
         <div class="catalog-header-mobile-actions">
           <button type="button" class="catalog-icon-pill" data-action="open-search" aria-label="Открыть поиск">Поиск</button>
           <button type="button" class="catalog-icon-pill" data-action="open-cart" aria-label="Открыть корзину">Корзина <span>0</span></button>
@@ -146,23 +148,27 @@
         </div>
       </div>
       <div class="catalog-header__bottom">
-        <div class="catalog-header-panel">
+        <div class="catalog-header-workbar">
           <form class="catalog-header-search" data-header-search>
-            <input type="search" value="" placeholder="Поиск по каталогу, артикулу или сценарию" />
-            <div class="catalog-scope-toggle" role="group" aria-label="Область поиска">
-              <button type="button" class="catalog-chip-button" data-action="set-search-mode" data-value="site">По всему сайту</button>
-              <button type="button" class="catalog-chip-button is-active" data-action="set-search-mode" data-value="catalog">По магазину</button>
+            <div class="catalog-search-shell">
+              <input type="search" value="" placeholder="Название, артикул или рабочий узел" />
+              <button type="submit" class="catalog-search-submit" aria-label="Искать по магазину">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M10.5 4a6.5 6.5 0 1 0 4.018 11.61l4.436 4.436 1.06-1.06-4.436-4.436A6.5 6.5 0 0 0 10.5 4Zm0 1.5a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z" />
+                </svg>
+                <span class="sr-only">Искать</span>
+              </button>
             </div>
-            <button type="submit" class="catalog-primary-button">Найти</button>
           </form>
-          <div class="catalog-header-actions">
-            <div class="catalog-header-phones">
-              <a href="tel:+78005552417">+7 (800) 555-24-17</a><a href="tel:+74951200630">+7 (495) 120-06-30</a>
+          <div class="catalog-header-support">
+            <div class="catalog-header-contactline">
+              <a href="tel:+79672429633">+7 967 242-96-33</a>
             </div>
-            <a class="catalog-icon-pill catalog-header-anchor" href="#catalog-how-buy">Как купить</a>
-            <a class="catalog-icon-pill catalog-header-anchor" href="#catalog-contacts">Контакты</a>
-            <button type="button" class="catalog-secondary-button" data-action="open-assistant" data-intent="callback">Заказать звонок</button>
-            <button type="button" class="catalog-secondary-button" data-action="open-assistant" data-intent="question">Задать вопрос</button>
+            <div class="catalog-header-actions">
+              <a class="catalog-icon-pill catalog-header-anchor" href="#catalog-contacts">Контакты</a>
+              <button type="button" class="catalog-secondary-button" data-action="open-assistant" data-intent="callback">Попросить звонок</button>
+              <button type="button" class="catalog-secondary-button" data-action="open-assistant" data-intent="question">Задать вопрос</button>
+            </div>
           </div>
         </div>
       </div>
@@ -238,6 +244,17 @@
               <span>4 соседних позиций в разделе</span>
             </div>
           </div>
+          <section class="catalog-product-route-card">
+            <div>
+              <span class="catalog-eyebrow">Перед оплатой</span>
+              <h2>Проверьте не только цену, но и место позиции в вашей схеме</h2>
+              <p>Каталог ускоряет типовую закупку, но не должен подменять разбор совместимости. Если узел влияет на свет, полив, стеллаж или корневую зону, лучше уточнить сценарий до оформления заказа.</p>
+            </div>
+            <div class="catalog-product-route-card__actions">
+              <a class="catalog-secondary-button" href="../../../farm/index.html">Рассчитать ферму</a>
+              <button type="button" class="catalog-primary-button" data-action="open-assistant" data-intent="question">Сверить с задачей</button>
+            </div>
+          </section>
           <div class="catalog-product-summary__grid">
             <div class="catalog-buy-box">
               <div class="catalog-buy-box__sticky">
@@ -251,7 +268,7 @@
                 </button>
                 <div class="catalog-buy-box__stock"><span class="catalog-stock catalog-stock--blue">Под заказ</span></div>
                 <div class="catalog-buy-box__actions">
-                  <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-disc-filter-34">В корзину</button>
+                  <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-disc-filter-34">Добавить в корзину</button>
                   <button type="button" class="catalog-secondary-button" data-action="open-assistant" data-intent="one-click">Купить в 1 клик</button>
                 </div>
                 <div class="catalog-buy-box__links">
@@ -273,7 +290,6 @@
             </div>
             <div class="catalog-product-content">
               <div class="catalog-product-highlights">
-                <div></div>
                 <div class="catalog-product-rating">
                   
     <span class="catalog-stars" aria-label="Рейтинг 0 из 5">
@@ -283,17 +299,6 @@
                   <button type="button" class="catalog-link-button" data-action="set-tab" data-tab="reviews">0 отзывов</button>
                 </div>
               </div>
-              <section class="catalog-product-route-card">
-                <div>
-                  <span class="catalog-eyebrow">Перед оплатой</span>
-                  <h2>Проверьте не только цену, но и место позиции в вашей схеме</h2>
-                  <p>Каталог ускоряет типовую закупку, но не должен подменять разбор совместимости. Если узел влияет на свет, полив, стеллаж или корневую зону, лучше уточнить сценарий до оформления заказа.</p>
-                </div>
-                <div class="catalog-product-route-card__actions">
-                  <a class="catalog-secondary-button" href="../../../farm/index.html">Рассчитать ферму</a>
-                  <button type="button" class="catalog-primary-button" data-action="open-assistant" data-intent="question">Сверить с задачей</button>
-                </div>
-              </section>
               
     <section class="catalog-product-tabs-shell">
       
@@ -503,7 +508,7 @@
         </div>
         <div class="catalog-product-card__actions">
           <a class="catalog-secondary-button" href="../../../catalog/fittings/tube-blank-16/index.html">Подробности</a>
-          <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-tube-blank-16">В корзину</button>
+          <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-tube-blank-16">Добавить в корзину</button>
           
         </div>
       </div>
@@ -539,7 +544,7 @@
         </div>
         <div class="catalog-product-card__actions">
           <a class="catalog-secondary-button" href="../../../catalog/fittings/tube-blank-roll/index.html">Подробности</a>
-          <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-tube-blank-roll">В корзину</button>
+          <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-tube-blank-roll">Добавить в корзину</button>
           
         </div>
       </div>
@@ -575,7 +580,7 @@
         </div>
         <div class="catalog-product-card__actions">
           <a class="catalog-secondary-button" href="../../../catalog/fittings/punch-16-20/index.html">Подробности</a>
-          <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-punch-16-20">В корзину</button>
+          <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-punch-16-20">Добавить в корзину</button>
           
         </div>
       </div>
@@ -607,7 +612,7 @@
         </div>
         <div class="catalog-product-card__actions">
           <a class="catalog-secondary-button" href="../../../catalog/fittings/fittings-kit-module/index.html">Подробности</a>
-          <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-fittings-kit-module">В корзину</button>
+          <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-fittings-kit-module">Добавить в корзину</button>
           
         </div>
       </div>
@@ -625,7 +630,7 @@
     <section class="catalog-info-strip" id="catalog-how-buy">
       <div class="catalog-section-head">
         <h2>Как купить</h2>
-        <p>Каталог позволяет купить типовой товар сразу, а проектные позиции перевести в консультацию без потери контекста.</p>
+        <p>Если задача уже понятна, здесь можно быстро собрать закупку. Если нет, каталог помогает не потерять контекст и перейти к вопросу или расчёту.</p>
       </div>
       <div class="catalog-how-buy-grid">
         <article>
@@ -634,11 +639,11 @@
         </article>
         <article>
           <strong>2. Сравните цены и характеристики</strong>
-          <p>У каждой позиции есть price tiers, quick view, документы и краткий блок с тем, что важно проверить до оплаты.</p>
+          <p>У каждой позиции есть варианты цен, быстрый просмотр, документы и короткий список того, что важно проверить до оплаты.</p>
         </article>
         <article>
           <strong>3. Добавьте в корзину или задайте вопрос</strong>
-          <p>Типовые товары отправляются в корзину сразу, а спорные позиции можно отдать в быстрый вопрос без ухода со страницы.</p>
+          <p>Понятные позиции можно сразу положить в корзину, а спорные лучше быстро уточнить, не уходя со страницы.</p>
         </article>
       </div>
     </section>
@@ -649,7 +654,7 @@
       <div class="catalog-footer__grid">
         <div>
           <h2>Klubnika Project</h2>
-          <p>Свет, полив, стеллажи, посадочный материал и сервисные позиции для controlled-environment фермы.</p>
+          <p>Свет, полив, стеллажи, субстрат, посадочный материал и сервисные позиции для рабочей закупки клубничной фермы.</p>
           <div class="catalog-footer__socials">
             <a href="https://t.me/patiev_admin" target="_blank" rel="noreferrer">Telegram</a><a href="https://vk.com" target="_blank" rel="noreferrer">VK</a><a href="https://youtube.com" target="_blank" rel="noreferrer">YouTube</a>
           </div>
@@ -672,7 +677,7 @@
         <div>
           <h3>Контакты</h3>
           <ul class="catalog-footer__contacts">
-            <li><a href="tel:+78005552417">+7 (800) 555-24-17</a></li><li><a href="tel:+74951200630">+7 (495) 120-06-30</a></li>
+            <li><a href="tel:+79672429633">+7 967 242-96-33</a></li>
             <li><a href="mailto:hello@klubnikaproject.ru">hello@klubnikaproject.ru</a></li>
             <li>Москва, проектная комплектация с отгрузкой по РФ</li>
           </ul>
@@ -706,13 +711,9 @@
         </div>
         <div class="catalog-search-form">
           <input type="search" value="" placeholder="Название, артикул, категория" data-action="search-input" />
-          <div class="catalog-scope-toggle" role="group" aria-label="Область поиска">
-            <button type="button" class="catalog-chip-button" data-action="set-search-mode" data-value="site">По всему сайту</button>
-            <button type="button" class="catalog-chip-button is-active" data-action="set-search-mode" data-value="catalog">По каталогу</button>
-          </div>
         </div>
         <div class="catalog-search-results">
-          <p>Введите запрос, чтобы искать по каталогу или всему сайту.</p>
+          <p>Введите название, артикул или рабочий узел, чтобы начать поиск.</p>
         </div>
       </div>
     </div>
@@ -725,7 +726,7 @@
           <h2 id="catalog-cart-title">Корзина</h2>
           <button type="button" class="catalog-icon-button" data-action="close-dialog" data-dialog="cart" aria-label="Закрыть корзину">×</button>
         </div>
-        <p>В корзине пока пусто. Добавляйте позиции прямо из списка или карточки товара.</p>
+        <p>Корзина пока пустая. Добавляйте позиции из списка или из карточки товара.</p>
       </div>
     </div>
   
@@ -734,12 +735,12 @@
       <div class="catalog-overlay__backdrop" data-action="close-dialog" data-dialog="assistant"></div>
       <div class="catalog-overlay__panel catalog-overlay__panel--assistant" role="dialog" aria-modal="true" aria-labelledby="catalog-assistant-title">
         <div class="catalog-overlay__head">
-          <h2 id="catalog-assistant-title">Нужна помощь по каталогу</h2>
+          <h2 id="catalog-assistant-title">Нужна помощь с выбором или заказом</h2>
           <button type="button" class="catalog-icon-button" data-action="close-dialog" data-dialog="assistant" aria-label="Закрыть панель помощи">×</button>
         </div>
-        <p>Можно сразу передать задачу в продажу или техподбор, не теряя контекст страницы.</p>
+        <p>Можно сразу передать задачу в работу или на подбор, не теряя контекст страницы и выбранных позиций.</p>
         <div class="catalog-assistant-actions">
-          <a class="catalog-primary-button" href="tel:+78005552417">Продажи: +7 (800) 555-24-17</a><a class="catalog-primary-button" href="tel:+74951200630">Техподбор: +7 (495) 120-06-30</a>
+          <a class="catalog-primary-button" href="tel:+79672429633">+7 967 242-96-33</a>
           <a class="catalog-secondary-button" href="mailto:hello@klubnikaproject.ru">Написать на hello@klubnikaproject.ru</a>
           <a class="catalog-secondary-button" href="https://t.me/patiev_admin" target="_blank" rel="noreferrer">Открыть Telegram</a>
         </div>
@@ -818,7 +819,7 @@
                     
         </div>
         <div class="catalog-mobile-contacts">
-          <a href="tel:+78005552417">+7 (800) 555-24-17</a><a href="tel:+74951200630">+7 (495) 120-06-30</a>
+          <a href="tel:+79672429633">+7 967 242-96-33</a>
           <a href="mailto:hello@klubnikaproject.ru">hello@klubnikaproject.ru</a>
         </div>
       </div>
@@ -831,6 +832,6 @@
     window.__CATALOG_ROUTE__ = {"type":"product","categorySlug":"fittings","productSlug":"disc-filter-34"};
     window.__CATALOG_CONTEXT__ = {"route":{"type":"product","categorySlug":"fittings","productSlug":"disc-filter-34"},"siteRoot":"../../../","catalogRoot":"../../"};
   </script>
-  <script type="module" src="../../_app/catalog-app.js?v=20260402h"></script>
+  <script type="module" src="../../_app/catalog-app.js?v=20260403d"></script>
 </body>
 </html>

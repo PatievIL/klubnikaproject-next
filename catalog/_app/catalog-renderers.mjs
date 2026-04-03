@@ -205,7 +205,7 @@ function renderProductCard(ctx, state, categorySlug, product, options = {}) {
             stock.purchasable
               ? `<button type="button" class="catalog-primary-button${inCart ? " is-active" : ""}" data-action="toggle-cart" data-product-id="${
                   product.id
-                }">${inCart ? "В корзине" : "В корзину"}</button>`
+                }">${inCart ? "Уже в корзине" : "Добавить в корзину"}</button>`
               : `<button type="button" class="catalog-primary-button" disabled>Нет в наличии</button>`
           }
           ${
@@ -271,7 +271,7 @@ function renderFilterPanel(data, draft, isMobile = false) {
       <div class="catalog-filter-panel__head">
         <div>
           <h2>Фильтры</h2>
-          <p>Выбрано параметров: ${draftCount}</p>
+          <p>Выбрано фильтров: ${draftCount}</p>
         </div>
         ${
           isMobile
@@ -410,7 +410,7 @@ function renderTableView(ctx, state, categorySlug, products, selectedProductIds 
           <span>Выбрать все</span>
         </label>
         <button type="button" class="catalog-primary-button" data-action="bulk-add-to-cart" ${selectedProductIds.length ? "" : "disabled"}>
-          В корзину (${selectedProductIds.length})
+          Добавить в корзину (${selectedProductIds.length})
         </button>
       </div>
       <div class="catalog-table">
@@ -447,7 +447,7 @@ function renderTableView(ctx, state, categorySlug, products, selectedProductIds 
                 <div class="catalog-table-cell catalog-table-cell--actions">
                   <button type="button" class="catalog-link-button" data-action="open-quick-view" data-product-id="${product.id}">Быстрый просмотр</button>
                   <button type="button" class="catalog-primary-button${isInCart(state, product.id) ? " is-active" : ""}" data-action="toggle-cart" data-product-id="${product.id}">${
-                    isInCart(state, product.id) ? "В корзине" : "В корзину"
+                    isInCart(state, product.id) ? "Уже в корзине" : "Добавить в корзину"
                   }</button>
                 </div>
               </div>
@@ -498,6 +498,26 @@ function renderCategoryListing(ctx, state, data) {
 }
 
 function renderCategoryPage(ctx, state, data) {
+  const heroShortcuts = data.children.length
+    ? data.children.slice(0, 3).map(
+        (category) => `
+          <a class="catalog-page-hero__shortcut-card" href="${resolveHref(ctx, `/catalog/${category.slug}/`)}">
+            <strong>${escapeHtml(category.name)}</strong>
+            <p>${escapeHtml(category.description)}</p>
+            <span>${category.productCount} товаров</span>
+          </a>
+        `
+      )
+    : data.products.slice(0, 3).map(
+        (product) => `
+          <a class="catalog-page-hero__shortcut-card" href="${resolveHref(ctx, getProductCatalogPath(product))}">
+            <strong>${escapeHtml(product.name)}</strong>
+            <p>${escapeHtml(product.shortDescription)}</p>
+            <span>${formatPrice(product.price)}</span>
+          </a>
+        `
+      );
+
   return `
     <section class="catalog-page-hero">
       ${renderBreadcrumbs(ctx, data.breadcrumbs)}
@@ -508,34 +528,98 @@ function renderCategoryPage(ctx, state, data) {
           <p>${escapeHtml(data.category.description)}</p>
           <div class="catalog-page-hero__meta">
             <span>${data.products.length} товаров в разделе</span>
+            ${data.children.length ? `<span>${data.children.length} рабочих подкатегорий</span>` : ""}
           </div>
+          <div class="catalog-page-hero__actions">
+            <a class="catalog-primary-button" href="#catalog-products">Смотреть товары</a>
+            ${
+              data.children.length
+                ? `<a class="catalog-secondary-button" href="#catalog-subcategories">Открыть подкатегории</a>`
+                : `<a class="catalog-secondary-button" href="${resolveHref(ctx, "/consultations/")}">Сверить задачу</a>`
+            }
+          </div>
+          <div class="catalog-page-hero__rail">
+            <div class="catalog-page-hero__rail-head">
+              <span class="catalog-sibling-row__label">Карта каталога</span>
+              <p>Переключайтесь между верхнеуровневыми разделами без возврата на главную магазина.</p>
+            </div>
+            <div class="catalog-sibling-grid" aria-label="Соседние категории">
+              ${data.siblings
+                .map(
+                  (category) => `
+                    <a class="catalog-sibling-card${category.active ? " is-active" : ""}" href="${resolveHref(
+                      ctx,
+                      `/catalog/${category.slug}/`
+                    )}">
+                      <span class="catalog-sibling-card__media">
+                        <img src="${resolveAsset(ctx, category.image)}" alt="${escapeHtml(category.name)}" loading="lazy" />
+                      </span>
+                      <span class="catalog-sibling-card__body">
+                        <strong>${escapeHtml(category.name)}</strong>
+                        <span>${category.productCount} товаров</span>
+                      </span>
+                    </a>
+                  `
+                )
+                .join("")}
+            </div>
+          </div>
+          ${
+            heroShortcuts.length
+              ? `
+                <div class="catalog-page-hero__support">
+                  <div class="catalog-page-hero__support-head">
+                    <strong>${data.children.length ? "Быстрый вход в сценарии раздела" : "С чего обычно начинают в этом разделе"}</strong>
+                    <p>${
+                      data.children.length
+                        ? "Начните с подкатегории, если уже понимаете рабочий узел или конкретный сценарий закупки."
+                        : "Если подкатегорий нет, удобнее начать с самых типовых позиций, а уже потом докручивать состав."
+                    }</p>
+                  </div>
+                  <div class="catalog-page-hero__shortcut-grid">
+                    ${heroShortcuts.join("")}
+                  </div>
+                </div>
+              `
+              : ""
+          }
         </div>
-      </div>
-      <div class="catalog-sibling-row" aria-label="Соседние категории">
-        ${data.siblings
-          .map(
-            (category) => `
-              <a class="catalog-sibling-link${category.active ? " is-active" : ""}" href="${resolveHref(
-                ctx,
-                `/catalog/${category.slug}/`
-              )}">
-                ${escapeHtml(category.name)}
-              </a>
-            `
-          )
-          .join("")}
+        <aside class="catalog-page-hero__aside">
+          <div class="catalog-page-hero__card">
+            <strong>Как смотреть этот раздел</strong>
+            <ul>
+              <li>Сначала выберите подкатегорию или сценарий узла, потом уже сравнивайте позиции.</li>
+              <li>${data.products.length} товаров уже разложены по фильтрам, документам и быстрым действиям.</li>
+              ${data.children.length ? `<li>${data.children.length} подкатегорий помогают не смешивать типовые и проектные позиции.</li>` : `<li>Здесь лучше покупать сразу только те позиции, чья совместимость вам уже понятна.</li>`}
+            </ul>
+          </div>
+          <div class="catalog-page-hero__card catalog-page-hero__card--accent">
+            <strong>Когда лучше не идти в корзину сразу</strong>
+            <p>Если товар влияет на схему света, полива, стеллажа или запуска в целом, лучше сначала уточнить сценарий, а не собирать модуль поштучно.</p>
+            <div class="catalog-page-hero__actions">
+              <a class="catalog-secondary-button" href="${resolveHref(ctx, "/consultations/")}">Сверить задачу</a>
+              <a class="catalog-link-button" href="${resolveHref(ctx, "/farm/")}">Перейти к расчёту</a>
+            </div>
+          </div>
+        </aside>
       </div>
     </section>
     ${
       data.children.length
         ? `
-          <section class="catalog-subcategory-grid">
-            ${data.children.map((category) => renderCategoryCard(ctx, category, true)).join("")}
+          <section class="catalog-subcategory-section" id="catalog-subcategories">
+            <div class="catalog-section-head">
+              <h2>Подкатегории раздела</h2>
+              <p>Разделены по рабочим сценариям, чтобы не смешивать типовые позиции, докупку и проектные решения.</p>
+            </div>
+            <div class="catalog-subcategory-grid">
+              ${data.children.map((category) => renderCategoryCard(ctx, category, true)).join("")}
+            </div>
           </section>
         `
         : ""
     }
-    <section class="catalog-category-layout">
+    <section class="catalog-category-layout" id="catalog-products">
       <aside class="catalog-category-sidebar">
         ${renderFilterPanel(data, state.category.draft)}
       </aside>
@@ -801,6 +885,17 @@ function renderProductPage(ctx, state, data) {
               <span>${data.relatedProducts.length} соседних позиций в разделе</span>
             </div>
           </div>
+          <section class="catalog-product-route-card">
+            <div>
+              <span class="catalog-eyebrow">Перед оплатой</span>
+              <h2>Проверьте не только цену, но и место позиции в вашей схеме</h2>
+              <p>Каталог ускоряет типовую закупку, но не должен подменять разбор совместимости. Если узел влияет на свет, полив, стеллаж или корневую зону, лучше уточнить сценарий до оформления заказа.</p>
+            </div>
+            <div class="catalog-product-route-card__actions">
+              <a class="catalog-secondary-button" href="${resolveHref(ctx, "/farm/")}">Рассчитать ферму</a>
+              <button type="button" class="catalog-primary-button" data-action="open-assistant" data-intent="question">Сверить с задачей</button>
+            </div>
+          </section>
           <div class="catalog-product-summary__grid">
             <div class="catalog-buy-box">
               <div class="catalog-buy-box__sticky">
@@ -818,7 +913,7 @@ function renderProductPage(ctx, state, data) {
                     stock.purchasable
                       ? `<button type="button" class="catalog-primary-button${isInCart(state, data.product.id) ? " is-active" : ""}" data-action="toggle-cart" data-product-id="${
                           data.product.id
-                        }">${isInCart(state, data.product.id) ? "В корзине" : "В корзину"}</button>`
+                        }">${isInCart(state, data.product.id) ? "Уже в корзине" : "Добавить в корзину"}</button>`
                       : `<button type="button" class="catalog-primary-button" disabled>Нет в наличии</button>`
                   }
                   <button type="button" class="catalog-secondary-button" data-action="open-assistant" data-intent="one-click">Купить в 1 клик</button>
@@ -838,23 +933,11 @@ function renderProductPage(ctx, state, data) {
             </div>
             <div class="catalog-product-content">
               <div class="catalog-product-highlights">
-                <div>${renderBadgeList(data.product.badges)}</div>
                 <div class="catalog-product-rating">
                   ${renderRatingStars(data.product.rating || 0)}
                   <button type="button" class="catalog-link-button" data-action="set-tab" data-tab="reviews">${data.product.reviewCount} отзывов</button>
                 </div>
               </div>
-              <section class="catalog-product-route-card">
-                <div>
-                  <span class="catalog-eyebrow">Перед оплатой</span>
-                  <h2>Проверьте не только цену, но и место позиции в вашей схеме</h2>
-                  <p>Каталог ускоряет типовую закупку, но не должен подменять разбор совместимости. Если узел влияет на свет, полив, стеллаж или корневую зону, лучше уточнить сценарий до оформления заказа.</p>
-                </div>
-                <div class="catalog-product-route-card__actions">
-                  <a class="catalog-secondary-button" href="${resolveHref(ctx, "/farm/")}">Рассчитать ферму</a>
-                  <button type="button" class="catalog-primary-button" data-action="open-assistant" data-intent="question">Сверить с задачей</button>
-                </div>
-              </section>
               ${renderProductTabs(ctx, state, data)}
               <section class="catalog-qa-section">
                 <div class="catalog-section-head">
@@ -900,41 +983,88 @@ function renderProductPage(ctx, state, data) {
 
 function renderLandingPage(ctx) {
   const data = getLandingPageData();
+  const heroCategories = data.categories.slice(0, 4);
+  const topCategoryCount = data.categories.length;
+  const totalProductCount = data.categories.reduce((sum, category) => sum + category.productCount, 0);
   return `
     <section class="catalog-landing-hero">
       ${renderBreadcrumbs(ctx, data.breadcrumbs)}
       <div class="catalog-landing-hero__content">
         <div class="catalog-landing-hero__copy">
-          <span class="catalog-eyebrow">Каталог интернет-магазина</span>
-          <h1>Полноценный магазин для клубничной фермы, а не набор разрозненных SKU</h1>
+          <span class="catalog-eyebrow">Каталог для клубничной фермы</span>
+          <h1>Каталог для тех случаев, когда задача уже понятна</h1>
           <p>${escapeHtml(CATALOG_META.slogan)}</p>
-          <p class="catalog-landing-hero__sublead">Каталог нужен, когда задача уже понятна и нужен быстрый вход в раздел, товар или закупку. Если схема ещё плавает, лучше начать с расчёта или консультации, а не с корзины.</p>
+          <p class="catalog-landing-hero__sublead">Здесь удобно быстро перейти в нужную категорию, проверить наличие и собрать закупку. Если схема ещё собирается, лучше сначала начать с расчёта или короткого вопроса.</p>
           <div class="catalog-landing-hero__actions">
             <a class="catalog-primary-button" href="#catalog-categories">Открыть категории</a>
-            <a class="catalog-secondary-button" href="${resolveHref(ctx, "/farm/")}">Сначала рассчитать ферму</a>
+            <a class="catalog-secondary-button" href="${resolveHref(ctx, "/farm/")}">Сначала сверить задачу</a>
           </div>
           <div class="catalog-landing-hero__signals">
-            <span>Для типовой закупки</span>
-            <span>Для докупки по узлам</span>
-            <span>Для быстрой проверки наличия и цены</span>
+            <span>Когда уже знаете, что нужно купить</span>
+            <span>Когда добираете конкретный узел</span>
+            <span>Когда хотите быстро проверить наличие и цену</span>
+          </div>
+          <div class="catalog-landing-hero__map">
+            <div class="catalog-landing-hero__map-head">
+              <strong>С чего обычно начинают закупку</strong>
+              <p>Основные рабочие разделы, с которых удобно начать, если вы уже понимаете задачу.</p>
+            </div>
+            <div class="catalog-landing-hero__map-grid">
+              ${heroCategories
+                .map(
+                  (category) => `
+                    <a class="catalog-landing-hero__map-card" href="${resolveHref(ctx, `/catalog/${category.slug}/`)}">
+                      <span class="catalog-landing-hero__map-media">
+                        <img src="${resolveAsset(ctx, category.image)}" alt="${escapeHtml(category.name)}" loading="lazy" />
+                      </span>
+                      <span class="catalog-landing-hero__map-body">
+                        <strong>${escapeHtml(category.name)}</strong>
+                        <span>${category.productCount} товаров</span>
+                      </span>
+                    </a>
+                  `
+                )
+                .join("")}
+            </div>
           </div>
         </div>
         <div class="catalog-landing-hero__aside">
           <div class="catalog-landing-hero__card">
-            <strong>В каталоге уже есть:</strong>
-            <ul>
-              <li>9 верхнеуровневых категорий</li>
-              <li>вложенные подкатегории по сценариям</li>
-              <li>цены, документы, отзывы и Q&amp;A</li>
-              <li>фильтры, quick view и корзина без перезагрузки</li>
-            </ul>
+            <strong>Каталог собран для рабочей закупки</strong>
+            <p>Это не просто список позиций, а удобный вход в разделы, сценарии закупки и понятные действия без лишних прыжков.</p>
+            <div class="catalog-landing-hero__stats">
+              <div class="catalog-landing-hero__stat">
+                <strong>${topCategoryCount}</strong>
+                <span>верхнеуровневых разделов</span>
+              </div>
+              <div class="catalog-landing-hero__stat">
+                <strong>${totalProductCount}</strong>
+                <span>товаров в каталоге</span>
+              </div>
+              <div class="catalog-landing-hero__stat">
+                <strong>Q&amp;A</strong>
+                <span>документы, отзывы и быстрые действия по позициям</span>
+              </div>
+              <div class="catalog-landing-hero__stat">
+                <strong>Live</strong>
+                <span>фильтры, быстрый просмотр и корзина без перезагрузки</span>
+              </div>
+            </div>
           </div>
           <div class="catalog-landing-hero__route">
-            <strong>Когда не идти сразу в магазин</strong>
-            <p>Если вы ещё выбираете формат фермы, не уверены в совместимости узлов или собираете первую схему, правильнее начать с расчёта, а не с покупок поштучно.</p>
+            <strong>Когда лучше сначала не покупать</strong>
+            <p>Если вы ещё выбираете формат фермы, не уверены в совместимости узлов или только собираете первую схему, правильнее начать с расчёта, а не с покупок поштучно.</p>
             <div class="catalog-landing-hero__route-actions">
-              <a class="catalog-link-button" href="${resolveHref(ctx, "/consultations/")}">Задать вопрос по схеме</a>
-              <a class="catalog-link-button" href="${resolveHref(ctx, "/calc/")}">Открыть калькулятор</a>
+              <a class="catalog-secondary-button" href="${resolveHref(ctx, "/consultations/")}">Обсудить схему</a>
+              <a class="catalog-primary-button" href="${resolveHref(ctx, "/calc/")}">Открыть калькулятор</a>
+            </div>
+          </div>
+          <div class="catalog-landing-hero__utility">
+            <strong>Что можно сделать сразу</strong>
+            <div class="catalog-landing-hero__utility-list">
+              <a href="#catalog-categories">Выбрать категорию</a>
+              <a href="${resolveHref(ctx, "/farm/")}">Сверить состав фермы</a>
+              <a href="${resolveHref(ctx, "/consultations/")}">Задать вопрос</a>
             </div>
           </div>
         </div>
@@ -955,7 +1085,7 @@ function renderHowBuy(ctx) {
     <section class="catalog-info-strip" id="catalog-how-buy">
       <div class="catalog-section-head">
         <h2>Как купить</h2>
-        <p>Каталог позволяет купить типовой товар сразу, а проектные позиции перевести в консультацию без потери контекста.</p>
+        <p>Если задача уже понятна, здесь можно быстро собрать закупку. Если нет, каталог помогает не потерять контекст и перейти к вопросу или расчёту.</p>
       </div>
       <div class="catalog-how-buy-grid">
         <article>
@@ -964,11 +1094,11 @@ function renderHowBuy(ctx) {
         </article>
         <article>
           <strong>2. Сравните цены и характеристики</strong>
-          <p>У каждой позиции есть price tiers, quick view, документы и краткий блок с тем, что важно проверить до оплаты.</p>
+          <p>У каждой позиции есть варианты цен, быстрый просмотр, документы и короткий список того, что важно проверить до оплаты.</p>
         </article>
         <article>
           <strong>3. Добавьте в корзину или задайте вопрос</strong>
-          <p>Типовые товары отправляются в корзину сразу, а спорные позиции можно отдать в быстрый вопрос без ухода со страницы.</p>
+          <p>Понятные позиции можно сразу положить в корзину, а спорные лучше быстро уточнить, не уходя со страницы.</p>
         </article>
       </div>
     </section>
@@ -1030,7 +1160,7 @@ function renderFooter(ctx, state) {
 }
 
 function renderSearchPanel(ctx, state) {
-  const results = getSearchResults(state.search.query, state.search.mode);
+  const results = getSearchResults(state.search.query, "catalog");
   return `
     <div class="catalog-overlay ${state.dialogs.search ? "is-open" : ""}" data-overlay="search" aria-hidden="${state.dialogs.search ? "false" : "true"}">
       <div class="catalog-overlay__backdrop" data-action="close-dialog" data-dialog="search"></div>
@@ -1041,10 +1171,6 @@ function renderSearchPanel(ctx, state) {
         </div>
         <div class="catalog-search-form">
           <input type="search" value="${escapeHtml(state.search.query)}" placeholder="Название, артикул, категория" data-action="search-input" />
-          <div class="catalog-scope-toggle" role="group" aria-label="Область поиска">
-            <button type="button" class="catalog-chip-button${state.search.mode === "site" ? " is-active" : ""}" data-action="set-search-mode" data-value="site">По всему сайту</button>
-            <button type="button" class="catalog-chip-button${state.search.mode === "catalog" ? " is-active" : ""}" data-action="set-search-mode" data-value="catalog">По каталогу</button>
-          </div>
         </div>
         <div class="catalog-search-results">
           ${
@@ -1076,7 +1202,7 @@ function renderSearchPanel(ctx, state) {
                           `
                         )
                         .join("")
-                    : "<p>Категории не найдены.</p>"
+                    : "<p>По этому запросу категории не нашлись.</p>"
                 }</section>
                 <section><h3>Товары</h3>${
                   results.products.length
@@ -1090,10 +1216,10 @@ function renderSearchPanel(ctx, state) {
                           `
                         )
                         .join("")
-                    : "<p>Товары не найдены.</p>"
+                    : "<p>По этому запросу товары не нашлись.</p>"
                 }</section>
               `
-              : "<p>Введите запрос, чтобы искать по каталогу или всему сайту.</p>"
+              : "<p>Введите название, артикул или рабочий узел, чтобы начать поиск.</p>"
           }
         </div>
       </div>
@@ -1136,11 +1262,11 @@ function renderCartPanel(ctx, state) {
               </div>
               <div class="catalog-cart-summary">
                 <strong>Итого: ${formatPrice(summary.total)}</strong>
-                <p>Оформление заказа идёт через менеджера, чтобы сохранить совместимость узлов и актуальное наличие.</p>
-                <button type="button" class="catalog-primary-button" data-action="open-assistant" data-intent="checkout">Оформить заказ</button>
+                <p>Оформление идёт через менеджера, чтобы спокойно проверить совместимость узлов и актуальное наличие.</p>
+                <button type="button" class="catalog-primary-button" data-action="open-assistant" data-intent="checkout">Передать заказ менеджеру</button>
               </div>
             `
-            : `<p>В корзине пока пусто. Добавляйте позиции прямо из списка или карточки товара.</p>`
+            : `<p>Корзина пока пустая. Добавляйте позиции из списка или из карточки товара.</p>`
         }
       </div>
     </div>
@@ -1148,18 +1274,19 @@ function renderCartPanel(ctx, state) {
 }
 
 function renderAssistantPanel(state) {
+  const singlePhone = CATALOG_META.phones.length === 1;
   return `
     <div class="catalog-overlay ${state.dialogs.assistant ? "is-open" : ""}" data-overlay="assistant" aria-hidden="${state.dialogs.assistant ? "false" : "true"}">
       <div class="catalog-overlay__backdrop" data-action="close-dialog" data-dialog="assistant"></div>
       <div class="catalog-overlay__panel catalog-overlay__panel--assistant" role="dialog" aria-modal="true" aria-labelledby="catalog-assistant-title">
         <div class="catalog-overlay__head">
-          <h2 id="catalog-assistant-title">Нужна помощь по каталогу</h2>
+          <h2 id="catalog-assistant-title">Нужна помощь с выбором или заказом</h2>
           <button type="button" class="catalog-icon-button" data-action="close-dialog" data-dialog="assistant" aria-label="Закрыть панель помощи">×</button>
         </div>
-        <p>Можно сразу передать задачу в продажу или техподбор, не теряя контекст страницы.</p>
+        <p>Можно сразу передать задачу в работу или на подбор, не теряя контекст страницы и выбранных позиций.</p>
         <div class="catalog-assistant-actions">
           ${CATALOG_META.phones
-            .map((phone) => `<a class="catalog-primary-button" href="${phone.href}">${phone.label}: ${phone.value}</a>`)
+            .map((phone) => `<a class="catalog-primary-button" href="${phone.href}">${singlePhone ? phone.value : `${phone.label}: ${phone.value}`}</a>`)
             .join("")}
           <a class="catalog-secondary-button" href="mailto:${CATALOG_META.email}">Написать на ${CATALOG_META.email}</a>
           <a class="catalog-secondary-button" href="https://t.me/patiev_admin" target="_blank" rel="noreferrer">Открыть Telegram</a>
@@ -1194,7 +1321,7 @@ function renderQuickViewPanel(ctx, state) {
             ${renderProductSpecs(product)}
             <div class="catalog-quick-view__actions">
               <button type="button" class="catalog-primary-button${isInCart(state, product.id) ? " is-active" : ""}" data-action="toggle-cart" data-product-id="${product.id}">${
-                isInCart(state, product.id) ? "В корзине" : "В корзину"
+                isInCart(state, product.id) ? "Уже в корзине" : "Добавить в корзину"
               }</button>
               <button type="button" class="catalog-secondary-button" data-action="open-price-tiers" data-product-id="${product.id}">Варианты цен</button>
               <a class="catalog-secondary-button" href="${resolveHref(ctx, getProductCatalogPath(product))}">Полная карточка</a>
@@ -1326,7 +1453,6 @@ function renderMobileFilters(ctx, state, data) {
 
 function renderHeader(ctx, state) {
   const summary = getCartSummary(state);
-  const currentSearchMode = state.search.mode;
   return `
     <header class="catalog-header">
       <div class="catalog-header__top catalog-topbar">
@@ -1340,7 +1466,6 @@ function renderHeader(ctx, state) {
                 <span class="brand-title-line">Klubnika</span>
                 <span class="brand-title-line">Project</span>
               </div>
-              <div class="brand-note">Магазин, комплектация и закупка в логике всего проекта</div>
             </div>
           </a>
         </div>
@@ -1361,13 +1486,13 @@ function renderHeader(ctx, state) {
               <a href="${resolveHref(ctx, "/farm/")}"><strong>Расчёт фермы</strong><span>Состав запуска, рамка бюджета и следующий шаг.</span></a>
               <a href="${resolveHref(ctx, "/study/")}"><strong>Сопровождение</strong><span>Разбор действующей фермы, узких мест и технологии.</span></a>
               <a href="${resolveHref(ctx, "/consultations/")}"><strong>Консультации</strong><span>Точечный разбор задачи, совместимости и выбора.</span></a>
-              <a href="${resolveHref(ctx, "/klubhack/")}"><strong>Клубничный Хак</strong><span>База знаний по controlled-environment клубнике.</span></a>
+              <a href="${resolveHref(ctx, "/klubhack/")}"><strong>Клубничный Хак</strong><span>Практическая база по технологии клубничной фермы.</span></a>
             </div>
           </div>
           <div class="nav-group">
             <button class="nav-trigger" type="button">Каталог</button>
             <div class="nav-menu nav-menu-wide">
-              <a href="${resolveHref(ctx, "/catalog/")}"><strong>Магазин</strong><span>Весь storefront и вход в рабочие категории.</span></a>
+              <a href="${resolveHref(ctx, "/catalog/")}"><strong>Магазин</strong><span>Вход в рабочие категории и закупку без лишней витринности.</span></a>
               <a href="${resolveHref(ctx, "/catalog/led/")}"><strong>LED</strong><span>Линейные и тепличные сценарии досветки.</span></a>
               <a href="${resolveHref(ctx, "/catalog/irrigation/")}"><strong>Полив</strong><span>Полив, дозирование и расходники по узлам.</span></a>
               <a href="${resolveHref(ctx, "/catalog/racks/")}"><strong>Стеллажи</strong><span>Каркасы, лотки и модульные ряды.</span></a>
@@ -1376,11 +1501,14 @@ function renderHeader(ctx, state) {
             </div>
           </div>
           <a class="nav-link" href="${resolveHref(ctx, "/calc/")}">Калькулятор</a>
-          <a class="nav-link catalog-nav-link-button" href="${resolveHref(ctx, "/account/")}">Кабинет</a>
-          <button type="button" class="nav-cta catalog-nav-cart" data-action="open-cart">
+        </nav>
+        <div class="catalog-header-utility">
+          <a class="catalog-icon-pill catalog-header-utility-link" href="#catalog-how-buy">Как купить</a>
+          <a class="catalog-icon-pill catalog-header-utility-link" href="${resolveHref(ctx, "/account/")}">Кабинет</a>
+          <button type="button" class="catalog-header-cart" data-action="open-cart">
             Корзина <span>${summary.itemCount}</span>
           </button>
-        </nav>
+        </div>
         <div class="catalog-header-mobile-actions">
           <button type="button" class="catalog-icon-pill" data-action="open-search" aria-label="Открыть поиск">Поиск</button>
           <button type="button" class="catalog-icon-pill" data-action="open-cart" aria-label="Открыть корзину">Корзина <span>${summary.itemCount}</span></button>
@@ -1388,23 +1516,27 @@ function renderHeader(ctx, state) {
         </div>
       </div>
       <div class="catalog-header__bottom">
-        <div class="catalog-header-panel">
+        <div class="catalog-header-workbar">
           <form class="catalog-header-search" data-header-search>
-            <input type="search" value="${escapeHtml(state.search.query)}" placeholder="Поиск по каталогу, артикулу или сценарию" />
-            <div class="catalog-scope-toggle" role="group" aria-label="Область поиска">
-              <button type="button" class="catalog-chip-button${currentSearchMode === "site" ? " is-active" : ""}" data-action="set-search-mode" data-value="site">По всему сайту</button>
-              <button type="button" class="catalog-chip-button${currentSearchMode === "catalog" ? " is-active" : ""}" data-action="set-search-mode" data-value="catalog">По магазину</button>
+            <div class="catalog-search-shell">
+              <input type="search" value="${escapeHtml(state.search.query)}" placeholder="Название, артикул или рабочий узел" />
+              <button type="submit" class="catalog-search-submit" aria-label="Искать по магазину">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M10.5 4a6.5 6.5 0 1 0 4.018 11.61l4.436 4.436 1.06-1.06-4.436-4.436A6.5 6.5 0 0 0 10.5 4Zm0 1.5a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z" />
+                </svg>
+                <span class="sr-only">Искать</span>
+              </button>
             </div>
-            <button type="submit" class="catalog-primary-button">Найти</button>
           </form>
-          <div class="catalog-header-actions">
-            <div class="catalog-header-phones">
+          <div class="catalog-header-support">
+            <div class="catalog-header-contactline">
               ${CATALOG_META.phones.map((phone) => `<a href="${phone.href}">${phone.value}</a>`).join("")}
             </div>
-            <a class="catalog-icon-pill catalog-header-anchor" href="#catalog-how-buy">Как купить</a>
-            <a class="catalog-icon-pill catalog-header-anchor" href="#catalog-contacts">Контакты</a>
-            <button type="button" class="catalog-secondary-button" data-action="open-assistant" data-intent="callback">Заказать звонок</button>
-            <button type="button" class="catalog-secondary-button" data-action="open-assistant" data-intent="question">Задать вопрос</button>
+            <div class="catalog-header-actions">
+              <a class="catalog-icon-pill catalog-header-anchor" href="#catalog-contacts">Контакты</a>
+              <button type="button" class="catalog-secondary-button" data-action="open-assistant" data-intent="callback">Попросить звонок</button>
+              <button type="button" class="catalog-secondary-button" data-action="open-assistant" data-intent="question">Задать вопрос</button>
+            </div>
           </div>
         </div>
       </div>

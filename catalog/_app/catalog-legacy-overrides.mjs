@@ -102,7 +102,8 @@ export const catalogLegacyOverrides = {
     "images": [
       "assets/catalog/50590287.webp",
       "assets/photos/optimized/greenhouse-rack.webp",
-      "assets/photos/optimized/rack-aisle.webp"
+      "assets/photos/optimized/rack-aisle.webp",
+      "assets/photos/optimized/hero-process.webp"
     ],
     "attributes": [
       {
@@ -284,7 +285,9 @@ export const catalogLegacyOverrides = {
     "fullDescription": "<p>Базовая трубка для сборки фермерской линии. Её можно брать сразу, если вы уже понимаете длину ряда, число точек и формат подключения.</p>\n<h3>Как смотреть эту позицию</h3>\n<p><strong>Трубку стоит брать тогда, когда линия уже посчитана</strong></p>\n<ul><li>Позиция становится быстрой покупкой только внутри уже понятной схемы.</li><li>Сначала сверяют длину ряда, точки подключения и шаг капельниц.</li><li>Если меняется сама логика узла, сначала лучше сверить состав, а потом добирать расходники.</li></ul>\n<h3>Следующий шаг</h3>\n<p><strong>Этот расходник хорош только в уже понятной схеме.</strong></p>\n<p>Если линия ещё не просчитана, лучше сначала сверить метраж и fit по объекту, чем добирать трубку на глаз.</p>",
     "price": 66,
     "images": [
-      "assets/catalog/86171232.webp"
+      "assets/catalog/86171232.webp",
+      "assets/photos/optimized/greenhouse-rack.webp",
+      "assets/photos/optimized/hero-process.webp"
     ],
     "attributes": [
       {
@@ -328,7 +331,9 @@ export const catalogLegacyOverrides = {
     "fullDescription": "<p>Тот же материал, но уже под объёмную сборку линии и запас под несколько рядов или модулей. Работает там, где схема фермы уже понятна по метражу.</p>\n<h3>Как смотреть эту позицию</h3>\n<p><strong>Бухта имеет смысл, когда вы уже понимаете расход по очереди</strong></p>\n<ul><li>Такой формат удобен, когда метраж и монтажный сценарий уже не плавают.</li><li>Сначала сверяют длину линии на несколько рядов и запас под расширение.</li><li>Если схема ещё собирается, объёмная покупка только добавит лишний остаток и шум.</li></ul>\n<h3>Следующий шаг</h3>\n<p><strong>Бухта оправдана только тогда, когда метраж линии уже посчитан.</strong></p>\n<p>Если ещё непонятно, сколько трубки уйдёт в объект, лучше сначала сверить расчёт по линии и только потом брать объём.</p>",
     "price": 10000,
     "images": [
-      "assets/catalog/86171232.webp"
+      "assets/catalog/86171232.webp",
+      "assets/photos/optimized/rack-aisle.webp",
+      "assets/photos/optimized/greenhouse-rack.webp"
     ],
     "attributes": [
       {
@@ -372,7 +377,9 @@ export const catalogLegacyOverrides = {
     "fullDescription": "<p>Инструмент для сборки линии без лишней самодеятельности. Подходит там, где полив уже проектно понятен и нужна аккуратная работа руками по готовой схеме.</p>\n<h3>Как смотреть эту позицию</h3>\n<p><strong>Инструмент полезен только там, где схема уже не спорная</strong></p>\n<ul><li>Пробойник не выбирает диаметр и узел за вас, он лишь помогает аккуратно собрать уже понятную линию.</li><li>Сначала сверяют трубку, шаг точек и формат подключения.</li><li>Если схема ещё плавает, инструмент покупают последним, а не первым.</li></ul>\n<h3>Следующий шаг</h3>\n<p><strong>Инструмент нужен, когда сама схема уже не вызывает вопросов.</strong></p>\n<p>Если полив ещё не собран на бумаге, пробойник не решит задачу. Сначала сверяйте узел, потом добирайте инструмент под работу руками.</p>",
     "price": 1200,
     "images": [
-      "assets/catalog/75043878.webp"
+      "assets/catalog/75043878.webp",
+      "assets/photos/optimized/greenhouse-rack.webp",
+      "assets/photos/optimized/hero-process.webp"
     ],
     "attributes": [],
     "faq": [],
@@ -481,7 +488,8 @@ export const catalogLegacyOverrides = {
     "images": [
       "assets/photos/optimized/hero-process.webp",
       "assets/photos/optimized/greenhouse-rack.webp",
-      "assets/photos/optimized/rack-aisle.webp"
+      "assets/photos/optimized/rack-aisle.webp",
+      "assets/catalog/IMG_6061.webp"
     ],
     "attributes": [
       {
@@ -619,7 +627,8 @@ export const catalogLegacyOverrides = {
     "images": [
       "assets/catalog/grodan_prestige_6_ho.webp",
       "assets/photos/optimized/berry-cluster.webp",
-      "assets/photos/optimized/greenhouse-rack.webp"
+      "assets/photos/optimized/greenhouse-rack.webp",
+      "assets/photos/optimized/berry-red.webp"
     ],
     "attributes": [
       {
@@ -755,7 +764,9 @@ export const catalogLegacyOverrides = {
     "fullDescription": "<p>Набор для уже понятного модульного стеллажа. Здесь важна не красота названия, а то, что фитинги действительно совпадают с вашим узлом и схемой полива.</p>\n<h3>Как смотреть эту позицию</h3>\n<p><strong>Фитинги работают только внутри уже собранной схемы</strong></p>\n<ul><li>Комплект становится удобным, когда модуль уже понятен по геометрии и подаче.</li><li>Если меняется сама логика узла, сначала лучше сверить состав, а потом добирать расходники.</li><li>Даже небольшие фитинги должны совпасть с линией, переходами и сценарием обслуживания.</li></ul>\n<h3>Следующий шаг</h3>\n<p><strong>Фитинги хороши только в уже понятном узле.</strong></p>\n<p>Если сам модуль или схема полива ещё не зафиксированы, лучше сначала сверить состав, а не подбирать фитинги наугад.</p>",
     "price": 671,
     "images": [
-      "assets/catalog/80999720.webp"
+      "assets/catalog/80999720.webp",
+      "assets/photos/optimized/greenhouse-rack.webp",
+      "assets/photos/optimized/hero-process.webp"
     ],
     "attributes": [],
     "faq": [],
@@ -816,7 +827,8 @@ export const catalogLegacyOverrides = {
     "fullDescription": "<p>Базовая модульная ячейка, если нужен старт в понятном формате, а не проектная абстракция. Подходит как первый рабочий модуль при сборке фермы по этапам.</p>\n<h3>Как смотреть это решение</h3>\n<p><strong>Базовый модуль нужно смотреть как первый рабочий фрагмент фермы</strong></p>\n<ul><li>Сначала на проход, свет, лоток и обслуживание, а уже потом на цену одной ячейки.</li><li>Такой модуль удобен, когда нужно запустить понятный старт без расчёта всей очереди сразу.</li><li>Если вместе с ним уже меняются климат, полив и логика расширения, это повод идти в расчёт.</li></ul>\n<h3>Следующий шаг</h3>\n<p><strong>Базовый модуль хорош как вход в понятную очередь, а не как замена расчёту всей фермы.</strong></p>\n<p>Если модуль нужен как старт, можно идти в состав и смету. Если вы уже считаете целую очередь или несколько зон, лучше сразу расширять разговор до расчёта проекта.</p>",
     "price": 121000,
     "images": [
-      "assets/catalog/IMG_6063.webp"
+      "assets/catalog/IMG_6063.webp",
+      "assets/catalog/IMG_6061.webp"
     ],
     "attributes": [
       {
@@ -860,7 +872,8 @@ export const catalogLegacyOverrides = {
     "fullDescription": "<p>Модуль для расширения уже существующей линии, когда базовая логика фермы собрана и нужно нарастить объём без пересборки стартового ядра.</p>\n<h3>Как смотреть это решение</h3>\n<p><strong>Дополнительный модуль нужен, когда базовая геометрия уже подтверждена</strong></p>\n<ul><li>Он работает как шаг роста, а не как отдельная покупка вне существующей линии.</li><li>Сначала проверяют, выдержит ли объект следующий ряд по свету, поливу и проходам.</li><li>Если расширение тянет за собой пересборку схемы, лучше сразу идти в расчёт.</li></ul>\n<h3>Следующий шаг</h3>\n<p><strong>Дополнительный модуль хорош только тогда, когда базовая логика фермы уже собрана.</strong></p>\n<p>Если вы не уверены, что объект выдержит расширение или сама конфигурация ряда ещё меняется, сначала переходите к составу и смете.</p>",
     "price": 104500,
     "images": [
-      "assets/catalog/IMG_4924.webp"
+      "assets/catalog/IMG_4924.webp",
+      "assets/catalog/IMG_6061.webp"
     ],
     "attributes": [
       {

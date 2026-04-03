@@ -3,6 +3,15 @@
   gap: 24px;
 }
 
+.hero-grid-lean .hero-copy {
+  max-width: 680px;
+}
+
+.hero-grid-lean .visual-panel {
+  min-height: 100%;
+  align-content: start;
+}
+
 .account-panel {
   display: grid;
   gap: 18px;
@@ -75,36 +84,11 @@
   font-weight: 600;
 }
 
-.account-status.is-error {
-  color: #8f2d1d;
-}
-
-.account-status.is-success {
-  color: var(--green);
-}
-
-.account-help-card {
-  display: grid;
-  gap: 6px;
-  padding: 14px 16px;
-  border-radius: 16px;
-  background: rgba(255, 250, 242, 0.78);
-  border: 1px solid rgba(0, 77, 43, 0.12);
-}
-
-.account-help-card strong {
-  font-size: 14px;
-}
-
-.account-help-card span {
-  color: var(--muted);
-  font-size: 14px;
-}
-
 .account-user {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  margin-top: 18px;
 }
 
 .account-item-meta {
@@ -121,8 +105,6 @@
   border: 1px dashed var(--line);
   color: var(--muted);
   background: rgba(255, 250, 242, 0.6);
-  display: grid;
-  gap: 12px;
 }
 
 .account-note-chip {
@@ -137,38 +119,9 @@
   font-weight: 700;
 }
 
-.account-password-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.account-session-list {
-  display: grid;
-  gap: 10px;
-}
-
-.account-session-item {
-  display: grid;
-  gap: 6px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(0, 77, 43, 0.12);
-  background: rgba(255, 255, 255, 0.72);
-}
-
-.account-session-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 12px;
-}
-
 @media (max-width: 960px) {
   .account-grid,
-  .account-grid-3,
-  .account-password-grid {
+  .account-grid-3 {
     grid-template-columns: 1fr;
   }
 }

@@ -13,12 +13,12 @@
   />
   <link rel="stylesheet" href="../../styles.css?v=20260402b" />
   <link rel="stylesheet" href="../calc.css?v=20260401f" />
-  <link rel="stylesheet" href="./admin.css?v=20260403a" />
+  <link rel="stylesheet" href="./admin.css?v=20260402b" />
   <!-- SEO:START -->
   <meta name="robots" content="noindex, nofollow" />
   <!-- SEO:END -->
 </head>
-<body data-calc-admin-auth="guest">
+<body>
   <header class="hero">
     <div class="container">
       <div class="hero-shell">
@@ -41,7 +41,7 @@
 
           <nav class="nav">
             <a href="../../">Главная</a>
-            <a class="calc-admin-authenticated-only" href="../../admin/">Админ кабинет</a>
+            <a href="../../admin/">Админ кабинет</a>
             <a href="../">Калькулятор</a>
             <a href="../../farm/">Расчёт</a>
             <a href="../../shop/">Магазин</a>
@@ -50,30 +50,24 @@
 
         <div class="hero-grid admin-hero-grid">
           <div class="hero-copy">
-            <span class="eyebrow">Защищённый инструмент</span>
-            <h1>Редактор цен калькулятора открыт только после входа в админ-кабинет</h1>
-            <p class="lead calc-admin-authenticated-only">
+            <span class="eyebrow">Внутренний инструмент</span>
+            <h1>Редактор цен и расчётных констант без переписывания калькулятора</h1>
+            <p class="lead">
               Здесь можно менять цены, константы и значения по умолчанию, а справа сразу видеть,
               как это влияет на смету, расходы и базовую экономику по модели фермы.
             </p>
-            <p class="sublead calc-admin-authenticated-only">
+            <p class="sublead">
               Эта страница не пишет файл на сервер автоматически. Она готовит новый `pricing.json`,
               который можно скачать, вставить в проект и затем уже зафиксировать в git или CMS.
             </p>
-            <p class="lead calc-admin-guest-only">
-              Без подтверждённой admin-сессии редактор цен, константы и экспортный JSON не показываются.
-            </p>
-            <p class="sublead calc-admin-guest-only">
-              Сначала войдите в основной админ-кабинет или подтвердите сессию здесь. После этого откроется рабочее пространство калькулятора.
-            </p>
 
-            <div class="btn-row hero-cta calc-admin-authenticated-only">
+            <div class="btn-row hero-cta">
               <a class="btn btn-secondary" href="../../admin/">Открыть админ кабинет</a>
               <a class="btn btn-primary" href="../">Открыть калькулятор</a>
               <a class="btn btn-secondary" href="../../farm/#brief">Перейти к расчёту под проект</a>
             </div>
 
-            <div class="hero-stats calc-admin-authenticated-only">
+            <div class="hero-stats">
               <div class="hero-stat">
                 <strong>Что меняется</strong>
                 <span>Цены по позициям, экономические константы и значения по умолчанию в калькуляторе.</span>
@@ -89,7 +83,7 @@
             </div>
           </div>
 
-          <aside class="visual-panel admin-note-panel calc-admin-authenticated-only">
+          <aside class="visual-panel admin-note-panel">
             <div class="tag">Как работать</div>
             <ul class="calc-list">
               <li>Меняете значения слева.</li>
@@ -107,38 +101,7 @@
     <section class="section" id="admin-workspace">
       <div class="container">
         <div class="section-frame">
-          <div class="calc-admin-shell">
-            <section class="card card-pad admin-card calc-admin-access-gate calc-admin-guest-only" id="calc-admin-access-gate">
-              <div class="tag">Вход и статус</div>
-              <h3 class="calc-card-title">Сначала войдите в кабинет</h3>
-              <p class="sublead">Редактор цен калькулятора больше не показывается публично. Для доступа нужна подтверждённая admin-сессия.</p>
-              <label class="admin-field">
-                <span class="admin-field-label">Bootstrap token / access key</span>
-                <span class="admin-field-note">Резервный способ входа, если обычный логин недоступен.</span>
-                <input class="admin-input" id="calc-admin-backend-token" type="password" autocomplete="off" placeholder="Bearer token or access key" />
-              </label>
-              <div class="admin-grid">
-                <label class="admin-field">
-                  <span class="admin-field-label">Admin login</span>
-                  <span class="admin-field-note">Slug или email admin-пользователя.</span>
-                  <input class="admin-input" id="calc-admin-login-identity" type="text" autocomplete="username" placeholder="admin login or email" />
-                </label>
-                <label class="admin-field">
-                  <span class="admin-field-label">Admin password</span>
-                  <span class="admin-field-note">Пароль для входа в админ-контур.</span>
-                  <input class="admin-input" id="calc-admin-login-password" type="password" autocomplete="current-password" placeholder="Password" />
-                </label>
-              </div>
-              <div class="calc-admin-auth-actions">
-                <button class="btn btn-primary" id="calc-admin-login-button" type="button">Войти по token</button>
-                <button class="btn btn-primary" id="calc-admin-password-login-button" type="button">Войти по логину</button>
-                <button class="btn btn-secondary" id="calc-admin-session-button" type="button">Проверить сессию</button>
-                <button class="btn btn-secondary" id="calc-admin-logout-button" type="button">Выйти</button>
-              </div>
-              <div class="calc-admin-session-state" id="calc-admin-session-state">Сессия backend не проверялась.</div>
-            </section>
-
-            <div class="admin-layout calc-admin-authenticated-only" id="calc-admin-workspace" hidden>
+          <div class="admin-layout">
             <section class="admin-editor">
               <article class="card card-pad admin-card">
                 <div class="tag">Модель</div>
@@ -195,7 +158,6 @@
                 <textarea class="admin-json-output" id="json-output" spellcheck="false" readonly></textarea>
               </div>
             </aside>
-            </div>
           </div>
         </div>
       </div>
@@ -203,6 +165,6 @@
   </main>
 
   <script src="../../site.js?v=20260402d" defer></script>
-  <script src="./admin.js?v=20260403a" type="module"></script>
+  <script src="./admin.js?v=20260402b" type="module"></script>
 </body>
 </html>

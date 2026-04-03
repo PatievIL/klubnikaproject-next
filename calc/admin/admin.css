@@ -2,10 +2,17 @@
   grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
 }
 
+.admin-hero-grid .hero-copy {
+  max-width: 700px;
+}
+
 .admin-note-panel {
   align-self: start;
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.14);
+  min-height: 100%;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(245, 236, 223, 0.08)),
+    rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
 }
 
 .admin-note-panel .tag {
@@ -19,32 +26,6 @@
 
 .admin-note-panel .calc-list li::before {
   background: var(--accent);
-}
-
-body[data-calc-admin-auth="guest"] .calc-admin-authenticated-only {
-  display: none !important;
-}
-
-body[data-calc-admin-auth="authenticated"] .calc-admin-guest-only {
-  display: none !important;
-}
-
-.calc-admin-access-gate {
-  max-width: 960px;
-  margin: 0 auto;
-}
-
-.calc-admin-auth-actions {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.calc-admin-session-state {
-  margin-top: 10px;
-  color: var(--muted);
-  font-size: 13px;
 }
 
 .admin-layout {
@@ -241,7 +222,6 @@ body[data-calc-admin-auth="authenticated"] .calc-admin-guest-only {
 
 @media (max-width: 760px) {
   .admin-grid,
-  .calc-admin-auth-actions,
   .admin-price-row,
   .admin-section-top {
     grid-template-columns: 1fr;

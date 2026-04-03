@@ -9,7 +9,8 @@
 - `index.html` — главная как маршрутизатор спроса
 - `farm/index.html` — сценарий расчёта фермы
 - `study/index.html` — сценарий консультаций и сопровождения
-- `shop/index.html` — магазин как каталог решений
+- `catalog/` — новый полноформатный каталог интернет-магазина с фильтрами, сортировкой, quick view и карточками товаров
+- `shop/index.html` — legacy-витрина магазина как старый каталог решений
 - `seeds/index.html` — раздел посадочного материала
 - `styles.css` — общая дизайн-система
 - `docs/strategy-brief.md` — рабочий CRO/UX-бриф по новой версии
@@ -24,11 +25,21 @@
 - `calc/admin/index.html` — внутренняя страница редактирования draft-цен с экспортом JSON
 - `site.js` — общий UI-слой, язык/тема, формы и привязка к admin-config
 - `crm/` — отдельный контур под новый CRM-проект и инструкцию для Codex
+- `graph/` — отдельный контур под visual-system, бренд, шаблоны и CSS-качество сайта
+- `copy/` — отдельный контур под tone of voice, headers, CTA, microcopy и очеловечивание текста сайта
 
 Отдельный CRM-контур:
 
 - `crm/README.md` — запуск и устройство нового CRM backend
 - `crm/CODEX_INSTRUCTIONS.md` — ТЗ для дальнейшей разработки CRM как отдельного проекта
+
+Отдельный дизайн-контур:
+
+- `graph/CODEX_INSTRUCTIONS.md` — инструкция для `graph` как главного visual/CSS-агента `KlubnikaProject`
+
+Отдельный copy-контур:
+
+- `copy/CODEX_INSTRUCTIONS.md` — инструкция для `copy` как главного tone-of-voice и copywriting-агента `KlubnikaProject`
 
 ## Локальный запуск
 
@@ -46,6 +57,7 @@ python3 -m http.server 8011 --bind 127.0.0.1
 - `http://127.0.0.1:8011/admin/`
 - `http://127.0.0.1:8011/calc/`
 - `http://127.0.0.1:8011/calc/admin/`
+- `http://127.0.0.1:8011/catalog/`
 
 Боевой стенд:
 
@@ -88,6 +100,7 @@ python3 scripts/build-brandbook-project-v2.py
 
 Что входит:
 
+- `scripts/build-catalog.mjs` — пересобирает статические маршруты нового `/catalog`
 - `scripts/build-seo.mjs` — обновляет `canonical`, `robots`, JSON-LD и нормализует бренд в `<title>`
 - `robots.txt` — закрывает служебные разделы и публикует sitemap
 - `sitemap.xml` — собирается автоматически из индексируемых HTML-страниц
@@ -97,8 +110,14 @@ python3 scripts/build-brandbook-project-v2.py
 
 ```bash
 cd /path/to/klubnikaproject
+node scripts/build-catalog.mjs
 node scripts/build-seo.mjs
 ```
+
+Примечание:
+
+- `build-seo.mjs` теперь сам сначала пересобирает `/catalog`, а потом уже пересобирает sitemap и SEO-обвязку сайта.
+- страницы внутри `catalog/` управляются собственным генератором и не переписываются повторно SEO-скриптом.
 
 Что делает пакет:
 
@@ -112,7 +131,7 @@ node scripts/build-seo.mjs
 Примеры уже в проекте:
 
 - главная: `index.html`
-- продуктовая карточка: `shop/products/led-300wt/index.html`
+- продуктовая карточка: `catalog/linear-led/luma-line-191/index.html`
 - админ кабинет с `noindex`: `admin/index.html`
 - админка с `noindex`: `calc/admin/index.html`
 

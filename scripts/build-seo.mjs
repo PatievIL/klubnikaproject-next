@@ -2,6 +2,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+await import("./build-catalog.mjs");
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, "..");
@@ -34,8 +36,9 @@ for (const relativePath of htmlFiles) {
   const original = await fs.readFile(absolutePath, "utf8");
   const normalizedTitle = normalizeTitle(relativePath, original);
   const withNormalizedTitle = replaceTitle(original, normalizedTitle);
-  const seoBlock = buildSeoBlock(relativePath, withNormalizedTitle);
-  const updated = replaceSeoBlock(withNormalizedTitle, seoBlock);
+  const updated = isCatalogManagedRoute(relativePath)
+    ? original
+    : replaceSeoBlock(withNormalizedTitle, buildSeoBlock(relativePath, withNormalizedTitle));
 
   if (updated !== original) {
     await fs.writeFile(absolutePath, updated);
@@ -340,6 +343,10 @@ function toCanonicalPath(relativePath) {
 
 function isNoindex(relativePath) {
   return EXCLUDED_FROM_INDEX.some((pattern) => pattern.test(relativePath));
+}
+
+function isCatalogManagedRoute(relativePath) {
+  return relativePath === "catalog/index.html" || relativePath.startsWith("catalog/");
 }
 
 function buildRobotsTxt() {
