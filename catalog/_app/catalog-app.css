@@ -1220,7 +1220,7 @@ textarea {
 .catalog-product-card__body {
   grid-template-rows: auto auto 1fr auto auto;
   gap: 10px;
-  padding: 14px;
+  padding: 13px;
   align-content: start;
 }
 
@@ -1236,8 +1236,9 @@ textarea {
   line-height: 1.45;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   overflow: hidden;
+  color: color-mix(in srgb, var(--catalog-text) 72%, var(--catalog-muted));
 }
 
 .catalog-category-card__body h3,
@@ -1250,7 +1251,7 @@ textarea {
 }
 
 .catalog-product-card__title {
-  font-size: 22px;
+  font-size: 20px;
   line-height: 1.04;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -1276,7 +1277,7 @@ textarea {
 }
 
 .catalog-product-card__media img {
-  height: 156px;
+  height: 144px;
 }
 
 .catalog-badge-list {
@@ -1352,6 +1353,7 @@ textarea {
   align-items: flex-start;
   font-size: 12px;
   line-height: 1.3;
+  color: var(--catalog-muted);
 }
 
 .catalog-product-card__price-row {
@@ -1363,15 +1365,15 @@ textarea {
 
 .catalog-product-card__price-row strong {
   display: block;
-  font-size: 22px;
+  font-size: 21px;
   line-height: 1;
   letter-spacing: -0.04em;
 }
 
 .catalog-product-card__actions {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
   align-items: stretch;
 }
 
@@ -1381,6 +1383,20 @@ textarea {
   min-height: 38px;
   padding: 8px 10px;
   font-size: 12px;
+}
+
+.catalog-product-card__actions .catalog-secondary-button {
+  border: 0;
+  background: transparent;
+  color: var(--catalog-blue);
+  justify-content: flex-start;
+  padding: 0;
+  min-height: auto;
+}
+
+.catalog-product-card__actions .catalog-secondary-button:hover {
+  background: transparent;
+  color: var(--catalog-accent-dark);
 }
 
 .catalog-product-card__actions .catalog-link-button {
@@ -1396,7 +1412,7 @@ textarea {
 
 .catalog-category-layout {
   display: grid;
-  grid-template-columns: 272px minmax(0, 1fr);
+  grid-template-columns: 248px minmax(0, 1fr);
   gap: 28px;
   padding: 0;
   background: none;
@@ -1422,16 +1438,16 @@ textarea {
 }
 
 .catalog-filter-panel {
-  padding: 18px 18px 16px;
+  padding: 16px 16px 14px;
   border-radius: 22px;
-  background: rgba(255, 250, 242, 0.68);
-  border: 1px solid rgba(0, 77, 43, 0.08);
-  box-shadow: 0 10px 22px rgba(0, 11, 48, 0.04);
+  background: rgba(255, 250, 242, 0.52);
+  border: 1px solid rgba(0, 77, 43, 0.06);
+  box-shadow: none;
 }
 
 .catalog-filter-panel__head h2 {
   margin: 0;
-  font-size: 24px;
+  font-size: 22px;
   line-height: 1;
   letter-spacing: -0.035em;
 }
@@ -1480,7 +1496,7 @@ textarea {
   padding: 0;
   margin: 0;
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .catalog-filter-options,
@@ -1498,11 +1514,12 @@ textarea {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 10px 2px;
+  padding: 8px 0;
   border: 0;
   border-bottom: 1px solid rgba(0, 77, 43, 0.08);
   border-radius: 0;
   background: transparent;
+  font-size: 13px;
 }
 
 .catalog-price-inputs {
@@ -1516,13 +1533,13 @@ textarea {
   border: 1px solid rgba(0, 77, 43, 0.08);
   box-shadow: 0 10px 24px rgba(0, 11, 48, 0.05);
   border-radius: var(--catalog-radius);
-  padding: 18px;
+  padding: 16px;
 }
 
 .catalog-listing-toolbar {
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   align-items: center;
-  padding-bottom: 14px;
+  padding-bottom: 12px;
   border-bottom: 1px solid rgba(0, 77, 43, 0.08);
 }
 
@@ -1536,7 +1553,14 @@ textarea {
 
 .catalog-sort-control {
   display: grid;
-  gap: 6px;
+  gap: 4px;
+}
+
+.catalog-sort-control select,
+.catalog-price-inputs input {
+  padding: 11px 12px;
+  border-radius: 12px;
+  background: rgba(255, 250, 242, 0.92);
 }
 
 .catalog-filter-chip-row {
