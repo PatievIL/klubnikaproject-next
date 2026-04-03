@@ -1458,15 +1458,8 @@ function renderHeader(ctx, state) {
       <div class="catalog-header__top catalog-topbar">
         <div class="catalog-brand brand">
           <a class="brand-home" href="${resolveHref(ctx, "/")}">
-            <div class="brand-logo">
-              <img src="${resolveAsset(ctx, "assets/brand-berry-beige.svg")}" alt="Знак Klubnika Project" />
-            </div>
-            <div class="brand-copy">
-              <div class="brand-title">
-                <span class="brand-title-line">Klubnika</span>
-                <span class="brand-title-line">Project</span>
-              </div>
-            </div>
+            <img class="brand-lockup brand-lockup-primary" src="${resolveAsset(ctx, "documents/logo/header-lockup-v1-close-compact-dark.svg?v=20260403u")}" alt="KLUBNIKA PROJECT" />
+            <img class="brand-lockup brand-lockup-compact" src="${resolveAsset(ctx, "documents/logo/header-lockup-v1-close-compact-dark.svg?v=20260403u")}" alt="KLUBNIKA PROJECT" />
           </a>
         </div>
         <button

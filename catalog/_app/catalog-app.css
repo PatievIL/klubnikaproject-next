@@ -121,7 +121,7 @@ textarea {
 }
 
 .catalog-header__top {
-  padding: 16px 18px 12px;
+  padding: 12px 16px 10px;
 }
 
 .catalog-header__bottom {
@@ -133,7 +133,7 @@ textarea {
   grid-template-columns: auto minmax(0, 1fr) auto;
   grid-template-areas: none;
   align-items: center;
-  gap: 18px;
+  gap: 12px;
 }
 
 .catalog-brand,
@@ -156,21 +156,26 @@ textarea {
 .catalog-brand .brand-home {
   text-decoration: none;
   align-items: center;
+  gap: 0;
+  padding-right: 8px;
 }
 
-.catalog-brand .brand-logo {
-  width: 52px;
-  height: 52px;
-  flex: 0 0 52px;
+.catalog-brand .brand-lockup {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
 }
 
-.catalog-brand .brand-logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  border-radius: 0;
-  background: none;
-  padding: 0;
+.catalog-brand .brand-lockup-primary {
+  width: auto;
+  height: clamp(33px, 2.55vw, 37px);
+}
+
+.catalog-brand .brand-lockup-compact {
+  display: none;
+  width: auto;
+  height: clamp(27px, 4.7vw, 31px);
 }
 
 .catalog-brand .brand-title {
@@ -205,9 +210,7 @@ textarea {
 }
 
 .catalog-brand a {
-  display: grid;
-  grid-template-columns: 52px 1fr;
-  gap: 12px;
+  display: flex;
   align-items: center;
   text-decoration: none;
 }
@@ -219,6 +222,12 @@ textarea {
   border-radius: 16px;
   background: rgba(245, 236, 223, 0.1);
   padding: 6px;
+}
+
+.catalog-brand .brand-lockup {
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .catalog-brand strong {
@@ -2220,8 +2229,12 @@ textarea {
     width: 100%;
   }
 
-  .catalog-brand .brand-copy {
-    min-width: 0;
+  .catalog-brand .brand-lockup-primary {
+    display: none;
+  }
+
+  .catalog-brand .brand-lockup-compact {
+    display: block;
   }
 
   .catalog-header-search,
@@ -2374,26 +2387,13 @@ textarea {
   }
 
   .catalog-brand .brand-home {
-    grid-template-columns: 44px minmax(0, 1fr);
-    gap: 12px;
-    align-items: start;
+    gap: 0;
+    align-items: center;
+    padding-right: 0;
   }
 
-  .catalog-brand .brand-logo,
-  .catalog-brand .brand-logo img,
-  .catalog-brand img {
-    width: 44px;
-    height: 44px;
-  }
-
-  .catalog-brand .brand-title {
-    line-height: 0.9;
-  }
-
-  .catalog-brand .brand-note {
-    max-width: 28ch;
-    font-size: var(--type-brand-note-compact);
-    line-height: 1.28;
+  .catalog-brand .brand-lockup-compact {
+    width: min(144px, 38vw);
   }
 
   .catalog-header-mobile-actions .catalog-icon-pill {
