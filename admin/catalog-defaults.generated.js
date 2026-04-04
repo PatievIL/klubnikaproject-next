@@ -27,7 +27,7 @@ export const DEFAULT_CATALOG_ITEMS = [
     "path": "/catalog/greenhouse-led/",
     "cta_mode": "choose",
     "status": "published",
-    "summary": "Более мощные позиции для зон досветки, тепличных рядов и комбинированных сценариев."
+    "summary": "Более мощные решения для зон досветки, тепличных рядов и комбинированных сценариев."
   },
   {
     "slug": "catalog-category-irrigation",
@@ -41,13 +41,13 @@ export const DEFAULT_CATALOG_ITEMS = [
   },
   {
     "slug": "catalog-subcategory-drippers",
-    "title": "Капельницы и узлы подачи",
+    "title": "Капельницы и подача",
     "kind": "subcategory",
     "category": "irrigation",
     "path": "/catalog/drippers/",
     "cta_mode": "choose",
     "status": "published",
-    "summary": "Точечная подача раствора, компенсирующие капельницы и готовые узлы на растение."
+    "summary": "Точечная подача раствора, компенсирующие капельницы и готовые комплекты на растение."
   },
   {
     "slug": "catalog-subcategory-fittings",
@@ -77,7 +77,7 @@ export const DEFAULT_CATALOG_ITEMS = [
     "path": "/catalog/racks/",
     "cta_mode": "estimate",
     "status": "published",
-    "summary": "Каркасы, ряды, лотки и сервисные узлы для построения рабочей геометрии фермы."
+    "summary": "Каркасы, ряды, лотки и сервисные элементы для построения рабочей геометрии фермы."
   },
   {
     "slug": "catalog-subcategory-rack-frames",
@@ -167,7 +167,7 @@ export const DEFAULT_CATALOG_ITEMS = [
     "path": "/catalog/climate/",
     "cta_mode": "consult",
     "status": "published",
-    "summary": "Вентиляция, туман, сервисные климатические позиции и мягкое управление микроклиматом."
+    "summary": "Вентиляция, туман, сервисные климатические решения и мягкое управление микроклиматом."
   },
   {
     "slug": "catalog-subcategory-air-circulation",
@@ -177,7 +177,7 @@ export const DEFAULT_CATALOG_ITEMS = [
     "path": "/catalog/air-circulation/",
     "cta_mode": "choose",
     "status": "published",
-    "summary": "Вентиляторы и циркуляционные узлы под плотную посадку и равномерную среду."
+    "summary": "Вентиляторы и циркуляционные решения под плотную посадку и равномерную среду."
   },
   {
     "slug": "catalog-subcategory-humidification",
@@ -337,17 +337,17 @@ export const DEFAULT_CATALOG_ITEMS = [
     "path": "/catalog/drippers/pressure-stick-20/",
     "cta_mode": "buy",
     "status": "published",
-    "summary": "Готовый узел подачи под контролируемый ввод в мат или кубик без провисающей линии."
+    "summary": "Готовая подача под контролируемый ввод в мат или кубик без провисающей линии."
   },
   {
     "slug": "catalog-product-micro-spike-assembly",
-    "title": "Микроузел подачи Micro Spike",
+    "title": "Точечная подача Micro Spike",
     "kind": "product",
     "category": "drippers",
     "path": "/catalog/drippers/micro-spike-assembly/",
     "cta_mode": "buy",
     "status": "published",
-    "summary": "Точечный узел подачи для расстановки по растению, когда важна управляемая раскладка линии."
+    "summary": "Точечная подача для расстановки по растению, когда важна управляемая раскладка линии."
   },
   {
     "slug": "catalog-product-tube-blank-16",
@@ -387,17 +387,17 @@ export const DEFAULT_CATALOG_ITEMS = [
     "path": "/catalog/fittings/disc-filter-34/",
     "cta_mode": "consult",
     "status": "published",
-    "summary": "Фильтр дисковый 3/4, PN8: базовый фильтрационный узел для линии полива клубничной фермы с проверкой fit по диаметру, давлению и общей схеме."
+    "summary": "Фильтр дисковый 3/4, PN8: базовый фильтр для линии полива клубничной фермы с проверкой fit по диаметру, давлению и общей схеме."
   },
   {
     "slug": "catalog-product-dosatron",
-    "title": "Насос дозирующий Dosatron",
+    "title": "Растворный узел Dosatron",
     "kind": "product",
     "category": "irrigation-kits",
     "path": "/catalog/irrigation-kits/dosatron/",
     "cta_mode": "consult",
     "status": "published",
-    "summary": "Насос дозирующий Dosatron: узел дозирования для схемы полива клубничной фермы. Покупка имеет смысл только после проверки линии, расхода и логики подачи раствора."
+    "summary": "Растворный узел Dosatron для схем полива, где уже понятны расход линии, бак и подача раствора."
   },
   {
     "slug": "catalog-product-fittings-kit-module",
@@ -417,7 +417,7 @@ export const DEFAULT_CATALOG_ITEMS = [
     "path": "/catalog/irrigation-kits/starter-irrigation-96/",
     "cta_mode": "buy",
     "status": "published",
-    "summary": "Система капельного полива на 96 растений: состав узла, совместимость и когда лучше сначала получить смету под объект."
+    "summary": "Система капельного полива на 96 растений: состав системы, совместимость и когда лучше сначала получить смету под объект."
   },
   {
     "slug": "catalog-product-irrigation-base-rack",
@@ -427,7 +427,7 @@ export const DEFAULT_CATALOG_ITEMS = [
     "path": "/catalog/irrigation-kits/irrigation-base-rack/",
     "cta_mode": "buy",
     "status": "published",
-    "summary": "Комплект полива для базового стеллажа: готовый узел под стартовый модуль клубничной фермы с проверкой состава и fit по схеме."
+    "summary": "Комплект полива для базового стеллажа: готовый комплект под стартовый модуль клубничной фермы с проверкой состава и fit по схеме."
   },
   {
     "slug": "catalog-product-rack-irrigation-module",
@@ -437,7 +437,7 @@ export const DEFAULT_CATALOG_ITEMS = [
     "path": "/catalog/irrigation-kits/rack-irrigation-module/",
     "cta_mode": "consult",
     "status": "published",
-    "summary": "Комплект полива для дополнительного стеллажа: готовый узел под расширение существующего модульного ряда с проверкой fit по базовой схеме."
+    "summary": "Комплект полива для дополнительного стеллажа: готовый комплект под расширение существующего модульного ряда с проверкой fit по базовой схеме."
   },
   {
     "slug": "catalog-product-frame-base-12",
@@ -748,5 +748,105 @@ export const DEFAULT_CATALOG_ITEMS = [
     "cta_mode": "buy",
     "status": "published",
     "summary": "Этикетка под быструю маркировку партии, даты и базовой информации по фасовке."
+  },
+  {
+    "slug": "catalog-product-osmos-1600",
+    "title": "Осмос 1600",
+    "kind": "product",
+    "category": "irrigation-kits",
+    "path": "/catalog/irrigation-kits/osmos-1600/",
+    "cta_mode": "consult",
+    "status": "published",
+    "summary": "Компактная станция обратного осмоса: готовит воду под маточный и рабочий раствор на запуске фермы."
+  },
+  {
+    "slug": "catalog-product-membrane-1600",
+    "title": "Мембрана 1600",
+    "kind": "product",
+    "category": "irrigation-kits",
+    "path": "/catalog/irrigation-kits/membrane-1600/",
+    "cta_mode": "buy",
+    "status": "published",
+    "summary": "Сменная мембрана для RO-системы 1600: поддерживает стабильную подачу очищенной воды между сервисными интервалами."
+  },
+  {
+    "slug": "catalog-product-prefilter-set-1600",
+    "title": "Предфильтр и запас фильтров грубой очистки",
+    "kind": "product",
+    "category": "fittings",
+    "path": "/catalog/fittings/prefilter-set-1600/",
+    "cta_mode": "buy",
+    "status": "published",
+    "summary": "Комплект предочистки и запасных картриджей для осмоса: снижает износ мембраны и стабилизирует установку."
+  },
+  {
+    "slug": "catalog-product-fertilizers-year-1000",
+    "title": "Удобрения по мешку на год для 1000 кустов",
+    "kind": "product",
+    "category": "base-nutrition",
+    "path": "/catalog/base-nutrition/fertilizers-year-1000/",
+    "cta_mode": "consult",
+    "status": "published",
+    "summary": "Годовой стартовый набор по мешкам для участка около 1000 кустов: базовая рамка закупки по сезону."
+  },
+  {
+    "slug": "catalog-product-mixing-kit-solution",
+    "title": "Для замеса раствора: весы, стаканчики, ведра",
+    "kind": "product",
+    "category": "ph-ec-control",
+    "path": "/catalog/ph-ec-control/mixing-kit-solution/",
+    "cta_mode": "buy",
+    "status": "published",
+    "summary": "Базовый набор под замес: весы, стаканчики и вёдра для маточного и рабочего раствора без импровизации."
+  },
+  {
+    "slug": "catalog-product-smart-home-kit-farm",
+    "title": "Умный дом комплект",
+    "kind": "product",
+    "category": "controllers",
+    "path": "/catalog/controllers/smart-home-kit-farm/",
+    "cta_mode": "consult",
+    "status": "published",
+    "summary": "Комплект на DIN-рейку для базовой автоматики, управления реле и удалённого контроля в ключевых зонах."
+  },
+  {
+    "slug": "catalog-product-split-system-climate",
+    "title": "Сплит система",
+    "kind": "product",
+    "category": "air-circulation",
+    "path": "/catalog/air-circulation/split-system-climate/",
+    "cta_mode": "consult",
+    "status": "published",
+    "summary": "Сплит-система для стабилизации температуры в сервисной комнате, рассадной зоне или небольшом помещении модуля."
+  },
+  {
+    "slug": "catalog-product-water-tank-kit",
+    "title": "Емкости для воды и для маточников",
+    "kind": "product",
+    "category": "irrigation-kits",
+    "path": "/catalog/irrigation-kits/water-tank-kit/",
+    "cta_mode": "consult",
+    "status": "published",
+    "summary": "Набор ёмкостей под воду и маточные растворы: без «кривых» решений для стабильного бакового контура."
+  },
+  {
+    "slug": "catalog-product-ventilation-duct-kit",
+    "title": "Климат: вытяжка, листы металла для вентканалов",
+    "kind": "product",
+    "category": "air-circulation",
+    "path": "/catalog/air-circulation/ventilation-duct-kit/",
+    "cta_mode": "consult",
+    "status": "published",
+    "summary": "Комплект для сборки вытяжки и воздуховодов: нужен, когда климат проектируют по помещению, а не по остаточному принципу."
+  },
+  {
+    "slug": "catalog-product-electrical-panel-kit",
+    "title": "Провода, щиток, автоматы",
+    "kind": "product",
+    "category": "controllers",
+    "path": "/catalog/controllers/electrical-panel-kit/",
+    "cta_mode": "consult",
+    "status": "published",
+    "summary": "Стартовый электрокомплект под ввод, защиту и разводку по объекту без временных решений и случайных линий."
   }
 ];

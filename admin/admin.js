@@ -1,7 +1,6 @@
 import { DEFAULT_CATALOG_ITEMS } from "./catalog-defaults.generated.js";
 
 const STORAGE_KEY = "klubnikaproject.site.admin.draft.v1";
-const BACKEND_TOKEN_KEY = "klubnikaproject.site.admin.token.v1";
 
 const DEFAULT_CONFIG = {
   site: {
@@ -10,16 +9,16 @@ const DEFAULT_CONFIG = {
     primaryDomain: "https://klubnikaproject.ru/",
     supportTelegram: "@patiev_admin",
     supportTelegramUrl: "https://t.me/patiev_admin",
-    supportEmail: "hello@klubnikaproject.ru",
-    supportWhatsapp: "",
+    supportEmail: "info@klubnikaproject.ru",
+    supportWhatsapp: "https://wa.me/79891250150",
     defaultLanguage: "ru",
     defaultTheme: "light",
     activeLogoSystem: "manual-primary",
   },
   members: {
     enabled: true,
-    loginPath: "/account/login/",
-    hubPath: "/account/",
+    loginPath: "/cabinet/login/",
+    hubPath: "/cabinet/",
     catalogPath: "/account/catalog/",
     specialPath: "/account/special/",
   },
@@ -112,7 +111,6 @@ const els = {
   section: document.getElementById("admin-section-content"),
   summary: document.getElementById("admin-summary-grid"),
   status: document.getElementById("admin-status"),
-  backendToken: document.getElementById("admin-backend-token"),
   loginIdentity: document.getElementById("admin-login-identity"),
   loginPassword: document.getElementById("admin-login-password"),
   jsonOutput: document.getElementById("admin-json-output"),
@@ -122,7 +120,6 @@ const els = {
   resetButton: document.getElementById("reset-admin-button"),
   pullBackendButton: document.getElementById("pull-backend-config"),
   pushBackendButton: document.getElementById("push-backend-config"),
-  loginButton: document.getElementById("admin-login-button"),
   passwordLoginButton: document.getElementById("admin-password-login-button"),
   sessionButton: document.getElementById("admin-session-button"),
   logoutButton: document.getElementById("admin-logout-button"),
@@ -137,11 +134,29 @@ let usersDraft = [];
 let auditDraft = [];
 let backendUser = null;
 let backendAccessPolicy = null;
+const auditWorkspace = {
+  query: "",
+  area: "",
+  actor: "",
+};
 const inventoryWorkspace = {
   query: "",
   category: "",
   stockStatus: "",
+  editorSlug: "",
+  editorDraft: null,
+  editorLoadingSlug: "",
+  editorSaving: false,
+  editorWarnings: [],
+  editorErrors: [],
 };
+
+const INVENTORY_BADGE_OPTIONS = [
+  { value: "recommended", label: "Советуем" },
+  { value: "hit", label: "Хит" },
+  { value: "new", label: "Новинка" },
+  { value: "sale", label: "Акция" },
+];
 const crmWorkspace = {
   available: false,
   view: "kanban",
@@ -168,7 +183,7 @@ init();
 function init() {
   hydrateDraft();
   normalizeDraft();
-  hydrateBackendToken();
+  hydrateSectionFromHash();
   renderTabs();
   renderCurrentSection();
   renderSummary();
@@ -193,13 +208,6 @@ function normalizeDraft() {
   draft.integrations.apiBase = getApiBase();
 }
 
-function hydrateBackendToken() {
-  const token = window.localStorage.getItem(BACKEND_TOKEN_KEY) || "";
-  if (els.backendToken) {
-    els.backendToken.value = token;
-  }
-}
-
 function bindGlobalEvents() {
   els.downloadButton.addEventListener("click", downloadJson);
   els.copyButton.addEventListener("click", copyJson);
@@ -207,11 +215,10 @@ function bindGlobalEvents() {
   els.resetButton.addEventListener("click", resetDraft);
   els.pullBackendButton.addEventListener("click", pullBackendDraft);
   els.pushBackendButton.addEventListener("click", pushBackendDraft);
-  els.loginButton.addEventListener("click", loginToBackend);
   els.passwordLoginButton.addEventListener("click", loginToBackendWithPassword);
   els.sessionButton.addEventListener("click", checkBackendSession);
   els.logoutButton.addEventListener("click", logoutFromBackend);
-  els.backendToken.addEventListener("input", persistBackendToken);
+  window.addEventListener("hashchange", handleSectionHashChange);
 }
 
 function renderTabs() {
@@ -238,8 +245,11 @@ function renderTabs() {
       currentSection = button.dataset.section;
       renderTabs();
       renderCurrentSection();
+      syncSectionHash();
     });
   });
+
+  syncSectionHash();
 }
 
 function getVisibleSections() {
@@ -307,20 +317,48 @@ function renderCurrentSection() {
   }
 }
 
+function hydrateSectionFromHash() {
+  const sectionFromHash = readSectionFromHash();
+  if (sectionFromHash && SECTIONS.some((section) => section.id === sectionFromHash)) {
+    currentSection = sectionFromHash;
+  }
+}
+
+function readSectionFromHash() {
+  const match = window.location.hash.match(/^#admin:([a-z0-9_-]+)$/i);
+  return match?.[1] || "";
+}
+
+function syncSectionHash() {
+  if (!backendUser) return;
+  const nextHash = `#admin:${currentSection}`;
+  if (window.location.hash === nextHash) return;
+  window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}${nextHash}`);
+}
+
+function handleSectionHashChange() {
+  const sectionFromHash = readSectionFromHash();
+  if (!sectionFromHash || sectionFromHash === currentSection) return;
+  if (!SECTIONS.some((section) => section.id === sectionFromHash)) return;
+  currentSection = sectionFromHash;
+  renderTabs();
+  renderCurrentSection();
+}
+
 function renderAccessGateSection() {
   return `
     <div class="admin-section-stack admin-locked-state">
       <div class="admin-section-intro">
-        <div class="tag">Вход и статус</div>
-        <h3 class="calc-card-title">Сначала подтвердите доступ</h3>
-        <p class="sublead">Этот кабинет закрыт для публичного доступа. После входа откроются настройки сайта, каталога, доступов и заявок.</p>
+        <div class="tag">Доступ</div>
+        <h3 class="calc-card-title">Войдите, чтобы открыть кабинет</h3>
+        <p class="sublead">После входа откроются только те разделы, которые доступны по вашей роли.</p>
       </div>
 
       <div class="admin-block admin-locked-card">
         <div class="admin-block-head">
           <div>
-            <strong>Что откроется после входа</strong>
-            <span>Управление сайтом, товарами, заявками, доступами и аудитом остаётся внутри этого кабинета.</span>
+            <strong>Что внутри</strong>
+            <span>Сайт, каталог, заявки, доступы и рабочие настройки собраны в одном кабинете.</span>
           </div>
         </div>
         <div class="admin-pills">
@@ -372,6 +410,45 @@ function renderDashboardSection() {
 <pre>${escapeHtml(JSON.stringify(buildLeadExample(), null, 2))}</pre>
         </div>
       </div>
+    </div>
+  `;
+}
+
+function getCrmWorkspaceDashboardStats() {
+  const leads = getVisibleCrmLeads();
+  const currentUser = findCurrentCrmUser();
+  const newStatusCode = getCrmNewStatusCode();
+  const activeLeads = leads.filter((lead) => !lead.is_archived && lead.follow_up_state !== "archived");
+  const overdueLeads = activeLeads.filter((lead) => lead.follow_up_state === "overdue");
+  const unassignedLeads = activeLeads.filter((lead) => !Number(lead.owner_id || 0));
+  const newLeads = activeLeads.filter((lead) => lead.status_code === newStatusCode);
+  const myLeads = currentUser
+    ? activeLeads.filter((lead) => Number(lead.owner_id || 0) === Number(currentUser.id))
+    : [];
+  const syncIssues = activeLeads.filter((lead) => {
+    const syncStatus = lead?.sync?.sync_status;
+    return syncStatus === "failed" || syncStatus === "failed_permanent";
+  });
+
+  return {
+    roleLabel: backendAccessPolicy?.role || backendUser?.user_role || backendUser?.role || "гость",
+    entryState: getCrmApiBaseConfigured() ? (crmWorkspace.available ? "подключено" : "ожидание данных") : "нужен API base",
+    routeLabel: "/cabinet/crm",
+    total: activeLeads.length,
+    newLeads: newLeads.length,
+    overdueLeads: overdueLeads.length,
+    unassignedLeads: unassignedLeads.length,
+    myLeads: myLeads.length,
+    syncIssues: syncIssues.length,
+  };
+}
+
+function renderCrmMetricCard(label, value, caption = "") {
+  return `
+    <div class="admin-mini-metric admin-crm-mini-metric">
+      <span>${escapeHtml(label)}</span>
+      <strong>${escapeHtml(String(value))}</strong>
+      ${caption ? `<em>${escapeHtml(caption)}</em>` : ""}
     </div>
   `;
 }
@@ -472,18 +549,39 @@ function renderFormsSection() {
 }
 
 function renderCrmSection() {
+  const crmStats = getCrmWorkspaceDashboardStats();
   return `
     <div class="admin-section-stack">
       <div class="admin-section-intro">
-        <div class="tag">CRM</div>
-        <h3 class="calc-card-title">Рабочий кабинет CRM</h3>
-        <p class="sublead">Здесь команда быстро видит новые заявки, фильтрует их по стадиям, открывает карточку лида и фиксирует следующий шаг без лишнего шума.</p>
+        <div class="tag">Cabinet CRM</div>
+        <h3 class="calc-card-title">Минимальный рабочий срез кабинета для CRM</h3>
+        <p class="sublead">Это не отдельная админка, а CRM-слой внутри универсального кабинета. Здесь сначала видно очередь, затем открывается карточка лида и уже после этого фиксируется следующий шаг.</p>
+      </div>
+      <div class="admin-crm-dashboard">
+        <div class="admin-crm-dashboard-copy">
+          <div class="admin-crm-entry-chip-row">
+            <span class="admin-pill">Доступ: ${escapeHtml(crmStats.roleLabel)}</span>
+            <span class="admin-pill">Маршрут: ${escapeHtml(crmStats.routeLabel)}</span>
+            <span class="admin-pill">Состояние: ${escapeHtml(crmStats.entryState)}</span>
+          </div>
+          <p class="admin-crm-dashboard-note">
+            Минимальный доступный срез должен отвечать на четыре вопроса: сколько лидов в потоке, где срочная просрочка, что ещё не назначено и что уже в работе у меня.
+          </p>
+        </div>
+        <div class="admin-crm-dashboard-metrics">
+          ${renderCrmMetricCard("В потоке", crmStats.total, "Открытые лиды под текущими фильтрами")}
+          ${renderCrmMetricCard("Новые", crmStats.newLeads, "Первичный вход без обработки")}
+          ${renderCrmMetricCard("Просрочено", crmStats.overdueLeads, "Нужно вернуть в работу сейчас")}
+          ${renderCrmMetricCard("Без owner", crmStats.unassignedLeads, "Требуют назначения")}
+          ${renderCrmMetricCard("На мне", crmStats.myLeads, "Лиды текущего пользователя")}
+          ${renderCrmMetricCard("Sync issues", crmStats.syncIssues, "Где нужен повторный прогон")}
+        </div>
       </div>
       <div class="admin-block">
         <div class="admin-block-head">
           <div>
             <strong>Рабочий кабинет CRM</strong>
-            <span>Если CRM уже подключена, здесь открывается основной рабочий экран. Если нет, ниже остаётся запасной inbox.</span>
+            <span>Если CRM уже подключена, здесь открывается рабочий экран очереди. Если нет, ниже остаётся запасной inbox.</span>
           </div>
           <div class="admin-toolbar-actions">
             <button class="btn btn-secondary" id="crm-workspace-refresh" type="button">Обновить</button>
@@ -602,6 +700,7 @@ function renderInventorySection() {
   const filteredProducts = filterInventoryProducts(products, categories);
   const stockCounts = summarizeInventoryStock(products);
   const priceRange = summarizeInventoryPrice(filteredProducts);
+  const editorContent = renderInventoryProductEditor();
   const tableContent = !snapshot ? `
             <div class="admin-lead-empty">Срез каталога ещё не загружен. Нужен рабочий `apiBase` и активный вход в кабинет.</div>
           ` : filteredProducts.length ? `
@@ -677,6 +776,9 @@ function renderInventorySection() {
           ${tableContent}
         </div>
       </div>
+      <div class="admin-block admin-inventory-editor-shell">
+        ${editorContent}
+      </div>
     </div>
   `;
 }
@@ -701,18 +803,75 @@ function renderUsersSection() {
 }
 
 function renderAuditSection() {
+  const filteredAudit = getFilteredAuditEvents();
+  const areas = getAuditAreas();
+  const actors = getAuditActors();
+  const summary = getAuditSummary();
   return `
     <div class="admin-section-stack">
       <div class="admin-section-intro">
         <div class="tag">История</div>
         <h3 class="calc-card-title">История действий</h3>
-        <p class="sublead">Здесь видно, кто входил в кабинет и менял настройки, пользователей или каталог. Это рабочая история изменений по текущей системе.</p>
+        <p class="sublead">Следующий кабинетный блок после пользователей: кто что менял, в каком разделе и что стоит перепроверить без ручного поиска по всему интерфейсу.</p>
       </div>
-      <div class="admin-toolbar-actions">
-        <button class="btn btn-secondary" id="load-audit-button" type="button">Загрузить историю</button>
+      <div class="admin-mini-metrics admin-audit-metrics">
+        <div class="admin-mini-metric"><span>Событий в журнале</span><strong>${summary.total}</strong></div>
+        <div class="admin-mini-metric"><span>Разделов</span><strong>${summary.areas}</strong></div>
+        <div class="admin-mini-metric"><span>Акторов</span><strong>${summary.actors}</strong></div>
+        <div class="admin-mini-metric"><span>Последнее событие</span><strong>${escapeHtml(summary.latest)}</strong></div>
       </div>
-      <div class="admin-lead-list" id="admin-audit-list">
-        <div class="admin-lead-empty">История пока не загружена.</div>
+      <div class="admin-block">
+        <div class="admin-block-head">
+          <div>
+            <strong>Журнал кабинета</strong>
+            <span>Фильтры помогают быстро отсечь шум и увидеть изменения по разделу, актору или поисковому запросу.</span>
+          </div>
+          <div class="admin-toolbar-actions">
+            <button class="btn btn-secondary" id="load-audit-button" type="button">Загрузить историю</button>
+            <button class="btn btn-secondary" id="audit-clear-filters" type="button">Сбросить фильтры</button>
+          </div>
+        </div>
+        <div class="admin-grid admin-grid-3 admin-audit-filters">
+          <label class="admin-field">
+            <span class="admin-field-label">Поиск</span>
+            <span class="admin-field-note">Раздел, действие, actor или target</span>
+            <input class="admin-input" id="audit-filter-query" type="text" value="${escapeAttribute(auditWorkspace.query)}" placeholder="Поиск по журналу" />
+          </label>
+          <label class="admin-field">
+            <span class="admin-field-label">Раздел</span>
+            <span class="admin-field-note">Фильтр по зоне изменений</span>
+            <select class="admin-select" id="audit-filter-area">
+              <option value="" ${auditWorkspace.area ? "" : "selected"}>Все разделы</option>
+              ${areas.map((area) => `<option value="${escapeAttribute(area)}" ${auditWorkspace.area === area ? "selected" : ""}>${escapeHtml(area)}</option>`).join("")}
+            </select>
+          </label>
+          <label class="admin-field">
+            <span class="admin-field-label">Actor</span>
+            <span class="admin-field-note">Фильтр по автору</span>
+            <select class="admin-select" id="audit-filter-actor">
+              <option value="" ${auditWorkspace.actor ? "" : "selected"}>Все actors</option>
+              ${actors.map((actor) => `<option value="${escapeAttribute(actor)}" ${auditWorkspace.actor === actor ? "selected" : ""}>${escapeHtml(actor)}</option>`).join("")}
+            </select>
+          </label>
+        </div>
+        <div class="admin-lead-list" id="admin-audit-list">
+          ${filteredAudit.length ? filteredAudit.map((item) => `
+            <article class="admin-lead-card">
+              <div class="admin-lead-head">
+                <strong>${escapeHtml(item.area)} / ${escapeHtml(item.action)}</strong>
+                <span>${escapeHtml(item.created_at || "")}</span>
+              </div>
+              <div class="admin-lead-meta">
+                <span>${escapeHtml(item.actor_name || "system")} · ${escapeHtml(item.actor_role || "")}</span>
+                <span>${escapeHtml(item.target_type || "")} · ${escapeHtml(item.target_id || "")}</span>
+              </div>
+              <div class="admin-history-item">
+                <strong>Payload</strong>
+                <span>${escapeHtml(JSON.stringify(item.payload || {}))}</span>
+              </div>
+            </article>
+          `).join("") : '<div class="admin-lead-empty">История пока не загружена или не проходит текущие фильтры.</div>'}
+        </div>
       </div>
     </div>
   `;
@@ -889,19 +1048,15 @@ function persistDraft() {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
 }
 
-function persistBackendToken() {
-  if (!els.backendToken) return;
-  window.localStorage.setItem(BACKEND_TOKEN_KEY, els.backendToken.value.trim());
-}
-
 function getApiBase() {
   const configured = String(draft.integrations?.apiBase || "").trim().replace(/\/+$/, "");
   const fallback = String(DEFAULT_CONFIG.integrations?.apiBase || "").trim().replace(/\/+$/, "");
-  return configured || fallback;
-}
-
-function getBackendToken() {
-  return (els.backendToken?.value || "").trim();
+  const resolved = configured || fallback;
+  const host = window.location.hostname;
+  if (host === "127.0.0.1" || host === "localhost") {
+    return "http://127.0.0.1:8010/v1";
+  }
+  return resolved;
 }
 
 async function adminFetch(path, options = {}) {
@@ -909,12 +1064,7 @@ async function adminFetch(path, options = {}) {
   if (!apiBase) {
     throw new Error("Сначала укажите integrations.apiBase.");
   }
-  const token = getBackendToken();
-
   const headers = new Headers(options.headers || {});
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
   if (options.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
@@ -1805,7 +1955,37 @@ function bindUsersSection() {
 
 function bindAuditSection() {
   const loadButton = document.getElementById("load-audit-button");
+  const clearButton = document.getElementById("audit-clear-filters");
+  const queryField = document.getElementById("audit-filter-query");
+  const areaField = document.getElementById("audit-filter-area");
+  const actorField = document.getElementById("audit-filter-actor");
   if (loadButton) loadButton.addEventListener("click", loadAuditEvents);
+  if (clearButton) {
+    clearButton.addEventListener("click", () => {
+      auditWorkspace.query = "";
+      auditWorkspace.area = "";
+      auditWorkspace.actor = "";
+      renderCurrentSection();
+    });
+  }
+  if (queryField) {
+    queryField.addEventListener("input", () => {
+      auditWorkspace.query = queryField.value;
+      renderCurrentSection();
+    });
+  }
+  if (areaField) {
+    areaField.addEventListener("change", () => {
+      auditWorkspace.area = areaField.value;
+      renderCurrentSection();
+    });
+  }
+  if (actorField) {
+    actorField.addEventListener("change", () => {
+      auditWorkspace.actor = actorField.value;
+      renderCurrentSection();
+    });
+  }
 }
 
 async function loadUsers() {
@@ -1871,15 +2051,11 @@ async function loadUsers() {
           </label>
           <button class="btn btn-primary admin-user-save" data-user-save="${user.id}" type="button">Сохранить пользователя</button>
           <button class="btn btn-secondary admin-user-password" data-user-password="${user.id}" type="button">Задать пароль</button>
-          <button class="btn btn-secondary admin-user-rotate" data-user-rotate="${user.id}" type="button">Сменить access key</button>
         </div>
       </article>
     `).join("");
     list.querySelectorAll("[data-user-save]").forEach((button) => {
       button.addEventListener("click", () => saveUser(button.dataset.userSave));
-    });
-    list.querySelectorAll("[data-user-rotate]").forEach((button) => {
-      button.addEventListener("click", () => rotateUserKey(button.dataset.userRotate));
     });
     list.querySelectorAll("[data-user-password]").forEach((button) => {
       button.addEventListener("click", () => setUserPassword(button.dataset.userPassword));
@@ -1913,7 +2089,7 @@ async function createUser() {
         password,
       }),
     });
-    els.status.textContent = `Пользователь создан. Access key: ${response.access_key}`;
+    els.status.textContent = "Пользователь создан.";
     loadUsers();
   } catch (error) {
     els.status.textContent = `Не удалось создать пользователя: ${error.message}`;
@@ -1946,18 +2122,6 @@ async function saveUser(userId) {
   }
 }
 
-async function rotateUserKey(userId) {
-  try {
-    const response = await adminFetch(`/admin/users/${userId}/rotate-key`, {
-      method: "POST",
-    });
-    els.status.textContent = `Новый access key для пользователя #${userId}: ${response.access_key}`;
-    loadUsers();
-  } catch (error) {
-    els.status.textContent = `Не удалось сменить ключ пользователя #${userId}: ${error.message}`;
-  }
-}
-
 async function loadAuditEvents() {
   if (!canAccessSection("audit")) {
     auditDraft = [];
@@ -1971,29 +2135,56 @@ async function loadAuditEvents() {
     const response = await adminFetch("/admin/audit-events?limit=100");
     auditDraft = response.items || [];
     renderSummary();
-    if (!auditDraft.length) {
-      list.innerHTML = '<div class="admin-lead-empty">Аудит пока пустой.</div>';
-      return;
-    }
-    list.innerHTML = auditDraft.map((item) => `
-      <article class="admin-lead-card">
-        <div class="admin-lead-head">
-          <strong>${escapeHtml(item.area)} / ${escapeHtml(item.action)}</strong>
-          <span>${escapeHtml(item.created_at || "")}</span>
-        </div>
-        <div class="admin-lead-meta">
-          <span>${escapeHtml(item.actor_name || "system")} · ${escapeHtml(item.actor_role || "")}</span>
-          <span>${escapeHtml(item.target_type || "")} · ${escapeHtml(item.target_id || "")}</span>
-        </div>
-        <div class="admin-history-item">
-          <strong>Payload</strong>
-          <span>${escapeHtml(JSON.stringify(item.payload || {}))}</span>
-        </div>
-      </article>
-    `).join("");
+    renderCurrentSection();
   } catch (error) {
-    list.innerHTML = `<div class="admin-lead-empty">Не удалось загрузить аудит: ${escapeHtml(error.message)}</div>`;
+    auditDraft = [];
+    renderCurrentSection();
+    const fallbackList = document.getElementById("admin-audit-list");
+    if (fallbackList) {
+      fallbackList.innerHTML = `<div class="admin-lead-empty">Не удалось загрузить аудит: ${escapeHtml(error.message)}</div>`;
+    }
   }
+}
+
+function getFilteredAuditEvents() {
+  return auditDraft.filter((item) => {
+    const query = auditWorkspace.query.trim().toLowerCase();
+    const area = auditWorkspace.area.trim();
+    const actor = auditWorkspace.actor.trim();
+    const haystack = [
+      item.area,
+      item.action,
+      item.actor_name,
+      item.actor_role,
+      item.target_type,
+      item.target_id,
+      JSON.stringify(item.payload || {}),
+    ].join(" ").toLowerCase();
+    if (query && !haystack.includes(query)) return false;
+    if (area && item.area !== area) return false;
+    if (actor && (item.actor_name || "") !== actor) return false;
+    return true;
+  });
+}
+
+function getAuditAreas() {
+  return [...new Set(auditDraft.map((item) => item.area).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ru"));
+}
+
+function getAuditActors() {
+  return [...new Set(auditDraft.map((item) => item.actor_name).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ru"));
+}
+
+function getAuditSummary() {
+  const areas = getAuditAreas();
+  const actors = getAuditActors();
+  const latest = auditDraft[0]?.created_at || "не загружена";
+  return {
+    total: auditDraft.length,
+    areas: areas.length,
+    actors: actors.length,
+    latest,
+  };
 }
 
 async function setUserPassword(userId) {
@@ -2068,8 +2259,33 @@ function bindInventorySection() {
     if (resetButton) {
       resetButton.addEventListener("click", () => resetInventoryRow(row.dataset.inventoryRow));
     }
+    const editButton = row.querySelector("[data-inventory-edit-product]");
+    if (editButton) {
+      editButton.addEventListener("click", () => openInventoryProductEditor(row.dataset.inventoryRow));
+    }
     updateInventoryRowState(row);
   });
+
+  document.querySelectorAll("[data-editor-field]").forEach((field) => {
+    const eventName = field.tagName === "SELECT" || field.type === "checkbox" || field.type === "number" ? "change" : "input";
+    field.addEventListener(eventName, () => updateInventoryEditorSimpleField(field));
+  });
+  document.querySelectorAll("[data-editor-badge]").forEach((field) => {
+    field.addEventListener("change", () => updateInventoryEditorBadge(field.dataset.editorBadge, field.checked));
+  });
+  document.querySelectorAll("[data-editor-list-field]").forEach((field) => {
+    const eventName = field.tagName === "SELECT" || field.type === "checkbox" ? "change" : "input";
+    field.addEventListener(eventName, () => updateInventoryEditorListField(field));
+  });
+  document.querySelectorAll("[data-editor-add]").forEach((button) => {
+    button.addEventListener("click", () => addInventoryEditorListItem(button.dataset.editorAdd));
+  });
+  document.querySelectorAll("[data-editor-remove]").forEach((button) => {
+    button.addEventListener("click", () => removeInventoryEditorListItem(button.dataset.listKind, Number(button.dataset.listIndex)));
+  });
+  document.querySelector("[data-inventory-editor-save]")?.addEventListener("click", saveInventoryProductEditor);
+  document.querySelector("[data-inventory-editor-reset]")?.addEventListener("click", resetInventoryProductEditor);
+  document.querySelector("[data-inventory-editor-close]")?.addEventListener("click", closeInventoryProductEditor);
 
   if (!catalogSnapshotDraft) {
     pullCatalogSnapshot(false);
@@ -2190,25 +2406,364 @@ function resetInventoryRow(slug) {
   els.status.textContent = `Изменения по ${slug} сброшены.`;
 }
 
-async function loginToBackend() {
-  const token = getBackendToken();
-  if (!token) {
-    els.sessionState.textContent = "Добавьте резервный ключ доступа, чтобы войти этим способом.";
-    return;
+function normalizeInventoryEditorProduct(product) {
+  if (!product || typeof product !== "object") return null;
+  return {
+    slug: String(product.slug || ""),
+    path: String(product.path || ""),
+    article: String(product.article || ""),
+    name: String(product.name || ""),
+    short_description: String(product.short_description || ""),
+    full_description: String(product.full_description || ""),
+    price: Number.isFinite(Number(product.price)) ? Number(product.price) : null,
+    old_price: Number.isFinite(Number(product.old_price)) ? Number(product.old_price) : null,
+    stock_status: String(product.stock_status || "in_stock"),
+    status: String(product.status || "published"),
+    seo_title: String(product.seo_title || ""),
+    seo_description: String(product.seo_description || ""),
+    badges: Array.isArray(product.badges) ? product.badges.map((item) => String(item || "").trim()).filter(Boolean) : [],
+    images: Array.isArray(product.images) ? product.images.map((item) => String(item || "").trim()).filter(Boolean) : [],
+    attributes: Array.isArray(product.attributes)
+      ? product.attributes.map((item) => ({
+          key: String(item?.key || ""),
+          label: String(item?.label || ""),
+          value: String(item?.value || ""),
+          group: String(item?.group || ""),
+          filterable: Boolean(item?.filterable),
+        }))
+      : [],
+    documents: Array.isArray(product.documents)
+      ? product.documents.map((item) => ({
+          id: String(item?.id || ""),
+          title: String(item?.title || ""),
+          fileUrl: String(item?.fileUrl || ""),
+          fileSize: String(item?.fileSize || ""),
+        }))
+      : [],
+    faq: Array.isArray(product.faq)
+      ? product.faq.map((item) => ({
+          question: String(item?.question || ""),
+          answer: String(item?.answer || ""),
+          askedAt: String(item?.askedAt || ""),
+          answeredAt: String(item?.answeredAt || ""),
+        }))
+      : [],
+    related_products: Array.isArray(product.related_products)
+      ? product.related_products.map((item) => ({
+          slug: String(item?.slug || ""),
+          label: String(item?.label || ""),
+        }))
+      : [],
+    compatibility: Array.isArray(product.compatibility)
+      ? product.compatibility.map((item) => ({
+          target_slug: String(item?.target_slug || ""),
+          relation: String(item?.relation || "works_with"),
+          note: String(item?.note || ""),
+        }))
+      : [],
+  };
+}
+
+async function openInventoryProductEditor(slug) {
+  if (!slug) return;
+  inventoryWorkspace.editorSlug = slug;
+  inventoryWorkspace.editorLoadingSlug = slug;
+  inventoryWorkspace.editorSaving = false;
+  if (currentSection === "inventory") {
+    renderCurrentSection();
   }
   try {
-    els.sessionState.textContent = "Проверяем ключ и открываем кабинет...";
-    const response = await adminFetch("/admin/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ token }),
-    });
-    const user = response.user;
-    await applyBackendAccessState(user || null);
-    els.sessionState.textContent = user
-      ? `Доступ подтверждён: ${user.display_name || user.user_name || "пользователь"} (${user.role || user.user_role || "роль"})`
-      : "Доступ подтверждён.";
+    els.status.textContent = `Загружаю карточку ${slug}...`;
+    const response = await adminFetch(`/admin/catalog/products/${slug}`);
+    inventoryWorkspace.editorDraft = normalizeInventoryEditorProduct(response.product);
+    applyInventoryEditorRules();
+    inventoryWorkspace.editorLoadingSlug = "";
+    if (currentSection === "inventory") {
+      renderCurrentSection();
+    }
+    els.status.textContent = `Карточка ${slug} загружена в редактор.`;
   } catch (error) {
-    els.sessionState.textContent = `Не получилось войти по ключу: ${error.message}`;
+    inventoryWorkspace.editorDraft = null;
+    inventoryWorkspace.editorLoadingSlug = "";
+    inventoryWorkspace.editorWarnings = [];
+    inventoryWorkspace.editorErrors = [];
+    if (currentSection === "inventory") {
+      renderCurrentSection();
+    }
+    els.status.textContent = `Не удалось загрузить карточку ${slug}: ${error.message}`;
+  }
+}
+
+function closeInventoryProductEditor() {
+  inventoryWorkspace.editorSlug = "";
+  inventoryWorkspace.editorDraft = null;
+  inventoryWorkspace.editorLoadingSlug = "";
+  inventoryWorkspace.editorSaving = false;
+  inventoryWorkspace.editorWarnings = [];
+  inventoryWorkspace.editorErrors = [];
+  if (currentSection === "inventory") {
+    renderCurrentSection();
+  }
+}
+
+function resetInventoryProductEditor() {
+  if (!inventoryWorkspace.editorSlug) return;
+  openInventoryProductEditor(inventoryWorkspace.editorSlug);
+}
+
+function updateInventoryEditorSimpleField(field) {
+  if (!inventoryWorkspace.editorDraft || !field?.dataset?.editorField) return;
+  const key = field.dataset.editorField;
+  if (key === "price" || key === "old_price") {
+    const nextValue = Number(field.value);
+    inventoryWorkspace.editorDraft[key] = Number.isFinite(nextValue) && nextValue > 0 ? nextValue : null;
+    applyInventoryEditorRules();
+    return;
+  }
+  inventoryWorkspace.editorDraft[key] = field.type === "checkbox" ? Boolean(field.checked) : String(field.value || "");
+  applyInventoryEditorRules();
+  if (key === "status" || key === "stock_status") {
+    renderCurrentSection();
+  }
+}
+
+function updateInventoryEditorBadge(badge, checked) {
+  if (!inventoryWorkspace.editorDraft) return;
+  const current = new Set(inventoryWorkspace.editorDraft.badges || []);
+  if (checked) current.add(String(badge || ""));
+  else current.delete(String(badge || ""));
+  inventoryWorkspace.editorDraft.badges = Array.from(current).filter(Boolean);
+  applyInventoryEditorRules();
+  renderCurrentSection();
+}
+
+function updateInventoryEditorListField(field) {
+  if (!inventoryWorkspace.editorDraft) return;
+  const kind = field.dataset.listKind;
+  const index = Number(field.dataset.listIndex);
+  if (!kind || !Number.isInteger(index) || index < 0) return;
+  const list = inventoryWorkspace.editorDraft[kind];
+  if (!Array.isArray(list) || !list[index]) return;
+
+  if (kind === "images") {
+    list[index] = String(field.value || "");
+    applyInventoryEditorRules();
+    return;
+  }
+
+  const key = field.dataset.listKey;
+  if (!key) return;
+  list[index][key] = field.type === "checkbox" ? Boolean(field.checked) : String(field.value || "");
+  applyInventoryEditorRules();
+}
+
+function addInventoryEditorListItem(kind) {
+  if (!inventoryWorkspace.editorDraft || !kind) return;
+  const list = inventoryWorkspace.editorDraft[kind];
+  if (!Array.isArray(list)) return;
+  if (kind === "images") {
+    list.push("");
+  } else if (kind === "attributes") {
+    list.push({ key: "", label: "", value: "", group: "", filterable: false });
+  } else if (kind === "documents") {
+    list.push({ id: "", title: "", fileUrl: "", fileSize: "" });
+  } else if (kind === "faq") {
+    list.push({ question: "", answer: "", askedAt: "", answeredAt: "" });
+  } else if (kind === "related_products") {
+    list.push({ slug: "", label: "" });
+  } else if (kind === "compatibility") {
+    list.push({ target_slug: "", relation: "works_with", note: "" });
+  }
+  if (currentSection === "inventory") {
+    applyInventoryEditorRules();
+    renderCurrentSection();
+  }
+}
+
+function removeInventoryEditorListItem(kind, index) {
+  if (!inventoryWorkspace.editorDraft || !kind || !Number.isInteger(index) || index < 0) return;
+  const list = inventoryWorkspace.editorDraft[kind];
+  if (!Array.isArray(list)) return;
+  list.splice(index, 1);
+  if (currentSection === "inventory") {
+    applyInventoryEditorRules();
+    renderCurrentSection();
+  }
+}
+
+function applyInventoryEditorRules() {
+  const product = inventoryWorkspace.editorDraft;
+  if (!product) {
+    inventoryWorkspace.editorWarnings = [];
+    inventoryWorkspace.editorErrors = [];
+    return;
+  }
+
+  const warnings = [];
+  const errors = [];
+
+  if (product.status === "archived" && product.stock_status !== "out_of_stock") {
+    product.stock_status = "out_of_stock";
+    warnings.push("Для статуса archived наличие автоматически выставлено в «Нет в наличии».");
+  }
+
+  if (product.status !== "published" && Array.isArray(product.badges) && product.badges.length) {
+    product.badges = [];
+    warnings.push("Для статусов draft/hidden/archived бейджи снимаются автоматически.");
+  }
+
+  if (product.stock_status === "out_of_stock" && Array.isArray(product.badges) && product.badges.includes("sale")) {
+    product.badges = product.badges.filter((badge) => badge !== "sale");
+    warnings.push("Бейдж «Акция» снят: товар помечен как «Нет в наличии».");
+  }
+
+  const price = Number(product.price);
+  const oldPrice = Number(product.old_price);
+  const hasSaleBadge = Array.isArray(product.badges) && product.badges.includes("sale");
+  const validPrice = Number.isFinite(price) && price > 0;
+  const validOldPrice = Number.isFinite(oldPrice) && oldPrice > 0;
+
+  if (hasSaleBadge && (!validPrice || !validOldPrice || oldPrice <= price)) {
+    product.badges = product.badges.filter((badge) => badge !== "sale");
+    warnings.push("Бейдж «Акция» снят: для него нужна старая цена выше текущей.");
+  }
+
+  if (!String(product.name || "").trim()) {
+    errors.push("Название товара обязательно.");
+  }
+  if (product.status === "published" && !validPrice) {
+    errors.push("Для статуса published нужно указать цену.");
+  }
+  if (validOldPrice && validPrice && oldPrice <= price) {
+    errors.push("Старая цена должна быть больше текущей.");
+  }
+  const brokenDocuments = (product.documents || []).filter((item) => {
+    const hasId = Boolean(String(item?.id || "").trim());
+    const hasTitle = Boolean(String(item?.title || "").trim());
+    const hasFileUrl = Boolean(String(item?.fileUrl || "").trim());
+    const hasFileSize = Boolean(String(item?.fileSize || "").trim());
+    return (hasId || hasTitle || hasFileSize) && !hasFileUrl;
+  });
+  if (brokenDocuments.length) {
+    warnings.push("В документах есть записи без ссылки на файл. Такие строки не стоит оставлять пустыми.");
+  }
+  const halfFaq = (product.faq || []).filter((item) => {
+    const hasQuestion = Boolean(String(item?.question || "").trim());
+    const hasAnswer = Boolean(String(item?.answer || "").trim());
+    return hasQuestion !== hasAnswer;
+  });
+  if (halfFaq.length) {
+    warnings.push("В FAQ есть неполные пары «вопрос-ответ». Лучше заполнить обе части перед публикацией.");
+  }
+
+  inventoryWorkspace.editorWarnings = warnings;
+  inventoryWorkspace.editorErrors = errors;
+}
+
+function renderInventoryEditorIssues() {
+  const warnings = inventoryWorkspace.editorWarnings || [];
+  const errors = inventoryWorkspace.editorErrors || [];
+  if (!warnings.length && !errors.length) return "";
+  return `
+    <div class="admin-inventory-editor-issues">
+      ${errors.map((message) => `<div class="admin-inventory-editor-issue is-error">${escapeHtml(message)}</div>`).join("")}
+      ${warnings.map((message) => `<div class="admin-inventory-editor-issue is-warning">${escapeHtml(message)}</div>`).join("")}
+    </div>
+  `;
+}
+
+function buildInventoryProductEditorPayload(product) {
+  const nextPrice = Number(product.price);
+  const nextOldPrice = Number(product.old_price);
+  return {
+    article: String(product.article || "").trim(),
+    name: String(product.name || "").trim(),
+    short_description: String(product.short_description || "").trim(),
+    full_description: String(product.full_description || "").trim(),
+    price: Number.isFinite(nextPrice) && nextPrice > 0 ? nextPrice : null,
+    old_price: Number.isFinite(nextOldPrice) && nextOldPrice > 0 ? nextOldPrice : null,
+    stock_status: String(product.stock_status || "in_stock").trim() || "in_stock",
+    status: String(product.status || "published").trim() || "published",
+    images: (product.images || []).map((item) => String(item || "").trim()).filter(Boolean),
+    badges: Array.from(new Set((product.badges || []).map((item) => String(item || "").trim()).filter(Boolean))),
+    seo_title: String(product.seo_title || "").trim(),
+    seo_description: String(product.seo_description || "").trim(),
+    attributes: (product.attributes || [])
+      .map((item) => ({
+        key: String(item?.key || "").trim(),
+        label: String(item?.label || "").trim(),
+        value: String(item?.value || "").trim(),
+        group: String(item?.group || "").trim(),
+        filterable: Boolean(item?.filterable),
+      }))
+      .filter((item) => item.key || item.label || item.value || item.group),
+    documents: (product.documents || [])
+      .map((item) => ({
+        id: String(item?.id || "").trim(),
+        title: String(item?.title || "").trim(),
+        fileUrl: String(item?.fileUrl || "").trim(),
+        fileSize: String(item?.fileSize || "").trim(),
+      }))
+      .filter((item) => item.id || item.title || item.fileUrl || item.fileSize),
+    faq: (product.faq || [])
+      .map((item) => ({
+        question: String(item?.question || "").trim(),
+        answer: String(item?.answer || "").trim(),
+        askedAt: String(item?.askedAt || "").trim(),
+        answeredAt: String(item?.answeredAt || "").trim(),
+      }))
+      .filter((item) => item.question || item.answer || item.askedAt || item.answeredAt),
+    related_products: (product.related_products || [])
+      .map((item) => ({
+        slug: String(item?.slug || "").trim(),
+        label: String(item?.label || "").trim(),
+      }))
+      .filter((item) => item.slug || item.label),
+    compatibility: (product.compatibility || [])
+      .map((item) => ({
+        target_slug: String(item?.target_slug || "").trim(),
+        relation: String(item?.relation || "works_with").trim() || "works_with",
+        note: String(item?.note || "").trim(),
+      }))
+      .filter((item) => item.target_slug || item.relation || item.note),
+  };
+}
+
+async function saveInventoryProductEditor() {
+  const product = inventoryWorkspace.editorDraft;
+  if (!product?.slug) return;
+  if (!String(product.name || "").trim()) {
+    els.status.textContent = "Укажите название товара перед сохранением.";
+    return;
+  }
+  applyInventoryEditorRules();
+  if (inventoryWorkspace.editorErrors.length) {
+    els.status.textContent = `Нельзя сохранить: ${inventoryWorkspace.editorErrors[0]}`;
+    renderCurrentSection();
+    return;
+  }
+  const payload = buildInventoryProductEditorPayload(product);
+  try {
+    inventoryWorkspace.editorSaving = true;
+    if (currentSection === "inventory") {
+      renderCurrentSection();
+    }
+    els.status.textContent = `Сохраняю карточку ${product.slug}...`;
+    const response = await adminFetch(`/admin/catalog/products/${product.slug}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+    inventoryWorkspace.editorDraft = normalizeInventoryEditorProduct(response.product);
+    patchAdminProductInSnapshot(response.product || null);
+    renderSummary();
+    els.status.textContent = `Карточка ${product.slug} сохранена.`;
+  } catch (error) {
+    els.status.textContent = `Не удалось сохранить карточку ${product.slug}: ${error.message}`;
+  } finally {
+    inventoryWorkspace.editorSaving = false;
+    if (currentSection === "inventory") {
+      renderCurrentSection();
+    }
   }
 }
 
@@ -2216,11 +2771,11 @@ async function loginToBackendWithPassword() {
   const login = (els.loginIdentity?.value || "").trim();
   const password = els.loginPassword?.value || "";
   if (!login || !password) {
-    els.sessionState.textContent = "Введите логин и пароль администратора.";
+    els.sessionState.textContent = "Введите логин и пароль.";
     return;
   }
   try {
-    els.sessionState.textContent = "Проверяем логин и пароль...";
+    els.sessionState.textContent = "Проверяем данные...";
     const response = await adminFetch("/admin/auth/password-login", {
       method: "POST",
       body: JSON.stringify({ login, password }),
@@ -2228,25 +2783,25 @@ async function loginToBackendWithPassword() {
     const user = response.user;
     await applyBackendAccessState(user || null);
     els.sessionState.textContent = user
-      ? `Доступ подтверждён: ${user.display_name || "пользователь"} (${user.role || "роль"}, ${user.account_type || "admin"})`
-      : "Доступ подтверждён.";
+      ? `Вход выполнен: ${user.display_name || "пользователь"} (${user.role || "роль"})`
+      : "Вход выполнен.";
   } catch (error) {
-    els.sessionState.textContent = `Не получилось войти по логину и паролю: ${error.message}`;
+    els.sessionState.textContent = `Не удалось войти: ${error.message}`;
   }
 }
 
 async function checkBackendSession() {
   try {
-    els.sessionState.textContent = "Проверяем текущую сессию...";
+    els.sessionState.textContent = "Проверяем сессию...";
     const response = await adminFetch("/admin/auth/session");
     const user = response.user;
     await applyBackendAccessState(user || null);
     els.sessionState.textContent = response.session
-      ? `Сессия активна: ${user?.user_name || user?.display_name || "пользователь"} (${user?.user_role || user?.role || "роль"}, ${user?.account_type || "admin"})`
-      : "Активная сессия не найдена.";
+      ? `Сессия активна: ${user?.user_name || user?.display_name || "пользователь"} (${user?.user_role || user?.role || "роль"})`
+      : "Сессия не найдена.";
   } catch (error) {
     applyGuestAccessState();
-    els.sessionState.textContent = `Сессию не удалось подтвердить: ${error.message}`;
+    els.sessionState.textContent = `Не удалось проверить сессию: ${error.message}`;
   }
 }
 
@@ -2364,6 +2919,35 @@ function patchInventoryProductInSnapshot(product) {
   catalogSnapshotDraft.products[index] = {
     ...catalogSnapshotDraft.products[index],
     ...product,
+  };
+}
+
+function patchAdminProductInSnapshot(product) {
+  if (!catalogSnapshotDraft || !product?.slug || !Array.isArray(catalogSnapshotDraft.products)) return;
+  const index = catalogSnapshotDraft.products.findIndex((item) => item.slug === product.slug);
+  if (index === -1) return;
+  const current = catalogSnapshotDraft.products[index] || {};
+  catalogSnapshotDraft.products[index] = {
+    ...current,
+    article: product.article ?? current.article,
+    name: product.name ?? current.name,
+    shortDescription: product.short_description ?? current.shortDescription,
+    fullDescription: product.full_description ?? current.fullDescription,
+    price: product.price ?? current.price,
+    oldPrice: product.old_price ?? null,
+    stockStatus: product.stock_status || current.stockStatus || "in_stock",
+    status: product.status || current.status || "published",
+    images: Array.isArray(product.images) ? product.images : current.images,
+    badges: Array.isArray(product.badges) ? product.badges : current.badges,
+    seoTitle: product.seo_title ?? current.seoTitle,
+    seoDescription: product.seo_description ?? current.seoDescription,
+    attributes: Array.isArray(product.attributes) ? product.attributes : current.attributes,
+    documents: Array.isArray(product.documents) ? product.documents : current.documents,
+    faq: Array.isArray(product.faq) ? product.faq : current.faq,
+    relatedProducts: Array.isArray(product.related_products) ? product.related_products : current.relatedProducts,
+    compatibility: Array.isArray(product.compatibility) ? product.compatibility : current.compatibility,
+    path: product.path || current.path,
+    productAdminUpdatedAt: product.updated_at || current.productAdminUpdatedAt,
   };
 }
 
@@ -2489,12 +3073,281 @@ function renderInventoryRow(product, categories) {
         <div class="admin-inventory-actions">
           <button class="btn btn-primary admin-inventory-open" data-inventory-save="${escapeAttribute(product.slug || "")}" type="button">Сохранить</button>
           <button class="btn btn-secondary admin-inventory-open" data-inventory-reset="${escapeAttribute(product.slug || "")}" type="button">Сбросить</button>
+          <button class="btn btn-secondary admin-inventory-open" data-inventory-edit-product="${escapeAttribute(product.slug || "")}" type="button">Редактор</button>
           ${product.path ? `<a class="btn btn-secondary admin-inventory-open" href="..${escapeAttribute(product.path)}" target="_blank" rel="noopener">Открыть</a>` : ""}
         </div>
         <div class="admin-inventory-row-state" data-inventory-state>Совпадает с текущим срезом.</div>
       </td>
     </tr>
   `;
+}
+
+function renderInventoryProductEditor() {
+  if (inventoryWorkspace.editorLoadingSlug) {
+    return `
+      <div class="admin-block-head">
+        <div>
+          <strong>Редактор карточки товара</strong>
+          <span>Загружаю данные по ${escapeHtml(inventoryWorkspace.editorLoadingSlug)}...</span>
+        </div>
+      </div>
+      <div class="admin-lead-empty">Подождите, загружаю карточку.</div>
+    `;
+  }
+
+  const product = inventoryWorkspace.editorDraft;
+  if (!product) {
+    return `
+      <div class="admin-block-head">
+        <div>
+          <strong>Редактор карточки товара</strong>
+          <span>Полный редактор: контент, медиа, характеристики, документы, FAQ и SEO.</span>
+        </div>
+      </div>
+      <div class="admin-lead-empty">Выберите товар в таблице и нажмите «Редактор».</div>
+    `;
+  }
+
+  const stockOptions = ["in_stock", "limited", "preorder", "out_of_stock"]
+    .map((status) => `<option value="${status}" ${product.stock_status === status ? "selected" : ""}>${escapeHtml(formatInventoryStockLabel(status))}</option>`)
+    .join("");
+  const statusOptions = [
+    ["published", "Опубликовано"],
+    ["draft", "Черновик"],
+    ["hidden", "Скрыто"],
+    ["archived", "Архив"],
+  ]
+    .map(([value, label]) => `<option value="${value}" ${product.status === value ? "selected" : ""}>${escapeHtml(label)}</option>`)
+    .join("");
+  applyInventoryEditorRules();
+  const issues = renderInventoryEditorIssues();
+  const mediaSuggestions = collectInventoryMediaSuggestions();
+  const mediaListId = "inventory-media-suggestions";
+
+  return `
+    <div class="admin-block-head">
+      <div>
+        <strong>Редактор: ${escapeHtml(product.name || product.slug || "товар")}</strong>
+        <span>${escapeHtml(product.slug || "")}${product.path ? ` · ${escapeHtml(product.path)}` : ""}</span>
+      </div>
+      <div class="admin-toolbar-actions">
+        <button class="btn btn-secondary" type="button" data-inventory-editor-reset>Обновить из базы</button>
+        <button class="btn btn-secondary" type="button" data-inventory-editor-close>Закрыть</button>
+        <button class="btn btn-primary" type="button" data-inventory-editor-save ${inventoryWorkspace.editorSaving ? "disabled" : ""}>${inventoryWorkspace.editorSaving ? "Сохраняю..." : "Сохранить карточку"}</button>
+      </div>
+    </div>
+    ${issues}
+
+    <div class="admin-grid admin-grid-3">
+      <label class="admin-field">
+        <span class="admin-field-label">Артикул</span>
+        <input class="admin-input" type="text" data-editor-field="article" value="${escapeAttribute(product.article || "")}" />
+      </label>
+      <label class="admin-field">
+        <span class="admin-field-label">Название</span>
+        <input class="admin-input" type="text" data-editor-field="name" value="${escapeAttribute(product.name || "")}" />
+      </label>
+      <label class="admin-field">
+        <span class="admin-field-label">Статус карточки</span>
+        <select class="admin-select" data-editor-field="status">${statusOptions}</select>
+      </label>
+    </div>
+
+    <div class="admin-grid admin-grid-3">
+      <label class="admin-field">
+        <span class="admin-field-label">Цена</span>
+        <input class="admin-input" type="number" min="0" step="1" data-editor-field="price" value="${escapeAttribute(formatNumberInputValue(product.price))}" />
+      </label>
+      <label class="admin-field">
+        <span class="admin-field-label">Старая цена</span>
+        <input class="admin-input" type="number" min="0" step="1" data-editor-field="old_price" value="${escapeAttribute(formatNumberInputValue(product.old_price))}" placeholder="не задана" />
+      </label>
+      <label class="admin-field">
+        <span class="admin-field-label">Наличие</span>
+        <select class="admin-select" data-editor-field="stock_status">${stockOptions}</select>
+      </label>
+    </div>
+
+    <div class="admin-grid">
+      <label class="admin-field">
+        <span class="admin-field-label">Короткое описание</span>
+        <textarea class="admin-textarea" data-editor-field="short_description">${escapeHtml(product.short_description || "")}</textarea>
+      </label>
+      <label class="admin-field">
+        <span class="admin-field-label">Полное описание</span>
+        <textarea class="admin-textarea admin-inventory-editor-long" data-editor-field="full_description">${escapeHtml(product.full_description || "")}</textarea>
+      </label>
+    </div>
+
+    <div class="admin-field admin-inventory-badge-manager">
+      <span class="admin-field-label">Бейджи карточки</span>
+      <div class="admin-inventory-badge-grid">
+        ${INVENTORY_BADGE_OPTIONS.map((badge) => `
+          <label class="admin-checkbox-chip">
+            <input type="checkbox" data-editor-badge="${escapeAttribute(badge.value)}" ${(product.badges || []).includes(badge.value) ? "checked" : ""} />
+            <span>${escapeHtml(badge.label)}</span>
+          </label>
+        `).join("")}
+      </div>
+    </div>
+
+    <div class="admin-field admin-inventory-list-manager">
+      <div class="admin-inventory-list-head">
+        <span class="admin-field-label">Медиа-менеджер</span>
+        <button class="btn btn-secondary" type="button" data-editor-add="images">Добавить фото</button>
+      </div>
+      ${mediaSuggestions.length ? `
+        <datalist id="${mediaListId}">
+          ${mediaSuggestions.map((item) => `<option value="${escapeAttribute(item)}"></option>`).join("")}
+        </datalist>
+      ` : ""}
+      <div class="admin-inventory-list-grid">
+        ${(product.images || []).map((value, index) => `
+          <div class="admin-inventory-list-row admin-inventory-media-row">
+            <div class="admin-inventory-media-preview">
+              ${value
+    ? `<img src="${escapeAttribute(resolveInventoryMediaHref(value))}" alt="Фото ${escapeAttribute(product.name || product.slug || "товара")}" loading="lazy" />`
+    : '<div class="admin-inventory-media-placeholder">Нет превью</div>'}
+            </div>
+            <div class="admin-inventory-media-controls">
+              <input class="admin-input" type="text" placeholder="assets/catalog/tovar.jpg" value="${escapeAttribute(value || "")}" data-editor-list-field data-list-kind="images" data-list-index="${index}" list="${mediaListId}" />
+              <div class="admin-inventory-list-actions">
+                ${value ? `<a class="btn btn-secondary" target="_blank" rel="noopener" href="${escapeAttribute(resolveInventoryMediaHref(value))}">Открыть</a>` : ""}
+                <button class="btn btn-secondary" type="button" data-editor-remove data-list-kind="images" data-list-index="${index}">Удалить</button>
+              </div>
+            </div>
+          </div>
+        `).join("") || '<div class="admin-lead-empty">Фото не добавлены.</div>'}
+      </div>
+    </div>
+
+    <div class="admin-field admin-inventory-list-manager">
+      <div class="admin-inventory-list-head">
+        <span class="admin-field-label">Характеристики</span>
+        <button class="btn btn-secondary" type="button" data-editor-add="attributes">Добавить характеристику</button>
+      </div>
+      <div class="admin-inventory-list-grid">
+        ${(product.attributes || []).map((item, index) => `
+          <div class="admin-inventory-list-row admin-inventory-list-row-grid">
+            <input class="admin-input" type="text" placeholder="Ключ (slug)" value="${escapeAttribute(item.key || "")}" data-editor-list-field data-list-kind="attributes" data-list-index="${index}" data-list-key="key" />
+            <input class="admin-input" type="text" placeholder="Название поля" value="${escapeAttribute(item.label || "")}" data-editor-list-field data-list-kind="attributes" data-list-index="${index}" data-list-key="label" />
+            <input class="admin-input" type="text" placeholder="Значение" value="${escapeAttribute(item.value || "")}" data-editor-list-field data-list-kind="attributes" data-list-index="${index}" data-list-key="value" />
+            <input class="admin-input" type="text" placeholder="Группа" value="${escapeAttribute(item.group || "")}" data-editor-list-field data-list-kind="attributes" data-list-index="${index}" data-list-key="group" />
+            <label class="admin-checkbox-chip">
+              <input type="checkbox" ${(item.filterable ? "checked" : "")} data-editor-list-field data-list-kind="attributes" data-list-index="${index}" data-list-key="filterable" />
+              <span>Фильтр</span>
+            </label>
+            <button class="btn btn-secondary" type="button" data-editor-remove data-list-kind="attributes" data-list-index="${index}">Удалить</button>
+          </div>
+        `).join("") || '<div class="admin-lead-empty">Характеристики не добавлены.</div>'}
+      </div>
+    </div>
+
+    <div class="admin-field admin-inventory-list-manager">
+      <div class="admin-inventory-list-head">
+        <span class="admin-field-label">Документы</span>
+        <button class="btn btn-secondary" type="button" data-editor-add="documents">Добавить документ</button>
+      </div>
+      <div class="admin-inventory-list-grid">
+        ${(product.documents || []).map((item, index) => `
+          <div class="admin-inventory-list-row admin-inventory-list-row-grid">
+            <input class="admin-input" type="text" placeholder="ID документа" value="${escapeAttribute(item.id || "")}" data-editor-list-field data-list-kind="documents" data-list-index="${index}" data-list-key="id" />
+            <input class="admin-input" type="text" placeholder="Название документа" value="${escapeAttribute(item.title || "")}" data-editor-list-field data-list-kind="documents" data-list-index="${index}" data-list-key="title" />
+            <input class="admin-input" type="text" placeholder="Путь к файлу" value="${escapeAttribute(item.fileUrl || "")}" data-editor-list-field data-list-kind="documents" data-list-index="${index}" data-list-key="fileUrl" />
+            <input class="admin-input" type="text" placeholder="Размер (например, 124 KB)" value="${escapeAttribute(item.fileSize || "")}" data-editor-list-field data-list-kind="documents" data-list-index="${index}" data-list-key="fileSize" />
+            <button class="btn btn-secondary" type="button" data-editor-remove data-list-kind="documents" data-list-index="${index}">Удалить</button>
+          </div>
+        `).join("") || '<div class="admin-lead-empty">Документы не добавлены.</div>'}
+      </div>
+    </div>
+
+    <div class="admin-field admin-inventory-list-manager">
+      <div class="admin-inventory-list-head">
+        <span class="admin-field-label">FAQ</span>
+        <button class="btn btn-secondary" type="button" data-editor-add="faq">Добавить вопрос</button>
+      </div>
+      <div class="admin-inventory-list-grid">
+        ${(product.faq || []).map((item, index) => `
+          <div class="admin-inventory-list-row admin-inventory-list-row-grid">
+            <input class="admin-input" type="text" placeholder="Вопрос" value="${escapeAttribute(item.question || "")}" data-editor-list-field data-list-kind="faq" data-list-index="${index}" data-list-key="question" />
+            <textarea class="admin-textarea" placeholder="Ответ" data-editor-list-field data-list-kind="faq" data-list-index="${index}" data-list-key="answer">${escapeHtml(item.answer || "")}</textarea>
+            <input class="admin-input" type="text" placeholder="Дата вопроса (YYYY-MM-DD)" value="${escapeAttribute(item.askedAt || "")}" data-editor-list-field data-list-kind="faq" data-list-index="${index}" data-list-key="askedAt" />
+            <input class="admin-input" type="text" placeholder="Дата ответа (YYYY-MM-DD)" value="${escapeAttribute(item.answeredAt || "")}" data-editor-list-field data-list-kind="faq" data-list-index="${index}" data-list-key="answeredAt" />
+            <button class="btn btn-secondary" type="button" data-editor-remove data-list-kind="faq" data-list-index="${index}">Удалить</button>
+          </div>
+        `).join("") || '<div class="admin-lead-empty">FAQ не заполнен.</div>'}
+      </div>
+    </div>
+
+    <div class="admin-field admin-inventory-list-manager">
+      <div class="admin-inventory-list-head">
+        <span class="admin-field-label">Связанные товары</span>
+        <button class="btn btn-secondary" type="button" data-editor-add="related_products">Добавить связь</button>
+      </div>
+      <div class="admin-inventory-list-grid">
+        ${(product.related_products || []).map((item, index) => `
+          <div class="admin-inventory-list-row admin-inventory-list-row-grid">
+            <input class="admin-input" type="text" placeholder="Slug товара" value="${escapeAttribute(item.slug || "")}" data-editor-list-field data-list-kind="related_products" data-list-index="${index}" data-list-key="slug" />
+            <input class="admin-input" type="text" placeholder="Подпись (опционально)" value="${escapeAttribute(item.label || "")}" data-editor-list-field data-list-kind="related_products" data-list-index="${index}" data-list-key="label" />
+            <button class="btn btn-secondary" type="button" data-editor-remove data-list-kind="related_products" data-list-index="${index}">Удалить</button>
+          </div>
+        `).join("") || '<div class="admin-lead-empty">Связанные товары пока не заданы.</div>'}
+      </div>
+    </div>
+
+    <div class="admin-field admin-inventory-list-manager">
+      <div class="admin-inventory-list-head">
+        <span class="admin-field-label">Совместимость</span>
+        <button class="btn btn-secondary" type="button" data-editor-add="compatibility">Добавить правило</button>
+      </div>
+      <div class="admin-inventory-list-grid">
+        ${(product.compatibility || []).map((item, index) => `
+          <div class="admin-inventory-list-row admin-inventory-list-row-grid">
+            <input class="admin-input" type="text" placeholder="Slug совместимого товара" value="${escapeAttribute(item.target_slug || "")}" data-editor-list-field data-list-kind="compatibility" data-list-index="${index}" data-list-key="target_slug" />
+            <input class="admin-input" type="text" placeholder="Тип связи (works_with)" value="${escapeAttribute(item.relation || "works_with")}" data-editor-list-field data-list-kind="compatibility" data-list-index="${index}" data-list-key="relation" />
+            <input class="admin-input" type="text" placeholder="Комментарий" value="${escapeAttribute(item.note || "")}" data-editor-list-field data-list-kind="compatibility" data-list-index="${index}" data-list-key="note" />
+            <button class="btn btn-secondary" type="button" data-editor-remove data-list-kind="compatibility" data-list-index="${index}">Удалить</button>
+          </div>
+        `).join("") || '<div class="admin-lead-empty">Правила совместимости пока не заданы.</div>'}
+      </div>
+    </div>
+
+    <div class="admin-grid">
+      <label class="admin-field">
+        <span class="admin-field-label">SEO title</span>
+        <input class="admin-input" type="text" data-editor-field="seo_title" value="${escapeAttribute(product.seo_title || "")}" />
+      </label>
+      <label class="admin-field">
+        <span class="admin-field-label">SEO description</span>
+        <textarea class="admin-textarea" data-editor-field="seo_description">${escapeHtml(product.seo_description || "")}</textarea>
+      </label>
+    </div>
+  `;
+}
+
+function resolveInventoryMediaHref(value) {
+  const normalized = String(value || "").trim();
+  if (!normalized) return "";
+  if (/^https?:\/\//i.test(normalized)) return normalized;
+  if (normalized.startsWith("/")) return `..${normalized}`;
+  return `../${normalized.replace(/^\.?\//, "")}`;
+}
+
+function collectInventoryMediaSuggestions(limit = 120) {
+  const products = getInventoryProducts();
+  const seen = new Set();
+  const items = [];
+  for (const product of products) {
+    const images = Array.isArray(product?.images) ? product.images : [];
+    for (const source of images) {
+      const value = String(source || "").trim();
+      if (!value || seen.has(value)) continue;
+      seen.add(value);
+      items.push(value);
+      if (items.length >= limit) return items.sort((left, right) => left.localeCompare(right, "ru"));
+    }
+  }
+  return items.sort((left, right) => left.localeCompare(right, "ru"));
 }
 
 function resolveInventoryCategory(product, categories) {

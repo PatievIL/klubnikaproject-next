@@ -5,73 +5,154 @@ import {
   formatRub,
   formatSmart,
   normalizeInputValue
-} from "../calc-core.js";
+} from "../calc-core.js?v=20260404ah";
 
-const STORAGE_KEY = "klubnikaproject.calc.admin.draft.v1";
+const STORAGE_KEY = "klubnikaproject.calc.admin.draft.v2";
 
 const CONSTANT_FIELDS = [
   {
-    key: "plantsPerRack",
-    label: "Растений на один стеллаж",
+    key: "heightBreakpoints.threeTierMax",
+    label: "Порог 3 этажей",
+    unit: "м",
+    note: "До этой высоты считаем 3 этажа."
+  },
+  {
+    key: "heightBreakpoints.fourTierMax",
+    label: "Порог 4 этажей",
+    unit: "м",
+    note: "До этой высоты считаем 4 этажа."
+  },
+  {
+    key: "rackGeometry.segmentLength",
+    label: "Шаг длины стеллажа",
+    unit: "м",
+    note: "Стеллаж считаем кратно этой длине."
+  },
+  {
+    key: "rackGeometry.maxRackLength",
+    label: "Максимум длины стеллажа",
+    unit: "м",
+    note: "Стеллаж не делаем длиннее этого значения."
+  },
+  {
+    key: "rackGeometry.rackWidth",
+    label: "Ширина стеллажа",
+    unit: "м",
+    note: "Ширина одного стеллажа."
+  },
+  {
+    key: "rackGeometry.aisleWidth",
+    label: "Проход между стеллажами",
+    unit: "м",
+    note: "Проход нужен между соседними стеллажами."
+  },
+  {
+    key: "rackGeometry.wallOffset",
+    label: "Отступ от стены",
+    unit: "м",
+    note: "Отступ слева и справа от крайних стеллажей."
+  },
+  {
+    key: "trayKit.plantsPerTray",
+    label: "Растений на 1 лоток",
     unit: "шт.",
-    note: "Используется для расчёта кустов, посадочного материала и выручки."
+    note: "На одном лотке одного этажа."
   },
   {
-    key: "cropProtectionAndNutritionPerPlantPerMonth",
-    label: "СЗР и питание на растение в месяц",
+    key: "trayKit.matsPerTray",
+    label: "Матов на 1 лоток",
+    unit: "шт.",
+    note: "На одном лотке одного этажа."
+  },
+  {
+    key: "trayKit.drippersPerTray",
+    label: "Капельниц на 1 лоток",
+    unit: "шт.",
+    note: "На одном лотке одного этажа."
+  },
+  {
+    key: "trayKit.lightsPerTray",
+    label: "Светильников на 1 лоток",
+    unit: "шт.",
+    note: "На одном лотке одного этажа."
+  },
+  {
+    key: "trayKit.blindTubePerTray",
+    label: "Слепой трубки на лоток",
+    unit: "м",
+    note: "На одном лотке одного этажа."
+  },
+  {
+    key: "trayKit.blindTubePerRack",
+    label: "Подача к стеллажу",
+    unit: "м",
+    note: "Дополнительно к каждому стеллажу вне зависимости от этажности."
+  },
+  {
+    key: "purchaseUnits.matPackSize",
+    label: "Матов в пачке",
+    unit: "шт.",
+    note: "Закупочная упаковка матов."
+  },
+  {
+    key: "purchaseUnits.minMatReserve",
+    label: "Минимальный запас матов",
+    unit: "шт.",
+    note: "Если запас ниже, добавляем ещё пачку."
+  },
+  {
+    key: "purchaseUnits.blindTubeCoilMeters",
+    label: "Трубки в бухте",
+    unit: "м",
+    note: "Закупочная длина одной бухты."
+  },
+  {
+    key: "assemblyPerPlant",
+    label: "Базовая сборка на растение",
     unit: "руб.",
-    note: "Ложится в блок ежемесячных и годовых расходов."
+    note: "Каркас, свет, полив, субстрат и базовый контроль раствора."
   },
   {
-    key: "electricityKwPerRack",
-    label: "Потребление на один стеллаж",
-    unit: "кВт",
-    note: "Базовая мощность на стеллаж в расчётной модели."
+    key: "electricalModel.fixturePowerW",
+    label: "Мощность светильника",
+    unit: "Вт",
+    note: "Один светильник на один лоток."
   },
   {
-    key: "waterLitersPerRackPerDay",
-    label: "Вода на один стеллаж в день",
-    unit: "л",
-    note: "Используется для расчёта воды в модели расходов."
+    key: "electricalModel.maxLinePowerW",
+    label: "Максимум на линию света",
+    unit: "Вт",
+    note: "Выше этого делим свет на большее число линий."
   },
   {
-    key: "monthlyPreviewLightHoursPerDay",
-    label: "Часы света в блоке расходов",
-    unit: "ч/день",
-    note: "Превью ежемесячных расходов."
+    key: "electricalModel.panelToRackZoneM",
+    label: "От щита до стеллажей",
+    unit: "м",
+    note: "Базовая длина трассы до зоны стеллажей."
   },
   {
-    key: "paybackModelLightHoursPerDay",
-    label: "Часы света в модели окупаемости",
-    unit: "ч/день",
-    note: "Инвестиционная модель справа."
+    key: "electricalModel.exhaustPowerW",
+    label: "Вытяжка",
+    unit: "Вт",
+    note: "Суммарная электрическая мощность вытяжки."
   },
   {
-    key: "rackModelCost",
-    label: "Инвест-модель: стоимость стеллажа",
-    unit: "руб.",
-    note: "Используется только для блока окупаемости."
+    key: "electricalModel.serviceReserveW",
+    label: "Резерв сервисной группы",
+    unit: "Вт",
+    note: "Насос, автоматика и свободные точки."
   },
   {
-    key: "irrigationNodeModelCost",
-    label: "Инвест-модель: стоимость поливочного узла",
-    unit: "руб.",
-    note: "Тоже участвует только в инвестиционном слое."
-  }
-];
-
-const PRICE_GROUPS = [
-  {
-    id: "frame",
-    title: "Каркас и металлоконструкция",
-    note: "Позиции 1–11 формируют стоимость базового и дополнительного стеллажа.",
-    match: (item) => item.id <= 11
+    key: "electricalModel.splitColdFactor",
+    label: "Коэффициент холода сплита",
+    unit: "x",
+    note: "Во сколько раз холодопроизводительность выше света."
   },
   {
-    id: "system",
-    title: "Оборудование, расходники и посадочный материал",
-    note: "Лотки, свет, полив, субстрат, удобрения и посадочный материал.",
-    match: (item) => item.id >= 12
+    key: "electricalModel.splitEer",
+    label: "EER сплита",
+    unit: "x",
+    note: "Грубый перевод холода в электрическое потребление."
   }
 ];
 
@@ -97,14 +178,13 @@ const elements = {
 init().catch((error) => {
   console.error(error);
   if (elements.draftStatus) {
-    elements.draftStatus.textContent = "Не удалось загрузить админку цен. Проверьте pricing.json и структуру папок.";
+    elements.draftStatus.textContent = "Не удалось загрузить pricing.json.";
   }
 });
 
 async function init() {
   publishedPricing = await loadPricing();
   hydrateDraft();
-
   renderAll();
   bindEvents();
 }
@@ -122,6 +202,10 @@ function hydrateDraft() {
   const stored = loadStoredDraft();
   draftPricing = stored?.draftPricing ? stored.draftPricing : clone(publishedPricing);
   previewState = stored?.previewState ? stored.previewState : createDefaultState(draftPricing);
+  const previewDefaults = createDefaultState(draftPricing);
+
+  previewState.phaseMode = previewState.phaseMode || previewDefaults.phaseMode;
+  previewState.cableLayoutMode = previewState.cableLayoutMode || previewDefaults.cableLayoutMode;
 
   CONTROL_CONFIG.forEach((control) => {
     previewState[control.key] = normalizeInputValue(previewState[control.key], control);
@@ -132,13 +216,13 @@ function loadStoredDraft() {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
 
 function bindEvents() {
-  elements.priceSearch.addEventListener("input", renderPriceGroups);
+  elements.priceSearch.addEventListener("input", renderOptionFields);
   elements.downloadJsonButton.addEventListener("click", downloadJson);
   elements.copyJsonButton.addEventListener("click", copyJson);
   elements.resetDraftButton.addEventListener("click", resetDraft);
@@ -147,7 +231,7 @@ function bindEvents() {
 function renderAll() {
   renderConstants();
   renderDefaults();
-  renderPriceGroups();
+  renderOptionFields();
   renderPreviewInputs();
   renderPreview();
 }
@@ -163,7 +247,7 @@ function renderConstants() {
         data-key="${field.key}"
         type="number"
         step="0.1"
-        value="${draftPricing.constants[field.key]}"
+        value="${readConstant(field.key)}"
       />
       <span class="admin-field-note">${field.unit}</span>
     </label>
@@ -200,98 +284,119 @@ function renderDefaults() {
   });
 }
 
-function renderPriceGroups() {
+function renderOptionFields() {
   const query = elements.priceSearch.value.trim().toLowerCase();
-
-  elements.priceGroups.innerHTML = PRICE_GROUPS.map((group) => {
-    const rows = draftPricing.items.filter((item) => {
-      if (!group.match(item)) {
-        return false;
-      }
-
-      if (!query) {
-        return true;
-      }
-
-      return item.name.toLowerCase().includes(query) || String(item.id).includes(query);
-    });
-
-    if (!rows.length) {
-      return "";
+  const rows = (draftPricing.optionGroups || []).filter((group) => {
+    if (!query) {
+      return true;
     }
 
-    return `
-      <section class="admin-price-group">
-        <div class="admin-price-group-head">
-          <strong>${group.title}</strong>
-          <span>${group.note}</span>
-        </div>
-        <div class="admin-price-rows">
-          ${rows.map((item) => `
-            <label class="admin-price-row">
-              <div>
-                <div class="admin-price-name">${item.name}</div>
-                <div class="admin-price-meta">ID ${item.id}</div>
-              </div>
-              <input
-                class="admin-input"
-                data-kind="item-price"
-                data-id="${item.id}"
-                type="number"
-                min="0"
-                step="1"
-                value="${item.unitPrice}"
-              />
-            </label>
-          `).join("")}
-        </div>
-      </section>
-    `;
-  }).join("");
+    return group.label.toLowerCase().includes(query) || group.stateKey.toLowerCase().includes(query);
+  });
 
-  elements.priceGroups.querySelectorAll("[data-kind='item-price']").forEach((input) => {
-    input.addEventListener("input", handleItemPriceChange);
-    input.addEventListener("change", handleItemPriceChange);
+  elements.priceGroups.innerHTML = `
+    <section class="admin-price-group">
+      <div class="admin-price-group-head">
+        <strong>Цены опций</strong>
+        <span>Это те значения, которые использует калькулятор в правой сборке.</span>
+      </div>
+      <div class="admin-price-rows">
+        ${rows.map((group) => `
+          <label class="admin-price-row">
+            <div>
+              <div class="admin-price-name">${group.label}</div>
+              <div class="admin-price-meta">${group.note}</div>
+            </div>
+            <input
+              class="admin-input"
+              data-kind="option-group-price"
+              data-option-id="${group.id}"
+              type="number"
+              min="0"
+              step="1"
+              value="${group.unitPrice}"
+            />
+          </label>
+        `).join("")}
+      </div>
+    </section>
+  `;
+
+  elements.priceGroups.querySelectorAll("[data-kind='option-group-price']").forEach((input) => {
+    input.addEventListener("input", handleOptionPriceChange);
+    input.addEventListener("change", handleOptionPriceChange);
   });
 }
 
 function renderPreviewInputs() {
-  elements.previewInputs.innerHTML = CONTROL_CONFIG.map((field) => `
+  elements.previewInputs.innerHTML = `
+    ${CONTROL_CONFIG.map((field) => `
+      <label class="admin-field">
+        <span class="admin-field-label">${field.label}</span>
+        <input
+          class="admin-input"
+          data-kind="preview"
+          data-key="${field.key}"
+          type="number"
+          min="${field.min}"
+          max="${field.max}"
+          step="${field.step}"
+          value="${previewState[field.key]}"
+        />
+        <span class="admin-field-note">${field.unit}</span>
+      </label>
+    `).join("")}
     <label class="admin-field">
-      <span class="admin-field-label">${field.label}</span>
-      <input
-        class="admin-input"
-        data-kind="preview"
-        data-key="${field.key}"
-        type="number"
-        min="${field.min}"
-        max="${field.max}"
-        step="${field.step}"
-        value="${previewState[field.key]}"
-      />
-      <span class="admin-field-note">${field.unit}</span>
+      <span class="admin-field-label">Питание</span>
+      <select class="admin-input" data-kind="preview-choice" data-key="phaseMode">
+        <option value="one-phase" ${previewState.phaseMode === "one-phase" ? "selected" : ""}>1 фаза</option>
+        <option value="three-phase" ${previewState.phaseMode === "three-phase" ? "selected" : ""}>3 фазы</option>
+      </select>
     </label>
-  `).join("");
+    <label class="admin-field">
+      <span class="admin-field-label">Прокладка кабеля</span>
+      <select class="admin-input" data-kind="preview-choice" data-key="cableLayoutMode">
+        <option value="short" ${previewState.cableLayoutMode === "short" ? "selected" : ""}>Коротко</option>
+        <option value="tray" ${previewState.cableLayoutMode === "tray" ? "selected" : ""}>По лотку</option>
+        <option value="real" ${previewState.cableLayoutMode === "real" ? "selected" : ""}>С запасом</option>
+      </select>
+    </label>
+    ${(draftPricing.optionGroups || []).map((group) => `
+      <label class="admin-field">
+        <span class="admin-field-label">${group.label}</span>
+        <input class="admin-input" data-kind="preview-toggle" data-key="${group.stateKey}" type="checkbox" ${previewState[group.stateKey] ? "checked" : ""} />
+      </label>
+    `).join("")}
+  `;
 
   elements.previewInputs.querySelectorAll("[data-kind='preview']").forEach((input) => {
     input.addEventListener("input", handlePreviewChange);
     input.addEventListener("change", handlePreviewChange);
   });
+
+  elements.previewInputs.querySelectorAll("[data-kind='preview-choice']").forEach((input) => {
+    input.addEventListener("change", handlePreviewChoice);
+  });
+
+  elements.previewInputs.querySelectorAll("[data-kind='preview-toggle']").forEach((input) => {
+    input.addEventListener("change", handlePreviewToggle);
+  });
 }
 
 function renderPreview() {
   const calculation = calculateFarm(previewState, draftPricing);
-  const optimistic = calculation.yieldScenarios.find((scenario) => scenario.id === "optimistic") || calculation.activeScenario;
-  const firstYear = optimistic.cumulative[0]?.value || 0;
+  const selectedExtras = calculation.selectedItems.filter((item) => item.id !== "assembly");
 
   elements.previewTotalCost.textContent = formatRub(calculation.totalEquipmentCost);
   elements.previewMetrics.innerHTML = [
-    { label: "Оборудование без саженцев", value: formatRub(calculation.equipmentWithoutSeedlings) },
-    { label: "Посадочный материал", value: formatRub(calculation.seedlingsTotalCost) },
-    { label: "Расходы в месяц", value: formatRub(calculation.monthlyCosts.total) },
-    { label: "Выручка в год", value: formatRub(optimistic.annualRevenue) },
-    { label: "1-й год по модели", value: formatRub(firstYear) },
-    { label: "Стеллажи / кусты", value: `${formatSmart(calculation.totalRacks)} / ${formatSmart(calculation.plantCount)}` }
+    { label: "Размер", value: `${formatSmart(calculation.width)} × ${formatSmart(calculation.length)} × ${formatSmart(calculation.height)} м` },
+    { label: "Стеллажи / этажи", value: `${formatSmart(calculation.rackCount)} / ${formatSmart(calculation.tiers)}` },
+    { label: "Лотки / растения", value: `${formatSmart(calculation.trayCount)} / ${formatSmart(calculation.plantCount)}` },
+    { label: "Питание / ток", value: `${calculation.electrical.phaseLabel} / ${formatSmart(calculation.electrical.runningAmps)} А` },
+    { label: "Кабель / линии", value: `${formatSmart(calculation.electrical.totalCableM)} м / ${formatSmart(calculation.electrical.totalLightLines)} шт` },
+    { label: "Без рассады", value: formatRub(calculation.equipmentWithoutSeedlings) },
+    { label: "Рассада", value: formatRub(calculation.seedlingsTotalCost) },
+    { label: "Доп. блоки", value: selectedExtras.length ? selectedExtras.map((item) => item.label).join(", ") : "нет" }
   ].map((item) => `
     <div class="summary-item">
       <span>${item.label}</span>
@@ -305,8 +410,7 @@ function renderPreview() {
 }
 
 function handleConstantChange(event) {
-  const key = event.currentTarget.dataset.key;
-  draftPricing.constants[key] = safeNumber(event.currentTarget.value);
+  writeConstant(event.currentTarget.dataset.key, safeNumber(event.currentTarget.value));
   renderPreview();
 }
 
@@ -318,14 +422,13 @@ function handleDefaultChange(event) {
   renderPreview();
 }
 
-function handleItemPriceChange(event) {
-  const id = Number(event.currentTarget.dataset.id);
-  const item = draftPricing.items.find((entry) => entry.id === id);
-  if (!item) {
+function handleOptionPriceChange(event) {
+  const group = draftPricing.optionGroups.find((item) => item.id === event.currentTarget.dataset.optionId);
+  if (!group) {
     return;
   }
 
-  item.unitPrice = safeNumber(event.currentTarget.value);
+  group.unitPrice = safeNumber(event.currentTarget.value);
   renderPreview();
 }
 
@@ -334,6 +437,16 @@ function handlePreviewChange(event) {
   const field = CONTROL_CONFIG.find((item) => item.key === key);
   previewState[key] = normalizeInputValue(event.currentTarget.value, field);
   event.currentTarget.value = previewState[key];
+  renderPreview();
+}
+
+function handlePreviewToggle(event) {
+  previewState[event.currentTarget.dataset.key] = event.currentTarget.checked;
+  renderPreview();
+}
+
+function handlePreviewChoice(event) {
+  previewState[event.currentTarget.dataset.key] = event.currentTarget.value;
   renderPreview();
 }
 
@@ -367,12 +480,9 @@ function resetDraft() {
 }
 
 function updateStatus() {
-  if (isPublishedVersion()) {
-    elements.draftStatus.textContent = "Черновик совпадает с опубликованной версией.";
-    return;
-  }
-
-  elements.draftStatus.textContent = "Есть несохранённые изменения в draft. Скачайте JSON и замените pricing.json в проекте.";
+  elements.draftStatus.textContent = JSON.stringify(draftPricing) === JSON.stringify(publishedPricing)
+    ? "Черновик совпадает с опубликованной версией."
+    : "Есть несохранённые изменения в draft. Скачайте JSON и замените pricing.json в проекте.";
 }
 
 function setStatus(message) {
@@ -380,17 +490,7 @@ function setStatus(message) {
 }
 
 function persistDraft() {
-  window.localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify({
-      draftPricing,
-      previewState
-    })
-  );
-}
-
-function isPublishedVersion() {
-  return JSON.stringify(draftPricing) === JSON.stringify(publishedPricing);
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ draftPricing, previewState }));
 }
 
 function clone(value) {
@@ -402,27 +502,21 @@ function safeNumber(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function readConstant(path) {
+  return path.split(".").reduce((acc, key) => acc?.[key], draftPricing.constants);
+}
+
+function writeConstant(path, value) {
+  const parts = path.split(".");
+  const last = parts.pop();
+  const target = parts.reduce((acc, key) => acc[key], draftPricing.constants);
+  target[last] = value;
+}
+
 function copyText(text) {
-  if (navigator.clipboard && navigator.clipboard.writeText) {
+  if (navigator.clipboard?.writeText) {
     return navigator.clipboard.writeText(text);
   }
 
-  return new Promise((resolve, reject) => {
-    const field = document.createElement("textarea");
-    field.value = text;
-    field.setAttribute("readonly", "");
-    field.style.position = "absolute";
-    field.style.left = "-9999px";
-    document.body.appendChild(field);
-    field.select();
-
-    try {
-      document.execCommand("copy");
-      document.body.removeChild(field);
-      resolve();
-    } catch (error) {
-      document.body.removeChild(field);
-      reject(error);
-    }
-  });
+  return Promise.reject(new Error("Clipboard API unavailable"));
 }
