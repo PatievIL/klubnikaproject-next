@@ -5,10 +5,10 @@ const DEFAULT_SETTINGS = {
   },
   members: {
     enabled: true,
-    loginPath: "/cabinet/login/",
-    hubPath: "/cabinet/",
-    catalogPath: "/account/catalog/",
-    specialPath: "/account/special/",
+    loginPath: "cabinet/login/",
+    hubPath: "cabinet/",
+    catalogPath: "account/catalog/",
+    specialPath: "account/special/",
   },
   integrations: {
     apiBase: "https://api.klubnikaproject.ru/site/v1",
@@ -18,6 +18,7 @@ const DEFAULT_SETTINGS = {
 let settings = clone(DEFAULT_SETTINGS);
 let currentSessionUser = null;
 let memberAccessPolicy = null;
+const basePath = detectBasePath();
 
 document.addEventListener("DOMContentLoaded", async () => {
   settings = loadCachedSettings();
@@ -114,6 +115,14 @@ function apiBase() {
   return detectRuntimeApiBase((settings.integrations?.apiBase || DEFAULT_SETTINGS.integrations.apiBase));
 }
 
+function detectBasePath() {
+  return window.location.pathname.startsWith("/klubnikaproject-next/") ? "/klubnikaproject-next/" : "/";
+}
+
+function routePath(relativePath = "") {
+  return `${basePath}${String(relativePath).replace(/^\//, "")}`;
+}
+
 function detectRuntimeApiBase(configuredBase) {
   const configured = String(configuredBase || "").trim().replace(/\/+$/, "");
   const host = window.location.hostname;
@@ -124,7 +133,8 @@ function detectRuntimeApiBase(configuredBase) {
 }
 
 function memberPath(key) {
-  return settings.members?.[key] || DEFAULT_SETTINGS.members[key];
+  const raw = settings.members?.[key] || DEFAULT_SETTINGS.members[key];
+  return routePath(raw);
 }
 
 function isMembersEnabled() {

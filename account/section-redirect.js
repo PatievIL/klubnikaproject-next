@@ -8,7 +8,8 @@ function resolveTargetSection() {
 function buildCabinetHref(section) {
   const params = new URLSearchParams(window.location.search);
   params.set("section", section);
-  return `/cabinet/?${params.toString()}`;
+  const basePath = window.location.pathname.startsWith("/klubnikaproject-next/") ? "/klubnikaproject-next/" : "/";
+  return `${basePath}cabinet/?${params.toString()}`;
 }
 
 function redirectToCabinetSection() {
