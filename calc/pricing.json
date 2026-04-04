@@ -1,223 +1,258 @@
 {
   "meta": {
-    "name": "KlubnikaProject Farm Calculator",
+    "name": "KlubnikaProject Guided Estimate",
     "currency": "RUB",
-    "version": 1
+    "version": 4
   },
   "constants": {
-    "plantsPerRack": 96,
-    "cropProtectionAndNutritionPerPlantPerMonth": 5,
-    "electricityKwPerRack": 1,
-    "waterLitersPerRackPerDay": 20,
-    "monthlyPreviewLightHoursPerDay": 12,
-    "paybackModelLightHoursPerDay": 14,
-    "rackModelCost": 100000,
-    "irrigationNodeModelCost": 150000
+    "heightBreakpoints": {
+      "threeTierMax": 2.5,
+      "fourTierMax": 4
+    },
+    "rackGeometry": {
+      "segmentLength": 2,
+      "maxRackLength": 12,
+      "rackWidth": 0.4,
+      "aisleWidth": 0.6,
+      "wallOffset": 0.5
+    },
+    "trayKit": {
+      "plantsPerTray": 12,
+      "matsPerTray": 2,
+      "drippersPerTray": 12,
+      "lightsPerTray": 1,
+      "blindTubePerTray": 2,
+      "blindTubePerRack": 3
+    },
+    "purchaseUnits": {
+      "matPackSize": 12,
+      "minMatReserve": 2,
+      "blindTubeCoilMeters": 200
+    },
+    "assemblyPerPlant": 1300,
+    "electricalModel": {
+      "fixturePowerW": 100,
+      "driverCountPerFixture": 2,
+      "driverPowerW": 50,
+      "maxLinePowerW": 2500,
+      "panelToRackZoneM": 4,
+      "lightLineTerminalReserveM": 2,
+      "layoutCoefficients": {
+        "short": 1,
+        "tray": 1.15,
+        "real": 1.25
+      },
+      "exhaustPowerW": 1000,
+      "serviceReserveW": 1500,
+      "splitColdFactor": 1.2,
+      "btuPerW": 3.412,
+      "splitEer": 3.2,
+      "lineContactorA": 25,
+      "serviceSocketPoints": 7,
+      "standardBreakersA": [6, 10, 16, 20, 25, 32, 40, 50, 63, 80, 100]
+    },
+    "energyProfile": {
+      "daysPerMonth": 30,
+      "lightHoursFull": 12,
+      "lightHoursHalf": 4,
+      "lightHalfFactor": 0.5,
+      "condenserDuty": 0.5,
+      "exhaustHours": 24,
+      "exhaustDuty": 1,
+      "pumpPowerW": 200,
+      "pumpMinutesPerDay": 5,
+      "automationPowerW": 200,
+      "automationHoursPerDay": 24
+    },
+    "waterProfile": {
+      "perDripperMlPerDay": 250,
+      "daysPerMonth": 30,
+      "waterTariffPerM3": 60
+    },
+    "economyProfile": {
+      "berrySalePricePerKg": 1600
+    }
   },
+  "baseAssemblyIncludes": [
+    "Каркас и стеллажи на базовую 3- или 4-рядную сборку",
+    "Дренажные лотки и опоры под маты",
+    "LED-свет на рабочую конфигурацию",
+    "Капельный полив, трубка и комплект фитингов",
+    "Маты / субстрат под посадку",
+    "Базовый контроль раствора: фильтр, дозирующие насосы и pH/EC"
+  ],
+  "optionGroups": [
+    {
+      "id": "water-prep",
+      "stateKey": "includeWaterPrep",
+      "label": "Подготовка воды и осмос",
+      "note": "Осмос, мембрана, предфильтры и ёмкость под осмос",
+      "includes": [
+        "Осмос",
+        "Мембрана",
+        "Предфильтр и запас фильтров грубой очистки",
+        "Емкости для осмоса"
+      ],
+      "type": "fixed",
+      "unitLabel": "комплект",
+      "unitPrice": 64000,
+      "includedByDefault": false
+    },
+    {
+      "id": "fertilizers",
+      "stateKey": "includeFertilizers",
+      "label": "Удобрения на 6 месяцев",
+      "note": "Считаем от количества растений",
+      "includes": [
+        "Удобрения по мешку"
+      ],
+      "type": "perPlant",
+      "unitLabel": "растений",
+      "unitPrice": 25,
+      "includedByDefault": false
+    },
+    {
+      "id": "automation",
+      "stateKey": "includeAutomation",
+      "label": "Автоматика",
+      "note": "Умный дом для базы и полива",
+      "includes": [
+        "Умный дом (база)",
+        "Умный дом (полив)"
+      ],
+      "type": "fixed",
+      "unitLabel": "комплект",
+      "unitPrice": 50000,
+      "includedByDefault": false
+    },
+    {
+      "id": "mixing-inventory",
+      "stateKey": "includeMixingInventory",
+      "label": "Инвентарь и малые ёмкости",
+      "note": "Весы, стаканы, ведра и ёмкости под маточник",
+      "includes": [
+        "Весы, стаканчики, ведра",
+        "Емкости для маточника"
+      ],
+      "type": "fixed",
+      "unitLabel": "комплект",
+      "unitPrice": 17000,
+      "includedByDefault": false
+    },
+    {
+      "id": "electrical",
+      "stateKey": "includeElectrical",
+      "label": "Электрика и щит",
+      "note": "Щит, автоматы, контакторы и кабель по расчёту",
+      "includes": [
+        "Провода, щиток, автоматы"
+      ],
+      "type": "electricalAuto",
+      "unitLabel": "ориентир",
+      "unitPrice": 0,
+      "pricingModel": {
+        "shieldBase": 12000,
+        "inputBreakerUnitPrice": 1500,
+        "lightLineBreakerUnitPrice": 250,
+        "contactorUnitPrice": 1200,
+        "smartRelayUnitPrice": 2000,
+        "exhaustBreakerUnitPrice": 250,
+        "serviceBreakerUnitPrice": 250,
+        "splitBreakerUnitPrice": 350,
+        "lightCablePerMeter": 35,
+        "exhaustCablePerMeter": 25,
+        "serviceCablePerMeter": 30,
+        "splitCablePerMeter": 35,
+        "wagoPerFixture": 4,
+        "wagoUnitPrice": 15,
+        "junctionBoxPerRack": 1,
+        "junctionBoxUnitPrice": 250,
+        "roundTo": 5000,
+        "minTotal": 40000
+      },
+      "includedByDefault": false
+    },
+    {
+      "id": "climate-pack",
+      "stateKey": "includeClimatePack",
+      "label": "Климат-комплект",
+      "note": "3 000 ₽ за м² с округлением до 5 000 ₽",
+      "includes": [
+        "Климат: вытяжка и листы металла для вентканалов",
+        "Сплит-система",
+        "Увлажнитель"
+      ],
+      "type": "perAreaRounded",
+      "unitLabel": "м²",
+      "unitPrice": 3000,
+      "roundTo": 5000,
+      "includedByDefault": false
+    },
+    {
+      "id": "project-support-month",
+      "stateKey": "includeProjectSupportMonth",
+      "label": "Сопровождение проекта",
+      "note": "500 ₽ за м² с округлением вверх до 5 000 ₽",
+      "includes": [
+        "Сопровождение проекта 1 месяц"
+      ],
+      "type": "perAreaRounded",
+      "unitLabel": "м²",
+      "unitPrice": 500,
+      "roundTo": 5000,
+      "roundMode": "up",
+      "minTotal": 25000,
+      "includedByDefault": false
+    },
+    {
+      "id": "seedlings",
+      "stateKey": "includeSeedlings",
+      "label": "Рассада",
+      "note": "Посадочный материал",
+      "includes": [
+        "Рассада frigo / посадочный материал"
+      ],
+      "type": "perPlant",
+      "unitLabel": "растений",
+      "unitPrice": 80,
+      "includedByDefault": false
+    }
+  ],
   "inputs": {
     "a0": 4,
     "a1": 8,
-    "a2": 1200,
-    "a3": 0,
-    "a4": 5,
-    "a5": 15
+    "a2": 3,
+    "a3": 6,
+    "a4": 150
   },
-  "items": [
+  "presets": [
     {
-      "id": 1,
-      "name": "Перекладина 35 см",
-      "unitPrice": 210,
-      "basicQty": 16,
-      "extraQty": 8,
-      "roofQty": 4,
-      "vestibuleQty": 4,
-      "rearQty": 4
+      "id": "2x4",
+      "label": "2 × 4 м",
+      "width": 2,
+      "length": 4,
+      "note": "Минимальный вход, чтобы понять порядок цифр."
     },
     {
-      "id": 2,
-      "name": "Перекладина 99 см",
-      "unitPrice": 430,
-      "vestibuleQty": 4
+      "id": "4x8",
+      "label": "4 × 8 м",
+      "width": 4,
+      "length": 8,
+      "note": "Первый рабочий размер для предметного разговора."
     },
     {
-      "id": 3,
-      "name": "Перекладина 198 см",
-      "unitPrice": 850,
-      "basicQty": 10,
-      "extraQty": 8,
-      "roofQty": 2,
-      "vestibuleQty": 2,
-      "rearQty": 2
+      "id": "6x10",
+      "label": "6 × 10 м",
+      "width": 6,
+      "length": 10,
+      "note": "Более уверенный старт с запасом по масштабу."
     },
     {
-      "id": 4,
-      "name": "Перекладина 230 см",
-      "unitPrice": 978,
-      "basicQty": 8,
-      "extraQty": 4,
-      "roofQty": 2,
-      "vestibuleQty": 2,
-      "rearQty": 2
-    },
-    {
-      "id": 5,
-      "name": "Краб-система",
-      "unitPrice": 20,
-      "basicQty": 112,
-      "extraQty": 56,
-      "roofQty": 16,
-      "vestibuleQty": 24,
-      "rearQty": 24
-    },
-    {
-      "id": 6,
-      "name": "Болт М8",
-      "unitPrice": 6,
-      "basicQty": 112,
-      "extraQty": 56,
-      "roofQty": 16,
-      "vestibuleQty": 24,
-      "rearQty": 24
-    },
-    {
-      "id": 7,
-      "name": "Гайка М8",
-      "unitPrice": 6,
-      "basicQty": 112,
-      "extraQty": 56,
-      "roofQty": 16,
-      "vestibuleQty": 24,
-      "rearQty": 24
-    },
-    {
-      "id": 8,
-      "name": "Шайба М8",
-      "unitPrice": 6,
-      "basicQty": 112,
-      "extraQty": 56,
-      "roofQty": 16,
-      "vestibuleQty": 24,
-      "rearQty": 24
-    },
-    {
-      "id": 9,
-      "name": "Саморез кровельный",
-      "unitPrice": 4,
-      "basicQty": 8,
-      "extraQty": 8
-    },
-    {
-      "id": 10,
-      "name": "Саморез прессшайба",
-      "unitPrice": 4,
-      "basicQty": 72,
-      "extraQty": 36
-    },
-    {
-      "id": 11,
-      "name": "Пластина усиления",
-      "unitPrice": 200,
-      "basicQty": 4,
-      "extraQty": 4
-    },
-    {
-      "id": 12,
-      "name": "Лоток",
-      "unitPrice": 1200,
-      "basicQty": 8,
-      "extraQty": 8
-    },
-    {
-      "id": 13,
-      "name": "Светильник",
-      "unitPrice": 8500,
-      "basicQty": 8,
-      "extraQty": 8
-    },
-    {
-      "id": 14,
-      "name": "Капельница компенсированная, в сборе. 2,2 л/ч",
-      "unitPrice": 35,
-      "basicQty": 96,
-      "extraQty": 96
-    },
-    {
-      "id": 15,
-      "name": "Трубка слепая, белая. 16 мм",
-      "unitPrice": 45,
-      "basicQty": 20,
-      "extraQty": 16
-    },
-    {
-      "id": 16,
-      "name": "Мат минеральной ваты Grodan",
-      "unitPrice": 250,
-      "basicQty": 16,
-      "extraQty": 16
-    },
-    {
-      "id": 17,
-      "name": "Держатель ленты цветоноса",
-      "unitPrice": 200,
-      "basicQty": 16,
-      "extraQty": 8
-    },
-    {
-      "id": 18,
-      "name": "Комплект фитингов для подключения капельного полива",
-      "unitPrice": 600
-    },
-    {
-      "id": 19,
-      "name": "Лента поддержки цветоноса",
-      "unitPrice": 1350
-    },
-    {
-      "id": 20,
-      "name": "Фильтр дисковый",
-      "unitPrice": 800
-    },
-    {
-      "id": 21,
-      "name": "Дозировочный насос D25RE2VF",
-      "unitPrice": 45000
-    },
-    {
-      "id": 22,
-      "name": "Пробойник полуавтоматический",
-      "unitPrice": 1200
-    },
-    {
-      "id": 23,
-      "name": "Приборы измерения раствора PH/EC",
-      "unitPrice": 5000
-    },
-    {
-      "id": 24,
-      "name": "Комплект удобрений на 100 кустов",
-      "unitPrice": 4000
-    },
-    {
-      "id": 25,
-      "name": "Рассада",
-      "unitPrice": 45
-    }
-  ],
-  "yieldScenarios": [
-    {
-      "id": "optimistic",
-      "name": "Оптимистичный",
-      "kgPerPlantPerYear": 1.5
-    },
-    {
-      "id": "realistic",
-      "name": "Реалистичный",
-      "kgPerPlantPerYear": 1.15
-    },
-    {
-      "id": "pessimistic",
-      "name": "Пессимистичный",
-      "kgPerPlantPerYear": 0.8
+      "id": "8x12",
+      "label": "8 × 12 м",
+      "width": 8,
+      "length": 12,
+      "note": "Размер для уже серьёзного входа в проект."
     }
   ]
 }

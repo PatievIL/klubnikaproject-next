@@ -11,8 +11,8 @@
     name="description"
     content="Калькулятор клубничной фермы помогает быстро понять состав проекта, рамку бюджета и что делать дальше без длинной анкеты и лишнего давления."
   />
-  <link rel="stylesheet" href="../styles.css?v=20260403ab" />
-  <link rel="stylesheet" href="./calc.css?v=20260401f" />
+  <link rel="stylesheet" href="../styles.css?v=20260404r" />
+  <link rel="stylesheet" href="./calc.css?v=20260405l" />
   <!-- SEO:START -->
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <link rel="canonical" href="https://klubnikaproject.ru/calc/" />
@@ -127,16 +127,14 @@
             <div class="nav-mobile-utility">
               <a class="site-header-link" href="../catalog/index.html">Поиск в каталоге</a>
               <a class="site-header-link site-phone-link" href="tel:+79255831669">+7 925 583-16-69</a>
-              <a class="site-header-link" href="../account/">Кабинет</a>
+              <a class="site-header-link" href="../cabinet/login/">Кабинет</a>
               <a class="site-header-link" href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">Telegram</a>
               <a class="nav-cta" href="../consultations/#request">Обсудить задачу</a>
             </div>
           </nav>
 
           <div class="site-header-actions">
-            <a class="site-header-link site-search-trigger" href="../catalog/index.html" aria-label="Поиск в каталоге"><span class="sr-only">Поиск</span></a>
-            <a class="site-header-link site-phone-link" href="tel:+79255831669">Связь</a>
-            <a class="site-header-link" href="../account/">Кабинет</a>
+            <a class="site-header-link" href="../cabinet/login/">Кабинет</a>
             <a class="nav-cta" href="../consultations/#request">Обсудить задачу</a>
           </div>
 
@@ -146,53 +144,66 @@
           </button>
         </div>
 
-        <div class="hero-grid">
+        <div class="hero-grid calc-hero-grid-compact">
           <div class="hero-copy hero-copy-lean">
-            <span class="eyebrow">Калькулятор проекта</span>
-            <h1>Быстрый расчёт, чтобы понять основу фермы до детального проекта</h1>
+            <span class="eyebrow">Ориентир по проекту</span>
+            <h1>Калькулятор расчёта клубничной фермы</h1>
             <p class="lead">
-              Ответьте на несколько вопросов и сразу получите ориентир по составу фермы,
-              бюджету и тому, что имеет смысл делать дальше.
-            </p>
-            <p class="sublead">
-              Это не заявка ради заявки и не попытка заменить проектный расчёт.
-              Сначала вы видите основу, а потом решаете, нужен ли более глубокий разбор.
+              Быстро понять масштаб, что влияет на цифру и какой следующий шаг логичен без длинной анкеты и лишнего шума.
             </p>
 
-            <div class="btn-row hero-cta">
-              <a class="btn btn-primary" href="#calculator-app">Перейти к расчёту</a>
-              <a class="btn btn-secondary" href="#what-you-get">Посмотреть, что будет на выходе</a>
-            </div>
-            <div class="text-link-row">
-              <a href="../consultations/">Если нужна не рамка, а разбор по вашей ситуации</a>
+            <div class="anti-fear-row anti-fear-row-hero">
+              <span class="anti-fear-chip">Без сложных терминов</span>
+              <span class="anti-fear-chip">Первый ориентир сразу</span>
+              <span class="anti-fear-chip">Дальше только 3–4 уточнения</span>
             </div>
 
-            <ul class="hero-output-list">
-              <li>Предварительный состав оборудования по узлам.</li>
-              <li>Рамку по смете, ежемесячным расходам и выручке.</li>
-              <li>Понимание, когда хватит расчёта, а когда нужен проектный разбор.</li>
-            </ul>
-          </div>
+            <div class="btn-row hero-cta calc-hero-cta">
+              <a class="btn btn-primary" href="#calculator-app">Выбрать сценарий</a>
+              <a class="btn btn-secondary" href="../consultations/#request">Нужен разбор под объект</a>
+            </div>
 
-          <aside class="visual-panel visual-panel-tool">
-            <div class="visual-grid visual-grid-tool">
-              <img
-                class="visual-main"
-                src="../assets/photos/optimized/hero-process.webp"
-                alt="Разбор действующей клубничной фермы"
-              />
-              <img class="visual-top" src="../assets/photos/optimized/berry-cluster.webp" alt="Кластер ягоды в рабочем цикле" />
-              <div class="visual-bottom visual-summary">
-                <span class="visual-summary-label">Что на выходе</span>
-                <ul class="visual-summary-list">
-                  <li>Предварительный состав фермы по узлам.</li>
-                  <li>Рамка бюджета, расходов и выручки.</li>
-                  <li>Понимание, когда нужен уже точный разбор.</li>
-                </ul>
+            <div class="calc-hero-summary-band">
+              <div class="calc-hero-summary-item">
+                <span>Что получите</span>
+                <strong>Ориентир по бюджету</strong>
+              </div>
+              <div class="calc-hero-summary-item">
+                <span>Что увидите</span>
+                <strong>Что сильнее всего влияет</strong>
+              </div>
+              <div class="calc-hero-summary-item">
+                <span>Что дальше</span>
+                <strong>Логичный следующий шаг</strong>
               </div>
             </div>
-            <div class="visual-note">
-              Здесь начинается расчёт проекта, а не заявка без пользы.
+          </div>
+
+          <aside class="calc-hero-aside">
+            <div class="calc-hero-visual">
+              <img
+                class="calc-hero-visual-main"
+                src="../assets/photos/optimized/hero-process.webp"
+                alt="Разбор клубничной фермы и проектных решений"
+              />
+
+              <div class="calc-hero-floating calc-hero-floating-top">
+                <span>Ориентир по входу</span>
+                <strong>2–5 млн ₽</strong>
+                <p>Не обещание, а рабочая рамка для старта разговора.</p>
+              </div>
+
+              <div class="calc-hero-floating calc-hero-floating-bottom">
+                <span>Как работает экран</span>
+                <strong>Сценарий → ориентир → уточнение</strong>
+                <p>Сначала смысл, потом детали. Не форма ради формы.</p>
+              </div>
+            </div>
+
+            <div class="calc-hero-sidecard">
+              <div class="tag">Зачем идти дальше</div>
+              <h3>Сложная тема становится короче и понятнее уже на первом экране</h3>
+              <p>Вы не считаете ферму вручную. Вы выбираете задачу, а система сразу показывает масштаб и следующий разумный шаг.</p>
             </div>
           </aside>
         </div>
@@ -201,795 +212,324 @@
   </header>
 
   <main>
-    <section class="section-tight" id="what-you-get">
-      <div class="container">
-        <div class="section-frame">
-          <div class="section-head">
-            <span class="eyebrow">Что получите</span>
-            <h2>На выходе не просто цифры, а понятный ориентир по проекту</h2>
-            <p class="sublead">
-              Он помогает спокойно увидеть, что уже понятно, а что ещё требует детального разбора.
-            </p>
-          </div>
-
-          <div class="grid grid-4">
-            <article class="card result-card">
-              <div class="tag">Состав</div>
-              <h3>Оборудование по узлам</h3>
-              <p class="sublead">Стеллажи, свет, полив, субстрат, расходники и посадочный материал в одной рамке.</p>
-            </article>
-            <article class="card result-card">
-              <div class="tag">Смета</div>
-              <h3>Ориентир по закупке</h3>
-              <p class="sublead">Видно не только итоговую сумму, но и то, из чего она складывается.</p>
-            </article>
-            <article class="card result-card">
-              <div class="tag">Экономика</div>
-              <h3>Расходы и выручка</h3>
-              <p class="sublead">Предварительная модель помогает понять порядок цифр до проектного расчёта.</p>
-            </article>
-            <article class="card result-card">
-              <div class="tag">Что дальше</div>
-              <h3>Когда хватит расчёта</h3>
-              <p class="sublead">Сразу видно, когда этого уже достаточно, а когда лучше обсудить объект подробнее.</p>
-            </article>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section-tight" id="fit">
-      <div class="container">
-        <div class="fit-grid">
-          <article class="card fit-card">
-            <div class="tag">Подходит</div>
-            <h3>Когда калькулятор даёт реальную пользу</h3>
-            <ul>
-              <li>Запускаете ферму с нуля и хотите понять состав проекта.</li>
-              <li>Считаете новую очередь или расширение действующего объекта.</li>
-              <li>Нужно оценить рамку бюджета до более глубокого проектного разбора.</li>
-              <li>Хотите понять, какие узлы нужно считать отдельно и где риск ошибки уже высок.</li>
-            </ul>
-          </article>
-
-          <article class="card fit-card">
-            <div class="tag">Не подходит</div>
-            <h3>Когда лучше сразу идти в подбор или сопровождение</h3>
-            <ul>
-              <li>У вас уже работающая ферма с просадкой по качеству, корневой зоне или управлению климатом.</li>
-              <li>Нужен точный проект под нестандартный объект без базовых вводных.</li>
-              <li>Ищете быстрый “бизнес-план” без площади, формата и операционных параметров.</li>
-              <li>Нужно не посчитать рамку, а разобрать действующую проблему по технологии.</li>
-            </ul>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="section-tight" id="how-it-works">
-      <div class="container">
-        <div class="section-frame">
-          <div class="section-head">
-            <span class="eyebrow">Как работает расчёт</span>
-            <h2>Короткий расчёт без длинной анкеты и ощущения техдока</h2>
-          </div>
-
-          <div class="grid grid-4">
-            <article class="card step-card">
-              <div class="tag">Шаг 1</div>
-              <h3>Понимаем задачу</h3>
-              <p class="sublead">Смотрим, вы запускаете ферму, расширяетесь или хотите прикинуть бюджет.</p>
-            </article>
-            <article class="card step-card">
-              <div class="tag">Шаг 2</div>
-              <h3>Собираем базовые вводные</h3>
-              <p class="sublead">Площадь, формат объекта, выращивание и базовые цифры, которые реально влияют на расчёт.</p>
-            </article>
-            <article class="card step-card">
-              <div class="tag">Шаг 3</div>
-              <h3>Собираем основу</h3>
-              <p class="sublead">Сразу собирается предварительный состав оборудования, смета, расходы и выручка.</p>
-            </article>
-            <article class="card step-card">
-              <div class="tag">Шаг 4</div>
-              <h3>Смотрим, что делать дальше</h3>
-              <p class="sublead">Если объект уже сложнее типовой конфигурации, сразу видно, когда лучше перейти к подробному расчёту или разбору.</p>
-            </article>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <section class="section" id="calculator-app">
       <div class="container">
         <div class="section-frame">
-          <div class="section-head calc-head">
-            <span class="eyebrow">Пошаговый расчёт</span>
-            <h2>Сначала несколько вопросов, потом сразу понятный ориентир по ферме</h2>
-            <p class="sublead">
-              Каждый шаг нужен для дела: чтобы было ясно, зачем мы спрашиваем и как это влияет на расчёт.
-            </p>
-          </div>
+          <div class="guided-estimate">
+            <div class="guided-layout guided-layout-direct">
+              <section class="guided-flow guided-entry card card-pad">
+                <div class="guided-block">
+                  <div class="guided-block-head">
+                    <div>
+                      <div class="tag">Шаг 1</div>
+                      <h3 class="calc-card-title">Что хотите понять?</h3>
+                    </div>
+                  </div>
 
-          <div class="calc-wizard-layout">
-            <section class="calc-wizard card card-pad">
-              <div class="wizard-top">
-                <div>
-                  <div class="tag">Wizard</div>
-                  <h3 class="calc-card-title" id="wizard-title">Что считаем</h3>
-                </div>
-                <div class="wizard-progress-meta"><span id="wizard-step-current">1</span> / 7</div>
-              </div>
+                  <div class="scenario-grid goal-grid" id="goal-choice-grid">
+                    <button class="scenario-card" type="button" data-choice-key="goalType" data-choice-value="entry">
+                      <strong>Сколько это стоит</strong>
+                      <span>Нужен быстрый ориентир по бюджету.</span>
+                    </button>
+                    <button class="scenario-card" type="button" data-choice-key="goalType" data-choice-value="object">
+                      <strong>Подойдёт ли помещение</strong>
+                      <span>Хочу понять, можно ли в нём запускаться.</span>
+                    </button>
+                    <button class="scenario-card" type="button" data-choice-key="goalType" data-choice-value="kit">
+                      <strong>Что войдёт в комплект</strong>
+                      <span>Нужно увидеть состав базовой сборки.</span>
+                    </button>
+                  </div>
 
-              <p class="wizard-intro" id="wizard-intro">
-                Сначала важно понять саму задачу. Этого достаточно, чтобы расчёт был полезным.
-              </p>
-
-              <div class="wizard-progress-bar" aria-hidden="true">
-                <span id="wizard-progress-fill"></span>
-              </div>
-
-              <div class="wizard-step-list" id="wizard-step-list">
-                <button class="wizard-step-chip" type="button" data-go-step="0">Задача</button>
-                <button class="wizard-step-chip" type="button" data-go-step="1">Объект</button>
-                <button class="wizard-step-chip" type="button" data-go-step="2">Выращивание</button>
-                <button class="wizard-step-chip" type="button" data-go-step="3">Масштаб</button>
-                <button class="wizard-step-chip" type="button" data-go-step="4">Цель</button>
-                <button class="wizard-step-chip" type="button" data-go-step="5">Сбыт</button>
-                <button class="wizard-step-chip" type="button" data-go-step="6">Контакты</button>
-              </div>
-
-              <div class="wizard-panel is-active" data-step-panel="0">
-                <div class="wizard-panel-top">
-                  <strong>Шаг 1. Что считаем</strong>
-                  <p>Нужно быстро понять, вы считаете запуск, расширение, действующий объект или просто хотите прикинуть бюджет.</p>
-                </div>
-                <div class="option-grid">
-                  <button class="option-button" type="button" data-choice-key="scenarioType" data-choice-value="start">
-                    <strong>Запускаю с нуля</strong>
-                    <span>Нужна первая рамка по составу фермы и базовой экономике.</span>
-                  </button>
-                  <button class="option-button" type="button" data-choice-key="scenarioType" data-choice-value="existing">
-                    <strong>Уже есть ферма</strong>
-                        <span>Нужно понять, что делать дальше по текущей ферме или новой очереди.</span>
-                  </button>
-                  <button class="option-button" type="button" data-choice-key="scenarioType" data-choice-value="expand">
-                    <strong>Расширяю ферму</strong>
-                    <span>Важно не тиражировать ошибку и понять состав следующего этапа.</span>
-                  </button>
-                  <button class="option-button" type="button" data-choice-key="scenarioType" data-choice-value="budget">
-                    <strong>Хочу понять бюджет и состав</strong>
-                    <span>Нужен первичный ориентир, чтобы перейти к предметному разговору.</span>
-                  </button>
-                </div>
-              </div>
-
-              <div class="wizard-panel" data-step-panel="1">
-                <div class="wizard-panel-top">
-                  <strong>Шаг 2. Формат объекта</strong>
-                  <p>Без базовых параметров помещения калькулятор не даёт полезной рамки по составу и смете.</p>
                 </div>
 
-                <div class="wizard-stack">
+                <div class="guided-block">
+                  <div class="guided-block-head">
+                    <div>
+                      <div class="tag">Шаг 2</div>
+                      <h3 class="calc-card-title">Помещение уже есть?</h3>
+                    </div>
+                  </div>
+
+                  <div class="option-grid option-grid-2" id="room-mode-grid">
+                    <button class="option-button" type="button" data-choice-key="roomMode" data-choice-value="have-room">
+                      <strong>Да, уже есть</strong>
+                      <span>Сейчас введём размеры и посмотрим, что влезает.</span>
+                    </button>
+                    <button class="option-button" type="button" data-choice-key="roomMode" data-choice-value="need-room">
+                      <strong>Нет, возьмём пример</strong>
+                      <span>Покажем ориентир на готовом размере.</span>
+                    </button>
+                  </div>
+                </div>
+
+                <section class="guided-step is-visible" id="room-size-panel" data-room-panel="have-room">
+                  <div class="guided-step-head">
+                    <div>
+                      <h3>Какой размер?</h3>
+                    </div>
+                  </div>
+
+                  <div class="room-size-stack">
+                    <div class="room-dimensions-row room-dimensions-row-all">
+                      <label class="compact-control" data-control-key="a0">
+                        <span class="compact-control-head">Ширина <i class="param-icon" aria-hidden="true">↔</i></span>
+                        <div class="control-number-wrap">
+                          <button class="control-step-button" type="button" data-step-control="a0" data-step-direction="-1" aria-label="Уменьшить">-</button>
+                          <input class="control-number" data-input-type="number" data-key="a0" type="number" min="2" max="20" step="0.5" inputmode="decimal" placeholder="4" />
+                          <button class="control-step-button" type="button" data-step-control="a0" data-step-direction="1" aria-label="Увеличить">+</button>
+                        </div>
+                      </label>
+                      <label class="compact-control" data-control-key="a1">
+                        <span class="compact-control-head">Длина <i class="param-icon" aria-hidden="true">⟷</i></span>
+                        <div class="control-number-wrap">
+                          <button class="control-step-button" type="button" data-step-control="a1" data-step-direction="-1" aria-label="Уменьшить">-</button>
+                          <input class="control-number" data-input-type="number" data-key="a1" type="number" min="4" max="30" step="0.5" inputmode="decimal" placeholder="8" />
+                          <button class="control-step-button" type="button" data-step-control="a1" data-step-direction="1" aria-label="Увеличить">+</button>
+                        </div>
+                      </label>
+                      <label class="compact-control" data-control-key="a2">
+                        <span class="compact-control-head">Высота <i class="param-icon" aria-hidden="true">↕</i></span>
+                        <div class="control-number-wrap">
+                          <button class="control-step-button" type="button" data-step-control="a2" data-step-direction="-1" aria-label="Уменьшить">-</button>
+                          <input class="control-number" data-input-type="number" data-key="a2" type="number" min="2" max="6" step="0.1" inputmode="decimal" placeholder="3.0" />
+                          <button class="control-step-button" type="button" data-step-control="a2" data-step-direction="1" aria-label="Увеличить">+</button>
+                        </div>
+                      </label>
+                      <label class="compact-control" data-control-key="a3">
+                        <span class="compact-control-head">1 кВт <i class="param-icon" aria-hidden="true">⚡</i></span>
+                        <div class="control-number-wrap">
+                          <button class="control-step-button" type="button" data-step-control="a3" data-step-direction="-1" aria-label="Уменьшить">-</button>
+                          <input class="control-number" data-input-type="number" data-key="a3" type="number" min="0" max="100000" step="0.5" inputmode="numeric" placeholder="5" />
+                          <button class="control-step-button" type="button" data-step-control="a3" data-step-direction="1" aria-label="Увеличить">+</button>
+                        </div>
+                      </label>
+                      <label class="compact-control" data-control-key="a4">
+                        <span class="compact-control-head">Аренда <i class="param-icon" aria-hidden="true">₽</i></span>
+                        <div class="control-number-wrap">
+                          <button class="control-step-button" type="button" data-step-control="a4" data-step-direction="-1" aria-label="Уменьшить">-</button>
+                          <input class="control-number" data-input-type="number" data-key="a4" type="number" min="0" max="100000" step="50" inputmode="numeric" placeholder="0" />
+                          <button class="control-step-button" type="button" data-step-control="a4" data-step-direction="1" aria-label="Увеличить">+</button>
+                        </div>
+                      </label>
+                    </div>
+
+                    <div class="dimension-helper" id="dimension-helper">
+                      <strong id="dimension-helper-title">По этому размеру уже видно, сколько поместится</strong>
+                      <button class="dimension-helper-reset" id="reset-defaults-button" type="button">Сбросить к стандарту</button>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="guided-step" id="preset-panel" data-room-panel="need-room">
+                  <div class="guided-step-head">
+                    <div>
+                      <h3>Какой размер взять для примера?</h3>
+                    </div>
+                  </div>
+
+                  <div class="preset-grid" id="preset-grid"></div>
+
+                </section>
+
+                <section class="guided-step is-visible" id="electrical-step">
+                  <div class="guided-step-head">
+                    <div>
+                      <div class="tag">Шаг 3</div>
+                      <h3>Как подключаем?</h3>
+                    </div>
+                  </div>
+
+                  <div class="choice-clusters">
+                    <div class="choice-cluster">
+                      <strong class="choice-cluster-title">Питание</strong>
+                      <div class="option-grid option-grid-2 option-grid-compact" id="phase-mode-grid">
+                        <button class="option-button option-button-compact" type="button" data-choice-key="phaseMode" data-choice-value="one-phase">
+                          <strong>1 фаза</strong>
+                          <span>Для небольшого объекта и более простой схемы.</span>
+                        </button>
+                        <button class="option-button option-button-compact" type="button" data-choice-key="phaseMode" data-choice-value="three-phase">
+                          <strong>3 фазы</strong>
+                          <span>Для более ровной нагрузки и спокойного запаса.</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="choice-cluster">
+                      <strong class="choice-cluster-title">Как кладём кабель</strong>
+                      <div class="option-grid option-grid-3 option-grid-compact" id="cable-layout-grid">
+                        <button class="option-button option-button-compact" type="button" data-choice-key="cableLayoutMode" data-choice-value="short">
+                          <strong>Коротко</strong>
+                          <span>Грубый минимум по трассам.</span>
+                        </button>
+                        <button class="option-button option-button-compact" type="button" data-choice-key="cableLayoutMode" data-choice-value="tray">
+                          <strong>По лотку</strong>
+                          <span>Рабочий ориентир для объекта.</span>
+                        </button>
+                        <button class="option-button option-button-compact" type="button" data-choice-key="cableLayoutMode" data-choice-value="real">
+                          <strong>С запасом</strong>
+                          <span>Ближе к реальному монтажу.</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="guided-step is-visible" id="feature-step">
+                  <div class="guided-step-head">
+                    <div>
+                      <div class="tag">Шаг 4</div>
+                      <h3>Что добавить?</h3>
+                    </div>
+                  </div>
+
+                  <div class="feature-grid" id="feature-grid"></div>
+                </section>
+
+                <div class="micro-result card" id="micro-result-card">
+                  <div class="tag">Ориентир</div>
+                  <h3 id="micro-result-title">Уже видно, в какую рамку начинает собираться проект</h3>
+                  <p class="micro-result-value" id="micro-result-value">0 ₽</p>
+                  <p class="micro-result-text" id="micro-result-text">
+                    Это не финальная смета, а быстрый ориентир по размеру и выбранным опциям.
+                  </p>
+                  <div class="micro-result-pills" id="micro-result-pills"></div>
+                  <div class="micro-result-inline">
+                    <div class="micro-result-inline-item">
+                      <span>Что влияет</span>
+                      <strong id="calc-entry-status">Размер помещения и число растений</strong>
+                    </div>
+                    <div class="micro-result-inline-item">
+                      <span>Следующий шаг</span>
+                      <strong id="micro-next-step">Если размер уже ваш, можно переходить к разбору под объект</strong>
+                    </div>
+                    <div class="micro-result-inline-item">
+                      <span>Электроэнергия / мес</span>
+                      <strong id="micro-result-electricity">0 ₽</strong>
+                    </div>
+                    <div class="micro-result-inline-item">
+                      <span>Вода / мес</span>
+                      <strong id="micro-result-water">0 ₽</strong>
+                    </div>
+                    <div class="micro-result-inline-item">
+                      <span>Аренда / мес</span>
+                      <strong id="micro-result-rent">0 ₽</strong>
+                    </div>
+                    <div class="micro-result-inline-item">
+                      <span>Расходы всего / мес</span>
+                      <strong id="micro-result-operating">0 ₽</strong>
+                    </div>
+                  </div>
+                  <p class="micro-result-text" id="micro-result-power-profile">Считаем ориентир по вашему тарифу и профилю работы электрооборудования.</p>
+                </div>
+              </section>
+
+              <aside class="guided-summary card card-pad" id="guided-summary">
+                <div class="guided-summary-top">
                   <div>
-                    <div class="field-label">Есть ли помещение под проект</div>
-                    <div class="option-grid option-grid-2">
-                      <button class="option-button" type="button" data-choice-key="roomStatus" data-choice-value="have-room">
-                        <strong>Помещение уже есть</strong>
-                        <span>Можно оценивать рамку проекта ближе к реальности.</span>
-                      </button>
-                      <button class="option-button" type="button" data-choice-key="roomStatus" data-choice-value="searching-room">
-                        <strong>Помещение ещё ищу</strong>
-                        <span>Расчёт будет предварительным и без привязки к инженерке объекта.</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div class="option-grid option-grid-3">
-                    <button class="option-button" type="button" data-choice-key="objectState" data-choice-value="new">
-                      <strong>Новый объект</strong>
-                      <span>Считаем рамку с нуля.</span>
-                    </button>
-                    <button class="option-button" type="button" data-choice-key="objectState" data-choice-value="active">
-                      <strong>Действующий объект</strong>
-                      <span>Нужно учитывать уже установленную схему.</span>
-                    </button>
-                    <button class="option-button" type="button" data-choice-key="climateReady" data-choice-value="yes">
-                      <strong>Есть климатическая база</strong>
-                      <span>Часть инфраструктуры уже предусмотрена.</span>
-                    </button>
-                  </div>
-
-                  <div class="control-grid">
-                    <div class="control-card" data-control="a0">
-                      <div class="control-top">
-                        <div>
-                          <div class="control-label">Ширина помещения</div>
-                          <div class="control-note">Влияет на число базовых стеллажей.</div>
-                        </div>
-                        <div class="control-value" id="a0-value"></div>
-                      </div>
-                      <div class="control-inputs">
-                        <input class="control-range" data-input-type="range" data-key="a0" type="range" min="2" max="20" step="0.5" />
-                        <input class="control-number" data-input-type="number" data-key="a0" type="number" min="2" max="20" step="0.5" />
-                      </div>
-                    </div>
-
-                    <div class="control-card" data-control="a1">
-                      <div class="control-top">
-                        <div>
-                          <div class="control-label">Длина помещения</div>
-                          <div class="control-note">От неё зависит число дополнительных секций.</div>
-                        </div>
-                        <div class="control-value" id="a1-value"></div>
-                      </div>
-                      <div class="control-inputs">
-                        <input class="control-range" data-input-type="range" data-key="a1" type="range" min="2" max="50" step="0.5" />
-                        <input class="control-number" data-input-type="number" data-key="a1" type="number" min="2" max="50" step="0.5" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <label class="wizard-field">
-                    <span class="field-label">Высота помещения</span>
-                    <select class="select" data-field-key="roomHeight">
-                      <option value="under-3">До 3 м</option>
-                      <option value="3-4">3–4 м</option>
-                      <option value="over-4">Выше 4 м</option>
-                    </select>
-                  </label>
-                </div>
-              </div>
-
-              <div class="wizard-panel" data-step-panel="2">
-                <div class="wizard-panel-top">
-                  <strong>Шаг 3. Формат выращивания</strong>
-                  <p>Этот блок нужен, чтобы отличить проект под рабочую клубничную ферму от слишком общей “фермы вообще”.</p>
-                </div>
-
-                <div class="wizard-stack">
-                  <div>
-                    <div class="field-label">Какой формат выращивания вы рассматриваете</div>
-                    <div class="option-grid option-grid-3">
-                      <button class="option-button" type="button" data-choice-key="growingFormat" data-choice-value="multi-tier">
-                        <strong>Многоярусная ферма</strong>
-                        <span>Основной сценарий для этого калькулятора.</span>
-                      </button>
-                      <button class="option-button" type="button" data-choice-key="growingFormat" data-choice-value="greenhouse">
-                        <strong>Теплица</strong>
-                        <span>Рамка будет полезна как ориентир по узлам.</span>
-                      </button>
-                      <button class="option-button" type="button" data-choice-key="growingFormat" data-choice-value="other">
-                        <strong>Другой формат</strong>
-                        <span>Нужен только предварительный ориентир.</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div class="option-grid option-grid-2">
-                    <button class="option-button" type="button" data-choice-key="strawberryFocus" data-choice-value="main">
-                      <strong>Клубника — основной фокус</strong>
-                        <span>Считаем именно клубничный сценарий под рабочую ферму.</span>
-                    </button>
-                    <button class="option-button" type="button" data-choice-key="strawberryFocus" data-choice-value="secondary">
-                      <strong>Клубника — часть проекта</strong>
-                      <span>Результат нужен как одна из рамок внутри объекта.</span>
-                    </button>
-                  </div>
-
-                  <div class="option-grid option-grid-2">
-                    <button class="option-button" type="button" data-choice-key="schemeReady" data-choice-value="yes">
-                      <strong>Схема уже понятна</strong>
-                      <span>Расчёт нужен для проверки бюджета и состава.</span>
-                    </button>
-                    <button class="option-button" type="button" data-choice-key="schemeReady" data-choice-value="no">
-                      <strong>Схему ещё определяю</strong>
-                      <span>Калькулятор поможет понять рамку, но не заменит проектный разбор.</span>
-                    </button>
+                    <div class="tag">Расчёт</div>
+                    <h3 class="calc-card-title">Что получилось по вашим вводным</h3>
                   </div>
                 </div>
-              </div>
 
-              <div class="wizard-panel" data-step-panel="3">
-                <div class="wizard-panel-top">
-                  <strong>Шаг 4. Масштаб и базовые цифры</strong>
-                  <p>Именно здесь появляется полезная рамка по смете, расходам и выручке.</p>
+                <div class="summary-progress summary-progress-compact">
+                  <strong id="summary-progress-count">Считаем по примеру</strong>
+                  <span id="summary-progress-text">Пока считаем на типовом размере.</span>
                 </div>
 
-                <div class="wizard-stack">
-                  <div>
-                    <div class="field-label">Какой масштаб ближе к вашей задаче</div>
-                    <div class="option-grid option-grid-4">
-                      <button class="option-button" type="button" data-choice-key="scaleType" data-choice-value="pilot">
-                        <strong>Пилотный модуль</strong>
-                        <span>Нужен аккуратный вход в технологию.</span>
-                      </button>
-                      <button class="option-button" type="button" data-choice-key="scaleType" data-choice-value="small">
-                        <strong>Малый запуск</strong>
-                        <span>Планируете первую коммерческую схему.</span>
-                      </button>
-                      <button class="option-button" type="button" data-choice-key="scaleType" data-choice-value="current">
-                        <strong>Действующий объект</strong>
-                        <span>Считаете новую очередь или дооснащение.</span>
-                      </button>
-                      <button class="option-button" type="button" data-choice-key="scaleType" data-choice-value="expand">
-                        <strong>Расширение</strong>
-                        <span>Важно понять состав следующего этапа.</span>
-                      </button>
-                    </div>
+                <div class="summary-main">
+                  <div class="summary-main-label">Ориентир по сборке</div>
+                  <div class="summary-main-value" id="total-equipment-cost">0 ₽</div>
+                  <p class="summary-main-note" id="summary-meaning-note">
+                    Это ориентир по рабочей конфигурации.
+                  </p>
+                </div>
+
+                <div class="summary-grid" id="summary-grid"></div>
+
+                <div class="summary-breakdown" id="summary-breakdown"></div>
+
+                <div class="summary-inline-blocks">
+                  <div class="qualifier-box">
+                    <strong>Что влияет</strong>
+                    <div class="brief-chip-list" id="brief-chip-list"></div>
                   </div>
 
-                  <div class="control-grid">
-                    <div class="control-card" data-control="a2">
-                      <div class="control-top">
-                        <div>
-                          <div class="control-label">Средняя цена реализации клубники</div>
-                          <div class="control-note">Используется в сценариях выручки.</div>
-                        </div>
-                        <div class="control-value" id="a2-value"></div>
-                      </div>
-                      <div class="control-inputs">
-                        <input class="control-range" data-input-type="range" data-key="a2" type="range" min="600" max="2000" step="50" />
-                        <input class="control-number" data-input-type="number" data-key="a2" type="number" min="600" max="2000" step="50" />
-                      </div>
-                    </div>
-
-                    <div class="control-card" data-control="a3">
-                      <div class="control-top">
-                        <div>
-                          <div class="control-label">Аренда помещения</div>
-                          <div class="control-note">Если аренды нет, оставьте 0.</div>
-                        </div>
-                        <div class="control-value" id="a3-value"></div>
-                      </div>
-                      <div class="control-inputs">
-                        <input class="control-range" data-input-type="range" data-key="a3" type="range" min="0" max="1000" step="5" />
-                        <input class="control-number" data-input-type="number" data-key="a3" type="number" min="0" max="1000" step="5" />
-                      </div>
-                    </div>
-
-                    <div class="control-card" data-control="a4">
-                      <div class="control-top">
-                        <div>
-                          <div class="control-label">Стоимость электроэнергии</div>
-                          <div class="control-note">Нужна для операционных расходов и модели окупаемости.</div>
-                        </div>
-                        <div class="control-value" id="a4-value"></div>
-                      </div>
-                      <div class="control-inputs">
-                        <input class="control-range" data-input-type="range" data-key="a4" type="range" min="0" max="15" step="1" />
-                        <input class="control-number" data-input-type="number" data-key="a4" type="number" min="0" max="15" step="1" />
-                      </div>
-                    </div>
-
-                    <div class="control-card" data-control="a5">
-                      <div class="control-top">
-                        <div>
-                          <div class="control-label">Стоимость воды</div>
-                          <div class="control-note">Используется в рамке ежемесячных и годовых расходов.</div>
-                        </div>
-                        <div class="control-value" id="a5-value"></div>
-                      </div>
-                      <div class="control-inputs">
-                        <input class="control-range" data-input-type="range" data-key="a5" type="range" min="0" max="40" step="1" />
-                        <input class="control-number" data-input-type="number" data-key="a5" type="number" min="0" max="40" step="1" />
-                      </div>
-                    </div>
+                  <div class="summary-callout">
+                    <span class="summary-callout-label">Следующий шаг</span>
+                    <strong id="next-step-title">Если цифра подходит, следующий шаг — подставить реальный объект</strong>
+                    <p id="next-step-text">Когда появится помещение, этот расчёт можно быстро привязать к его реальным ограничениям.</p>
                   </div>
                 </div>
-              </div>
 
-              <div class="wizard-panel" data-step-panel="4">
-                <div class="wizard-panel-top">
-                  <strong>Шаг 5. Цель расчёта</strong>
-                  <p>Нужно понять, на что вы хотите получить результат: комплект, бюджет, сравнение или подготовку к запуску.</p>
+                <div class="summary-interpretation-line">
+                  <span>Что это значит</span>
+                  <strong id="summary-interpretation-title">Это рабочий ориентир для старта</strong>
+                  <p id="summary-interpretation-text">Даже без точного объекта уже видно порядок цифр, масштаб и следующий шаг.</p>
                 </div>
 
-                <div class="option-grid option-grid-3">
-                  <button class="option-button" type="button" data-choice-key="goal" data-choice-value="kit">
-                    <strong>Понять стартовую комплектацию</strong>
-                    <span>Нужна рамка оборудования и состава фермы.</span>
-                  </button>
-                  <button class="option-button" type="button" data-choice-key="goal" data-choice-value="budget">
-                    <strong>Понять бюджет</strong>
-                    <span>Хочу быстро увидеть порядок цифр по смете и эксплуатации.</span>
-                  </button>
-                  <button class="option-button" type="button" data-choice-key="goal" data-choice-value="compare">
-                    <strong>Сравнить сценарии</strong>
-                    <span>Нужно посмотреть, как меняется рамка проекта под разные вводные.</span>
-                  </button>
-                  <button class="option-button" type="button" data-choice-key="goal" data-choice-value="launch">
-                    <strong>Подготовиться к запуску</strong>
-                    <span>Нужен ориентир перед следующим проектным шагом.</span>
-                  </button>
-                  <button class="option-button" type="button" data-choice-key="goal" data-choice-value="bottleneck">
-                    <strong>Понять узкое место</strong>
-                    <span>Нужно быстро определить, хватит ли калькулятора или уже нужен разбор.</span>
-                  </button>
+                <div class="calc-summary-actions">
+                  <div class="summary-utility summary-utility-main">
+                    <a class="btn btn-primary" id="project-brief-link" href="../farm/#brief">Получить разбор под мой объект</a>
+                    <a class="btn btn-secondary" id="summary-secondary-link" href="#calc-details">Посмотреть детали</a>
+                  </div>
                 </div>
-              </div>
-
-              <div class="wizard-panel" data-step-panel="5">
-                <div class="wizard-panel-top">
-                  <strong>Шаг 6. Канал реализации и ожидания</strong>
-                  <p>Этот блок не меняет магически весь расчёт, но помогает понять, какой сценарий проекта у вас в голове.</p>
-                </div>
-
-                <div class="option-grid option-grid-3">
-                  <button class="option-button" type="button" data-choice-key="channel" data-choice-value="fresh">
-                    <strong>Свежая ягода</strong>
-                    <span>Нужна понятная рабочая схема под стабильный свежий продукт.</span>
-                  </button>
-                  <button class="option-button" type="button" data-choice-key="channel" data-choice-value="local">
-                    <strong>Локальные продажи</strong>
-                    <span>Важна рамка по масштабу и экономике без лишней сложности.</span>
-                  </button>
-                  <button class="option-button" type="button" data-choice-key="channel" data-choice-value="premium">
-                    <strong>Премиальная ягода</strong>
-                    <span>Точность по качеству решения важнее быстрой закупки.</span>
-                  </button>
-                  <button class="option-button" type="button" data-choice-key="channel" data-choice-value="test">
-                    <strong>Тест модели</strong>
-                    <span>Нужен пилот и аккуратная проверка гипотезы.</span>
-                  </button>
-                  <button class="option-button" type="button" data-choice-key="channel" data-choice-value="other">
-                    <strong>Другая задача</strong>
-                    <span>Нужен ориентир перед разговором по проекту.</span>
-                  </button>
-                </div>
-              </div>
-
-              <div class="wizard-panel" data-step-panel="6">
-                <div class="wizard-panel-top">
-                  <strong>Шаг 7. Контакты для продолжения работы</strong>
-                  <p>Эти поля пригодятся, если после расчёта вы захотите быстро перейти к проектному разбору без повторного ввода.</p>
-                </div>
-
-                <div class="wizard-contact-grid">
-                  <label class="wizard-field">
-                    <span class="field-label">Имя</span>
-                    <input class="input" data-field-key="name" type="text" placeholder="Как к вам обращаться" />
-                  </label>
-                  <label class="wizard-field">
-                    <span class="field-label">Telegram / WhatsApp / телефон</span>
-                    <input class="input" data-field-key="contact" type="text" placeholder="Контакт для связи" />
-                  </label>
-                  <label class="wizard-field">
-                    <span class="field-label">Email</span>
-                    <input class="input" data-field-key="email" type="email" placeholder="Если нужен для переписки" />
-                  </label>
-                  <label class="wizard-field">
-                    <span class="field-label">Город</span>
-                    <input class="input" data-field-key="city" type="text" placeholder="Если важно для логистики и работы по проекту" />
-                  </label>
-                </div>
-
-                <div class="wizard-note">
-                  Калькулятор сразу покажет рамку на странице. Если результата уже мало, одной кнопкой перейдёте в расчёт под объект.
-                </div>
-              </div>
-
-              <div class="wizard-actions">
-                <button class="btn btn-secondary" id="wizard-back" type="button">Назад</button>
-                <button class="btn btn-primary" id="wizard-next" type="button">Продолжить расчёт</button>
-              </div>
-            </section>
-
-            <aside class="calc-summary card card-pad">
-              <div class="tag">Предпросмотр</div>
-              <h3 class="calc-card-title">Что уже видно по текущим вводным</h3>
-
-              <div class="summary-main">
-                <div class="summary-main-label">Ориентир по смете</div>
-                <div class="summary-main-value" id="total-equipment-cost">0 ₽</div>
-                <p class="summary-main-note">Предварительный состав оборудования и посадочного материала в текущей конфигурации.</p>
-              </div>
-
-              <div class="summary-grid" id="summary-grid"></div>
-
-              <div class="qualifier-box">
-                <strong>Краткая рамка проекта</strong>
-                <div class="brief-chip-list" id="brief-chip-list"></div>
-              </div>
-
-              <div class="summary-callout">
-                <strong id="next-step-title">Сначала соберите базовые вводные</strong>
-                <p id="next-step-text">Чем точнее исходные данные, тем полезнее и честнее получится ориентир ниже.</p>
-                <div class="btn-row">
-                  <a class="btn btn-primary" id="project-brief-link" href="../farm/#brief">Открыть подробный расчёт</a>
-                  <button class="btn btn-secondary" id="copy-brief-button" type="button">Скопировать вводные</button>
-                </div>
-              </div>
-
-              <div class="summary-handoff">
-                <strong>Если хотите передать расчёт вручную</strong>
-                <p>Скопируйте вводные и отправьте их нам в Telegram. Так расчёт не потеряется, и можно быстрее перейти к следующему шагу.</p>
-                <div class="btn-row">
-                  <a class="btn btn-secondary" href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">Открыть Telegram</a>
-                </div>
-              </div>
-
-              <div class="summary-utility">
-                <button class="btn btn-ghost" id="copy-link-button" type="button">Скопировать ссылку</button>
-                <button class="btn btn-ghost" id="reset-button" type="button">Сбросить расчёт</button>
-              </div>
-            </aside>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section-tight" id="result-preview">
-      <div class="container">
-        <div class="section-frame">
-          <div class="section-head">
-            <span class="eyebrow">Ваш расчёт</span>
-            <h2 id="result-status-title">Что уже видно по вашим вводным</h2>
-            <p class="sublead" id="result-status-text">
-              Калькулятор сразу показывает предварительную рамку проекта. Завершите шаги, чтобы сохранить результат и спокойно вернуться к нему позже.
-            </p>
-          </div>
-
-          <div class="grid grid-2 result-preview-grid">
-            <article class="card result-card result-personal-card">
-              <div class="tag">Расчёт вашей фермы</div>
-              <h3 id="result-personal-title">Предварительная рамка фермы по вашим вводным</h3>
-              <p class="sublead" id="result-personal-text">
-                Здесь собирается персональная рамка по сценарию, масштабу, составу и бюджету. После контакта этот экран становится рабочей опорой, а не просто промежуточной страницей.
-              </p>
-              <div class="result-personal-metrics" id="result-personal-metrics"></div>
-            </article>
-
-            <article class="card result-card result-route-card">
-              <div class="tag">Что дальше</div>
-              <h3 id="result-route-title">Пока это предварительный ориентир</h3>
-              <p class="sublead" id="result-route-text">
-                Если объект выходит за рамки типовой конфигурации, калькулятор не заменяет разговор. Зато с этими вводными он будет намного предметнее.
-              </p>
-              <div class="btn-row">
-                <a class="btn btn-primary" id="result-project-link" href="../farm/#brief">Открыть подробный расчёт</a>
-                <a class="btn btn-secondary" id="result-secondary-link" href="../study/">Обсудить результат</a>
-              </div>
-              <div class="result-handoff-row">
-                <button class="btn btn-ghost" id="result-copy-brief-button" type="button">Скопировать вводные</button>
-                <a class="btn btn-ghost" href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">Открыть Telegram</a>
-              </div>
-            </article>
-
-            <article class="card result-card result-assumption-card">
-              <div class="tag">Что входит в расчёт</div>
-              <h3>Что уже собрано по вашей ферме</h3>
-              <ul id="result-includes-list">
-                <li>Рамка по узлам, чтобы не собирать ферму вслепую.</li>
-                <li>Ориентир по бюджету до объектного расчёта.</li>
-                <li>Сценарная модель, чтобы сравнить порядок цифр.</li>
-                <li>Понимание, что лучше делать дальше именно по вашей ферме.</li>
-              </ul>
-            </article>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section-tight" id="result-related" hidden>
-      <div class="container">
-        <div class="section-frame">
-          <div class="section-head">
-            <span class="eyebrow">Что ещё может пригодиться</span>
-            <h2>Вам также могут подойти</h2>
-            <p class="sublead">
-              После расчёта могут пригодиться ещё несколько разделов. Здесь только то, что действительно может помочь дальше.
-            </p>
-          </div>
-
-          <div class="grid grid-3" id="result-related-grid"></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section-tight" id="estimate">
-      <div class="container">
-        <div class="grid grid-2 calc-section-grid">
-          <article class="card card-pad">
-            <div class="tag">Смета</div>
-            <h3 class="calc-card-title">Как выглядит структура бюджета сейчас</h3>
-            <p class="sublead">
-              До разговора показываем не позиционную смету, а рамку по узлам. Так понятнее, из чего складывается проект, и меньше риск зацепиться за сырую детализацию до привязки к объекту.
-            </p>
-
-            <div class="equipment-overview">
-              <div class="equipment-overview-card">
-                <span>Оборудование без посадочного материала</span>
-                <strong id="equipment-without-seedlings">0 ₽</strong>
-              </div>
-              <div class="equipment-overview-card">
-                <span>Посадочный материал</span>
-                <strong id="seedlings-total-cost">0 ₽</strong>
-              </div>
-            </div>
-
-            <div class="budget-structure-grid" id="budget-structure-grid"></div>
-
-            <div class="model-note">
-              Детализация по конкретным позициям, количеству и замене узлов раскрывается уже после передачи вводных на расчёт или короткого созвона по объекту.
-            </div>
-          </article>
-
-          <article class="card card-pad">
-            <div class="tag">Операционные расходы</div>
-            <div class="calc-section-top">
-              <h3 class="calc-card-title">Ежемесячная и годовая рамка расходов</h3>
-              <div class="toggle-row" id="expense-mode-toggle" role="tablist" aria-label="Режим расходов">
-                <button class="toggle-button is-active" data-expense-mode="month" type="button">В месяц</button>
-                <button class="toggle-button" data-expense-mode="year" type="button">В год</button>
-              </div>
-            </div>
-            <p class="sublead">
-              Этот блок нужен, чтобы быстро понять нагрузку по эксплуатации до более точного проектного расчёта.
-            </p>
-
-            <div class="expense-list" id="expense-list"></div>
-
-            <div class="expense-total">
-              <span>Итого</span>
-              <strong id="expense-total-value">0 ₽</strong>
-            </div>
-
-            <div class="model-note">
-              Инвестиционная часть вынесена отдельно, чтобы не смешивать смету закупки и текущую экономику фермы.
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="revenue">
-      <div class="container">
-        <div class="section-frame">
-          <div class="calc-section-top">
-            <div>
-              <span class="eyebrow">Сценарная рамка</span>
-              <h2>Сценарии по урожайности и денежному потоку модели</h2>
-            </div>
-            <div class="toggle-row" id="yield-scenario-toggle" role="tablist" aria-label="Сценарий урожайности"></div>
-          </div>
-
-          <div class="grid grid-2 calc-section-grid">
-            <article class="card card-pad">
-              <div class="scenario-grid" id="scenario-grid"></div>
-              <div class="model-note">
-                Это не обещание выручки и не финплан под любой объект. Блок нужен, чтобы сравнить сценарии и понять порядок цифр до проектного расчёта.
-              </div>
-              <div class="table-wrap mt-24">
-                <table class="calc-table compact-table">
-                  <thead>
-                    <tr>
-                      <th>Период</th>
-                      <th>Накопленный денежный поток</th>
-                    </tr>
-                  </thead>
-                  <tbody id="payback-table-body"></tbody>
-                </table>
-              </div>
-            </article>
-
-            <article class="card card-pad">
-              <div class="tag">Модель</div>
-              <h3 class="calc-card-title">Как читать эту сценарную рамку</h3>
-              <p class="sublead">
-                Это предварительная модель для клубничной фермы. Она помогает сравнивать сценарии, но не заменяет объектный расчёт, разбор канала сбыта и проверку ограничений по помещению.
-              </p>
-
-              <div class="metric-wall calc-model-wall">
-                <div class="metric">
-                  <strong id="model-investment-cost">0 ₽</strong>
-                  <span>инвестиционная база в текущей модели</span>
-                </div>
-                <div class="metric">
-                  <strong id="annual-model-opex">0 ₽</strong>
-                  <span>годовые расходы внутри сценария</span>
-                </div>
-                <div class="metric">
-                  <strong id="annual-harvest">0 кг</strong>
-                  <span>годовой объём ягоды по активному сценарию</span>
-                </div>
-                <div class="metric">
-                  <strong id="annual-revenue">0 ₽</strong>
-                  <span>годовой денежный поток по активному сценарию</span>
-                </div>
-              </div>
-            </article>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section-tight" id="human-step">
-      <div class="container">
-        <div class="action-panel">
-          <div class="split-hero">
-            <div>
-              <span class="eyebrow">Когда нужен не калькулятор, а подбор</span>
-              <h2>Если объект сложный или ферма уже работает, одного калькулятора может быть мало</h2>
-              <p class="sublead">
-                На нестандартном объекте или при проблеме по узлу важнее не сама цифра, а разговор по вашей ситуации.
-              </p>
-              <div class="btn-row">
-                <a class="btn btn-primary" href="../study/">Обсудить нестандартный проект</a>
-                <a class="btn btn-secondary" href="../consultations/#request">Нужна консультация по задаче</a>
-              </div>
-            </div>
-
-            <div class="card form-card">
-              <div class="tag">Когда это особенно важно</div>
-              <ul>
-                <li>Есть действующая ферма и нужно не просто считать, а разбирать проблему.</li>
-                <li>Объект уже ограничен по высоте, мощности, проходам или климату.</li>
-                <li>Нужно считать поэтапный запуск, а не абстрактную ферму “с нуля”.</li>
-              </ul>
+              </aside>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="section-tight" id="trust">
+    <section class="section-tight calc-secondary-layer" id="calc-details">
       <div class="container">
-        <div class="grid grid-3">
-          <article class="card result-card">
-            <div class="tag">Для чего это нужно</div>
-            <h3>Калькулятор убирает слепой старт</h3>
-            <p class="sublead">Сначала становится видно, из чего складывается проект. Уже потом решается, что нужно считать глубже.</p>
-          </article>
-          <article class="card result-card">
-            <div class="tag">Что важно понимать</div>
-            <h3>Это предварительная рамка, а не финальная смета</h3>
-            <p class="sublead">Часть решений зависит от помещения, высоты, сервиса, этапности закупки и фактической инженерной схемы.</p>
-          </article>
-          <article class="card result-card">
-            <div class="tag">Что получает клиент</div>
-            <h3>Не красивую форму, а понятную опору</h3>
-            <p class="sublead">После расчёта уже понятно, нужен ли подробный разбор, подбор узла или можно спокойно идти в типовые позиции магазина.</p>
-          </article>
-        </div>
-      </div>
-    </section>
+        <details class="calc-details-disclosure">
+          <summary>
+            <span class="calc-details-summary-copy">
+              <span class="calc-details-summary-title">Посмотреть детали ориентировочной сборки</span>
+              <span class="calc-details-summary-note">Состав, структура бюджета и электрическая схема по текущим вводным.</span>
+            </span>
+            <span class="calc-details-summary-badge">Детали</span>
+          </summary>
+          <div class="calc-details-body">
+            <div class="grid grid-2 calc-section-grid">
+              <article class="card card-pad">
+                <div class="tag">Состав</div>
+                <h3 class="calc-card-title">Что вошло в цифру</h3>
+                <div class="equipment-overview">
+                  <div class="equipment-overview-card">
+                    <span>Без рассады</span>
+                    <strong id="equipment-without-seedlings">0 ₽</strong>
+                  </div>
+                  <div class="equipment-overview-card">
+                    <span>Рассада</span>
+                    <strong id="seedlings-total-cost">0 ₽</strong>
+                  </div>
+                </div>
+                <div class="assembly-includes">
+                  <div class="tag">База</div>
+                  <div class="assembly-includes-list" id="assembly-includes-list"></div>
+                </div>
+                <div class="budget-structure-grid" id="budget-structure-grid"></div>
+              </article>
 
-    <section class="section" id="faq">
-      <div class="container">
-        <div class="section-frame">
-          <div class="section-head">
-            <span class="eyebrow">FAQ</span>
-            <h2>Что важно понять до расчёта</h2>
-          </div>
+              <article class="card card-pad">
+                <div class="tag">Как читать ориентир</div>
+                <h3 class="calc-card-title">Что стоит помнить до финальной сметы</h3>
+                <div class="detail-notes" id="detail-notes"></div>
+              </article>
+            </div>
 
-          <div class="faq-grid">
-            <article class="card faq-box">
-              <strong>Что я получу после расчёта?</strong>
-              <p>Предварительный состав фермы, ориентир по смете, расходы, выручку и понимание, что делать дальше.</p>
-            </article>
-            <article class="card faq-box">
-              <strong>Нужен ли точный метраж помещения?</strong>
-              <p>Чем точнее площадь, тем полезнее расчёт. Но даже при приблизительных вводных уже можно увидеть рабочую рамку.</p>
-            </article>
-            <article class="card faq-box">
-              <strong>Можно ли считать без готового помещения?</strong>
-              <p>Да. Просто такой расчёт остаётся предварительным и не заменяет привязку к реальному объекту.</p>
-            </article>
-            <article class="card faq-box">
-              <strong>Это финальный расчёт или только ориентир?</strong>
-              <p>Это ориентир. Финальный состав, этапность и смета зависят от объекта, ограничений и конкретной схемы запуска.</p>
-            </article>
-            <article class="card faq-box">
-              <strong>Что делать, если у меня уже есть ферма?</strong>
-              <p>Если считаете новую очередь или рамку следующего этапа, калькулятор полезен. Если вопрос уже в технологии и просадке, лучше идти в сопровождение.</p>
-            </article>
-            <article class="card faq-box">
-              <strong>Когда мне нужен человек, а не калькулятор?</strong>
-              <p>Когда объект нестандартный, уже ограничен по инфраструктуре или проблема упирается в действующую технологию, а не в грубую рамку бюджета.</p>
+            <article class="card card-pad electrical-detail-card">
+              <div class="tag">Электрика</div>
+              <h3 class="calc-card-title">Нагрузка, линии и схема подключения</h3>
+              <div class="budget-structure-grid" id="electrical-summary-grid"></div>
+              <div class="budget-structure-grid" id="electrical-kit-grid"></div>
+              <div class="detail-note" id="electrical-scheme"></div>
+              <div class="detail-notes" id="electrical-lines"></div>
             </article>
           </div>
-        </div>
+        </details>
       </div>
     </section>
 
@@ -1023,45 +563,29 @@
     </section>
   </main>
 
-  <footer>
+    <footer class="footer-main">
     <div class="container">
-      <div class="footer-main">
-        <div class="footer-grid">
-          <div class="footer-card">
-            <strong>КлубникаПро</strong>
-            <p>Расчёт, комплектация, запуск и сопровождение решений для клубничных ферм.</p>
+      <div class="footer-shell">
+        <div class="footer-meta">
+          <div class="footer-copy">© Klubnika Project</div>
+          <div class="footer-service-links">
+            <a href="https://klubnikaproject.ru/docs/policy">Политика</a>
+            <a href="https://klubnikaproject.ru/docs/offero">Оферта</a>
+            <a href="https://klubnikaproject.ru/docs/warrenty">Гарантия</a>
           </div>
-          <div class="footer-card">
-            <strong>Маршруты</strong>
-            <div class="footer-links">
-              <a href="../">Главная</a>
-              <a href="../farm/">Расчёт</a>
-              <a href="../consultations/">Консультации</a>
-              <a href="../shop/">Магазин</a>
-              <a href="../study/">Сопровождение</a>
-            </div>
-          </div>
-          <div class="footer-card">
-            <strong>Куда идти дальше</strong>
-            <p>Если расчёта уже мало, передайте вводные на проектный разбор и смету под объект.</p>
-          </div>
-          <div class="footer-card">
-            <strong>Контакты</strong>
-            <div class="footer-links">
-              <a href="tel:+79255831669">+7 925 583-16-69</a>
-              <a href="mailto:info@klubnikaproject.ru">info@klubnikaproject.ru</a>
-              <a href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">Telegram — @patiev_admin</a>
-              <a href="https://wa.me/79891250150" target="_blank" rel="noopener noreferrer">WhatsApp</a>
-              <a href="https://www.instagram.com/ilya_patiev/" target="_blank" rel="noopener noreferrer">Instagram</a>
-              <a href="https://www.youtube.com/@Ilya_patiev" target="_blank" rel="noopener noreferrer">YouTube</a>
-            </div>
-          </div>
+        </div>
+        <div class="footer-contacts">
+          <a href="tel:+79255831669">+7 925 583-16-69</a>
+          <a href="mailto:info@klubnikaproject.ru">info@klubnikaproject.ru</a>
+          <a href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">Telegram</a>
+          <a href="https://wa.me/79891250150" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+          <a href="https://www.instagram.com/ilya_patiev/" target="_blank" rel="noopener noreferrer">Instagram</a>
+          <a href="https://www.youtube.com/@Ilya_patiev" target="_blank" rel="noopener noreferrer">YouTube</a>
         </div>
       </div>
     </div>
   </footer>
 
-  <script src="../site.js?v=20260403ab" defer></script>
-  <script src="./calc.js?v=20260401f" type="module"></script>
+  <script src="./calc.js?v=20260405q" type="module"></script>
 </body>
 </html>
