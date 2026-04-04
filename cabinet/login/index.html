@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png" />
+  <link rel="manifest" href="../../site.webmanifest" />
+  <title>Вход в кабинет — Klubnika Project</title>
+  <meta
+    name="description"
+    content="Universal login для клиентов, студентов и команды Klubnika Project."
+  />
+  <link rel="stylesheet" href="../../styles.css?v=20260404r" />
+  <link rel="stylesheet" href="../../account/account.css?v=20260402b" />
+  <link rel="stylesheet" href="../cabinet.css?v=20260404au" />
+  <!-- SEO:START -->
+  <meta name="robots" content="noindex, nofollow" />
+  <!-- SEO:END -->
+</head>
+<body data-cabinet-view="login">
+  <header class="hero">
+    <div class="container">
+      <div class="hero-shell">
+        <div class="topbar">
+          <a class="brand-home" href="../../">
+            <img class="brand-lockup brand-lockup-primary" src="../../documents/logo/header-lockup-v1-close-compact-dark.svg?v=20260403aa" alt="KLUBNIKA PROJECT" />
+            <img class="brand-lockup brand-lockup-compact" src="../../documents/logo/header-lockup-v1-close-compact-dark.svg?v=20260403aa" alt="KLUBNIKA PROJECT" />
+          </a>
+
+          <button class="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false">
+            <span></span>
+          </button>
+
+          <nav class="nav">
+            <a href="../../">Сайт</a>
+            <a href="../../catalog/">Каталог</a>
+            <a href="../../calc/">Калькулятор</a>
+            <a href="../">Кабинет</a>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section cabinet-login-section">
+      <div class="container">
+        <div class="section-frame cabinet-frame cabinet-frame--login">
+          <div class="account-shell cabinet-login-shell">
+            <article class="card card-pad account-panel cabinet-login-panel">
+              <div class="tag">Доступ</div>
+              <h1 class="calc-card-title">Войти в кабинет</h1>
+              <p class="sublead">Один вход для клиента, студента и команды. После авторизации откроется только ваш рабочий кабинет.</p>
+              <form class="account-form" id="cabinet-login-form">
+                <label class="account-label">
+                  <span>Логин или email</span>
+                  <input class="account-input" id="cabinet-login-identity" type="text" autocomplete="username" placeholder="Например, ваш email" />
+                </label>
+                <label class="account-label">
+                  <span>Пароль</span>
+                  <input class="account-input" id="cabinet-login-password" type="password" autocomplete="current-password" placeholder="Введите пароль" />
+                </label>
+                <div class="account-actions">
+                  <button class="btn btn-primary" type="submit">Открыть кабинет</button>
+                  <a class="btn btn-secondary" href="../../">Вернуться на сайт</a>
+                </div>
+              </form>
+              <div class="account-status" id="cabinet-login-status"></div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer-main">
+    <div class="container">
+      <div class="footer-shell">
+        <div class="footer-meta">
+          <div class="footer-copy">© Klubnika Project</div>
+          <div class="footer-service-links">
+            <a href="https://klubnikaproject.ru/docs/policy">Политика</a>
+            <a href="https://klubnikaproject.ru/docs/offero">Оферта</a>
+            <a href="https://klubnikaproject.ru/docs/warrenty">Гарантия</a>
+          </div>
+        </div>
+        <div class="footer-contacts">
+          <a href="tel:+79255831669">+7 925 583-16-69</a>
+          <a href="mailto:info@klubnikaproject.ru">info@klubnikaproject.ru</a>
+          <a href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">Telegram</a>
+          <a href="https://wa.me/79891250150" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+          <a href="https://www.instagram.com/ilya_patiev/" target="_blank" rel="noopener noreferrer">Instagram</a>
+          <a href="https://www.youtube.com/@Ilya_patiev" target="_blank" rel="noopener noreferrer">YouTube</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../../site.js?v=20260404e" defer></script>
+  <script src="../cabinet.js?v=20260405ba" type="module"></script>
+</body>
+</html>
