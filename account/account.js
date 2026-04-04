@@ -5,8 +5,8 @@ const DEFAULT_SETTINGS = {
   },
   members: {
     enabled: true,
-    loginPath: "/account/login/",
-    hubPath: "/account/",
+    loginPath: "/cabinet/login/",
+    hubPath: "/cabinet/",
     catalogPath: "/account/catalog/",
     specialPath: "/account/special/",
   },
@@ -111,7 +111,16 @@ async function refreshSettings() {
 }
 
 function apiBase() {
-  return (settings.integrations?.apiBase || DEFAULT_SETTINGS.integrations.apiBase).replace(/\/+$/, "");
+  return detectRuntimeApiBase((settings.integrations?.apiBase || DEFAULT_SETTINGS.integrations.apiBase));
+}
+
+function detectRuntimeApiBase(configuredBase) {
+  const configured = String(configuredBase || "").trim().replace(/\/+$/, "");
+  const host = window.location.hostname;
+  if (host === "127.0.0.1" || host === "localhost") {
+    return "http://127.0.0.1:8010/v1";
+  }
+  return configured;
 }
 
 function memberPath(key) {
@@ -248,7 +257,7 @@ function renderHub(user) {
         <div class="account-actions">
           ${hasCatalog
             ? `<a class="btn btn-primary" href="${memberPath("catalogPath")}">Открыть каталог</a>`
-            : `<span class="account-note-chip">Нет scope \`catalog\`</span>`
+            : `<span class="account-note-chip">Нет доступа к каталогу</span>`
           }
         </div>
       </article>
@@ -259,7 +268,7 @@ function renderHub(user) {
         <div class="account-actions">
           ${hasSpecial
             ? `<a class="btn btn-secondary" href="${memberPath("specialPath")}">Открыть спецстраницы</a>`
-            : `<span class="account-note-chip">Нет scope \`special_pages\`</span>`
+            : `<span class="account-note-chip">Нет доступа к материалам</span>`
           }
         </div>
       </article>
@@ -271,7 +280,7 @@ function renderHub(user) {
     </article>
     ${!hasCatalog && !hasSpecial ? `
       <div class="account-empty">
-        Для этого аккаунта пока не выдан доступ к \`catalog\` или \`special_pages\`. Настройте scopes в админке.
+        Для этого аккаунта пока не выдан доступ к каталогу или закрытым материалам. Проверьте права в админке.
       </div>
     ` : ""}
   `;
@@ -336,13 +345,13 @@ async function renderSpecialPages() {
 function renderCatalogCard(item) {
   return `
     <article class="card card-pad account-card">
-      <div class="tag">${escapeHtml(item.kind || item.category || "catalog")}</div>
+      <div class="tag">${escapeHtml(humanizeMemberItemKind(item.kind || item.category || "catalog"))}</div>
       <h3 class="calc-card-title">${escapeHtml(item.title)}</h3>
       <p class="sublead">${escapeHtml(item.summary || "Без описания")}</p>
       <div class="account-item-meta">
         <span>${escapeHtml(item.category || "без категории")}</span>
-        <span>${escapeHtml(item.cta_mode || "choose")}</span>
-        <span>${escapeHtml(item.status || "published")}</span>
+        <span>${escapeHtml(humanizeMemberCtaMode(item.cta_mode || "choose"))}</span>
+        <span>${escapeHtml(humanizeMemberItemStatus(item.status || "published"))}</span>
       </div>
       <div class="account-actions">
         <a class="btn btn-primary" href="${escapeAttribute(item.path)}">Открыть страницу</a>
@@ -354,7 +363,7 @@ function renderCatalogCard(item) {
 function renderSpecialCard(item) {
   return `
     <article class="card card-pad account-card">
-      <div class="tag">${escapeHtml(item.kind || "route")}</div>
+      <div class="tag">${escapeHtml(humanizeMemberItemKind(item.kind || "route"))}</div>
       <h3 class="calc-card-title">${escapeHtml(item.title)}</h3>
       <p class="sublead">${escapeHtml(item.summary || "Без описания")}</p>
       <div class="account-actions">
@@ -433,7 +442,7 @@ function renderScopeDenied(scope) {
   if (!container) return;
   container.innerHTML = `
     <div class="account-empty">
-      Для этого раздела нужен scope <strong>${escapeHtml(scope)}</strong>. Вернитесь в кабинет или измените права пользователя в админке.
+      Для этого раздела нужен доступ <strong>${escapeHtml(humanizeMemberScope(scope))}</strong>. Вернитесь в кабинет или измените права пользователя в админке.
       <div class="account-actions">
         <a class="btn btn-secondary" href="${memberPath("hubPath")}">Вернуться в кабинет</a>
       </div>
@@ -443,6 +452,41 @@ function renderScopeDenied(scope) {
 
 function cleanupError(message) {
   return String(message || "").replace(/^Error:\s*/u, "");
+}
+
+function humanizeMemberItemKind(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (["catalog", "product"].includes(normalized)) return "Каталог";
+  if (["special", "special_page"].includes(normalized)) return "Материал";
+  if (["route", "page"].includes(normalized)) return "Раздел";
+  if (["document", "file"].includes(normalized)) return "Документ";
+  return value || "Раздел";
+}
+
+function humanizeMemberItemStatus(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (normalized === "published") return "Опубликовано";
+  if (normalized === "draft") return "Черновик";
+  if (normalized === "hidden") return "Скрыто";
+  if (normalized === "archived") return "Архив";
+  return value || "Статус не указан";
+}
+
+function humanizeMemberCtaMode(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (normalized === "buy") return "Готово к закупке";
+  if (normalized === "choose") return "Нужно уточнение";
+  if (normalized === "consult") return "Через консультацию";
+  return value || "Режим не указан";
+}
+
+function humanizeMemberScope(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (normalized === "catalog") return "Каталог";
+  if (normalized === "special_pages") return "Закрытые материалы";
+  if (normalized === "orders") return "Заказы";
+  if (normalized === "documents") return "Документы";
+  return value || "Нужный раздел";
 }
 
 function escapeHtml(value) {
