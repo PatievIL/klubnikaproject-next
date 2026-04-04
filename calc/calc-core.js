@@ -12,7 +12,7 @@ export const CONTROL_CONFIG = [
     key: "a1",
     label: "Длина помещения",
     unit: "м",
-    min: 4,
+    min: 2,
     max: 30,
     step: 0.5,
     note: "От длины зависит число секций по длине."
@@ -43,6 +43,15 @@ export const CONTROL_CONFIG = [
     max: 100000,
     step: 50,
     note: "Ставка аренды за квадратный метр в месяц."
+  },
+  {
+    key: "a5",
+    label: "Цена ягоды",
+    unit: "руб/кг",
+    min: 0,
+    max: 100000,
+    step: 50,
+    note: "Цена реализации ягоды для расчёта выручки."
   }
 ];
 
@@ -89,6 +98,7 @@ export function createDefaultState(loadedPricing) {
     a2: normalizeInputValue(loadedPricing.inputs.a2, CONTROL_CONFIG[2]),
     a3: normalizeInputValue(loadedPricing.inputs.a3, CONTROL_CONFIG[3]),
     a4: normalizeInputValue(loadedPricing.inputs.a4, CONTROL_CONFIG[4]),
+    a5: normalizeInputValue(loadedPricing.inputs.a5, CONTROL_CONFIG[5]),
     phaseMode: "three-phase",
     cableLayoutMode: "tray",
     ...optionDefaults
@@ -109,6 +119,7 @@ export function calculateFarm(currentState, loadedPricing) {
   const height = normalizeInputValue(currentState.a2, CONTROL_CONFIG[2]);
   const powerRate = normalizeInputValue(currentState.a3, CONTROL_CONFIG[3]);
   const rentRate = normalizeInputValue(currentState.a4, CONTROL_CONFIG[4]);
+  const berrySaleRate = normalizeInputValue(currentState.a5, CONTROL_CONFIG[5]);
   const area = width * length;
   const heightProfile = resolveHeightProfile(height, loadedPricing.constants);
   const geometry = loadedPricing.constants.rackGeometry;
@@ -149,24 +160,29 @@ export function calculateFarm(currentState, loadedPricing) {
     dripperCount
   });
   const berrySalePricePerKg = normalizeNonNegativeNumber(
-    loadedPricing.constants?.economyProfile?.berrySalePricePerKg,
-    1600
+    berrySaleRate,
+    normalizeNonNegativeNumber(loadedPricing.constants?.economyProfile?.berrySalePricePerKg, 1600)
   );
+  const avgBerryGramsPerPlantPerMonth = normalizeNonNegativeNumber(
+    loadedPricing.constants?.economyProfile?.avgBerryGramsPerPlantPerMonth,
+    80
+  );
+  const monthlyBerryKg = roundToStep((plantCount * avgBerryGramsPerPlantPerMonth) / 1000, 0.1, "nearest");
   const monthlyRentCost = Math.max(0, roundToStep(area * rentRate, 1, "nearest"));
   const monthlyOperatingCost = monthlyRentCost + electrical.monthlyPowerCost + water.monthlyWaterCost;
 
-  const lineItems = [
-    {
-      id: "assembly",
-      label: "Стеллажи в сборе",
-      qty: plantCount,
-      unit: "растений",
-      unitPrice: loadedPricing.constants.assemblyPerPlant,
-      total: plantCount * loadedPricing.constants.assemblyPerPlant,
-      included: true,
-      note: "Базовая сборка на растение"
-    }
-  ];
+  const baseAssemblyTotal = plantCount * loadedPricing.constants.assemblyPerPlant;
+  const lineItems = buildBaseAssemblyLineItems({
+    baseAssemblyTotal,
+    rackCount,
+    segmentsPerRack,
+    tiers: heightProfile.tiers,
+    trayCount,
+    lightsCount,
+    blindTubeMeters,
+    dripperCount,
+    matCount
+  });
 
   (loadedPricing.optionGroups || []).forEach((group) => {
     const included = Boolean(currentState[group.stateKey]);
@@ -188,9 +204,16 @@ export function calculateFarm(currentState, loadedPricing) {
 
   const totalEquipmentCost = lineItems.reduce((sum, item) => sum + item.total, 0);
   const selectedItems = lineItems.filter((item) => item.included);
-  const optionalItems = lineItems.filter((item) => !item.included && item.id !== "assembly");
+  const optionalItems = lineItems.filter((item) => !item.included);
   const seedlingsItem = lineItems.find((item) => item.id === "seedlings");
   const seedlingsTotalCost = seedlingsItem?.total || 0;
+  const economy = calculateLegacyEconomy({
+    loadedPricing,
+    plantCount,
+    berrySalePricePerKg,
+    monthlyOperatingCost,
+    totalEquipmentCost
+  });
   return {
     width,
     length,
@@ -224,13 +247,134 @@ export function calculateFarm(currentState, loadedPricing) {
     electrical,
     water,
     berrySalePricePerKg,
+    avgBerryGramsPerPlantPerMonth,
+    monthlyBerryKg,
     monthlyRentCost,
     monthlyOperatingCost,
+    economy,
     baseAssemblyIncludes: loadedPricing.baseAssemblyIncludes || [],
     lineItems,
     selectedItems,
     optionalItems
   };
+}
+
+function buildBaseAssemblyLineItems(metrics) {
+  const {
+    baseAssemblyTotal,
+    rackCount,
+    segmentsPerRack,
+    tiers,
+    trayCount,
+    lightsCount,
+    blindTubeMeters,
+    dripperCount,
+    matCount
+  } = metrics;
+  const safeTotal = Math.max(0, roundToStep(baseAssemblyTotal, 1, "nearest"));
+  const baseModuleCount = Math.max(1, rackCount);
+  const extensionModuleCount = Math.max(0, rackCount * (segmentsPerRack - 1));
+
+  const pricing = {
+    rackBaseModule: 11000,
+    rackExtension2m: 7100,
+    trayUnit: 1500,
+    lightUnit: 8900,
+    irrigationTubePerMeter: 25,
+    irrigationDripperUnit: 5,
+    irrigationFittingKitPerBaseModule: 600,
+    irrigationFilterBase: 900,
+    substratePerMat: 220
+  };
+
+  const racksTotal = roundToStep(
+    baseModuleCount * pricing.rackBaseModule
+      + extensionModuleCount * pricing.rackExtension2m,
+    1,
+    "nearest"
+  );
+  const traysTotal = roundToStep(trayCount * pricing.trayUnit, 1, "nearest");
+  const lightsTotal = roundToStep(lightsCount * pricing.lightUnit, 1, "nearest");
+  const irrigationTotal = roundToStep(
+    blindTubeMeters * pricing.irrigationTubePerMeter
+      + dripperCount * pricing.irrigationDripperUnit
+      + baseModuleCount * pricing.irrigationFittingKitPerBaseModule
+      + pricing.irrigationFilterBase,
+    1,
+    "nearest"
+  );
+  const substrateTotal = roundToStep(matCount * pricing.substratePerMat, 1, "nearest");
+  const subtotal = racksTotal + traysTotal + lightsTotal + irrigationTotal + substrateTotal;
+  const installationTotal = Math.max(0, safeTotal - subtotal);
+
+  return [
+    {
+      id: "base-racks",
+      label: "Стеллажи металлические (каркас и крепеж)",
+      qty: baseModuleCount,
+      unit: "баз. модулей",
+      unitPrice: pricing.rackBaseModule,
+      total: racksTotal,
+      included: true,
+      note: `База: ${formatSmart(baseModuleCount)} × ${formatSmart(pricing.rackBaseModule)} ₽, удлинение +2 м: ${formatSmart(extensionModuleCount)} × ${formatSmart(pricing.rackExtension2m)} ₽`,
+      includes: []
+    },
+    {
+      id: "base-trays",
+      label: "Лотки посадочные",
+      qty: trayCount,
+      unit: "шт",
+      unitPrice: pricing.trayUnit,
+      total: traysTotal,
+      included: true,
+      note: `${formatSmart(trayCount)} × ${formatSmart(pricing.trayUnit)} ₽`,
+      includes: []
+    },
+    {
+      id: "base-lighting",
+      label: "Освещение (LED и драйверы)",
+      qty: lightsCount,
+      unit: "светильников",
+      unitPrice: pricing.lightUnit,
+      total: lightsTotal,
+      included: true,
+      note: "Светильники, драйверы, подвес",
+      includes: []
+    },
+    {
+      id: "base-irrigation",
+      label: "Система полива (трубка, капельницы, фильтр, фитинги)",
+      qty: dripperCount,
+      unit: "точек полива",
+      unitPrice: dripperCount > 0 ? roundToStep(irrigationTotal / dripperCount, 1, "nearest") : 0,
+      total: irrigationTotal,
+      included: true,
+      note: `Фитинговые комплекты: ${formatSmart(baseModuleCount)} шт (по числу базовых модулей)`,
+      includes: []
+    },
+    {
+      id: "base-substrate",
+      label: "Субстрат и посадочные маты",
+      qty: matCount,
+      unit: "матов",
+      unitPrice: pricing.substratePerMat,
+      total: substrateTotal,
+      included: true,
+      note: "Субстратный контур посадки",
+      includes: []
+    },
+    {
+      id: "base-installation",
+      label: "Крепеж и монтажные расходники",
+      qty: Math.max(1, rackCount),
+      unit: "комплект",
+      unitPrice: Math.max(0, roundToStep(installationTotal / Math.max(1, rackCount), 1, "nearest")),
+      total: installationTotal,
+      included: true,
+      note: "Крепеж, соединители, мелкие расходники монтажа",
+      includes: []
+    }
+  ];
 }
 
 function calculateWaterModel(context) {
@@ -653,6 +797,77 @@ function calculateElectricalModel(context) {
     cableSpecSplit,
     cableSpecService,
     bomItems
+  };
+}
+
+function calculateLegacyEconomy(context) {
+  const {
+    loadedPricing,
+    plantCount,
+    berrySalePricePerKg,
+    monthlyOperatingCost,
+    totalEquipmentCost
+  } = context;
+  const economyProfile = loadedPricing.constants?.economyProfile || {};
+  const optimisticGramsPerPlantPerMonth = normalizeNonNegativeNumber(
+    economyProfile.optimisticGramsPerPlantPerMonth,
+    120
+  );
+  const realisticGramsPerPlantPerMonth = normalizeNonNegativeNumber(
+    economyProfile.realisticGramsPerPlantPerMonth,
+    85
+  );
+  const pessimisticGramsPerPlantPerMonth = normalizeNonNegativeNumber(
+    economyProfile.pessimisticGramsPerPlantPerMonth,
+    60
+  );
+
+  const buildScenario = (id, label, gramsPerPlantPerMonth) => {
+    const monthlyYieldKg = roundToStep((plantCount * gramsPerPlantPerMonth) / 1000, 0.1, "nearest");
+    const annualYieldKg = roundToStep(monthlyYieldKg * 12, 0.1, "nearest");
+    const revenueMonth = roundToStep(monthlyYieldKg * berrySalePricePerKg, 1, "nearest");
+    const revenueYear = roundToStep(revenueMonth * 12, 1, "nearest");
+    const netMonth = roundToStep(revenueMonth - monthlyOperatingCost, 1, "nearest");
+    const netYear = roundToStep(netMonth * 12, 1, "nearest");
+    const paybackMonths = netMonth > 0 ? Math.ceil(totalEquipmentCost / netMonth) : null;
+    const paybackYears = Number.isFinite(paybackMonths)
+      ? roundToStep(paybackMonths / 12, 0.1, "nearest")
+      : null;
+
+    return {
+      id,
+      label,
+      gramsPerPlantPerMonth,
+      annualYieldKg,
+      monthlyYieldKg,
+      revenueMonth,
+      revenueYear,
+      netMonth,
+      netYear,
+      paybackMonths,
+      paybackYears
+    };
+  };
+
+  const scenarios = [
+    buildScenario("optimistic", "Оптимистичный", optimisticGramsPerPlantPerMonth),
+    buildScenario("realistic", "Реалистичный", realisticGramsPerPlantPerMonth),
+    buildScenario("pessimistic", "Пессимистичный", pessimisticGramsPerPlantPerMonth)
+  ];
+  const realistic = scenarios.find((item) => item.id === "realistic") || scenarios[1];
+  const realisticYieldKgPerPlantPerYear = roundToStep((realisticGramsPerPlantPerMonth * 12) / 1000, 0.01, "nearest");
+
+  return {
+    scenarios,
+    realisticYieldKgPerPlantPerYear,
+    annualYieldKgReal: realistic.annualYieldKg,
+    monthlyYieldKgReal: realistic.monthlyYieldKg,
+    revenueMonthReal: realistic.revenueMonth,
+    revenueYearReal: realistic.revenueYear,
+    netMonthReal: realistic.netMonth,
+    netYearReal: realistic.netYear,
+    paybackMonthsReal: realistic.paybackMonths,
+    paybackYearsReal: realistic.paybackYears
   };
 }
 

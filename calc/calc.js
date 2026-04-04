@@ -5,32 +5,33 @@ import {
   formatRub,
   formatSmart,
   normalizeInputValue
-} from "./calc-core.js?v=20260405q";
+} from "./calc-core.js?v=20260405ab";
 
 const STORAGE_KEY = "klubnikaproject.calc.state.v4";
-const BUILD_ID = "calc-20260405q";
+const BUILD_ID = "calc-20260405ay";
+const AUTH_API_BASE_DEFAULT = "https://api.klubnikaproject.ru/site/v1";
 
 const GOAL_COPY = {
   entry: {
     title: "Уже видно, где начинается рабочий вход в проект",
-    meaning: "Это ориентир по порогу входа, а не попытка продать максимальную конфигурацию.",
-    next: "Если рамка вам подходит, следующий шаг — проверить ваш объект и убрать лишнее."
+    meaning: "Ориентир по порогу входа без лишних опций.",
+    next: "Если рамка подходит, следующий шаг — проверка объекта."
   },
   object: {
     title: "Уже видно, что этот размер может дать по сборке",
-    meaning: "Это помогает понять, стоит ли дальше работать именно с этим помещением.",
-    next: "Если помещение реально существует, уже есть смысл перейти к разбору под объект."
+    meaning: "Можно быстро понять, стоит ли работать с этим помещением.",
+    next: "Если помещение реальное, переходим к разбору объекта."
   },
   kit: {
     title: "Уже видно, из чего складывается базовая сборка",
-    meaning: "Это ориентир по составу, чтобы обсуждать уже не идею, а конфигурацию.",
-    next: "Если состав близок к вашей задаче, дальше имеет смысл уточнить ограничения объекта."
+    meaning: "Ориентир по составу для предметного обсуждения.",
+    next: "Если состав подходит, уточняем ограничения объекта."
   }
 };
 
 const UI_DEFAULTS = {
   goalType: "entry",
-  roomMode: "need-room",
+  roomMode: "have-room",
   presetSize: "4x8",
   phaseMode: "three-phase",
   cableLayoutMode: "tray"
@@ -39,6 +40,10 @@ const UI_DEFAULTS = {
 let pricing = null;
 let state = null;
 const acceptedFields = new Set();
+let totalDisplayValue = null;
+let totalDisplayAnimationFrame = null;
+let totalFlashTimeout = null;
+let summaryUnlocked = false;
 
 const elements = {
   goalChoiceGrid: document.getElementById("goal-choice-grid"),
@@ -47,6 +52,7 @@ const elements = {
   phaseModeGrid: document.getElementById("phase-mode-grid"),
   cableLayoutGrid: document.getElementById("cable-layout-grid"),
   roomPanels: Array.from(document.querySelectorAll("[data-room-panel]")),
+  electricalStep: document.getElementById("electrical-step"),
   featureGrid: document.getElementById("feature-grid"),
   microResultTitle: document.getElementById("micro-result-title"),
   microResultValue: document.getElementById("micro-result-value"),
@@ -65,6 +71,8 @@ const elements = {
   summaryMeaningNote: document.getElementById("summary-meaning-note"),
   summaryGrid: document.getElementById("summary-grid"),
   summaryBreakdown: document.getElementById("summary-breakdown"),
+  summaryRevealShell: document.getElementById("summary-reveal-shell"),
+  summaryLoginLink: document.getElementById("summary-login-link"),
   briefChipList: document.getElementById("brief-chip-list"),
   nextStepTitle: document.getElementById("next-step-title"),
   nextStepText: document.getElementById("next-step-text"),
@@ -74,6 +82,17 @@ const elements = {
   seedlingsTotalCost: document.getElementById("seedlings-total-cost"),
   assemblyIncludesList: document.getElementById("assembly-includes-list"),
   budgetStructureGrid: document.getElementById("budget-structure-grid"),
+  economyCapex: document.getElementById("economy-capex"),
+  economyOpexTotal: document.getElementById("economy-opex-total"),
+  economyOpexEnergy: document.getElementById("economy-opex-energy"),
+  economyOpexWater: document.getElementById("economy-opex-water"),
+  economyOpexRent: document.getElementById("economy-opex-rent"),
+  economyBerryKg: document.getElementById("economy-berry-kg"),
+  economyRevenueMonthReal: document.getElementById("economy-revenue-month-real"),
+  economyRevenueYearReal: document.getElementById("economy-revenue-year-real"),
+  economyNetMonthReal: document.getElementById("economy-net-month-real"),
+  economyPaybackReal: document.getElementById("economy-payback-real"),
+  economyScenariosGrid: document.getElementById("economy-scenarios-grid"),
   detailNotes: document.getElementById("detail-notes"),
   electricalSummaryGrid: document.getElementById("electrical-summary-grid"),
   electricalKitGrid: document.getElementById("electrical-kit-grid"),
@@ -82,6 +101,7 @@ const elements = {
   dimensionHelperTitle: document.getElementById("dimension-helper-title"),
   dimensionHelperText: document.getElementById("dimension-helper-text"),
   resetDefaultsButton: document.getElementById("reset-defaults-button"),
+  roomQuickPresets: Array.from(document.querySelectorAll("[data-quick-preset]")),
   debugBuildId: document.getElementById("debug-build-id"),
   debugAppPhase: document.getElementById("debug-app-phase"),
   debugTotal: document.getElementById("debug-total"),
@@ -115,9 +135,12 @@ async function init() {
   pricing = await loadPricing();
   setDebugAppPhase("build-state");
   state = buildInitialState();
+  setDebugAppPhase("auth-check");
+  summaryUnlocked = await checkCabinetSession();
   setDebugAppPhase("render-presets");
   renderPresetCards();
   renderFeatureToggles();
+  syncSummaryLoginLink();
   setDebugAppPhase("bind-events");
   bindEvents();
   setDebugAppPhase("first-render");
@@ -150,6 +173,7 @@ function buildInitialState() {
     base.presetSize = UI_DEFAULTS.presetSize;
   }
 
+  base.roomMode = "have-room";
   syncPresetIntoState(base);
   return base;
 }
@@ -174,6 +198,7 @@ function renderPresetCards() {
 
   elements.presetGrid.innerHTML = pricing.presets.map((preset) => `
     <button class="scenario-card preset-card" type="button" data-choice-key="presetSize" data-choice-value="${preset.id}">
+      ${preset.discountPercent ? `<i class="preset-discount-badge">−${preset.discountPercent}%</i>` : ""}
       <strong>${preset.label}</strong>
       <span>${preset.note}</span>
     </button>
@@ -218,6 +243,10 @@ function bindEvents() {
   if (elements.resetDefaultsButton) {
     elements.resetDefaultsButton.addEventListener("click", handleResetDefaultsClick);
   }
+
+  elements.roomQuickPresets.forEach((button) => {
+    button.addEventListener("click", handleQuickPresetClick);
+  });
 }
 
 function handleChoiceClick(event) {
@@ -312,12 +341,30 @@ function handleResetDefaultsClick() {
   render();
 }
 
+function handleQuickPresetClick(event) {
+  const button = event.currentTarget;
+  const presetId = button.dataset.quickPreset;
+  if (!presetId) {
+    return;
+  }
+
+  state.presetSize = presetId;
+  applyPresetSize(state, presetId);
+  acceptedFields.add("a0");
+  acceptedFields.add("a1");
+  render();
+}
+
 function syncPresetIntoState(targetState) {
   if (targetState.roomMode !== "need-room") {
     return;
   }
 
-  const preset = pricing.presets.find((entry) => entry.id === targetState.presetSize) || pricing.presets[0];
+  applyPresetSize(targetState, targetState.presetSize);
+}
+
+function applyPresetSize(targetState, presetId) {
+  const preset = pricing.presets.find((entry) => entry.id === presetId) || pricing.presets[0];
   targetState.a0 = normalizeInputValue(preset.width, CONTROL_CONFIG[0]);
   targetState.a1 = normalizeInputValue(preset.length, CONTROL_CONFIG[1]);
 }
@@ -328,14 +375,63 @@ function render() {
   const calc = calculateFarm(state, pricing);
   renderChoiceStates();
   renderPanels();
+  renderConditionalSteps();
   renderInputs();
   renderAcceptedFields();
   renderFeatureToggleNotes(calc);
   renderDimensionHelper(calc);
   renderMicroResult(calc);
   renderSummary(calc);
+  renderSummaryReveal();
   renderDetails(calc);
   renderDebug(calc);
+}
+
+function renderSummaryReveal() {
+  if (!elements.summaryRevealShell) {
+    return;
+  }
+  elements.summaryRevealShell.classList.toggle("is-locked", !summaryUnlocked);
+  document.body.classList.toggle("calc-auth-locked", !summaryUnlocked);
+}
+
+function syncSummaryLoginLink() {
+  if (!elements.summaryLoginLink) {
+    return;
+  }
+  const next = encodeURIComponent(window.location.pathname || "/calc/");
+  elements.summaryLoginLink.href = `../cabinet/login/?next=${next}`;
+}
+
+function detectRuntimeApiBase(configuredBase) {
+  const configured = String(configuredBase || "").trim().replace(/\/+$/, "");
+  const host = window.location.hostname;
+  if (host === "127.0.0.1" || host === "localhost") {
+    return "http://127.0.0.1:8010/v1";
+  }
+  return configured;
+}
+
+async function checkCabinetSession() {
+  const apiBase = detectRuntimeApiBase(AUTH_API_BASE_DEFAULT);
+  const hasAdminSession = await hasSession(`${apiBase}/admin/auth/session`);
+  if (hasAdminSession) {
+    return true;
+  }
+  return hasSession(`${apiBase}/auth/session`);
+}
+
+async function hasSession(url) {
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      credentials: "include"
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
 }
 
 function renderChoiceStates() {
@@ -346,6 +442,14 @@ function renderChoiceStates() {
 
   document.querySelectorAll("[data-toggle-key]").forEach((input) => {
     input.checked = Boolean(state[input.dataset.toggleKey]);
+    const toggleCard = input.closest(".feature-toggle");
+    if (toggleCard) {
+      toggleCard.classList.toggle("is-active", input.checked);
+    }
+  });
+
+  elements.roomQuickPresets.forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.quickPreset === state.presetSize);
   });
 
 }
@@ -354,6 +458,16 @@ function renderPanels() {
   elements.roomPanels.forEach((panel) => {
     panel.classList.toggle("is-visible", panel.dataset.roomPanel === state.roomMode);
   });
+}
+
+function renderConditionalSteps() {
+  if (!elements.electricalStep) {
+    return;
+  }
+
+  const hasElectricalAddon = Boolean(state.includeElectrical);
+  elements.electricalStep.classList.toggle("is-visible", hasElectricalAddon);
+  elements.electricalStep.setAttribute("aria-hidden", hasElectricalAddon ? "false" : "true");
 }
 
 function renderInputs() {
@@ -386,8 +500,12 @@ function renderDimensionHelper(calc) {
 }
 
 function renderMicroResult(calc) {
+  if (!elements.microResultTitle || !elements.microResultValue || !elements.microResultPills) {
+    return;
+  }
+
   const copy = GOAL_COPY[state.goalType] || GOAL_COPY.entry;
-  const selectedOptions = calc.selectedItems.filter((item) => item.id !== "assembly").length;
+  const selectedOptions = calc.selectedItems.filter((item) => !isBaseAssemblyItem(item.id)).length;
   const driverText = state.roomMode === "have-room"
     ? "Размер, этажность и выбранные блоки"
     : "Типовой размер, этажность и выбранные блоки";
@@ -396,125 +514,268 @@ function renderMicroResult(calc) {
     : "Если рамка подходит, дальше можно привязать её к реальному помещению";
 
   elements.microResultTitle.textContent = copy.title;
-  elements.microResultValue.textContent = formatRub(calc.totalEquipmentCost);
+  elements.microResultValue.textContent = "Ключевые цифры собраны справа";
   if (elements.microResultText) {
     elements.microResultText.textContent = copy.meaning;
   }
   elements.calcEntryStatus.textContent = driverText;
   elements.microNextStep.textContent = nextText;
   if (elements.microResultElectricity) {
-    elements.microResultElectricity.textContent = `${formatRub(calc.electrical.monthlyPowerCost)} / ${formatSmart(calc.electrical.monthlyKwh)} кВт⋅ч`;
+    elements.microResultElectricity.textContent = "Учтено в ежемесячных расходах";
   }
   if (elements.microResultWater) {
-    elements.microResultWater.textContent = `${formatSmart(calc.water.monthlyM3)} м³ · ${formatRub(calc.water.monthlyWaterCost)}`;
+    elements.microResultWater.textContent = "Учтено в ежемесячных расходах";
   }
   if (elements.microResultRent) {
-    elements.microResultRent.textContent = formatRub(calc.monthlyRentCost);
+    elements.microResultRent.textContent = "Учтено в ежемесячных расходах";
   }
   if (elements.microResultOperating) {
-    elements.microResultOperating.textContent = formatRub(calc.monthlyOperatingCost);
+    elements.microResultOperating.textContent = "Смотрите свод справа";
   }
   if (elements.microResultPowerProfile) {
-    elements.microResultPowerProfile.textContent = `Считаем по тарифу ${formatRub(calc.powerRate)} за кВт⋅ч и добавляем ориентир расхода воды по капельному поливу.`;
+    elements.microResultPowerProfile.textContent = "Детализация затрат и условий вынесена в правый сводный блок.";
   }
   elements.microResultPills.innerHTML = [
-    `${formatSmart(calc.width)} × ${formatSmart(calc.length)} м`,
-    `${formatSmart(calc.rackCount)} стеллажей`,
-    `${formatSmart(calc.rackLength)} м длина`,
-    `${calc.heightProfile.tiers} этажа`,
-    `${formatSmart(calc.plantCount)} растений`,
-    selectedOptions ? `${selectedOptions} доп. блока` : "Только базовая сборка"
+    "Геометрия помещения",
+    "Этажность и размещение",
+    "Техническая схема",
+    "Комплектация проекта",
+    selectedOptions ? "Выбраны доп. блоки" : "Базовая сборка"
   ].map((item) => `<span class="chip">${item}</span>`).join("");
 }
 
 function renderSummary(calc) {
-  const copy = GOAL_COPY[state.goalType] || GOAL_COPY.entry;
   const sizeLabel = `${formatSmart(calc.width)} × ${formatSmart(calc.length)} м`;
 
-  elements.summaryProgressCount.textContent = state.roomMode === "have-room" ? "Считаем по вашему помещению" : "Считаем по примеру";
+  if (elements.summaryProgressCount) {
+    elements.summaryProgressCount.textContent = state.roomMode === "have-room" ? "Считаем по вашему помещению" : "Считаем по примеру";
+  }
   if (elements.summaryProgressText) {
     elements.summaryProgressText.textContent = state.roomMode === "have-room"
       ? "Размеры уже учтены в расчёте."
-      : "Пока считаем на типовом размере.";
+      : "Считаем на типовом размере.";
   }
-  elements.totalEquipmentCost.textContent = formatRub(calc.totalEquipmentCost);
-  elements.summaryMeaningNote.textContent = `Это ориентир по рабочей конфигурации: ${formatSmart(calc.plantCount)} растений, ${formatSmart(calc.trayCount)} лотков и ${formatSmart(calc.totalRackLength)} м рабочей длины.`;
+  setAnimatedTotalEquipmentCost(calc.totalEquipmentCost);
+  elements.summaryMeaningNote.textContent = "";
 
   elements.summaryGrid.innerHTML = [
     { label: "Размер", value: sizeLabel },
-    { label: "Стеллажей", value: `${formatSmart(calc.rackCount)} шт` },
-    { label: "Длина стеллажа", value: `${formatSmart(calc.rackLength)} м` },
-    { label: "Этажей", value: formatSmart(calc.heightProfile.tiers) },
+    { label: "Конфигурация", value: `${formatSmart(calc.rackCount)} ${pluralize(calc.rackCount, "стеллаж", "стеллажа", "стеллажей")} · ${formatSmart(calc.heightProfile.tiers)} ${pluralize(calc.heightProfile.tiers, "этаж", "этажа", "этажей")}` },
     { label: "Растений", value: formatSmart(calc.plantCount) },
-    { label: "Питание", value: calc.electrical.phaseLabel },
-    { label: "Электроэнергия", value: `${formatSmart(calc.electrical.monthlyKwh)} кВт⋅ч` },
-    { label: "Энергия/мес", value: formatRub(calc.electrical.monthlyPowerCost) },
-    { label: "Вода/мес", value: `${formatSmart(calc.water.monthlyM3)} м³` },
-    { label: "Вода стоимость/мес", value: formatRub(calc.water.monthlyWaterCost) },
-    { label: "Аренда/мес", value: formatRub(calc.monthlyRentCost) },
-    { label: "Расходы всего/мес", value: formatRub(calc.monthlyOperatingCost) },
-    { label: "Нагрузка", value: `${formatSmart(calc.electrical.totalPowerKw)} кВт` },
-    { label: "Ток", value: `${formatSmart(calc.electrical.runningAmps)} А` }
+    { label: "Ежемесячные расходы", value: formatRub(calc.monthlyOperatingCost) },
+    { label: "Питание и нагрузка", value: `${calc.electrical.phaseLabel} · ${formatSmart(calc.electrical.totalPowerKw)} кВт` },
+    { label: "Выход ягоды / мес", value: `${formatSmart(calc.monthlyBerryKg)} кг` }
   ].map(renderSummaryItem).join("");
 
-  elements.summaryBreakdown.innerHTML = calc.lineItems.map((item) => `
-    <div class="summary-breakdown-row ${item.included ? "is-included" : "is-muted"}">
+  const selectedLineItems = calc.lineItems.filter((item) => item.included);
+  elements.summaryBreakdown.innerHTML = selectedLineItems.map((item) => `
+    <div class="summary-breakdown-row is-included">
       <div>
         <strong>${item.label}</strong>
-        <span>${item.included ? formatLineMeta(item) : "Не включено в текущий ориентир"}</span>
       </div>
-      <b>${item.included ? formatRub(item.total) : "0 ₽"}</b>
+      <b>${formatRub(item.total)}</b>
     </div>
-  `).join("");
+  `).join("") + `
+    <div class="summary-breakdown-row is-total">
+      <div>
+        <strong>Итого</strong>
+      </div>
+      <b>${formatRub(calc.totalEquipmentCost)}</b>
+    </div>
+  `;
 
-  elements.briefChipList.innerHTML = buildDriverChips(calc).map((item) => `<span class="brief-chip">${item}</span>`).join("");
-  elements.nextStepTitle.textContent = state.roomMode === "have-room"
-    ? "Если цифра подходит, следующий шаг — проверить объект детально"
-    : "Если цифра подходит, следующий шаг — подставить реальный объект";
+  if (elements.briefChipList) {
+    elements.briefChipList.innerHTML = buildDriverChips(calc).map((item) => `<span class="brief-chip">${item}</span>`).join("");
+  }
+  if (elements.nextStepTitle) {
+    elements.nextStepTitle.textContent = state.roomMode === "have-room"
+      ? "Если цифра подходит, проверяем объект детально"
+      : "Если цифра подходит, подставляем реальный объект";
+  }
   if (elements.nextStepText) {
     elements.nextStepText.textContent = state.roomMode === "have-room"
-      ? "Проверить проходы, коммуникации, логистику и после этого собрать финальную конфигурацию."
-      : "Когда появится помещение, этот расчёт можно быстро привязать к его реальным ограничениям.";
+      ? "Проверяем проходы, коммуникации и собираем финальную конфигурацию."
+      : "Когда появится помещение, быстро привязываем расчёт к его ограничениям.";
   }
   elements.summaryInterpretationTitle.textContent = state.roomMode === "have-room"
-    ? "Это уже не абстрактная сумма"
-    : "Это рабочий ориентир для старта";
+    ? "Это уже не «пример в вакууме»"
+    : "Это понятный ориентир на старте";
   if (elements.summaryInterpretationText) {
     elements.summaryInterpretationText.textContent = state.roomMode === "have-room"
-      ? "Сумма собрана по вашим размерам и показывает, сколько реально помещается в этой конфигурации."
-      : "Даже без точного объекта уже видно порядок цифр, масштаб и следующий шаг.";
+      ? "Простыми словами: видно, что помещается, сколько это стоит и что делать дальше."
+      : "Даже без объекта уже понятны порядок цифр и следующий шаг.";
   }
 }
 
+function setAnimatedTotalEquipmentCost(nextTotal) {
+  if (!elements.totalEquipmentCost) {
+    return;
+  }
+
+  const target = Math.max(0, Number(nextTotal || 0));
+  triggerTotalFlash();
+  if (totalDisplayValue === null || !Number.isFinite(totalDisplayValue)) {
+    totalDisplayValue = target;
+    elements.totalEquipmentCost.textContent = formatRub(target);
+    return;
+  }
+
+  if (Math.round(totalDisplayValue) === Math.round(target)) {
+    totalDisplayValue = target;
+    elements.totalEquipmentCost.textContent = formatRub(target);
+    return;
+  }
+
+  if (totalDisplayAnimationFrame) {
+    window.cancelAnimationFrame(totalDisplayAnimationFrame);
+    totalDisplayAnimationFrame = null;
+  }
+
+  const startValue = totalDisplayValue;
+  const delta = target - startValue;
+  const duration = 420;
+  const startTime = performance.now();
+
+  const animate = (now) => {
+    const elapsed = now - startTime;
+    const progress = Math.min(1, elapsed / duration);
+    const eased = 1 - ((1 - progress) ** 3);
+    totalDisplayValue = startValue + delta * eased;
+    elements.totalEquipmentCost.textContent = formatRub(totalDisplayValue);
+
+    if (progress < 1) {
+      totalDisplayAnimationFrame = window.requestAnimationFrame(animate);
+      return;
+    }
+
+    totalDisplayValue = target;
+    elements.totalEquipmentCost.textContent = formatRub(target);
+    totalDisplayAnimationFrame = null;
+  };
+
+  totalDisplayAnimationFrame = window.requestAnimationFrame(animate);
+}
+
+function triggerTotalFlash() {
+  if (!elements.totalEquipmentCost) {
+    return;
+  }
+
+  elements.totalEquipmentCost.classList.remove("is-updating");
+  if (totalFlashTimeout) {
+    window.clearTimeout(totalFlashTimeout);
+    totalFlashTimeout = null;
+  }
+
+  void elements.totalEquipmentCost.offsetWidth;
+  elements.totalEquipmentCost.classList.add("is-updating");
+  totalFlashTimeout = window.setTimeout(() => {
+    elements.totalEquipmentCost.classList.remove("is-updating");
+    totalFlashTimeout = null;
+  }, 360);
+}
+
 function renderDetails(calc) {
-  elements.equipmentWithoutSeedlings.textContent = formatRub(calc.equipmentWithoutSeedlings);
-  elements.seedlingsTotalCost.textContent = formatRub(calc.seedlingsTotalCost);
+  const fallbackBerryKgPerMonth = Number.isFinite(calc.monthlyBerryKg)
+    ? calc.monthlyBerryKg
+    : roundToStep((Number(calc.plantCount || 0) * 80) / 1000, 0.1, "nearest");
+  const economy = calc.economy || {};
+  const berryKgPerMonth = Number.isFinite(economy.monthlyYieldKgReal)
+    ? economy.monthlyYieldKgReal
+    : fallbackBerryKgPerMonth;
+  const revenueMonthReal = Number.isFinite(economy.revenueMonthReal)
+    ? economy.revenueMonthReal
+    : roundToStep(berryKgPerMonth * (calc.berrySalePricePerKg || 1600), 1, "nearest");
+  const revenueYearReal = Number.isFinite(economy.revenueYearReal)
+    ? economy.revenueYearReal
+    : roundToStep(revenueMonthReal * 12, 1, "nearest");
+  const netMonthReal = Number.isFinite(economy.netMonthReal)
+    ? economy.netMonthReal
+    : roundToStep(revenueMonthReal - (calc.monthlyOperatingCost || 0), 1, "nearest");
+  const paybackText = Number.isFinite(economy.paybackMonthsReal)
+    ? `${formatSmart(economy.paybackMonthsReal)} мес`
+    : "Не рассчитывается";
+  if (elements.equipmentWithoutSeedlings) {
+    elements.equipmentWithoutSeedlings.textContent = formatRub(calc.equipmentWithoutSeedlings);
+  }
+  if (elements.seedlingsTotalCost) {
+    elements.seedlingsTotalCost.textContent = formatRub(calc.seedlingsTotalCost);
+  }
+  if (elements.economyCapex) {
+    elements.economyCapex.textContent = formatRub(calc.totalEquipmentCost);
+  }
+  if (elements.economyOpexTotal) {
+    elements.economyOpexTotal.textContent = formatRub(calc.monthlyOperatingCost);
+  }
+  if (elements.economyOpexEnergy) {
+    elements.economyOpexEnergy.textContent = formatRub(calc.electrical.monthlyPowerCost);
+  }
+  if (elements.economyOpexWater) {
+    elements.economyOpexWater.textContent = formatRub(calc.water.monthlyWaterCost);
+  }
+  if (elements.economyOpexRent) {
+    elements.economyOpexRent.textContent = formatRub(calc.monthlyRentCost);
+  }
+  if (elements.economyBerryKg) {
+    elements.economyBerryKg.textContent = `${formatSmart(berryKgPerMonth)} кг`;
+  }
+  if (elements.economyRevenueMonthReal) {
+    elements.economyRevenueMonthReal.textContent = formatRub(revenueMonthReal);
+  }
+  if (elements.economyRevenueYearReal) {
+    elements.economyRevenueYearReal.textContent = formatRub(revenueYearReal);
+  }
+  if (elements.economyNetMonthReal) {
+    elements.economyNetMonthReal.textContent = formatRub(netMonthReal);
+  }
+  if (elements.economyPaybackReal) {
+    elements.economyPaybackReal.textContent = paybackText;
+  }
+  if (elements.economyScenariosGrid) {
+    const scenarios = Array.isArray(economy.scenarios) ? economy.scenarios : [];
+    elements.economyScenariosGrid.innerHTML = scenarios.map((scenario) => {
+      const paybackScenarioText = Number.isFinite(scenario.paybackMonths)
+        ? `${formatSmart(scenario.paybackMonths)} мес`
+        : "Не рассчитывается";
+      return `
+        <li class="economy-scenario-row">
+          <strong>${scenario.label}</strong>
+          <span>Ягода ${formatSmart(scenario.monthlyYieldKg)} кг/мес · Выручка ${formatRub(scenario.revenueMonth)}/мес · Чистый поток ${formatRub(scenario.netMonth)}/мес · Окупаемость ${paybackScenarioText}</span>
+        </li>
+      `;
+    }).join("");
+  }
   if (elements.assemblyIncludesList) {
     elements.assemblyIncludesList.innerHTML = calc.baseAssemblyIncludes.map((item) => `
       <div class="brief-chip">${item}</div>
     `).join("");
   }
 
-  elements.budgetStructureGrid.innerHTML = calc.selectedItems.map((item) => `
-    <div class="summary-item">
-      <span>${item.label}</span>
-      <strong>${formatRub(item.total)}</strong>
-    </div>
-  `).join("");
+  if (elements.budgetStructureGrid) {
+    elements.budgetStructureGrid.innerHTML = calc.selectedItems.map((item) => `
+      <div class="summary-item">
+        <span>${item.label}</span>
+        <strong>${formatRub(item.total)}</strong>
+      </div>
+    `).join("");
+  }
 
-  elements.detailNotes.innerHTML = [
-    "Ориентир не учитывает индивидуальные строительные работы и нестандартную доработку объекта.",
-    "Если помещение уже есть, финальная цифра зависит от проходов, логистики и фактической полезной площади.",
-    "Если помещения ещё нет, этот расчёт нужен как рамка бюджета, чтобы не обсуждать проект вслепую.",
-    `Цена реализации ягоды для ориентиров принята: ${formatRub(calc.berrySalePricePerKg)} за кг.`,
-    `Вода: ориентир ${formatSmart(calc.water.monthlyM3)} м³/мес (${formatSmart(calc.water.dailyLiters)} л/день) из нормы до ${formatSmart(calc.water.perDripperMlPerDay)} мл/день на одну капельницу.`,
-    `Маты: нужно ${formatSmart(calc.matCount)} шт, на закупку ${formatSmart(calc.matPacks)} пач. по 12 = ${formatSmart(calc.matUnitsForPurchase)} шт. Запас после округления: ${formatSmart(calc.spareMats)} шт.`,
-    `Слепая трубка: нужно ${formatSmart(calc.blindTubeMeters)} м, на закупку ${formatSmart(calc.blindTubeCoils)} бух. по 200 м = ${formatSmart(calc.blindTubeMetersForPurchase)} м.`
-  ].concat(
-    calc.lineItems
-      .filter((item) => item.id !== "assembly" && item.includes?.length)
-      .map((item) => `${item.label}: ${item.includes.join(", ")}`)
-  ).map((item) => `<div class="detail-note">${item}</div>`).join("");
+  if (elements.detailNotes) {
+    elements.detailNotes.innerHTML = [
+      "Ориентир не учитывает индивидуальные строительные работы и нестандартную доработку объекта.",
+      "Если помещение уже есть, финальная цифра зависит от проходов, логистики и фактической полезной площади.",
+      "Если помещения ещё нет, этот расчёт нужен как рамка бюджета, чтобы не обсуждать проект вслепую.",
+      `Цена реализации ягоды для ориентиров принята: ${formatRub(calc.berrySalePricePerKg)} за кг.`,
+      `Оценка выхода ягоды (реалистичный сценарий): ${formatSmart(berryKgPerMonth)} кг/мес.`,
+      `Вода: ориентир ${formatSmart(calc.water.monthlyM3)} м³/мес (${formatSmart(calc.water.dailyLiters)} л/день) из нормы до ${formatSmart(calc.water.perDripperMlPerDay)} мл/день на одну капельницу.`,
+      `Маты: нужно ${formatSmart(calc.matCount)} шт, на закупку ${formatSmart(calc.matPacks)} пач. по 12 = ${formatSmart(calc.matUnitsForPurchase)} шт. Запас после округления: ${formatSmart(calc.spareMats)} шт.`,
+      `Слепая трубка: нужно ${formatSmart(calc.blindTubeMeters)} м, на закупку ${formatSmart(calc.blindTubeCoils)} бух. по 200 м = ${formatSmart(calc.blindTubeMetersForPurchase)} м.`
+    ].concat(
+      calc.lineItems
+        .filter((item) => !isBaseAssemblyItem(item.id) && item.includes?.length)
+        .map((item) => `${item.label}: ${item.includes.join(", ")}`)
+    ).map((item) => `<div class="detail-note">${item}</div>`).join("");
+  }
 
   if (elements.electricalSummaryGrid) {
     elements.electricalSummaryGrid.innerHTML = [
@@ -607,16 +868,16 @@ function renderSummaryItem(item) {
 
 function buildDriverChips(calc) {
   const chips = [
-    `${formatSmart(calc.width)} × ${formatSmart(calc.length)} м`,
-    `${formatSmart(calc.rackCount)} стеллажей`,
-    `${calc.heightProfile.tiers} этажа`,
-    `${formatSmart(calc.plantCount)} растений`,
-    calc.electrical.phaseLabel,
-    `${formatSmart(calc.electrical.runningAmps)} А`
+    "Геометрия помещения",
+    "Стеллажная схема",
+    "Этажность",
+    "Инженерный контур",
+    "Комплектация",
+    "Ограничения объекта"
   ];
 
   calc.selectedItems
-    .filter((item) => item.id !== "assembly")
+    .filter((item) => !isBaseAssemblyItem(item.id))
     .slice(0, 3)
     .forEach((item) => chips.push(item.label));
 
@@ -636,17 +897,36 @@ function formatLineMeta(item) {
 }
 
 function formatOptionPrice(group) {
+  if (group.id === "project-support-month") {
+    return "Ежемесячный блок сопровождения";
+  }
+
   if (group.type === "electricalAuto") {
-    return "Считаем от линий, щита и кабеля";
+    return "Расчёт по нагрузке и линиям";
   }
 
   if (group.type === "perAreaRounded") {
-    return `${formatRub(group.unitPrice)} за м²`;
+    return "Расчёт по площади";
   }
 
-  return group.type === "perPlant"
-    ? `Плюс ${formatRub(group.unitPrice)} на растение`
-    : `Плюс ${formatRub(group.unitPrice)}`;
+  if (group.type === "perPlant") {
+    return "Расчёт по количеству растений";
+  }
+
+  return "Параметр учитывается в расчёте";
+}
+
+function isBaseAssemblyItem(id) {
+  return String(id || "").startsWith("base-");
+}
+
+function pluralize(value, one, few, many) {
+  const n = Math.abs(Math.trunc(Number(value) || 0));
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return one;
+  if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return few;
+  return many;
 }
 
 function renderFeatureToggleNotes(calc) {
@@ -655,57 +935,6 @@ function renderFeatureToggleNotes(calc) {
     if (!group) {
       return;
     }
-
-    if (group.id === "fertilizers") {
-      const total = roundToThousands(calc.plantCount * group.unitPrice);
-      node.textContent = `Около ${formatRub(total)}`;
-      return;
-    }
-
-    if (group.id === "climate-pack") {
-      const total = roundToStep(calc.area * group.unitPrice, group.roundTo || 5000, group.roundMode);
-      node.textContent = `Около ${formatRub(total)}`;
-      return;
-    }
-
-    if (group.id === "project-support-month") {
-      const total = Math.max(
-        roundToStep(calc.area * group.unitPrice, group.roundTo || 5000, group.roundMode),
-        group.minTotal || 0
-      );
-      node.textContent = total <= (group.minTotal || 0)
-        ? `От ${formatRub(group.minTotal || 25000)} в месяц`
-        : `Около ${formatRub(total)} в месяц`;
-      return;
-    }
-
-    if (group.id === "electrical") {
-      const pricingModel = group.pricingModel || {};
-      const total = Math.max(
-        roundToStep(
-          (pricingModel.shieldBase || 0)
-          + (pricingModel.inputBreakerUnitPrice || 0)
-          + calc.electrical.totalLightLines * (pricingModel.lightLineBreakerUnitPrice || 0)
-          + calc.electrical.contactorCount * (pricingModel.contactorUnitPrice || 0)
-          + calc.electrical.smartRelayCount * (pricingModel.smartRelayUnitPrice || 0)
-          + (calc.electrical.exhaustPowerW ? (pricingModel.exhaustBreakerUnitPrice || 0) : 0)
-          + (calc.electrical.serviceSocketPoints ? (pricingModel.serviceBreakerUnitPrice || 0) : 0)
-          + (calc.electrical.splitInputW ? (pricingModel.splitBreakerUnitPrice || 0) : 0)
-          + calc.electrical.allLightLinesM * (pricingModel.lightCablePerMeter || 0)
-          + calc.electrical.exhaustLineM * (pricingModel.exhaustCablePerMeter || 0)
-          + calc.electrical.serviceLineM * (pricingModel.serviceCablePerMeter || 0)
-          + calc.electrical.splitLineM * (pricingModel.splitCablePerMeter || 0)
-          + calc.electrical.wagoCount * (pricingModel.wagoUnitPrice || 0)
-          + calc.electrical.junctionBoxCount * (pricingModel.junctionBoxUnitPrice || 0),
-          pricingModel.roundTo || 5000,
-          "up"
-        ),
-        pricingModel.minTotal || 0
-      );
-      node.textContent = `Около ${formatRub(total)}`;
-      return;
-    }
-
     node.textContent = formatOptionPrice(group);
   });
 }

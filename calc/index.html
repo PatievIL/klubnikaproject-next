@@ -12,7 +12,7 @@
     content="Калькулятор клубничной фермы помогает быстро понять состав проекта, рамку бюджета и что делать дальше без длинной анкеты и лишнего давления."
   />
   <link rel="stylesheet" href="../styles.css?v=20260404r" />
-  <link rel="stylesheet" href="./calc.css?v=20260405l" />
+  <link rel="stylesheet" href="./calc.css?v=20260405aa" />
   <!-- SEO:START -->
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <link rel="canonical" href="https://klubnikaproject.ru/calc/" />
@@ -229,95 +229,119 @@
                   <div class="scenario-grid goal-grid" id="goal-choice-grid">
                     <button class="scenario-card" type="button" data-choice-key="goalType" data-choice-value="entry">
                       <strong>Сколько это стоит</strong>
-                      <span>Нужен быстрый ориентир по бюджету.</span>
+                      <span>Быстрый ориентир по бюджету.</span>
                     </button>
                     <button class="scenario-card" type="button" data-choice-key="goalType" data-choice-value="object">
                       <strong>Подойдёт ли помещение</strong>
-                      <span>Хочу понять, можно ли в нём запускаться.</span>
+                      <span>Понять, можно ли запускаться.</span>
                     </button>
                     <button class="scenario-card" type="button" data-choice-key="goalType" data-choice-value="kit">
                       <strong>Что войдёт в комплект</strong>
-                      <span>Нужно увидеть состав базовой сборки.</span>
+                      <span>Состав базовой сборки.</span>
                     </button>
                   </div>
 
-                </div>
-
-                <div class="guided-block">
-                  <div class="guided-block-head">
-                    <div>
-                      <div class="tag">Шаг 2</div>
-                      <h3 class="calc-card-title">Помещение уже есть?</h3>
-                    </div>
-                  </div>
-
-                  <div class="option-grid option-grid-2" id="room-mode-grid">
-                    <button class="option-button" type="button" data-choice-key="roomMode" data-choice-value="have-room">
-                      <strong>Да, уже есть</strong>
-                      <span>Сейчас введём размеры и посмотрим, что влезает.</span>
-                    </button>
-                    <button class="option-button" type="button" data-choice-key="roomMode" data-choice-value="need-room">
-                      <strong>Нет, возьмём пример</strong>
-                      <span>Покажем ориентир на готовом размере.</span>
-                    </button>
-                  </div>
                 </div>
 
                 <section class="guided-step is-visible" id="room-size-panel" data-room-panel="have-room">
                   <div class="guided-step-head">
                     <div>
-                      <h3>Какой размер?</h3>
+                      <h3>Параметры расчёта</h3>
                     </div>
                   </div>
 
                   <div class="room-size-stack">
-                    <div class="room-dimensions-row room-dimensions-row-all">
-                      <label class="compact-control" data-control-key="a0">
-                        <span class="compact-control-head">Ширина <i class="param-icon" aria-hidden="true">↔</i></span>
-                        <div class="control-number-wrap">
-                          <button class="control-step-button" type="button" data-step-control="a0" data-step-direction="-1" aria-label="Уменьшить">-</button>
-                          <input class="control-number" data-input-type="number" data-key="a0" type="number" min="2" max="20" step="0.5" inputmode="decimal" placeholder="4" />
-                          <button class="control-step-button" type="button" data-step-control="a0" data-step-direction="1" aria-label="Увеличить">+</button>
-                        </div>
-                      </label>
-                      <label class="compact-control" data-control-key="a1">
-                        <span class="compact-control-head">Длина <i class="param-icon" aria-hidden="true">⟷</i></span>
-                        <div class="control-number-wrap">
-                          <button class="control-step-button" type="button" data-step-control="a1" data-step-direction="-1" aria-label="Уменьшить">-</button>
-                          <input class="control-number" data-input-type="number" data-key="a1" type="number" min="4" max="30" step="0.5" inputmode="decimal" placeholder="8" />
-                          <button class="control-step-button" type="button" data-step-control="a1" data-step-direction="1" aria-label="Увеличить">+</button>
-                        </div>
-                      </label>
-                      <label class="compact-control" data-control-key="a2">
-                        <span class="compact-control-head">Высота <i class="param-icon" aria-hidden="true">↕</i></span>
-                        <div class="control-number-wrap">
-                          <button class="control-step-button" type="button" data-step-control="a2" data-step-direction="-1" aria-label="Уменьшить">-</button>
-                          <input class="control-number" data-input-type="number" data-key="a2" type="number" min="2" max="6" step="0.1" inputmode="decimal" placeholder="3.0" />
-                          <button class="control-step-button" type="button" data-step-control="a2" data-step-direction="1" aria-label="Увеличить">+</button>
-                        </div>
-                      </label>
-                      <label class="compact-control" data-control-key="a3">
-                        <span class="compact-control-head">1 кВт <i class="param-icon" aria-hidden="true">⚡</i></span>
-                        <div class="control-number-wrap">
-                          <button class="control-step-button" type="button" data-step-control="a3" data-step-direction="-1" aria-label="Уменьшить">-</button>
-                          <input class="control-number" data-input-type="number" data-key="a3" type="number" min="0" max="100000" step="0.5" inputmode="numeric" placeholder="5" />
-                          <button class="control-step-button" type="button" data-step-control="a3" data-step-direction="1" aria-label="Увеличить">+</button>
-                        </div>
-                      </label>
-                      <label class="compact-control" data-control-key="a4">
-                        <span class="compact-control-head">Аренда <i class="param-icon" aria-hidden="true">₽</i></span>
-                        <div class="control-number-wrap">
-                          <button class="control-step-button" type="button" data-step-control="a4" data-step-direction="-1" aria-label="Уменьшить">-</button>
-                          <input class="control-number" data-input-type="number" data-key="a4" type="number" min="0" max="100000" step="50" inputmode="numeric" placeholder="0" />
-                          <button class="control-step-button" type="button" data-step-control="a4" data-step-direction="1" aria-label="Увеличить">+</button>
-                        </div>
-                      </label>
+                    <div class="room-size-layout">
+                      <div class="room-dimensions-row room-dimensions-row-all">
+                        <label class="compact-control" data-control-key="a0">
+                          <span class="compact-control-head">Ширина,<br>м</span>
+                          <div class="control-number-wrap">
+                            <button class="control-step-button" type="button" data-step-control="a0" data-step-direction="-1" aria-label="Уменьшить">-</button>
+                            <input class="control-number" data-input-type="number" data-key="a0" type="number" min="2" max="20" step="0.5" inputmode="decimal" placeholder="4" />
+                            <button class="control-step-button" type="button" data-step-control="a0" data-step-direction="1" aria-label="Увеличить">+</button>
+                          </div>
+                        </label>
+                        <label class="compact-control" data-control-key="a1">
+                          <span class="compact-control-head">Длина,<br>м</span>
+                          <div class="control-number-wrap">
+                            <button class="control-step-button" type="button" data-step-control="a1" data-step-direction="-1" aria-label="Уменьшить">-</button>
+                            <input class="control-number" data-input-type="number" data-key="a1" type="number" min="2" max="30" step="0.5" inputmode="decimal" placeholder="8" />
+                            <button class="control-step-button" type="button" data-step-control="a1" data-step-direction="1" aria-label="Увеличить">+</button>
+                          </div>
+                        </label>
+                        <label class="compact-control" data-control-key="a2">
+                          <span class="compact-control-head">Высота,<br>м</span>
+                          <div class="control-number-wrap">
+                            <button class="control-step-button" type="button" data-step-control="a2" data-step-direction="-1" aria-label="Уменьшить">-</button>
+                            <input class="control-number" data-input-type="number" data-key="a2" type="number" min="2" max="6" step="0.1" inputmode="decimal" placeholder="3.0" />
+                            <button class="control-step-button" type="button" data-step-control="a2" data-step-direction="1" aria-label="Увеличить">+</button>
+                          </div>
+                        </label>
+                        <label class="compact-control" data-control-key="a3">
+                          <span class="compact-control-head">Энергия,<br>₽/кВт·ч</span>
+                          <div class="control-number-wrap">
+                            <button class="control-step-button" type="button" data-step-control="a3" data-step-direction="-1" aria-label="Уменьшить">-</button>
+                            <input class="control-number" data-input-type="number" data-key="a3" type="number" min="0" max="100000" step="0.5" inputmode="numeric" placeholder="5" />
+                            <button class="control-step-button" type="button" data-step-control="a3" data-step-direction="1" aria-label="Увеличить">+</button>
+                          </div>
+                        </label>
+                        <label class="compact-control" data-control-key="a4">
+                          <span class="compact-control-head">Аренда,<br>₽/м²</span>
+                          <div class="control-number-wrap">
+                            <button class="control-step-button" type="button" data-step-control="a4" data-step-direction="-1" aria-label="Уменьшить">-</button>
+                            <input class="control-number" data-input-type="number" data-key="a4" type="number" min="0" max="100000" step="50" inputmode="numeric" placeholder="0" />
+                            <button class="control-step-button" type="button" data-step-control="a4" data-step-direction="1" aria-label="Увеличить">+</button>
+                          </div>
+                        </label>
+                        <label class="compact-control" data-control-key="a5">
+                          <span class="compact-control-head">Ягода,<br>₽/кг</span>
+                          <div class="control-number-wrap">
+                            <button class="control-step-button" type="button" data-step-control="a5" data-step-direction="-1" aria-label="Уменьшить">-</button>
+                            <input class="control-number" data-input-type="number" data-key="a5" type="number" min="0" max="100000" step="50" inputmode="numeric" placeholder="1600" />
+                            <button class="control-step-button" type="button" data-step-control="a5" data-step-direction="1" aria-label="Увеличить">+</button>
+                          </div>
+                        </label>
+                      </div>
+                      <aside class="room-quick-presets" id="room-quick-presets">
+                        <button class="quick-preset-button" type="button" data-quick-preset="2x2">
+                          <strong>2 × 2</strong>
+                          <span>Старт</span>
+                        </button>
+                        <button class="quick-preset-button" type="button" data-quick-preset="2x8">
+                          <strong>2 × 8</strong>
+                          <span>База</span>
+                        </button>
+                        <button class="quick-preset-button" type="button" data-quick-preset="3x8">
+                          <strong>3 × 8</strong>
+                          <span>Усиленный</span>
+                        </button>
+                        <button class="quick-preset-button" type="button" data-quick-preset="4x8">
+                          <strong>4 × 8</strong>
+                          <span>Рабочий</span>
+                        </button>
+                        <button class="quick-preset-button" type="button" data-quick-preset="5x10">
+                          <strong>5 × 10</strong>
+                          <span>Расширенный</span>
+                        </button>
+                        <button class="quick-preset-button" type="button" data-quick-preset="6x10">
+                          <i class="quick-preset-discount">−2%</i>
+                          <strong>6 × 10</strong>
+                          <span>Верхний</span>
+                        </button>
+                        <button class="quick-preset-button" type="button" data-quick-preset="7x12">
+                          <i class="quick-preset-discount">−3%</i>
+                          <strong>7 × 12</strong>
+                          <span>Большая</span>
+                        </button>
+                        <button class="quick-preset-button" type="button" data-quick-preset="8x14">
+                          <i class="quick-preset-discount">−5%</i>
+                          <strong>8 × 14</strong>
+                          <span>XL ферма</span>
+                        </button>
+                      </aside>
                     </div>
-
-                    <div class="dimension-helper" id="dimension-helper">
-                      <strong id="dimension-helper-title">По этому размеру уже видно, сколько поместится</strong>
-                      <button class="dimension-helper-reset" id="reset-defaults-button" type="button">Сбросить к стандарту</button>
-                    </div>
+                    <p class="room-size-hint">Быстрый выбор формата: пресеты справа подставляют размеры в один клик.</p>
+                    <button class="reset-inline-link" id="reset-defaults-button" type="button">сбросить</button>
                   </div>
                 </section>
 
@@ -332,10 +356,21 @@
 
                 </section>
 
-                <section class="guided-step is-visible" id="electrical-step">
+                <section class="guided-step is-visible" id="feature-step">
                   <div class="guided-step-head">
                     <div>
                       <div class="tag">Шаг 3</div>
+                      <h3>Что добавить?</h3>
+                    </div>
+                  </div>
+
+                  <div class="feature-grid" id="feature-grid"></div>
+                </section>
+
+                <section class="guided-step is-visible" id="electrical-step">
+                  <div class="guided-step-head">
+                    <div>
+                      <div class="tag">Шаг 4</div>
                       <h3>Как подключаем?</h3>
                     </div>
                   </div>
@@ -346,11 +381,11 @@
                       <div class="option-grid option-grid-2 option-grid-compact" id="phase-mode-grid">
                         <button class="option-button option-button-compact" type="button" data-choice-key="phaseMode" data-choice-value="one-phase">
                           <strong>1 фаза</strong>
-                          <span>Для небольшого объекта и более простой схемы.</span>
+                          <span>Простая схема для малого объекта.</span>
                         </button>
                         <button class="option-button option-button-compact" type="button" data-choice-key="phaseMode" data-choice-value="three-phase">
                           <strong>3 фазы</strong>
-                          <span>Для более ровной нагрузки и спокойного запаса.</span>
+                          <span>Ровная нагрузка и запас по вводу.</span>
                         </button>
                       </div>
                     </div>
@@ -360,11 +395,11 @@
                       <div class="option-grid option-grid-3 option-grid-compact" id="cable-layout-grid">
                         <button class="option-button option-button-compact" type="button" data-choice-key="cableLayoutMode" data-choice-value="short">
                           <strong>Коротко</strong>
-                          <span>Грубый минимум по трассам.</span>
+                          <span>Минимум по трассам.</span>
                         </button>
                         <button class="option-button option-button-compact" type="button" data-choice-key="cableLayoutMode" data-choice-value="tray">
                           <strong>По лотку</strong>
-                          <span>Рабочий ориентир для объекта.</span>
+                          <span>Рабочий ориентир.</span>
                         </button>
                         <button class="option-button option-button-compact" type="button" data-choice-key="cableLayoutMode" data-choice-value="real">
                           <strong>С запасом</strong>
@@ -375,53 +410,6 @@
                   </div>
                 </section>
 
-                <section class="guided-step is-visible" id="feature-step">
-                  <div class="guided-step-head">
-                    <div>
-                      <div class="tag">Шаг 4</div>
-                      <h3>Что добавить?</h3>
-                    </div>
-                  </div>
-
-                  <div class="feature-grid" id="feature-grid"></div>
-                </section>
-
-                <div class="micro-result card" id="micro-result-card">
-                  <div class="tag">Ориентир</div>
-                  <h3 id="micro-result-title">Уже видно, в какую рамку начинает собираться проект</h3>
-                  <p class="micro-result-value" id="micro-result-value">0 ₽</p>
-                  <p class="micro-result-text" id="micro-result-text">
-                    Это не финальная смета, а быстрый ориентир по размеру и выбранным опциям.
-                  </p>
-                  <div class="micro-result-pills" id="micro-result-pills"></div>
-                  <div class="micro-result-inline">
-                    <div class="micro-result-inline-item">
-                      <span>Что влияет</span>
-                      <strong id="calc-entry-status">Размер помещения и число растений</strong>
-                    </div>
-                    <div class="micro-result-inline-item">
-                      <span>Следующий шаг</span>
-                      <strong id="micro-next-step">Если размер уже ваш, можно переходить к разбору под объект</strong>
-                    </div>
-                    <div class="micro-result-inline-item">
-                      <span>Электроэнергия / мес</span>
-                      <strong id="micro-result-electricity">0 ₽</strong>
-                    </div>
-                    <div class="micro-result-inline-item">
-                      <span>Вода / мес</span>
-                      <strong id="micro-result-water">0 ₽</strong>
-                    </div>
-                    <div class="micro-result-inline-item">
-                      <span>Аренда / мес</span>
-                      <strong id="micro-result-rent">0 ₽</strong>
-                    </div>
-                    <div class="micro-result-inline-item">
-                      <span>Расходы всего / мес</span>
-                      <strong id="micro-result-operating">0 ₽</strong>
-                    </div>
-                  </div>
-                  <p class="micro-result-text" id="micro-result-power-profile">Считаем ориентир по вашему тарифу и профилю работы электрооборудования.</p>
-                </div>
               </section>
 
               <aside class="guided-summary card card-pad" id="guided-summary">
@@ -432,46 +420,48 @@
                   </div>
                 </div>
 
-                <div class="summary-progress summary-progress-compact">
-                  <strong id="summary-progress-count">Считаем по примеру</strong>
-                  <span id="summary-progress-text">Пока считаем на типовом размере.</span>
-                </div>
-
                 <div class="summary-main">
                   <div class="summary-main-label">Ориентир по сборке</div>
                   <div class="summary-main-value" id="total-equipment-cost">0 ₽</div>
                   <p class="summary-main-note" id="summary-meaning-note">
-                    Это ориентир по рабочей конфигурации.
+                    Ориентир по рабочей конфигурации.
                   </p>
                 </div>
 
-                <div class="summary-grid" id="summary-grid"></div>
+                <div class="summary-reveal-shell" id="summary-reveal-shell">
+                  <div class="summary-reveal-zone" id="summary-reveal-zone">
+                    <div class="summary-grid" id="summary-grid"></div>
 
-                <div class="summary-breakdown" id="summary-breakdown"></div>
+                    <div class="summary-breakdown" id="summary-breakdown"></div>
 
-                <div class="summary-inline-blocks">
-                  <div class="qualifier-box">
-                    <strong>Что влияет</strong>
-                    <div class="brief-chip-list" id="brief-chip-list"></div>
+                    <div class="summary-footer-dock">
+                      <div class="summary-interpretation-line">
+                        <span>Что это значит</span>
+                        <strong id="summary-interpretation-title">Это уже не «пример в вакууме»</strong>
+                        <p id="summary-interpretation-text">Простыми словами: видно, что помещается, сколько это стоит и что делать дальше.</p>
+                      </div>
+                      <div class="summary-model-limits">
+                        <span>Ограничения модели</span>
+                        <ul class="model-limits-list model-limits-list-compact">
+                          <li>Локальные строительные и монтажные работы на объекте.</li>
+                          <li>Точная логистика проходов, дверей и сервисных зон.</li>
+                          <li>Индивидуальные режимы климата и полива по фазам роста.</li>
+                          <li>Коммерческие риски по сбыту и фактической урожайности.</li>
+                        </ul>
+                      </div>
+
+                      <div class="calc-summary-actions">
+                        <div class="summary-utility summary-utility-main">
+                          <a class="btn btn-primary" id="project-brief-link" href="../farm/#brief">Получить разбор под мой объект</a>
+                          <a class="btn btn-secondary" id="summary-secondary-link" href="#calc-details">Разобрать расчет</a>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  <div class="summary-callout">
-                    <span class="summary-callout-label">Следующий шаг</span>
-                    <strong id="next-step-title">Если цифра подходит, следующий шаг — подставить реальный объект</strong>
-                    <p id="next-step-text">Когда появится помещение, этот расчёт можно быстро привязать к его реальным ограничениям.</p>
-                  </div>
-                </div>
-
-                <div class="summary-interpretation-line">
-                  <span>Что это значит</span>
-                  <strong id="summary-interpretation-title">Это рабочий ориентир для старта</strong>
-                  <p id="summary-interpretation-text">Даже без точного объекта уже видно порядок цифр, масштаб и следующий шаг.</p>
-                </div>
-
-                <div class="calc-summary-actions">
-                  <div class="summary-utility summary-utility-main">
-                    <a class="btn btn-primary" id="project-brief-link" href="../farm/#brief">Получить разбор под мой объект</a>
-                    <a class="btn btn-secondary" id="summary-secondary-link" href="#calc-details">Посмотреть детали</a>
+                  <div class="summary-reveal-overlay" id="summary-reveal-overlay">
+                    <p>Детали доступны после входа в кабинет.</p>
+                    <a class="btn btn-secondary" id="summary-login-link" href="../cabinet/login/">Войти в кабинет</a>
                   </div>
                 </div>
               </aside>
@@ -483,51 +473,83 @@
 
     <section class="section-tight calc-secondary-layer" id="calc-details">
       <div class="container">
-        <details class="calc-details-disclosure">
+        <details class="calc-details-disclosure" open>
           <summary>
             <span class="calc-details-summary-copy">
-              <span class="calc-details-summary-title">Посмотреть детали ориентировочной сборки</span>
-              <span class="calc-details-summary-note">Состав, структура бюджета и электрическая схема по текущим вводным.</span>
+              <span class="calc-details-summary-title">Разобрать расчет</span>
+              <span class="calc-details-summary-note">Инженерная экономика проекта по трем сценариям урожайности.</span>
             </span>
-            <span class="calc-details-summary-badge">Детали</span>
+            <span class="calc-details-summary-badge">Разбор</span>
           </summary>
           <div class="calc-details-body">
-            <div class="grid grid-2 calc-section-grid">
+            <p class="calc-details-disclaimer">Расчет упрощен и зависит от условий.</p>
+            <div class="grid calc-section-grid">
               <article class="card card-pad">
-                <div class="tag">Состав</div>
-                <h3 class="calc-card-title">Что вошло в цифру</h3>
-                <div class="equipment-overview">
-                  <div class="equipment-overview-card">
-                    <span>Без рассады</span>
-                    <strong id="equipment-without-seedlings">0 ₽</strong>
+                <div class="tag">Разбивка экономики</div>
+                <h3 class="calc-card-title">Разовые и ежемесячные расходы</h3>
+                <div class="budget-structure-grid" id="economy-summary-grid">
+                  <div class="summary-item">
+                    <span>Разовые вложения</span>
+                    <strong id="economy-capex">0 ₽</strong>
                   </div>
-                  <div class="equipment-overview-card">
-                    <span>Рассада</span>
-                    <strong id="seedlings-total-cost">0 ₽</strong>
+                  <div class="summary-item">
+                    <span>Ежемесячные расходы</span>
+                    <strong id="economy-opex-total">0 ₽</strong>
+                  </div>
+                  <div class="summary-item">
+                    <span>Энергия / мес</span>
+                    <strong id="economy-opex-energy">0 ₽</strong>
+                  </div>
+                  <div class="summary-item">
+                    <span>Вода / мес</span>
+                    <strong id="economy-opex-water">0 ₽</strong>
+                  </div>
+                  <div class="summary-item">
+                    <span>Аренда / мес</span>
+                    <strong id="economy-opex-rent">0 ₽</strong>
+                  </div>
+                  <div class="summary-item">
+                    <span>Ягода / мес (оценка)</span>
+                    <strong id="economy-berry-kg">0 кг</strong>
+                  </div>
+                  <div class="summary-item">
+                    <span>Выручка / мес (реал.)</span>
+                    <strong id="economy-revenue-month-real">0 ₽</strong>
+                  </div>
+                  <div class="summary-item">
+                    <span>Выручка / год (реал.)</span>
+                    <strong id="economy-revenue-year-real">0 ₽</strong>
+                  </div>
+                  <div class="summary-item">
+                    <span>Чистый поток / мес (реал.)</span>
+                    <strong id="economy-net-month-real">0 ₽</strong>
+                  </div>
+                  <div class="summary-item">
+                    <span>Окупаемость (реал.)</span>
+                    <strong id="economy-payback-real">—</strong>
                   </div>
                 </div>
-                <div class="assembly-includes">
-                  <div class="tag">База</div>
-                  <div class="assembly-includes-list" id="assembly-includes-list"></div>
-                </div>
-                <div class="budget-structure-grid" id="budget-structure-grid"></div>
-              </article>
-
-              <article class="card card-pad">
-                <div class="tag">Как читать ориентир</div>
-                <h3 class="calc-card-title">Что стоит помнить до финальной сметы</h3>
-                <div class="detail-notes" id="detail-notes"></div>
+                <h3 class="calc-card-title economy-scenarios-title">Экономика по сценариям</h3>
+                <ul class="economy-scenarios-grid" id="economy-scenarios-grid">
+                  <li class="economy-scenario-row">
+                    <strong>Оптимистичный</strong>
+                    <span>Ягода 0 кг/мес · Выручка 0 ₽/мес · Чистый поток 0 ₽/мес · Окупаемость —</span>
+                  </li>
+                  <li class="economy-scenario-row">
+                    <strong>Реалистичный</strong>
+                    <span>Ягода 0 кг/мес · Выручка 0 ₽/мес · Чистый поток 0 ₽/мес · Окупаемость —</span>
+                  </li>
+                  <li class="economy-scenario-row">
+                    <strong>Пессимистичный</strong>
+                    <span>Ягода 0 кг/мес · Выручка 0 ₽/мес · Чистый поток 0 ₽/мес · Окупаемость —</span>
+                  </li>
+                </ul>
               </article>
             </div>
 
-            <article class="card card-pad electrical-detail-card">
-              <div class="tag">Электрика</div>
-              <h3 class="calc-card-title">Нагрузка, линии и схема подключения</h3>
-              <div class="budget-structure-grid" id="electrical-summary-grid"></div>
-              <div class="budget-structure-grid" id="electrical-kit-grid"></div>
-              <div class="detail-note" id="electrical-scheme"></div>
-              <div class="detail-notes" id="electrical-lines"></div>
-            </article>
+            <div class="calc-details-actions">
+              <a class="btn btn-primary" id="adapt-conditions-link" href="../farm/#brief">Адаптировать под мои условия</a>
+            </div>
           </div>
         </details>
       </div>
@@ -586,6 +608,6 @@
     </div>
   </footer>
 
-  <script src="./calc.js?v=20260405q" type="module"></script>
+  <script src="./calc.js?v=20260405ay" type="module"></script>
 </body>
 </html>

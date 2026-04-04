@@ -70,7 +70,11 @@
       "waterTariffPerM3": 60
     },
     "economyProfile": {
-      "berrySalePricePerKg": 1600
+      "berrySalePricePerKg": 1600,
+      "avgBerryGramsPerPlantPerMonth": 85,
+      "pessimisticGramsPerPlantPerMonth": 60,
+      "realisticGramsPerPlantPerMonth": 85,
+      "optimisticGramsPerPlantPerMonth": 120
     }
   },
   "baseAssemblyIncludes": [
@@ -223,36 +227,68 @@
     "a1": 8,
     "a2": 3,
     "a3": 6,
-    "a4": 150
+    "a4": 150,
+    "a5": 1600
   },
   "presets": [
     {
-      "id": "2x4",
-      "label": "2 × 4 м",
+      "id": "2x2",
+      "label": "Стартовый формат",
       "width": 2,
-      "length": 4,
-      "note": "Минимальный вход, чтобы понять порядок цифр."
+      "length": 2,
+      "note": "Размер 2 × 2 м · ориентир ~125 000 ₽ без допов."
+    },
+    {
+      "id": "2x8",
+      "label": "Базовый шаг",
+      "width": 2,
+      "length": 8,
+      "note": "Размер 2 × 8 м · ориентир ~250 000 ₽ без допов."
+    },
+    {
+      "id": "3x8",
+      "label": "Усиленный формат",
+      "width": 3,
+      "length": 8,
+      "note": "Размер 3 × 8 м · ориентир ~500 000 ₽ без допов."
     },
     {
       "id": "4x8",
-      "label": "4 × 8 м",
+      "label": "Рабочий формат",
       "width": 4,
       "length": 8,
-      "note": "Первый рабочий размер для предметного разговора."
+      "note": "Размер 4 × 8 м · ориентир ~750 000 ₽ без допов."
+    },
+    {
+      "id": "5x10",
+      "label": "Расширенный формат",
+      "width": 5,
+      "length": 10,
+      "note": "Размер 5 × 10 м · ориентир ~1 250 000 ₽ без допов."
     },
     {
       "id": "6x10",
-      "label": "6 × 10 м",
+      "label": "Верхний типовой формат",
       "width": 6,
       "length": 10,
-      "note": "Более уверенный старт с запасом по масштабу."
+      "note": "Размер 6 × 10 м · ориентир ~1 560 000 ₽ без допов.",
+      "discountPercent": 2
     },
     {
-      "id": "8x12",
-      "label": "8 × 12 м",
-      "width": 8,
+      "id": "7x12",
+      "label": "Большая ферма",
+      "width": 7,
       "length": 12,
-      "note": "Размер для уже серьёзного входа в проект."
+      "note": "Размер 7 × 12 м · ориентир ~2 100 000 ₽ без допов.",
+      "discountPercent": 3
+    },
+    {
+      "id": "8x14",
+      "label": "Большая ферма + скидка",
+      "width": 8,
+      "length": 14,
+      "note": "Размер 8 × 14 м · ориентир с проектной скидкой.",
+      "discountPercent": 5
     }
   ]
 }
