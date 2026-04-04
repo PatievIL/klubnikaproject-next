@@ -482,73 +482,83 @@
             <span class="calc-details-summary-badge">Разбор</span>
           </summary>
           <div class="calc-details-body">
-            <p class="calc-details-disclaimer">Расчет упрощен и зависит от условий.</p>
-            <div class="grid calc-section-grid">
-              <article class="card card-pad">
-                <div class="tag">Разбивка экономики</div>
-                <h3 class="calc-card-title">Разовые и ежемесячные расходы</h3>
-                <div class="budget-structure-grid" id="economy-summary-grid">
-                  <div class="summary-item">
-                    <span>Разовые вложения</span>
-                    <strong id="economy-capex">0 ₽</strong>
-                  </div>
-                  <div class="summary-item">
-                    <span>Ежемесячные расходы</span>
-                    <strong id="economy-opex-total">0 ₽</strong>
-                  </div>
-                  <div class="summary-item">
-                    <span>Энергия / мес</span>
-                    <strong id="economy-opex-energy">0 ₽</strong>
-                  </div>
-                  <div class="summary-item">
-                    <span>Вода / мес</span>
-                    <strong id="economy-opex-water">0 ₽</strong>
-                  </div>
-                  <div class="summary-item">
-                    <span>Аренда / мес</span>
-                    <strong id="economy-opex-rent">0 ₽</strong>
-                  </div>
-                  <div class="summary-item">
-                    <span>Ягода / мес (оценка)</span>
-                    <strong id="economy-berry-kg">0 кг</strong>
-                  </div>
-                  <div class="summary-item">
-                    <span>Выручка / мес (реал.)</span>
-                    <strong id="economy-revenue-month-real">0 ₽</strong>
-                  </div>
-                  <div class="summary-item">
-                    <span>Выручка / год (реал.)</span>
-                    <strong id="economy-revenue-year-real">0 ₽</strong>
-                  </div>
-                  <div class="summary-item">
-                    <span>Чистый поток / мес (реал.)</span>
-                    <strong id="economy-net-month-real">0 ₽</strong>
-                  </div>
-                  <div class="summary-item">
-                    <span>Окупаемость (реал.)</span>
-                    <strong id="economy-payback-real">—</strong>
-                  </div>
+            <div class="summary-reveal-shell calc-details-reveal-shell" id="calc-details-reveal-shell">
+              <div class="summary-reveal-zone calc-details-reveal-zone" id="calc-details-reveal-zone">
+                <p class="calc-details-disclaimer">Расчет упрощен и зависит от условий.</p>
+                <div class="grid calc-section-grid">
+                  <article class="card card-pad">
+                    <div class="tag">Разбивка экономики</div>
+                    <h3 class="calc-card-title">Разовые и ежемесячные расходы</h3>
+                    <div class="budget-structure-grid" id="economy-summary-grid">
+                      <div class="summary-item">
+                        <span>Разовые вложения</span>
+                        <strong id="economy-capex">0 ₽</strong>
+                      </div>
+                      <div class="summary-item">
+                        <span>Ежемесячные расходы</span>
+                        <strong id="economy-opex-total">0 ₽</strong>
+                      </div>
+                      <div class="summary-item">
+                        <span>Энергия / мес</span>
+                        <strong id="economy-opex-energy">0 ₽</strong>
+                      </div>
+                      <div class="summary-item">
+                        <span>Вода / мес</span>
+                        <strong id="economy-opex-water">0 ₽</strong>
+                      </div>
+                      <div class="summary-item">
+                        <span>Аренда / мес</span>
+                        <strong id="economy-opex-rent">0 ₽</strong>
+                      </div>
+                      <div class="summary-item">
+                        <span>Ягода / мес (оценка)</span>
+                        <strong id="economy-berry-kg">0 кг</strong>
+                      </div>
+                      <div class="summary-item">
+                        <span>Выручка / мес (реал.)</span>
+                        <strong id="economy-revenue-month-real">0 ₽</strong>
+                      </div>
+                      <div class="summary-item">
+                        <span>Выручка / год (реал.)</span>
+                        <strong id="economy-revenue-year-real">0 ₽</strong>
+                      </div>
+                      <div class="summary-item">
+                        <span>Чистый поток / мес (реал.)</span>
+                        <strong id="economy-net-month-real">0 ₽</strong>
+                      </div>
+                      <div class="summary-item">
+                        <span>Окупаемость (реал.)</span>
+                        <strong id="economy-payback-real">—</strong>
+                      </div>
+                    </div>
+                    <h3 class="calc-card-title economy-scenarios-title">Экономика по сценариям</h3>
+                    <ul class="economy-scenarios-grid" id="economy-scenarios-grid">
+                      <li class="economy-scenario-row">
+                        <strong>Оптимистичный</strong>
+                        <span>Ягода 0 кг/мес · Выручка 0 ₽/мес · Чистый поток 0 ₽/мес · Окупаемость —</span>
+                      </li>
+                      <li class="economy-scenario-row">
+                        <strong>Реалистичный</strong>
+                        <span>Ягода 0 кг/мес · Выручка 0 ₽/мес · Чистый поток 0 ₽/мес · Окупаемость —</span>
+                      </li>
+                      <li class="economy-scenario-row">
+                        <strong>Пессимистичный</strong>
+                        <span>Ягода 0 кг/мес · Выручка 0 ₽/мес · Чистый поток 0 ₽/мес · Окупаемость —</span>
+                      </li>
+                    </ul>
+                  </article>
                 </div>
-                <h3 class="calc-card-title economy-scenarios-title">Экономика по сценариям</h3>
-                <ul class="economy-scenarios-grid" id="economy-scenarios-grid">
-                  <li class="economy-scenario-row">
-                    <strong>Оптимистичный</strong>
-                    <span>Ягода 0 кг/мес · Выручка 0 ₽/мес · Чистый поток 0 ₽/мес · Окупаемость —</span>
-                  </li>
-                  <li class="economy-scenario-row">
-                    <strong>Реалистичный</strong>
-                    <span>Ягода 0 кг/мес · Выручка 0 ₽/мес · Чистый поток 0 ₽/мес · Окупаемость —</span>
-                  </li>
-                  <li class="economy-scenario-row">
-                    <strong>Пессимистичный</strong>
-                    <span>Ягода 0 кг/мес · Выручка 0 ₽/мес · Чистый поток 0 ₽/мес · Окупаемость —</span>
-                  </li>
-                </ul>
-              </article>
-            </div>
 
-            <div class="calc-details-actions">
-              <a class="btn btn-primary" id="adapt-conditions-link" href="../farm/#brief">Адаптировать под мои условия</a>
+                <div class="calc-details-actions">
+                  <a class="btn btn-primary" id="adapt-conditions-link" href="../farm/#brief">Адаптировать под мои условия</a>
+                </div>
+              </div>
+
+              <div class="summary-reveal-overlay calc-details-reveal-overlay" id="calc-details-reveal-overlay">
+                <p>Экономика проекта доступна после входа в кабинет.</p>
+                <a class="btn btn-secondary" id="calc-details-login-link" href="../cabinet/login/">Войти в кабинет</a>
+                <a class="btn btn-primary" href="../farm/#brief">Адаптировать под мои условия</a>
+              </div>
             </div>
           </div>
         </details>

@@ -2107,6 +2107,37 @@
   min-width: 220px;
 }
 
+.calc-details-reveal-shell {
+  position: relative;
+}
+
+.calc-details-reveal-shell.is-locked .calc-details-reveal-zone {
+  filter: blur(6px);
+  opacity: 0.72;
+  pointer-events: none;
+  user-select: none;
+}
+
+.calc-details-reveal-overlay {
+  border-radius: 28px;
+  background: linear-gradient(
+    180deg,
+    rgba(246, 242, 234, 0.18) 0%,
+    rgba(246, 242, 234, 0.72) 48%,
+    rgba(246, 242, 234, 0.95) 100%
+  );
+}
+
+.calc-details-reveal-shell.is-locked .calc-details-reveal-overlay {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.calc-details-reveal-overlay p {
+  max-width: 28ch;
+}
+
 /* Locked mode: on left side keep only Step 1 choices + quick presets open */
 body.calc-auth-locked #room-size-panel .room-dimensions-row,
 body.calc-auth-locked #room-size-panel .room-size-hint,

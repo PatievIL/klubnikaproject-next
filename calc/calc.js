@@ -73,6 +73,8 @@ const elements = {
   summaryBreakdown: document.getElementById("summary-breakdown"),
   summaryRevealShell: document.getElementById("summary-reveal-shell"),
   summaryLoginLink: document.getElementById("summary-login-link"),
+  calcDetailsRevealShell: document.getElementById("calc-details-reveal-shell"),
+  calcDetailsLoginLink: document.getElementById("calc-details-login-link"),
   briefChipList: document.getElementById("brief-chip-list"),
   nextStepTitle: document.getElementById("next-step-title"),
   nextStepText: document.getElementById("next-step-text"),
@@ -388,19 +390,23 @@ function render() {
 }
 
 function renderSummaryReveal() {
-  if (!elements.summaryRevealShell) {
-    return;
+  if (elements.summaryRevealShell) {
+    elements.summaryRevealShell.classList.toggle("is-locked", !summaryUnlocked);
   }
-  elements.summaryRevealShell.classList.toggle("is-locked", !summaryUnlocked);
+  if (elements.calcDetailsRevealShell) {
+    elements.calcDetailsRevealShell.classList.toggle("is-locked", !summaryUnlocked);
+  }
   document.body.classList.toggle("calc-auth-locked", !summaryUnlocked);
 }
 
 function syncSummaryLoginLink() {
-  if (!elements.summaryLoginLink) {
-    return;
-  }
   const next = encodeURIComponent(window.location.pathname || "/calc/");
-  elements.summaryLoginLink.href = `../cabinet/login/?next=${next}`;
+  if (elements.summaryLoginLink) {
+    elements.summaryLoginLink.href = `../cabinet/login/?next=${next}`;
+  }
+  if (elements.calcDetailsLoginLink) {
+    elements.calcDetailsLoginLink.href = `../cabinet/login/?next=${next}`;
+  }
 }
 
 function detectRuntimeApiBase(configuredBase) {
