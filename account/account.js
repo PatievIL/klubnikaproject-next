@@ -187,6 +187,20 @@ function bindLogin() {
     }
     if (status) status.textContent = "Проверяем данные и открываем кабинет...";
     try {
+      const adminResponse = await fetch(`${apiBase()}/admin/auth/password-login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ login, password }),
+      });
+
+      if (adminResponse.ok) {
+        const nextCandidate = new URLSearchParams(window.location.search).get("next") || memberPath("hubPath");
+        const next = isAllowedNextPath(nextCandidate) ? nextCandidate : memberPath("hubPath");
+        window.location.href = next;
+        return;
+      }
+
       const response = await fetch(`${apiBase()}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -197,6 +211,7 @@ function bindLogin() {
         const text = await response.text();
         throw new Error(text || `HTTP ${response.status}`);
       }
+
       const payload = await response.json();
       currentSessionUser = payload.user || null;
       await refreshAccessPolicy();
