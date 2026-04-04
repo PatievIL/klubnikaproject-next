@@ -15,8 +15,8 @@
   <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png" />
   <link rel="manifest" href="../site.webmanifest" />
-  <link rel="stylesheet" href="../styles.css?v=20260403ac" />
-  <link rel="stylesheet" href="./_app/catalog-app.css?v=20260403ac" />
+  <link rel="stylesheet" href="../styles.css?v=20260404r" />
+  <link rel="stylesheet" href="./_app/catalog-app.css?v=20260405r" />
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -60,65 +60,14 @@
           <span></span>
         </button>
         <nav class="catalog-main-nav nav" aria-label="Основная навигация">
-          <a class="nav-link" href="../index.html">Главная</a>
-          <div class="nav-group">
-            <button class="nav-trigger" type="button">Решения</button>
-            <div class="nav-menu">
-              <a href="../farm/index.html"><strong>Расчёт фермы</strong><span>Состав запуска, рамка бюджета и следующий шаг.</span></a>
-              <a href="../study/index.html"><strong>Сопровождение</strong><span>Разбор действующей фермы, узких мест и технологии.</span></a>
-              <a href="../consultations/index.html"><strong>Консультации</strong><span>Точечный разбор задачи, совместимости и выбора.</span></a>
-              <a href="../klubhack/index.html"><strong>Клубничный Хак</strong><span>Практическая база по технологии клубничной фермы.</span></a>
-            </div>
-          </div>
-          <div class="nav-group">
-            <button class="nav-trigger" type="button">Каталог</button>
-            <div class="nav-menu nav-menu-wide">
-              <a href="../catalog/index.html"><strong>Магазин</strong><span>Вход в рабочие категории и закупку без лишней витринности.</span></a>
-              <a href="../catalog/led/index.html"><strong>LED</strong><span>Линейные и тепличные сценарии досветки.</span></a>
-              <a href="../catalog/irrigation/index.html"><strong>Полив</strong><span>Полив, дозирование и расходники по узлам.</span></a>
-              <a href="../catalog/racks/index.html"><strong>Стеллажи</strong><span>Каркасы, лотки и модульные ряды.</span></a>
-              <a href="../catalog/substrates/index.html"><strong>Субстрат</strong><span>Маты, кубики и старт корневой зоны.</span></a>
-              <a href="../seeds/index.html"><strong>Семена и Frigo</strong><span>Посадочный материал под запуск и докупку.</span></a>
-            </div>
-          </div>
+          <a class="nav-link" href="../index.html">Сайт</a>
+          <a class="nav-link" href="../catalog/index.html">Каталог</a>
           <a class="nav-link" href="../calc/index.html">Калькулятор</a>
+          <a class="nav-link" href="../cabinet/login/index.html">Кабинет</a>
         </nav>
-        <div class="catalog-header-utility">
-          <a class="catalog-icon-pill catalog-header-utility-link" href="#catalog-how-buy">Как купить</a>
-          <a class="catalog-icon-pill catalog-header-utility-link" href="../account/index.html">Кабинет</a>
-          <button type="button" class="catalog-header-cart" data-action="open-cart">
-            Корзина <span>0</span>
-          </button>
-        </div>
-        <div class="catalog-header-mobile-actions">
-          <button type="button" class="catalog-icon-pill" data-action="open-search" aria-label="Открыть поиск">Поиск</button>
-          <button type="button" class="catalog-icon-pill" data-action="open-cart" aria-label="Открыть корзину">Корзина <span>0</span></button>
-          <button type="button" class="catalog-icon-pill" data-action="open-menu" aria-label="Открыть меню">Меню</button>
-        </div>
-      </div>
-      <div class="catalog-header__bottom">
-        <div class="catalog-header-workbar">
-          <form class="catalog-header-search" data-header-search>
-            <div class="catalog-search-shell">
-              <input type="search" value="" placeholder="Название, артикул или рабочий узел" />
-              <button type="submit" class="catalog-search-submit" aria-label="Искать по магазину">
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <path d="M10.5 4a6.5 6.5 0 1 0 4.018 11.61l4.436 4.436 1.06-1.06-4.436-4.436A6.5 6.5 0 0 0 10.5 4Zm0 1.5a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z" />
-                </svg>
-                <span class="sr-only">Искать</span>
-              </button>
-            </div>
-          </form>
-          <div class="catalog-header-support">
-            <div class="catalog-header-contactline">
-              <a href="tel:+79255831669">+7 925 583-16-69</a>
-            </div>
-            <div class="catalog-header-actions">
-              <a class="catalog-icon-pill catalog-header-anchor" href="#catalog-contacts">Контакты</a>
-              <button type="button" class="catalog-secondary-button" data-action="open-assistant" data-intent="callback">Попросить звонок</button>
-              <button type="button" class="catalog-secondary-button" data-action="open-assistant" data-intent="question">Задать вопрос</button>
-            </div>
-          </div>
+        <div class="catalog-header-contactbar">
+          <a class="catalog-header-phone" href="tel:+79255831669">+7 925 583-16-69</a>
+          <a class="catalog-icon-pill catalog-header-anchor" href="#catalog-contacts">Связь</a>
         </div>
       </div>
     </header>
@@ -126,7 +75,7 @@
       <main class="catalog-main">
         
         
-    <section class="catalog-landing-hero">
+    <section class="catalog-page-head catalog-page-head--landing">
       
     <nav class="catalog-breadcrumbs" aria-label="Хлебные крошки">
       
@@ -140,115 +89,13 @@
           
     </nav>
   
-      <div class="catalog-landing-hero__content">
-        <div class="catalog-landing-hero__copy">
-          <span class="catalog-eyebrow">Каталог для клубничной фермы</span>
-          <h1>Каталог для тех случаев, когда задача уже понятна</h1>
-          <p>Свет, полив, стеллажи, субстрат, посадочный материал и сервисные позиции для рабочей закупки клубничной фермы.</p>
-          <p class="catalog-landing-hero__sublead">Здесь удобно быстро перейти в нужную категорию, проверить наличие и собрать закупку. Если схема ещё собирается, лучше сначала начать с расчёта или короткого вопроса.</p>
-          <div class="catalog-landing-hero__actions">
-            <a class="catalog-primary-button" href="#catalog-categories">Открыть категории</a>
-            <a class="catalog-secondary-button" href="../farm/index.html">Сначала сверить задачу</a>
-          </div>
-          <div class="catalog-landing-hero__signals">
-            <span>Когда уже знаете, что нужно купить</span>
-            <span>Когда добираете конкретный узел</span>
-            <span>Когда хотите быстро проверить наличие и цену</span>
-          </div>
-          <div class="catalog-landing-hero__map">
-            <div class="catalog-landing-hero__map-head">
-              <strong>С чего обычно начинают закупку</strong>
-              <p>Основные рабочие разделы, с которых удобно начать, если вы уже понимаете задачу.</p>
-            </div>
-            <div class="catalog-landing-hero__map-grid">
-              
-                    <a class="catalog-landing-hero__map-card" href="../catalog/led/index.html">
-                      <span class="catalog-landing-hero__map-media">
-                        <img src="../assets/photos/optimized/greenhouse-rack.webp" alt="LED-освещение" loading="lazy" />
-                      </span>
-                      <span class="catalog-landing-hero__map-body">
-                        <strong>LED-освещение</strong>
-                        <span>5 товаров</span>
-                      </span>
-                    </a>
-                  
-                    <a class="catalog-landing-hero__map-card" href="../catalog/irrigation/index.html">
-                      <span class="catalog-landing-hero__map-media">
-                        <img src="../assets/catalog/80128135.webp" alt="Полив и дозирование" loading="lazy" />
-                      </span>
-                      <span class="catalog-landing-hero__map-body">
-                        <strong>Полив и дозирование</strong>
-                        <span>12 товаров</span>
-                      </span>
-                    </a>
-                  
-                    <a class="catalog-landing-hero__map-card" href="../catalog/racks/index.html">
-                      <span class="catalog-landing-hero__map-media">
-                        <img src="../assets/photos/optimized/rack-aisle.webp" alt="Стеллажные системы" loading="lazy" />
-                      </span>
-                      <span class="catalog-landing-hero__map-body">
-                        <strong>Стеллажные системы</strong>
-                        <span>7 товаров</span>
-                      </span>
-                    </a>
-                  
-                    <a class="catalog-landing-hero__map-card" href="../catalog/substrates/index.html">
-                      <span class="catalog-landing-hero__map-media">
-                        <img src="../assets/catalog/grodan_prestige_6_ho.webp" alt="Субстраты и старт-корневая зона" loading="lazy" />
-                      </span>
-                      <span class="catalog-landing-hero__map-body">
-                        <strong>Субстраты и старт-корневая зона</strong>
-                        <span>5 товаров</span>
-                      </span>
-                    </a>
-                  
-            </div>
-          </div>
+      <div class="catalog-page-head__copy">
+        <span class="catalog-eyebrow">Рабочий магазин</span>
+        <h1>Всё для клубничной фермы</h1>
+        <div class="catalog-page-head__meta">
+          <span>9 разделов</span>
+          <span>58 товаров</span>
         </div>
-        <div class="catalog-landing-hero__aside">
-          <div class="catalog-landing-hero__card">
-            <strong>Каталог собран для рабочей закупки</strong>
-            <p>Это не просто список позиций, а удобный вход в разделы, сценарии закупки и понятные действия без лишних прыжков.</p>
-            <div class="catalog-landing-hero__stats">
-              <div class="catalog-landing-hero__stat">
-                <strong>9</strong>
-                <span>верхнеуровневых разделов</span>
-              </div>
-              <div class="catalog-landing-hero__stat">
-                <strong>48</strong>
-                <span>товаров в каталоге</span>
-              </div>
-              <div class="catalog-landing-hero__stat">
-                <strong>Q&amp;A</strong>
-                <span>документы, отзывы и быстрые действия по позициям</span>
-              </div>
-              <div class="catalog-landing-hero__stat">
-                <strong>Live</strong>
-                <span>фильтры, быстрый просмотр и корзина без перезагрузки</span>
-              </div>
-            </div>
-          </div>
-          <div class="catalog-landing-hero__route">
-            <strong>Когда лучше сначала не покупать</strong>
-            <p>Если вы ещё выбираете формат фермы, не уверены в совместимости узлов или только собираете первую схему, правильнее начать с расчёта, а не с покупок поштучно.</p>
-            <div class="catalog-landing-hero__route-actions">
-              <a class="catalog-secondary-button" href="../consultations/index.html">Обсудить схему</a>
-              <a class="catalog-primary-button" href="../calc/index.html">Открыть калькулятор</a>
-            </div>
-          </div>
-          <div class="catalog-landing-hero__utility">
-            <strong>Что можно сделать сразу</strong>
-            <div class="catalog-landing-hero__utility-list">
-              <a href="#catalog-categories">Выбрать категорию</a>
-              <a href="../farm/index.html">Сверить состав фермы</a>
-              <a href="../consultations/index.html">Задать вопрос</a>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="catalog-section-head">
-        <h2>Категории магазина</h2>
-        <p>Сначала выберите рабочий узел, потом уже сравнивайте товары внутри раздела.</p>
       </div>
       <div class="catalog-category-grid" id="catalog-categories">
         
@@ -270,7 +117,7 @@
       <div class="catalog-category-card__body">
         <h3>Полив и дозирование</h3>
         <p>Капельницы, магистрали, фитинги и готовые наборы под стеллаж и рабочий модуль.</p>
-        <span>12 товаров</span>
+        <span>16 товаров</span>
       </div>
     </a>
   
@@ -280,7 +127,7 @@
       </div>
       <div class="catalog-category-card__body">
         <h3>Стеллажные системы</h3>
-        <p>Каркасы, ряды, лотки и сервисные узлы для построения рабочей геометрии фермы.</p>
+        <p>Каркасы, ряды, лотки и сервисные элементы для построения рабочей геометрии фермы.</p>
         <span>7 товаров</span>
       </div>
     </a>
@@ -313,8 +160,8 @@
       </div>
       <div class="catalog-category-card__body">
         <h3>Климат и воздух</h3>
-        <p>Вентиляция, туман, сервисные климатические позиции и мягкое управление микроклиматом.</p>
-        <span>4 товаров</span>
+        <p>Вентиляция, туман, сервисные климатические решения и мягкое управление микроклиматом.</p>
+        <span>6 товаров</span>
       </div>
     </a>
   
@@ -325,7 +172,7 @@
       <div class="catalog-category-card__body">
         <h3>Питание и сервис раствора</h3>
         <p>Базовые растворы, буферы, корректоры pH/EC и сервисные наборы контроля.</p>
-        <span>4 товаров</span>
+        <span>6 товаров</span>
       </div>
     </a>
   
@@ -336,7 +183,7 @@
       <div class="catalog-category-card__body">
         <h3>Датчики и автоматика</h3>
         <p>Контроллеры, датчики среды и телеметрия для рабочего контроля фермы.</p>
-        <span>4 товаров</span>
+        <span>6 товаров</span>
       </div>
     </a>
   
@@ -356,71 +203,40 @@
   
         
     <section class="catalog-info-strip" id="catalog-how-buy">
-      <div class="catalog-section-head">
-        <h2>Как купить</h2>
-        <p>Если задача уже понятна, здесь можно быстро собрать закупку. Если нет, каталог помогает не потерять контекст и перейти к вопросу или расчёту.</p>
-      </div>
-      <div class="catalog-how-buy-grid">
-        <article>
-          <strong>1. Выберите категорию</strong>
-          <p>Если модуль и узел уже понятны, заходите в нужный раздел и отфильтруйте позиции по атрибутам.</p>
-        </article>
-        <article>
-          <strong>2. Сравните цены и характеристики</strong>
-          <p>У каждой позиции есть варианты цен, быстрый просмотр, документы и короткий список того, что важно проверить до оплаты.</p>
-        </article>
-        <article>
-          <strong>3. Добавьте в корзину или задайте вопрос</strong>
-          <p>Понятные позиции можно сразу положить в корзину, а спорные лучше быстро уточнить, не уходя со страницы.</p>
-        </article>
+      <div class="catalog-how-buy-note">
+        <div class="catalog-how-buy-note__copy">
+          <strong>Если схема ещё не собрана</strong>
+          <p>Сначала коротко сверьте состав, сделайте быстрый расчёт или задайте вопрос, чтобы не собирать закупку вслепую.</p>
+        </div>
+        <div class="catalog-how-buy-note__actions">
+          <a class="catalog-link-button" href="/farm/">Сверить состав</a>
+          <a class="catalog-link-button" href="/calc/">Быстрый расчёт</a>
+          <a class="catalog-link-button" href="/consultations/">Короткий вопрос</a>
+        </div>
       </div>
     </section>
   
       </main>
       
     <footer class="catalog-footer" id="catalog-contacts">
-      <div class="catalog-footer__grid">
-        <div>
-          <h2>Klubnika Project</h2>
-          <p>Свет, полив, стеллажи, субстрат, посадочный материал и сервисные позиции для рабочей закупки клубничной фермы.</p>
-          <div class="catalog-footer__socials">
-            <a href="https://t.me/patiev_admin" target="_blank" rel="noreferrer">Telegram</a><a href="https://wa.me/79891250150" target="_blank" rel="noreferrer">WhatsApp</a><a href="https://www.instagram.com/ilya_patiev/" target="_blank" rel="noreferrer">Instagram</a><a href="https://www.youtube.com/@Ilya_patiev" target="_blank" rel="noreferrer">YouTube</a>
+      <div class="catalog-footer__shell">
+        <div class="catalog-footer__meta">
+          <div class="catalog-footer__copy">© Klubnika Project</div>
+          <div class="catalog-footer__links">
+            <a href="https://klubnikaproject.ru/docs/policy">Политика</a>
+            <a href="https://klubnikaproject.ru/docs/offero">Оферта</a>
+            <a href="https://klubnikaproject.ru/docs/warrenty">Гарантия</a>
           </div>
         </div>
-        <div>
-          <h3>Каталог</h3>
-          <ul>
-            <li><a href="../catalog/led/index.html">LED-освещение</a></li><li><a href="../catalog/irrigation/index.html">Полив и дозирование</a></li><li><a href="../catalog/racks/index.html">Стеллажные системы</a></li><li><a href="../catalog/substrates/index.html">Субстраты и старт-корневая зона</a></li><li><a href="../catalog/planting-material/index.html">Посадочный материал</a></li><li><a href="../catalog/climate/index.html">Климат и воздух</a></li><li><a href="../catalog/nutrition/index.html">Питание и сервис раствора</a></li><li><a href="../catalog/monitoring/index.html">Датчики и автоматика</a></li><li><a href="../catalog/packaging/index.html">Упаковка и отгрузка</a></li>
-          </ul>
+        <div class="catalog-footer__contacts">
+          <a href="tel:+79255831669">+7 925 583-16-69</a>
+          <a href="mailto:info@klubnikaproject.ru">info@klubnikaproject.ru</a>
+          <a href="https://t.me/patiev_admin" target="_blank" rel="noreferrer">Telegram</a>
+          <a href="https://wa.me/79891250150" target="_blank" rel="noreferrer">WhatsApp</a>
+          <a href="https://www.instagram.com/ilya_patiev/" target="_blank" rel="noreferrer">Instagram</a>
+          <a href="https://www.youtube.com/@Ilya_patiev" target="_blank" rel="noreferrer">YouTube</a>
+          <span>Москва, проектная комплектация с отгрузкой по РФ</span>
         </div>
-        <div>
-          <h3>Информация</h3>
-          <ul>
-            <li><a href="../consultations/index.html">Задать вопрос</a></li>
-            <li><a href="../farm/index.html">Расчёт фермы</a></li>
-            <li><a href="../study/index.html">Сопровождение</a></li>
-            <li><a href="../calc/index.html">Калькулятор</a></li>
-          </ul>
-        </div>
-        <div>
-          <h3>Контакты</h3>
-          <ul class="catalog-footer__contacts">
-            <li><a href="tel:+79255831669">+7 925 583-16-69</a></li>
-            <li><a href="mailto:info@klubnikaproject.ru">info@klubnikaproject.ru</a></li>
-            <li>Москва, проектная комплектация с отгрузкой по РФ</li>
-          </ul>
-        </div>
-      </div>
-      <div class="catalog-footer__newsletter">
-        <div>
-          <h3>Подписка на рассылку</h3>
-          <p>Получайте новые позиции, изменения наличия и обновления по категориям.</p>
-        </div>
-        <form class="catalog-newsletter-form" data-newsletter-form>
-          <input type="email" name="email" placeholder="Email для обновлений" required />
-          <button type="submit" class="catalog-primary-button">Подписаться</button>
-        </form>
-        
       </div>
     </footer>
   
@@ -441,7 +257,7 @@
           <input type="search" value="" placeholder="Название, артикул, категория" data-action="search-input" />
         </div>
         <div class="catalog-search-results">
-          <p>Введите название, артикул или рабочий узел, чтобы начать поиск.</p>
+          <p>Введите название, артикул или нужную группу товаров, чтобы начать поиск.</p>
         </div>
       </div>
     </div>
@@ -454,7 +270,7 @@
           <h2 id="catalog-cart-title">Корзина</h2>
           <button type="button" class="catalog-icon-button" data-action="close-dialog" data-dialog="cart" aria-label="Закрыть корзину">×</button>
         </div>
-        <p>Корзина пока пустая. Добавляйте позиции из списка или из карточки товара.</p>
+        <p>Корзина пока пустая. Добавляйте товары из списка или из карточки товара.</p>
       </div>
     </div>
   
@@ -466,7 +282,7 @@
           <h2 id="catalog-assistant-title">Нужна помощь с выбором или заказом</h2>
           <button type="button" class="catalog-icon-button" data-action="close-dialog" data-dialog="assistant" aria-label="Закрыть панель помощи">×</button>
         </div>
-        <p>Можно сразу передать задачу в работу или на подбор, не теряя контекст страницы и выбранных позиций.</p>
+        <p>Можно сразу передать запрос в работу или на подбор, не теряя контекст страницы и выбранных товаров.</p>
         <div class="catalog-assistant-actions">
           <a class="catalog-primary-button" href="tel:+79255831669">+7 925 583-16-69</a>
           <a class="catalog-secondary-button" href="mailto:info@klubnikaproject.ru">Написать на info@klubnikaproject.ru</a>
@@ -480,7 +296,7 @@
       
     <div class="catalog-overlay " data-overlay="menu" aria-hidden="true">
       <div class="catalog-overlay__backdrop" data-action="close-dialog" data-dialog="menu"></div>
-      <div class="catalog-overlay__panel catalog-overlay__panel--side" role="dialog" aria-modal="true" aria-labelledby="catalog-menu-title">
+      <div class="catalog-overlay__panel catalog-overlay__panel--side catalog-overlay__panel--menu" role="dialog" aria-modal="true" aria-labelledby="catalog-menu-title">
         <div class="catalog-overlay__head">
           <h2 id="catalog-menu-title">Меню каталога</h2>
           <button type="button" class="catalog-icon-button" data-action="close-dialog" data-dialog="menu" aria-label="Закрыть меню">×</button>
@@ -494,7 +310,7 @@
           <a href="../catalog/index.html">Магазин</a>
           <a href="#catalog-how-buy">Как купить</a>
           <a href="#catalog-contacts">Контакты</a>
-          <a class="catalog-mobile-nav__link" href="../account/index.html">Личный кабинет</a>
+          <a class="catalog-mobile-nav__link" href="../cabinet/login/index.html">Личный кабинет</a>
           <button type="button" class="catalog-mobile-nav__link" data-action="open-cart">Корзина</button>
         </nav>
         <div class="catalog-mobile-category-tree">
@@ -560,6 +376,6 @@
     window.__CATALOG_ROUTE__ = {"type":"landing"};
     window.__CATALOG_CONTEXT__ = {"route":{"type":"landing"},"siteRoot":"../","catalogRoot":"./"};
   </script>
-  <script type="module" src="./_app/catalog-app.js?v=20260403ac"></script>
+  <script type="module" src="./_app/catalog-app.js?v=20260404q"></script>
 </body>
 </html>

@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-04-03T09:41:22.341Z",
+  "generatedAt": "2026-04-04T14:00:11.597Z",
   "source": "catalogData",
   "basePath": "/catalog/",
   "shopName": "Каталог для клубничной фермы",
-  "slogan": "Свет, полив, стеллажи, субстрат, посадочный материал и сервисные позиции для рабочей закупки клубничной фермы.",
+  "slogan": "Свет, полив, стеллажи, субстрат, посадочный материал и сервисные товары для рабочей закупки клубничной фермы.",
   "counts": {
     "categories": 27,
-    "products": 48,
-    "items": 75
+    "products": 58,
+    "items": 85
   },
   "items": [
     {
@@ -38,7 +38,7 @@
       "path": "/catalog/greenhouse-led/",
       "cta_mode": "choose",
       "status": "published",
-      "summary": "Более мощные позиции для зон досветки, тепличных рядов и комбинированных сценариев."
+      "summary": "Более мощные решения для зон досветки, тепличных рядов и комбинированных сценариев."
     },
     {
       "slug": "catalog-category-irrigation",
@@ -52,13 +52,13 @@
     },
     {
       "slug": "catalog-subcategory-drippers",
-      "title": "Капельницы и узлы подачи",
+      "title": "Капельницы и подача",
       "kind": "subcategory",
       "category": "irrigation",
       "path": "/catalog/drippers/",
       "cta_mode": "choose",
       "status": "published",
-      "summary": "Точечная подача раствора, компенсирующие капельницы и готовые узлы на растение."
+      "summary": "Точечная подача раствора, компенсирующие капельницы и готовые комплекты на растение."
     },
     {
       "slug": "catalog-subcategory-fittings",
@@ -88,7 +88,7 @@
       "path": "/catalog/racks/",
       "cta_mode": "estimate",
       "status": "published",
-      "summary": "Каркасы, ряды, лотки и сервисные узлы для построения рабочей геометрии фермы."
+      "summary": "Каркасы, ряды, лотки и сервисные элементы для построения рабочей геометрии фермы."
     },
     {
       "slug": "catalog-subcategory-rack-frames",
@@ -178,7 +178,7 @@
       "path": "/catalog/climate/",
       "cta_mode": "consult",
       "status": "published",
-      "summary": "Вентиляция, туман, сервисные климатические позиции и мягкое управление микроклиматом."
+      "summary": "Вентиляция, туман, сервисные климатические решения и мягкое управление микроклиматом."
     },
     {
       "slug": "catalog-subcategory-air-circulation",
@@ -188,7 +188,7 @@
       "path": "/catalog/air-circulation/",
       "cta_mode": "choose",
       "status": "published",
-      "summary": "Вентиляторы и циркуляционные узлы под плотную посадку и равномерную среду."
+      "summary": "Вентиляторы и циркуляционные решения под плотную посадку и равномерную среду."
     },
     {
       "slug": "catalog-subcategory-humidification",
@@ -348,17 +348,17 @@
       "path": "/catalog/drippers/pressure-stick-20/",
       "cta_mode": "buy",
       "status": "published",
-      "summary": "Готовый узел подачи под контролируемый ввод в мат или кубик без провисающей линии."
+      "summary": "Готовая подача под контролируемый ввод в мат или кубик без провисающей линии."
     },
     {
       "slug": "catalog-product-micro-spike-assembly",
-      "title": "Микроузел подачи Micro Spike",
+      "title": "Точечная подача Micro Spike",
       "kind": "product",
       "category": "drippers",
       "path": "/catalog/drippers/micro-spike-assembly/",
       "cta_mode": "buy",
       "status": "published",
-      "summary": "Точечный узел подачи для расстановки по растению, когда важна управляемая раскладка линии."
+      "summary": "Точечная подача для расстановки по растению, когда важна управляемая раскладка линии."
     },
     {
       "slug": "catalog-product-tube-blank-16",
@@ -398,17 +398,17 @@
       "path": "/catalog/fittings/disc-filter-34/",
       "cta_mode": "consult",
       "status": "published",
-      "summary": "Фильтр дисковый 3/4, PN8: базовый фильтрационный узел для линии полива клубничной фермы с проверкой fit по диаметру, давлению и общей схеме."
+      "summary": "Фильтр дисковый 3/4, PN8: базовый фильтр для линии полива клубничной фермы с проверкой fit по диаметру, давлению и общей схеме."
     },
     {
       "slug": "catalog-product-dosatron",
-      "title": "Насос дозирующий Dosatron",
+      "title": "Растворный узел Dosatron",
       "kind": "product",
       "category": "irrigation-kits",
       "path": "/catalog/irrigation-kits/dosatron/",
       "cta_mode": "consult",
       "status": "published",
-      "summary": "Насос дозирующий Dosatron: узел дозирования для схемы полива клубничной фермы. Покупка имеет смысл только после проверки линии, расхода и логики подачи раствора."
+      "summary": "Растворный узел Dosatron для схем полива, где уже понятны расход линии, бак и подача раствора."
     },
     {
       "slug": "catalog-product-fittings-kit-module",
@@ -428,7 +428,7 @@
       "path": "/catalog/irrigation-kits/starter-irrigation-96/",
       "cta_mode": "buy",
       "status": "published",
-      "summary": "Система капельного полива на 96 растений: состав узла, совместимость и когда лучше сначала получить смету под объект."
+      "summary": "Система капельного полива на 96 растений: состав системы, совместимость и когда лучше сначала получить смету под объект."
     },
     {
       "slug": "catalog-product-irrigation-base-rack",
@@ -438,7 +438,7 @@
       "path": "/catalog/irrigation-kits/irrigation-base-rack/",
       "cta_mode": "buy",
       "status": "published",
-      "summary": "Комплект полива для базового стеллажа: готовый узел под стартовый модуль клубничной фермы с проверкой состава и fit по схеме."
+      "summary": "Комплект полива для базового стеллажа: готовый комплект под стартовый модуль клубничной фермы с проверкой состава и fit по схеме."
     },
     {
       "slug": "catalog-product-rack-irrigation-module",
@@ -448,7 +448,7 @@
       "path": "/catalog/irrigation-kits/rack-irrigation-module/",
       "cta_mode": "consult",
       "status": "published",
-      "summary": "Комплект полива для дополнительного стеллажа: готовый узел под расширение существующего модульного ряда с проверкой fit по базовой схеме."
+      "summary": "Комплект полива для дополнительного стеллажа: готовый комплект под расширение существующего модульного ряда с проверкой fit по базовой схеме."
     },
     {
       "slug": "catalog-product-frame-base-12",
@@ -759,6 +759,106 @@
       "cta_mode": "buy",
       "status": "published",
       "summary": "Этикетка под быструю маркировку партии, даты и базовой информации по фасовке."
+    },
+    {
+      "slug": "catalog-product-osmos-1600",
+      "title": "Осмос 1600",
+      "kind": "product",
+      "category": "irrigation-kits",
+      "path": "/catalog/irrigation-kits/osmos-1600/",
+      "cta_mode": "consult",
+      "status": "published",
+      "summary": "Компактная станция обратного осмоса: готовит воду под маточный и рабочий раствор на запуске фермы."
+    },
+    {
+      "slug": "catalog-product-membrane-1600",
+      "title": "Мембрана 1600",
+      "kind": "product",
+      "category": "irrigation-kits",
+      "path": "/catalog/irrigation-kits/membrane-1600/",
+      "cta_mode": "buy",
+      "status": "published",
+      "summary": "Сменная мембрана для RO-системы 1600: поддерживает стабильную подачу очищенной воды между сервисными интервалами."
+    },
+    {
+      "slug": "catalog-product-prefilter-set-1600",
+      "title": "Предфильтр и запас фильтров грубой очистки",
+      "kind": "product",
+      "category": "fittings",
+      "path": "/catalog/fittings/prefilter-set-1600/",
+      "cta_mode": "buy",
+      "status": "published",
+      "summary": "Комплект предочистки и запасных картриджей для осмоса: снижает износ мембраны и стабилизирует установку."
+    },
+    {
+      "slug": "catalog-product-fertilizers-year-1000",
+      "title": "Удобрения по мешку на год для 1000 кустов",
+      "kind": "product",
+      "category": "base-nutrition",
+      "path": "/catalog/base-nutrition/fertilizers-year-1000/",
+      "cta_mode": "consult",
+      "status": "published",
+      "summary": "Годовой стартовый набор по мешкам для участка около 1000 кустов: базовая рамка закупки по сезону."
+    },
+    {
+      "slug": "catalog-product-mixing-kit-solution",
+      "title": "Для замеса раствора: весы, стаканчики, ведра",
+      "kind": "product",
+      "category": "ph-ec-control",
+      "path": "/catalog/ph-ec-control/mixing-kit-solution/",
+      "cta_mode": "buy",
+      "status": "published",
+      "summary": "Базовый набор под замес: весы, стаканчики и вёдра для маточного и рабочего раствора без импровизации."
+    },
+    {
+      "slug": "catalog-product-smart-home-kit-farm",
+      "title": "Умный дом комплект",
+      "kind": "product",
+      "category": "controllers",
+      "path": "/catalog/controllers/smart-home-kit-farm/",
+      "cta_mode": "consult",
+      "status": "published",
+      "summary": "Комплект на DIN-рейку для базовой автоматики, управления реле и удалённого контроля в ключевых зонах."
+    },
+    {
+      "slug": "catalog-product-split-system-climate",
+      "title": "Сплит система",
+      "kind": "product",
+      "category": "air-circulation",
+      "path": "/catalog/air-circulation/split-system-climate/",
+      "cta_mode": "consult",
+      "status": "published",
+      "summary": "Сплит-система для стабилизации температуры в сервисной комнате, рассадной зоне или небольшом помещении модуля."
+    },
+    {
+      "slug": "catalog-product-water-tank-kit",
+      "title": "Емкости для воды и для маточников",
+      "kind": "product",
+      "category": "irrigation-kits",
+      "path": "/catalog/irrigation-kits/water-tank-kit/",
+      "cta_mode": "consult",
+      "status": "published",
+      "summary": "Набор ёмкостей под воду и маточные растворы: без «кривых» решений для стабильного бакового контура."
+    },
+    {
+      "slug": "catalog-product-ventilation-duct-kit",
+      "title": "Климат: вытяжка, листы металла для вентканалов",
+      "kind": "product",
+      "category": "air-circulation",
+      "path": "/catalog/air-circulation/ventilation-duct-kit/",
+      "cta_mode": "consult",
+      "status": "published",
+      "summary": "Комплект для сборки вытяжки и воздуховодов: нужен, когда климат проектируют по помещению, а не по остаточному принципу."
+    },
+    {
+      "slug": "catalog-product-electrical-panel-kit",
+      "title": "Провода, щиток, автоматы",
+      "kind": "product",
+      "category": "controllers",
+      "path": "/catalog/controllers/electrical-panel-kit/",
+      "cta_mode": "consult",
+      "status": "published",
+      "summary": "Стартовый электрокомплект под ввод, защиту и разводку по объекту без временных решений и случайных линий."
     }
   ],
   "categories": [
@@ -795,7 +895,7 @@
       "parentId": "led",
       "slug": "greenhouse-led",
       "name": "Тепличные световые модули",
-      "description": "Более мощные позиции для зон досветки, тепличных рядов и комбинированных сценариев.",
+      "description": "Более мощные решения для зон досветки, тепличных рядов и комбинированных сценариев.",
       "image": "assets/catalog/67446574.webp",
       "productCount": 2,
       "sortOrder": 12,
@@ -811,7 +911,7 @@
       "name": "Полив и дозирование",
       "description": "Капельницы, магистрали, фитинги и готовые наборы под стеллаж и рабочий модуль.",
       "image": "assets/catalog/80128135.webp",
-      "productCount": 12,
+      "productCount": 16,
       "sortOrder": 20,
       "seoTitle": "Полив и дозирование для клубничной фермы",
       "seoDescription": "Капельницы, магистрали, фильтры, фитинги и комплекты полива для клубничной фермы.",
@@ -822,13 +922,13 @@
       "id": "drippers",
       "parentId": "irrigation",
       "slug": "drippers",
-      "name": "Капельницы и узлы подачи",
-      "description": "Точечная подача раствора, компенсирующие капельницы и готовые узлы на растение.",
+      "name": "Капельницы и подача",
+      "description": "Точечная подача раствора, компенсирующие капельницы и готовые комплекты на растение.",
       "image": "assets/catalog/80128135.webp",
       "productCount": 3,
       "sortOrder": 21,
-      "seoTitle": "Капельницы и узлы подачи",
-      "seoDescription": "Капельницы и узлы подачи для равномерной работы поливочной линии на клубничной ферме.",
+      "seoTitle": "Капельницы и подача",
+      "seoDescription": "Капельницы и решения для точечной подачи на клубничной ферме.",
       "topLevelSlug": "irrigation",
       "path": "/catalog/drippers/"
     },
@@ -839,7 +939,7 @@
       "name": "Фитинги и магистрали",
       "description": "Магистрали, пробойники, фильтры и расходники для сборки линии без лишних переходников.",
       "image": "assets/catalog/IMG_4724.webp",
-      "productCount": 5,
+      "productCount": 6,
       "sortOrder": 22,
       "seoTitle": "Фитинги и магистрали полива",
       "seoDescription": "Фитинги, трубка, фильтры и расходники для сборки поливочной линии клубничной фермы.",
@@ -853,7 +953,7 @@
       "name": "Готовые наборы полива",
       "description": "Наборы под базовый модуль, дополнительный ряд и типовые схемы дооснащения.",
       "image": "assets/catalog/IMG_6061.webp",
-      "productCount": 4,
+      "productCount": 7,
       "sortOrder": 23,
       "seoTitle": "Готовые наборы полива",
       "seoDescription": "Готовые наборы полива для стеллажа, модуля и типовых рядов на клубничной ферме.",
@@ -865,12 +965,12 @@
       "parentId": null,
       "slug": "racks",
       "name": "Стеллажные системы",
-      "description": "Каркасы, ряды, лотки и сервисные узлы для построения рабочей геометрии фермы.",
+      "description": "Каркасы, ряды, лотки и сервисные элементы для построения рабочей геометрии фермы.",
       "image": "assets/photos/optimized/rack-aisle.webp",
       "productCount": 7,
       "sortOrder": 30,
       "seoTitle": "Стеллажные системы для клубничной фермы",
-      "seoDescription": "Каркасы, ряды, сервисные узлы и лотки для клубничной фермы.",
+      "seoDescription": "Каркасы, ряды, сервисные элементы и лотки для клубничной фермы.",
       "topLevelSlug": "racks",
       "path": "/catalog/racks/"
     },
@@ -991,12 +1091,12 @@
       "parentId": null,
       "slug": "climate",
       "name": "Климат и воздух",
-      "description": "Вентиляция, туман, сервисные климатические позиции и мягкое управление микроклиматом.",
+      "description": "Вентиляция, туман, сервисные климатические решения и мягкое управление микроклиматом.",
       "image": "assets/photos/optimized/hero-process.webp",
-      "productCount": 4,
+      "productCount": 6,
       "sortOrder": 60,
       "seoTitle": "Климат и воздух для клубничной фермы",
-      "seoDescription": "Вентиляция, увлажнение и сервисные климатические позиции для клубничной фермы.",
+      "seoDescription": "Вентиляция, увлажнение и сервисные климатические решения для клубничной фермы.",
       "topLevelSlug": "climate",
       "path": "/catalog/climate/"
     },
@@ -1005,12 +1105,12 @@
       "parentId": "climate",
       "slug": "air-circulation",
       "name": "Циркуляция воздуха",
-      "description": "Вентиляторы и циркуляционные узлы под плотную посадку и равномерную среду.",
+      "description": "Вентиляторы и циркуляционные решения под плотную посадку и равномерную среду.",
       "image": "assets/photos/optimized/hero-process.webp",
-      "productCount": 2,
+      "productCount": 4,
       "sortOrder": 61,
       "seoTitle": "Циркуляция воздуха",
-      "seoDescription": "Вентиляторы и циркуляционные узлы для клубничной фермы.",
+      "seoDescription": "Вентиляторы и циркуляционные решения для клубничной фермы.",
       "topLevelSlug": "climate",
       "path": "/catalog/air-circulation/"
     },
@@ -1035,7 +1135,7 @@
       "name": "Питание и сервис раствора",
       "description": "Базовые растворы, буферы, корректоры pH/EC и сервисные наборы контроля.",
       "image": "assets/catalog/IMG_4924.webp",
-      "productCount": 4,
+      "productCount": 6,
       "sortOrder": 70,
       "seoTitle": "Питание и сервис раствора",
       "seoDescription": "Питание, буферы и сервисные наборы контроля раствора для клубничной фермы.",
@@ -1049,7 +1149,7 @@
       "name": "Базовые линии питания",
       "description": "Растворы под рост, плодоношение и плавный переход между фазами.",
       "image": "assets/catalog/IMG_4924.webp",
-      "productCount": 2,
+      "productCount": 3,
       "sortOrder": 71,
       "seoTitle": "Базовые линии питания",
       "seoDescription": "Базовые линии питания для клубничной фермы.",
@@ -1063,7 +1163,7 @@
       "name": "pH / EC контроль",
       "description": "Буферы, корректоры и сервисные наборы под регулярные замеры раствора.",
       "image": "assets/catalog/18341837.webp",
-      "productCount": 2,
+      "productCount": 3,
       "sortOrder": 72,
       "seoTitle": "pH и EC контроль",
       "seoDescription": "Буферы и сервисные наборы контроля pH и EC для клубничной фермы.",
@@ -1077,7 +1177,7 @@
       "name": "Датчики и автоматика",
       "description": "Контроллеры, датчики среды и телеметрия для рабочего контроля фермы.",
       "image": "assets/catalog/92611106.webp",
-      "productCount": 4,
+      "productCount": 6,
       "sortOrder": 80,
       "seoTitle": "Датчики и автоматика",
       "seoDescription": "Контроллеры, датчики среды и телеметрия для клубничной фермы.",
@@ -1091,7 +1191,7 @@
       "name": "Контроллеры",
       "description": "Компактные контроллеры для сервиса климата, полива и тревог по объекту.",
       "image": "assets/catalog/92611106.webp",
-      "productCount": 2,
+      "productCount": 4,
       "sortOrder": 81,
       "seoTitle": "Контроллеры фермы",
       "seoDescription": "Контроллеры климата и полива для клубничной фермы.",
@@ -1201,19 +1301,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 3890,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 3696,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 3540,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -1305,19 +1405,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 4950,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 4703,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 4505,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -1509,19 +1609,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 22000,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 20900,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 20020,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -1546,8 +1646,8 @@
       ],
       "faq": [
         {
-          "question": "Это розничная позиция?",
-          "answer": "Скорее проектная: обычно берут после сверки с зоной и вентиляцией.",
+          "question": "Это розничный товар?",
+          "answer": "Скорее проектный: обычно берут после сверки с зоной и вентиляцией.",
           "askedAt": "2026-01-18",
           "answeredAt": "2026-01-18"
         }
@@ -1613,19 +1713,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 28900,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 27455,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 26299,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -1687,14 +1787,14 @@
         {
           "key": "tip-pozitsii",
           "label": "Тип позиции",
-          "value": "Собранный узел для капельной линии.",
+          "value": "готовая сборка для капельной линии.",
           "group": "Характеристики",
           "filterable": false
         },
         {
           "key": "kogda-podhodit",
           "label": "Когда подходит",
-          "value": "Если схема модуля уже понятна и вы не пересчитываете узел с нуля.",
+          "value": "Если схема модуля уже понятна и вы не пересобираете схему с нуля.",
           "group": "Характеристики",
           "filterable": false
         },
@@ -1729,7 +1829,7 @@
       "documents": [
         {
           "id": "irrigation-passport",
-          "title": "Паспорт линии полива и узлов",
+          "title": "Паспорт линии полива и подачи",
           "fileUrl": "catalog/files/irrigation-passport.txt",
           "fileSize": "112 KB"
         }
@@ -1743,7 +1843,7 @@
         },
         {
           "question": "Есть ли сборка с микротрубкой?",
-          "answer": "Да, готовый узел приходит в сборе.",
+          "answer": "Да, комплект приходит в сборе.",
           "askedAt": "2026-02-13",
           "answeredAt": "2026-02-13"
         }
@@ -1759,7 +1859,7 @@
       "categorySlug": "drippers",
       "topLevelCategorySlug": "irrigation",
       "path": "/catalog/drippers/pressure-stick-20/",
-      "shortDescription": "Готовый узел подачи под контролируемый ввод в мат или кубик без провисающей линии.",
+      "shortDescription": "Готовая подача под контролируемый ввод в мат или кубик без провисающей линии.",
       "price": 58,
       "oldPrice": null,
       "stockStatus": "limited",
@@ -1811,25 +1911,25 @@
           "label": "Розница",
           "minQty": 1,
           "price": 58,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 55,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 53,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
         {
           "id": "irrigation-passport",
-          "title": "Паспорт линии полива и узлов",
+          "title": "Паспорт линии полива и подачи",
           "fileUrl": "catalog/files/irrigation-passport.txt",
           "fileSize": "112 KB"
         }
@@ -1847,13 +1947,13 @@
     {
       "id": "prod-micro-spike-assembly",
       "slug": "micro-spike-assembly",
-      "name": "Микроузел подачи Micro Spike",
+      "name": "Точечная подача Micro Spike",
       "article": "DR-MS18",
       "categoryId": "drippers",
       "categorySlug": "drippers",
       "topLevelCategorySlug": "irrigation",
       "path": "/catalog/drippers/micro-spike-assembly/",
-      "shortDescription": "Точечный узел подачи для расстановки по растению, когда важна управляемая раскладка линии.",
+      "shortDescription": "Точечная подача для расстановки по растению, когда важна управляемая раскладка линии.",
       "price": 36,
       "oldPrice": null,
       "stockStatus": "in_stock",
@@ -1899,25 +1999,25 @@
           "label": "Розница",
           "minQty": 1,
           "price": 36,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 34,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 33,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
         {
           "id": "irrigation-passport",
-          "title": "Паспорт линии полива и узлов",
+          "title": "Паспорт линии полива и подачи",
           "fileUrl": "catalog/files/irrigation-passport.txt",
           "fileSize": "112 KB"
         }
@@ -1989,25 +2089,25 @@
           "label": "Розница",
           "minQty": 1,
           "price": 92,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 87,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 84,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
         {
           "id": "irrigation-passport",
-          "title": "Паспорт линии полива и узлов",
+          "title": "Паспорт линии полива и подачи",
           "fileUrl": "catalog/files/irrigation-passport.txt",
           "fileSize": "112 KB"
         }
@@ -2015,7 +2115,7 @@
       "faq": [
         {
           "question": "Есть бухты?",
-          "answer": "Да, отдельная позиция с бухтой доступна в этой же категории.",
+          "answer": "Да, отдельный вариант с бухтой доступен в этой же категории.",
           "askedAt": "2026-01-17",
           "answeredAt": "2026-01-17"
         }
@@ -2081,25 +2181,25 @@
           "label": "Розница",
           "minQty": 1,
           "price": 6990,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 6641,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 6361,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
         {
           "id": "irrigation-passport",
-          "title": "Паспорт линии полива и узлов",
+          "title": "Паспорт линии полива и подачи",
           "fileUrl": "catalog/files/irrigation-passport.txt",
           "fileSize": "112 KB"
         }
@@ -2147,7 +2247,7 @@
         },
         {
           "key": "type",
-          "label": "Тип позиции",
+          "label": "Тип",
           "value": "монтажный инструмент",
           "group": "Основные"
         },
@@ -2169,25 +2269,25 @@
           "label": "Розница",
           "minQty": 1,
           "price": 540,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 513,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 491,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
         {
           "id": "irrigation-passport",
-          "title": "Паспорт линии полива и узлов",
+          "title": "Паспорт линии полива и подачи",
           "fileUrl": "catalog/files/irrigation-passport.txt",
           "fileSize": "112 KB"
         }
@@ -2211,7 +2311,7 @@
       "categorySlug": "fittings",
       "topLevelCategorySlug": "irrigation",
       "path": "/catalog/fittings/disc-filter-34/",
-      "shortDescription": "Фильтр дисковый 3/4, PN8: базовый фильтрационный узел для линии полива клубничной фермы с проверкой fit по диаметру, давлению и общей схеме.",
+      "shortDescription": "Фильтр дисковый 3/4, PN8: базовый фильтр для линии полива клубничной фермы с проверкой fit по диаметру, давлению и общей схеме.",
       "price": 1000,
       "oldPrice": null,
       "stockStatus": "preorder",
@@ -2259,25 +2359,25 @@
           "label": "Розница",
           "minQty": 1,
           "price": 1740,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 1653,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 1583,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
         {
           "id": "irrigation-passport",
-          "title": "Паспорт линии полива и узлов",
+          "title": "Паспорт линии полива и подачи",
           "fileUrl": "catalog/files/irrigation-passport.txt",
           "fileSize": "112 KB"
         }
@@ -2295,13 +2395,13 @@
     {
       "id": "prod-dosatron",
       "slug": "dosatron",
-      "name": "Насос дозирующий Dosatron",
+      "name": "Растворный узел Dosatron",
       "article": "05-0004-590",
       "categoryId": "irrigation-kits",
       "categorySlug": "irrigation-kits",
       "topLevelCategorySlug": "irrigation",
       "path": "/catalog/irrigation-kits/dosatron/",
-      "shortDescription": "Насос дозирующий Dosatron: узел дозирования для схемы полива клубничной фермы. Покупка имеет смысл только после проверки линии, расхода и логики подачи раствора.",
+      "shortDescription": "Растворный узел Dosatron для схем полива, где уже понятны расход линии, бак и подача раствора.",
       "price": 45000,
       "oldPrice": null,
       "stockStatus": "preorder",
@@ -2341,7 +2441,7 @@
         {
           "key": "sleduyuschiy-shag",
           "label": "Следующий шаг",
-          "value": "Сначала сверить состав узла, потом согласовывать заказ.",
+          "value": "Сначала сверить состав системы, потом согласовывать заказ.",
           "group": "Характеристики",
           "filterable": false
         }
@@ -2351,25 +2451,25 @@
           "label": "Розница",
           "minQty": 1,
           "price": 45000,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 42750,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 40950,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
         {
           "id": "irrigation-passport",
-          "title": "Паспорт линии полива и узлов",
+          "title": "Паспорт линии полива и подачи",
           "fileUrl": "catalog/files/irrigation-passport.txt",
           "fileSize": "112 KB"
         },
@@ -2415,7 +2515,7 @@
       "attributes": [
         {
           "key": "type",
-          "label": "Тип позиции",
+          "label": "Тип",
           "value": "комплект фитингов",
           "group": "Основные"
         },
@@ -2428,7 +2528,7 @@
         {
           "key": "assembly",
           "label": "Сборка",
-          "value": "типовой узел",
+          "value": "типовая схема",
           "group": "Монтаж"
         },
         {
@@ -2443,25 +2543,25 @@
           "label": "Розница",
           "minQty": 1,
           "price": 671,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 637,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 611,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
         {
           "id": "irrigation-passport",
-          "title": "Паспорт линии полива и узлов",
+          "title": "Паспорт линии полива и подачи",
           "fileUrl": "catalog/files/irrigation-passport.txt",
           "fileSize": "112 KB"
         }
@@ -2485,7 +2585,7 @@
       "categorySlug": "irrigation-kits",
       "topLevelCategorySlug": "irrigation",
       "path": "/catalog/irrigation-kits/starter-irrigation-96/",
-      "shortDescription": "Система капельного полива на 96 растений: состав узла, совместимость и когда лучше сначала получить смету под объект.",
+      "shortDescription": "Система капельного полива на 96 растений: состав системы, совместимость и когда лучше сначала получить смету под объект.",
       "price": 1940,
       "oldPrice": null,
       "stockStatus": "in_stock",
@@ -2536,25 +2636,25 @@
           "label": "Розница",
           "minQty": 1,
           "price": 18400,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 17480,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 16744,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
         {
           "id": "irrigation-passport",
-          "title": "Паспорт линии полива и узлов",
+          "title": "Паспорт линии полива и подачи",
           "fileUrl": "catalog/files/irrigation-passport.txt",
           "fileSize": "112 KB"
         },
@@ -2590,7 +2690,7 @@
       "categorySlug": "irrigation-kits",
       "topLevelCategorySlug": "irrigation",
       "path": "/catalog/irrigation-kits/irrigation-base-rack/",
-      "shortDescription": "Комплект полива для базового стеллажа: готовый узел под стартовый модуль клубничной фермы с проверкой состава и fit по схеме.",
+      "shortDescription": "Комплект полива для базового стеллажа: готовый комплект под стартовый модуль клубничной фермы с проверкой состава и fit по схеме.",
       "price": 2167,
       "oldPrice": null,
       "stockStatus": "in_stock",
@@ -2609,7 +2709,7 @@
         {
           "key": "tip-resheniya",
           "label": "Тип решения",
-          "value": "Готовый узел под базовый стеллаж.",
+          "value": "готовый комплект под базовый стеллаж.",
           "group": "Характеристики",
           "filterable": false
         },
@@ -2630,7 +2730,7 @@
         {
           "key": "sleduyuschiy-shag",
           "label": "Следующий шаг",
-          "value": "Сверить состав узла и fit по вашему стеллажу.",
+          "value": "Сверить состав системы и fit по вашему стеллажу.",
           "group": "Характеристики",
           "filterable": false
         }
@@ -2640,25 +2740,25 @@
           "label": "Розница",
           "minQty": 1,
           "price": 2167,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 2059,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 1972,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
         {
           "id": "irrigation-passport",
-          "title": "Паспорт линии полива и узлов",
+          "title": "Паспорт линии полива и подачи",
           "fileUrl": "catalog/files/irrigation-passport.txt",
           "fileSize": "112 KB"
         },
@@ -2672,7 +2772,7 @@
       "faq": [
         {
           "question": "Это комплект под весь проект?",
-          "answer": "Нет, это именно узел под базовый модуль, а не под всю очередь фермы.",
+          "answer": "Нет, это комплект под базовый модуль, а не под всю очередь фермы.",
           "askedAt": "2026-02-28",
           "answeredAt": "2026-02-28"
         }
@@ -2688,7 +2788,7 @@
       "categorySlug": "irrigation-kits",
       "topLevelCategorySlug": "irrigation",
       "path": "/catalog/irrigation-kits/rack-irrigation-module/",
-      "shortDescription": "Комплект полива для дополнительного стеллажа: готовый узел под расширение существующего модульного ряда с проверкой fit по базовой схеме.",
+      "shortDescription": "Комплект полива для дополнительного стеллажа: готовый комплект под расширение существующего модульного ряда с проверкой fit по базовой схеме.",
       "price": 1940,
       "oldPrice": null,
       "stockStatus": "preorder",
@@ -2738,25 +2838,25 @@
           "label": "Розница",
           "minQty": 1,
           "price": 23600,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 22420,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 21476,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
         {
           "id": "irrigation-passport",
-          "title": "Паспорт линии полива и узлов",
+          "title": "Паспорт линии полива и подачи",
           "fileUrl": "catalog/files/irrigation-passport.txt",
           "fileSize": "112 KB"
         },
@@ -2838,19 +2938,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 54900,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 52155,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 49959,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -2935,19 +3035,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 68900,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 65455,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 62699,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -3033,19 +3133,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 124000,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 117800,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 112840,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -3160,19 +3260,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 104500,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 99275,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 95095,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -3258,19 +3358,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 3900,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 3705,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 3549,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -3284,7 +3384,7 @@
       "faq": [
         {
           "question": "Подходит ли под 2 ряда?",
-          "answer": "Нет, это позиция под один рабочий ряд и типовой лоток.",
+          "answer": "Нет, этот вариант рассчитан на один рабочий ряд и типовой лоток.",
           "askedAt": "2026-01-20",
           "answeredAt": "2026-01-20"
         }
@@ -3346,19 +3446,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 2790,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 2651,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 2539,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -3434,19 +3534,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 1960,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 1862,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 1784,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -3527,19 +3627,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 760,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 722,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 692,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -3625,19 +3725,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 590,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 561,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 537,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -3719,19 +3819,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 640,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 608,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 582,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -3744,7 +3844,7 @@
       ],
       "faq": [
         {
-          "question": "Это универсальная позиция?",
+          "question": "Это универсальный вариант?",
           "answer": "Да, но всё равно лучше сверить длину ряда и число растений.",
           "askedAt": "2026-02-24",
           "answeredAt": "2026-02-24"
@@ -3811,19 +3911,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 34,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 32,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 31,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -3843,7 +3943,7 @@
       "faq": [
         {
           "question": "Подходит под семенной старт?",
-          "answer": "Да, это типовая позиция для раннего этапа.",
+          "answer": "Да, это типовой вариант для раннего этапа.",
           "askedAt": "2026-02-04",
           "answeredAt": "2026-02-04"
         }
@@ -3903,19 +4003,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 52,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 49,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 47,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -4023,7 +4123,7 @@
       "faq": [
         {
           "question": "Какой минимум по заказу?",
-          "answer": "Рознично от 50 штук, но основной смысл позиции раскрывается на модуле.",
+          "answer": "Рознично от 50 штук, но основной смысл этого товара раскрывается на модуле.",
           "askedAt": "2026-02-02",
           "answeredAt": "2026-02-02"
         },
@@ -4091,19 +4191,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 132,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 125,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 120,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -4117,7 +4217,7 @@
       "faq": [
         {
           "question": "Можно ли брать небольшую партию?",
-          "answer": "Да, но позиция эффективнее в серийной логистике.",
+          "answer": "Да, но товар эффективнее в серийной логистике.",
           "askedAt": "2026-02-25",
           "answeredAt": "2026-02-25"
         }
@@ -4179,19 +4279,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 3290,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 3126,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 2994,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -4267,19 +4367,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 3490,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 3316,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 3176,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -4361,19 +4461,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 2990,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 2841,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 2721,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -4449,19 +4549,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 5200,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 4940,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 4732,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -4537,19 +4637,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 11800,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 11210,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 10738,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -4625,19 +4725,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 7600,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 7220,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 6916,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -4713,19 +4813,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 26400,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 25080,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 24024,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -4807,19 +4907,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 2980,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 2831,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 2712,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -4895,19 +4995,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 3140,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 2983,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 2857,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -4955,7 +5055,7 @@
       "attributes": [
         {
           "key": "type",
-          "label": "Тип позиции",
+          "label": "Тип",
           "value": "буферы и корректоры",
           "group": "Основные"
         },
@@ -4983,19 +5083,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 1680,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 1596,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 1529,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -5041,7 +5141,7 @@
       "attributes": [
         {
           "key": "type",
-          "label": "Тип позиции",
+          "label": "Тип",
           "value": "буферы",
           "group": "Основные"
         },
@@ -5069,19 +5169,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 1240,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 1178,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 1128,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -5157,19 +5257,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 28900,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 27455,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 26299,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -5245,19 +5345,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 64900,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 61655,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 59059,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -5339,19 +5439,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 9900,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 9405,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 9009,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -5427,19 +5527,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 7800,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 7410,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 7098,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -5603,19 +5703,19 @@
           "label": "Розница",
           "minQty": 1,
           "price": 460,
-          "summary": "Поштучная покупка для точечного добора."
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
         },
         {
           "label": "Мелкий опт",
           "minQty": 10,
           "price": 437,
-          "summary": "Для стандартных дооснащений на один модуль."
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
         },
         {
           "label": "Проектная партия",
           "minQty": 30,
           "price": 419,
-          "summary": "Для связки нескольких рядов и крупных отправок."
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
         }
       ],
       "documents": [
@@ -5632,6 +5732,896 @@
           "answer": "Да, если используете совместимый размер печати.",
           "askedAt": "2026-02-21",
           "answeredAt": "2026-02-21"
+        }
+      ],
+      "quickViewEnabled": true
+    },
+    {
+      "id": "prod-osmos-1600",
+      "slug": "osmos-1600",
+      "name": "Осмос 1600",
+      "article": "WT-RO1600",
+      "categoryId": "irrigation-kits",
+      "categorySlug": "irrigation-kits",
+      "topLevelCategorySlug": "irrigation",
+      "path": "/catalog/irrigation-kits/osmos-1600/",
+      "shortDescription": "Компактная станция обратного осмоса: готовит воду под маточный и рабочий раствор на запуске фермы.",
+      "price": 40000,
+      "oldPrice": null,
+      "stockStatus": "preorder",
+      "badges": [
+        "recommended"
+      ],
+      "rating": 0,
+      "reviewCount": 0,
+      "image": "assets/catalog/osmos-1600.jpg",
+      "images": [
+        "assets/catalog/osmos-1600.jpg",
+        "assets/catalog/membrane-1600.png",
+        "assets/catalog/prefilter-1600.jpg"
+      ],
+      "attributes": [
+        {
+          "key": "capacity",
+          "label": "Класс системы",
+          "value": "1600 GPD",
+          "group": "Основные"
+        },
+        {
+          "key": "scheme",
+          "label": "Схема",
+          "value": "предочистка + RO-мембрана",
+          "group": "Основные"
+        },
+        {
+          "key": "scenario",
+          "label": "Сценарий",
+          "value": "подготовка воды под раствор",
+          "group": "Сценарий"
+        },
+        {
+          "key": "service",
+          "label": "Сервис",
+          "value": "замена картриджей и мембраны по ресурсу",
+          "group": "Монтаж"
+        }
+      ],
+      "priceTiers": [
+        {
+          "label": "Розница",
+          "minQty": 1,
+          "price": 40000,
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
+        },
+        {
+          "label": "Мелкий опт",
+          "minQty": 10,
+          "price": 38000,
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
+        },
+        {
+          "label": "Проектная партия",
+          "minQty": 30,
+          "price": 36400,
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
+        }
+      ],
+      "documents": [
+        {
+          "id": "irrigation-passport",
+          "title": "Паспорт линии полива и подачи",
+          "fileUrl": "catalog/files/irrigation-passport.txt",
+          "fileSize": "112 KB"
+        },
+        {
+          "id": "nutrition-sheet",
+          "title": "Карта растворов и сервисных замеров",
+          "fileUrl": "catalog/files/nutrition-sheet.txt",
+          "fileSize": "84 KB"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Нужна ли диагностика воды перед покупкой?",
+          "answer": "Да, хотя бы базово: по жёсткости и pH/EC. Иначе расходники будут уходить быстрее и качество будет гулять.",
+          "askedAt": "2026-04-04",
+          "answeredAt": "2026-04-04"
+        }
+      ],
+      "quickViewEnabled": true
+    },
+    {
+      "id": "prod-membrane-1600",
+      "slug": "membrane-1600",
+      "name": "Мембрана 1600",
+      "article": "WT-MB1600",
+      "categoryId": "irrigation-kits",
+      "categorySlug": "irrigation-kits",
+      "topLevelCategorySlug": "irrigation",
+      "path": "/catalog/irrigation-kits/membrane-1600/",
+      "shortDescription": "Сменная мембрана для RO-системы 1600: поддерживает стабильную подачу очищенной воды между сервисными интервалами.",
+      "price": 10000,
+      "oldPrice": null,
+      "stockStatus": "limited",
+      "badges": [],
+      "rating": 0,
+      "reviewCount": 0,
+      "image": "assets/catalog/membrane-1600.png",
+      "images": [
+        "assets/catalog/membrane-1600.png",
+        "assets/catalog/osmos-1600.jpg",
+        "assets/catalog/prefilter-1600.jpg"
+      ],
+      "attributes": [
+        {
+          "key": "format",
+          "label": "Форм-фактор",
+          "value": "4040 / сервисный класс",
+          "group": "Основные"
+        },
+        {
+          "key": "scenario",
+          "label": "Сценарий",
+          "value": "замена мембраны осмоса",
+          "group": "Сценарий"
+        },
+        {
+          "key": "role",
+          "label": "Назначение",
+          "value": "стабильный пермеат под замес",
+          "group": "Основные"
+        },
+        {
+          "key": "service",
+          "label": "Сервис",
+          "value": "плановая замена по ресурсу",
+          "group": "Монтаж"
+        }
+      ],
+      "priceTiers": [
+        {
+          "label": "Розница",
+          "minQty": 1,
+          "price": 10000,
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
+        },
+        {
+          "label": "Мелкий опт",
+          "minQty": 10,
+          "price": 9500,
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
+        },
+        {
+          "label": "Проектная партия",
+          "minQty": 30,
+          "price": 9100,
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
+        }
+      ],
+      "documents": [
+        {
+          "id": "irrigation-passport",
+          "title": "Паспорт линии полива и подачи",
+          "fileUrl": "catalog/files/irrigation-passport.txt",
+          "fileSize": "112 KB"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Нужна ли замена предфильтров сразу?",
+          "answer": "Обычно да, если они уже выработаны. Иначе новая мембрана быстро теряет ресурс в первые недели.",
+          "askedAt": "2026-04-04",
+          "answeredAt": "2026-04-04"
+        }
+      ],
+      "quickViewEnabled": true
+    },
+    {
+      "id": "prod-prefilter-1600",
+      "slug": "prefilter-set-1600",
+      "name": "Предфильтр и запас фильтров грубой очистки",
+      "article": "WT-PF1600",
+      "categoryId": "fittings",
+      "categorySlug": "fittings",
+      "topLevelCategorySlug": "irrigation",
+      "path": "/catalog/fittings/prefilter-set-1600/",
+      "shortDescription": "Комплект предочистки и запасных картриджей для осмоса: снижает износ мембраны и стабилизирует установку.",
+      "price": 4000,
+      "oldPrice": null,
+      "stockStatus": "in_stock",
+      "badges": [
+        "recommended"
+      ],
+      "rating": 0,
+      "reviewCount": 0,
+      "image": "assets/catalog/prefilter-1600.jpg",
+      "images": [
+        "assets/catalog/prefilter-1600.jpg",
+        "assets/catalog/osmos-1600.jpg",
+        "assets/catalog/membrane-1600.png"
+      ],
+      "attributes": [
+        {
+          "key": "set",
+          "label": "Состав",
+          "value": "седимент + уголь + сервисный запас",
+          "group": "Основные"
+        },
+        {
+          "key": "scenario",
+          "label": "Сценарий",
+          "value": "предочистка перед осмосом",
+          "group": "Сценарий"
+        },
+        {
+          "key": "role",
+          "label": "Назначение",
+          "value": "защита мембраны и стабильный вход",
+          "group": "Основные"
+        },
+        {
+          "key": "service",
+          "label": "Сервис",
+          "value": "регулярная замена по загрязнению",
+          "group": "Монтаж"
+        }
+      ],
+      "priceTiers": [
+        {
+          "label": "Розница",
+          "minQty": 1,
+          "price": 4000,
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
+        },
+        {
+          "label": "Мелкий опт",
+          "minQty": 10,
+          "price": 3800,
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
+        },
+        {
+          "label": "Проектная партия",
+          "minQty": 30,
+          "price": 3640,
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
+        }
+      ],
+      "documents": [
+        {
+          "id": "irrigation-passport",
+          "title": "Паспорт линии полива и подачи",
+          "fileUrl": "catalog/files/irrigation-passport.txt",
+          "fileSize": "112 KB"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Можно ли покупать без осмоса?",
+          "answer": "Да, если уже есть совместимая схема грубой очистки на объекте. Иначе комплект лучше ставить вместе с установкой.",
+          "askedAt": "2026-04-04",
+          "answeredAt": "2026-04-04"
+        }
+      ],
+      "quickViewEnabled": true
+    },
+    {
+      "id": "prod-fertilizer-year-1000",
+      "slug": "fertilizers-year-1000",
+      "name": "Удобрения по мешку на год для 1000 кустов",
+      "article": "NT-YEAR1000",
+      "categoryId": "base-nutrition",
+      "categorySlug": "base-nutrition",
+      "topLevelCategorySlug": "nutrition",
+      "path": "/catalog/base-nutrition/fertilizers-year-1000/",
+      "shortDescription": "Годовой стартовый набор по мешкам для участка около 1000 кустов: базовая рамка закупки по сезону.",
+      "price": 50000,
+      "oldPrice": null,
+      "stockStatus": "preorder",
+      "badges": [
+        "recommended"
+      ],
+      "rating": 0,
+      "reviewCount": 0,
+      "image": "assets/catalog/fertilizer-year-1000.jpg",
+      "images": [
+        "assets/catalog/fertilizer-year-1000.jpg",
+        "assets/catalog/IMG_4924.webp",
+        "assets/catalog/18341837.webp"
+      ],
+      "attributes": [
+        {
+          "key": "format",
+          "label": "Формат",
+          "value": "закупка по мешкам",
+          "group": "Основные"
+        },
+        {
+          "key": "scenario",
+          "label": "Сценарий",
+          "value": "до 1000 кустов на год",
+          "group": "Сценарий"
+        },
+        {
+          "key": "role",
+          "label": "Назначение",
+          "value": "базовая рамка питания",
+          "group": "Основные"
+        },
+        {
+          "key": "service",
+          "label": "Условие",
+          "value": "нужен контроль pH и EC",
+          "group": "Сценарий"
+        }
+      ],
+      "priceTiers": [
+        {
+          "label": "Розница",
+          "minQty": 1,
+          "price": 50000,
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
+        },
+        {
+          "label": "Мелкий опт",
+          "minQty": 10,
+          "price": 47500,
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
+        },
+        {
+          "label": "Проектная партия",
+          "minQty": 30,
+          "price": 45500,
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
+        }
+      ],
+      "documents": [
+        {
+          "id": "nutrition-sheet",
+          "title": "Карта растворов и сервисных замеров",
+          "fileUrl": "catalog/files/nutrition-sheet.txt",
+          "fileSize": "84 KB"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Этого хватит на весь сезон?",
+          "answer": "Это рамка закупки на типовой объём 1000 кустов. Точные дозировки всё равно настраиваются под воду и схему полива.",
+          "askedAt": "2026-04-04",
+          "answeredAt": "2026-04-04"
+        }
+      ],
+      "quickViewEnabled": true
+    },
+    {
+      "id": "prod-mixing-kit-solution",
+      "slug": "mixing-kit-solution",
+      "name": "Для замеса раствора: весы, стаканчики, ведра",
+      "article": "NT-MIXKIT",
+      "categoryId": "ph-ec-control",
+      "categorySlug": "ph-ec-control",
+      "topLevelCategorySlug": "nutrition",
+      "path": "/catalog/ph-ec-control/mixing-kit-solution/",
+      "shortDescription": "Базовый набор под замес: весы, стаканчики и вёдра для маточного и рабочего раствора без импровизации.",
+      "price": 13000,
+      "oldPrice": null,
+      "stockStatus": "in_stock",
+      "badges": [],
+      "rating": 0,
+      "reviewCount": 0,
+      "image": "assets/catalog/mixing-kit-scale.jpg",
+      "images": [
+        "assets/catalog/mixing-kit-scale.jpg",
+        "assets/catalog/18341837.webp",
+        "assets/photos/optimized/hero-process.webp"
+      ],
+      "attributes": [
+        {
+          "key": "set",
+          "label": "Состав",
+          "value": "весы + мерная тара + сервисные вёдра",
+          "group": "Основные"
+        },
+        {
+          "key": "scenario",
+          "label": "Сценарий",
+          "value": "замес маточного и рабочего раствора",
+          "group": "Сценарий"
+        },
+        {
+          "key": "role",
+          "label": "Назначение",
+          "value": "сервис раствора без бытовой импровизации",
+          "group": "Основные"
+        },
+        {
+          "key": "control",
+          "label": "Контроль",
+          "value": "ручной и повторяемый",
+          "group": "Сценарий"
+        }
+      ],
+      "priceTiers": [
+        {
+          "label": "Розница",
+          "minQty": 1,
+          "price": 13000,
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
+        },
+        {
+          "label": "Мелкий опт",
+          "minQty": 10,
+          "price": 12350,
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
+        },
+        {
+          "label": "Проектная партия",
+          "minQty": 30,
+          "price": 11830,
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
+        }
+      ],
+      "documents": [
+        {
+          "id": "nutrition-sheet",
+          "title": "Карта растворов и сервисных замеров",
+          "fileUrl": "catalog/files/nutrition-sheet.txt",
+          "fileSize": "84 KB"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Обязательно ли покупать этот набор?",
+          "answer": "Да, если замес делается регулярно. Даже на небольшой ферме он снижает ошибки и гонки во время старта.",
+          "askedAt": "2026-04-04",
+          "answeredAt": "2026-04-04"
+        }
+      ],
+      "quickViewEnabled": true
+    },
+    {
+      "id": "prod-smart-home-kit",
+      "slug": "smart-home-kit-farm",
+      "name": "Умный дом комплект",
+      "article": "CT-SMHOME",
+      "categoryId": "controllers",
+      "categorySlug": "controllers",
+      "topLevelCategorySlug": "monitoring",
+      "path": "/catalog/controllers/smart-home-kit-farm/",
+      "shortDescription": "Комплект на DIN-рейку для базовой автоматики, управления реле и удалённого контроля в ключевых зонах.",
+      "price": 50000,
+      "oldPrice": null,
+      "stockStatus": "preorder",
+      "badges": [
+        "new"
+      ],
+      "rating": 0,
+      "reviewCount": 0,
+      "image": "assets/catalog/smart-home-kit.jpg",
+      "images": [
+        "assets/catalog/smart-home-kit.jpg",
+        "assets/catalog/92611106.webp",
+        "assets/catalog/20880535.webp"
+      ],
+      "attributes": [
+        {
+          "key": "mount",
+          "label": "Монтаж",
+          "value": "DIN-рейка",
+          "group": "Основные"
+        },
+        {
+          "key": "connectivity",
+          "label": "Связь",
+          "value": "Ethernet / RS-485 / Wi-Fi",
+          "group": "Основные"
+        },
+        {
+          "key": "scenario",
+          "label": "Сценарий",
+          "value": "базовая автоматика фермы",
+          "group": "Сценарий"
+        },
+        {
+          "key": "role",
+          "label": "Назначение",
+          "value": "реле, тревоги и удалённый контроль",
+          "group": "Основные"
+        }
+      ],
+      "priceTiers": [
+        {
+          "label": "Розница",
+          "minQty": 1,
+          "price": 50000,
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
+        },
+        {
+          "label": "Мелкий опт",
+          "minQty": 10,
+          "price": 47500,
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
+        },
+        {
+          "label": "Проектная партия",
+          "minQty": 30,
+          "price": 45500,
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
+        }
+      ],
+      "documents": [
+        {
+          "id": "monitoring-guide",
+          "title": "Памятка по датчикам и интеграции",
+          "fileUrl": "catalog/files/monitoring-guide.txt",
+          "fileSize": "72 KB"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Это подойдет с Home Assistant?",
+          "answer": "Да, если на объекте уже есть понятная карта датчиков и исполнительных устройств. Иначе подключение не даст эффекта.",
+          "askedAt": "2026-04-04",
+          "answeredAt": "2026-04-04"
+        }
+      ],
+      "quickViewEnabled": true
+    },
+    {
+      "id": "prod-split-system-climate",
+      "slug": "split-system-climate",
+      "name": "Сплит система",
+      "article": "CL-SPLIT",
+      "categoryId": "air-circulation",
+      "categorySlug": "air-circulation",
+      "topLevelCategorySlug": "climate",
+      "path": "/catalog/air-circulation/split-system-climate/",
+      "shortDescription": "Сплит-система для стабилизации температуры в сервисной комнате, рассадной зоне или небольшом помещении модуля.",
+      "price": 80000,
+      "oldPrice": null,
+      "stockStatus": "preorder",
+      "badges": [
+        "recommended"
+      ],
+      "rating": 0,
+      "reviewCount": 0,
+      "image": "assets/catalog/split-system-climate.png",
+      "images": [
+        "assets/catalog/split-system-climate.png",
+        "assets/photos/optimized/hero-process.webp",
+        "assets/photos/optimized/greenhouse-rack.webp"
+      ],
+      "attributes": [
+        {
+          "key": "type",
+          "label": "Тип",
+          "value": "настенная сплит-система",
+          "group": "Основные"
+        },
+        {
+          "key": "scenario",
+          "label": "Сценарий",
+          "value": "рабочая комната / модуль",
+          "group": "Сценарий"
+        },
+        {
+          "key": "role",
+          "label": "Назначение",
+          "value": "стабилизация температуры",
+          "group": "Основные"
+        },
+        {
+          "key": "service",
+          "label": "Условие",
+          "value": "нужен увязанный воздухообмен",
+          "group": "Монтаж"
+        }
+      ],
+      "priceTiers": [
+        {
+          "label": "Розница",
+          "minQty": 1,
+          "price": 80000,
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
+        },
+        {
+          "label": "Мелкий опт",
+          "minQty": 10,
+          "price": 76000,
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
+        },
+        {
+          "label": "Проектная партия",
+          "minQty": 30,
+          "price": 72800,
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
+        }
+      ],
+      "documents": [
+        {
+          "id": "climate-sheet",
+          "title": "Шпаргалка по климатическому контуру",
+          "fileUrl": "catalog/files/climate-sheet.txt",
+          "fileSize": "94 KB"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Можно ли ограничиться только сплит-системой?",
+          "answer": "Нет. Без притока/вытяжки она закрывает лишь часть задачи, а не весь климатический цикл.",
+          "askedAt": "2026-04-04",
+          "answeredAt": "2026-04-04"
+        }
+      ],
+      "quickViewEnabled": true
+    },
+    {
+      "id": "prod-water-tank-kit",
+      "slug": "water-tank-kit",
+      "name": "Емкости для воды и для маточников",
+      "article": "WT-TANKKIT",
+      "categoryId": "irrigation-kits",
+      "categorySlug": "irrigation-kits",
+      "topLevelCategorySlug": "irrigation",
+      "path": "/catalog/irrigation-kits/water-tank-kit/",
+      "shortDescription": "Набор ёмкостей под воду и маточные растворы: без «кривых» решений для стабильного бакового контура.",
+      "price": 10000,
+      "oldPrice": null,
+      "stockStatus": "preorder",
+      "badges": [
+        "recommended"
+      ],
+      "rating": 0,
+      "reviewCount": 0,
+      "image": "assets/catalog/water-tank-kit.jpg",
+      "images": [
+        "assets/catalog/water-tank-kit.jpg",
+        "assets/catalog/osmos-1600.jpg",
+        "assets/catalog/prefilter-1600.jpg"
+      ],
+      "attributes": [
+        {
+          "key": "material",
+          "label": "Материал",
+          "value": "пищевой полиэтилен",
+          "group": "Основные"
+        },
+        {
+          "key": "scenario",
+          "label": "Сценарий",
+          "value": "вода + маточники",
+          "group": "Сценарий"
+        },
+        {
+          "key": "role",
+          "label": "Назначение",
+          "value": "баковый контур под замес и подачу",
+          "group": "Основные"
+        },
+        {
+          "key": "service",
+          "label": "Особенность",
+          "value": "не ржавеют и не трескаются от обычной эксплуатации",
+          "group": "Основные"
+        }
+      ],
+      "priceTiers": [
+        {
+          "label": "Розница",
+          "minQty": 1,
+          "price": 10000,
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
+        },
+        {
+          "label": "Мелкий опт",
+          "minQty": 10,
+          "price": 9500,
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
+        },
+        {
+          "label": "Проектная партия",
+          "minQty": 30,
+          "price": 9100,
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
+        }
+      ],
+      "documents": [
+        {
+          "id": "irrigation-passport",
+          "title": "Паспорт линии полива и подачи",
+          "fileUrl": "catalog/files/irrigation-passport.txt",
+          "fileSize": "112 KB"
+        },
+        {
+          "id": "nutrition-sheet",
+          "title": "Карта растворов и сервисных замеров",
+          "fileUrl": "catalog/files/nutrition-sheet.txt",
+          "fileSize": "84 KB"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Подойдёт ли для маточных и рабочих растворов?",
+          "answer": "Да, это базовая логика: чистая вода отдельно и отдельные емкости под концентраты по мере необходимости.",
+          "askedAt": "2026-04-04",
+          "answeredAt": "2026-04-04"
+        }
+      ],
+      "quickViewEnabled": true
+    },
+    {
+      "id": "prod-ventilation-duct-kit",
+      "slug": "ventilation-duct-kit",
+      "name": "Климат: вытяжка, листы металла для вентканалов",
+      "article": "CL-VENTKIT",
+      "categoryId": "air-circulation",
+      "categorySlug": "air-circulation",
+      "topLevelCategorySlug": "climate",
+      "path": "/catalog/air-circulation/ventilation-duct-kit/",
+      "shortDescription": "Комплект для сборки вытяжки и воздуховодов: нужен, когда климат проектируют по помещению, а не по остаточному принципу.",
+      "price": 80000,
+      "oldPrice": null,
+      "stockStatus": "preorder",
+      "badges": [],
+      "rating": 0,
+      "reviewCount": 0,
+      "image": "assets/photos/optimized/hero-process.webp",
+      "images": [
+        "assets/photos/optimized/hero-process.webp",
+        "assets/catalog/split-system-climate.png",
+        "assets/photos/optimized/greenhouse-rack.webp"
+      ],
+      "attributes": [
+        {
+          "key": "set",
+          "label": "Состав",
+          "value": "вытяжка + металл под вентканалы",
+          "group": "Основные"
+        },
+        {
+          "key": "scenario",
+          "label": "Сценарий",
+          "value": "климатический контур помещения",
+          "group": "Сценарий"
+        },
+        {
+          "key": "role",
+          "label": "Назначение",
+          "value": "удаление тёплого и влажного воздуха",
+          "group": "Основные"
+        },
+        {
+          "key": "service",
+          "label": "Условие",
+          "value": "нужна увязка с притоком и охлаждением",
+          "group": "Монтаж"
+        }
+      ],
+      "priceTiers": [
+        {
+          "label": "Розница",
+          "minQty": 1,
+          "price": 80000,
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
+        },
+        {
+          "label": "Мелкий опт",
+          "minQty": 10,
+          "price": 76000,
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
+        },
+        {
+          "label": "Проектная партия",
+          "minQty": 30,
+          "price": 72800,
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
+        }
+      ],
+      "documents": [
+        {
+          "id": "climate-sheet",
+          "title": "Шпаргалка по климатическому контуру",
+          "fileUrl": "catalog/files/climate-sheet.txt",
+          "fileSize": "94 KB"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Нужна ли вытяжка без всего комплекса климата?",
+          "answer": "Рекомендуем считать вместе с притоком и охлаждением: только в связке получается стабильный режим.",
+          "askedAt": "2026-04-04",
+          "answeredAt": "2026-04-04"
+        }
+      ],
+      "quickViewEnabled": true
+    },
+    {
+      "id": "prod-electrical-panel-kit",
+      "slug": "electrical-panel-kit",
+      "name": "Провода, щиток, автоматы",
+      "article": "EL-PANELKIT",
+      "categoryId": "controllers",
+      "categorySlug": "controllers",
+      "topLevelCategorySlug": "monitoring",
+      "path": "/catalog/controllers/electrical-panel-kit/",
+      "shortDescription": "Стартовый электрокомплект под ввод, защиту и разводку по объекту без временных решений и случайных линий.",
+      "price": 40000,
+      "oldPrice": null,
+      "stockStatus": "preorder",
+      "badges": [],
+      "rating": 0,
+      "reviewCount": 0,
+      "image": "assets/catalog/smart-home-kit.jpg",
+      "images": [
+        "assets/catalog/smart-home-kit.jpg",
+        "assets/catalog/92611106.webp",
+        "assets/photos/optimized/hero-process.webp"
+      ],
+      "attributes": [
+        {
+          "key": "set",
+          "label": "Состав",
+          "value": "щиток + автоматы + проводка",
+          "group": "Основные"
+        },
+        {
+          "key": "scenario",
+          "label": "Сценарий",
+          "value": "ввод и разводка по модулю",
+          "group": "Сценарий"
+        },
+        {
+          "key": "role",
+          "label": "Назначение",
+          "value": "защита и питание контуров",
+          "group": "Основные"
+        },
+        {
+          "key": "service",
+          "label": "Условие",
+          "value": "нужна карта нагрузок и линий",
+          "group": "Монтаж"
+        }
+      ],
+      "priceTiers": [
+        {
+          "label": "Розница",
+          "minQty": 1,
+          "price": 40000,
+          "summary": "Для одной закупки или спокойного добора в уже понятную схему."
+        },
+        {
+          "label": "Мелкий опт",
+          "minQty": 10,
+          "price": 38000,
+          "summary": "Когда дооснащаете модуль или берёте небольшую рабочую партию."
+        },
+        {
+          "label": "Проектная партия",
+          "minQty": 30,
+          "price": 36400,
+          "summary": "Когда закупка идёт сразу на несколько рядов, зон или этапов запуска."
+        }
+      ],
+      "documents": [
+        {
+          "id": "monitoring-guide",
+          "title": "Памятка по датчикам и интеграции",
+          "fileUrl": "catalog/files/monitoring-guide.txt",
+          "fileSize": "72 KB"
+        },
+        {
+          "id": "climate-sheet",
+          "title": "Шпаргалка по климатическому контуру",
+          "fileUrl": "catalog/files/climate-sheet.txt",
+          "fileSize": "94 KB"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Можем ли мы считать финальной ценой?",
+          "answer": "Нет, это ориентир. На итог влияют длины линий, количество автоматов и итоговая мощность по объекту.",
+          "askedAt": "2026-04-04",
+          "answeredAt": "2026-04-04"
         }
       ],
       "quickViewEnabled": true

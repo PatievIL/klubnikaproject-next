@@ -19,7 +19,7 @@ import { getRouteMeta, renderCatalogApp } from "../catalog/_app/catalog-renderer
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "..");
 const catalogRoot = path.join(projectRoot, "catalog");
-const version = "20260403ac";
+const version = "20260404q";
 
 function jsonScript(data) {
   return JSON.stringify(data, null, 2);

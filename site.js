@@ -10,6 +10,15 @@ function withStaticIndexPath(path) {
   return `${normalizedPath}${query ? `?${query}` : ""}${hash ? `#${hash}` : ""}`;
 }
 
+function detectRuntimeApiBase(configuredBase) {
+  const normalized = String(configuredBase || "").trim().replace(/\/+$/, "");
+  const host = window.location.hostname;
+  if (host === "127.0.0.1" || host === "localhost") {
+    return "http://127.0.0.1:8010/v1";
+  }
+  return normalized;
+}
+
 const SITE_ADMIN_DEFAULTS = {
   site: {
     supportTelegram: "@patiev_admin",
@@ -231,7 +240,7 @@ function loadSiteAdminConfig() {
 
 async function refreshBackendSettings() {
   const current = loadSiteAdminConfig();
-  const apiBase = (current.integrations?.apiBase || "").replace(/\/+$/, "");
+  const apiBase = detectRuntimeApiBase(current.integrations?.apiBase || "");
   if (!apiBase) return;
 
   const response = await fetch(`${apiBase}/public/settings`, {
@@ -566,23 +575,59 @@ function injectUiControls() {
 
 function buildUiControlsMarkup() {
   return `
-    <div class="ui-switch" role="group" aria-label="Language switch">
-      <button class="ui-switch-btn" type="button" data-site-lang="ru">RU</button>
-      <button class="ui-switch-btn" type="button" data-site-lang="en">EN</button>
-    </div>
-    <div class="ui-switch" role="group" aria-label="Theme switch">
-      <button class="ui-switch-btn ui-switch-btn-theme" type="button" data-site-theme="light" title="Light theme" aria-label="Light theme">◐</button>
-      <button class="ui-switch-btn ui-switch-btn-theme" type="button" data-site-theme="dark" title="Dark theme" aria-label="Dark theme">◼</button>
+    <button class="site-utility-toggle" type="button" aria-label="Настройки интерфейса" aria-expanded="false">
+      <span class="site-utility-toggle__dot"></span>
+      <span class="site-utility-toggle__dot"></span>
+      <span class="site-utility-toggle__dot"></span>
+    </button>
+    <div class="site-utility-panel" hidden>
+      <div class="site-utility-row">
+        <span class="site-utility-label">Язык</span>
+        <div class="ui-switch" role="group" aria-label="Language switch">
+          <button class="ui-switch-btn" type="button" data-site-lang="ru">RU</button>
+          <button class="ui-switch-btn" type="button" data-site-lang="en">EN</button>
+        </div>
+      </div>
+      <div class="site-utility-row">
+        <span class="site-utility-label">Тема</span>
+        <div class="ui-switch" role="group" aria-label="Theme switch">
+          <button class="ui-switch-btn ui-switch-btn-theme" type="button" data-site-theme="light" title="Light theme" aria-label="Light theme">◐</button>
+          <button class="ui-switch-btn ui-switch-btn-theme" type="button" data-site-theme="dark" title="Dark theme" aria-label="Dark theme">◼</button>
+        </div>
+      </div>
     </div>
   `;
 }
 
 function bindUiControls() {
+  document.querySelectorAll(".site-utility-toggle").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const tools = button.closest(".topbar-tools, .compact-tools");
+      if (!tools) return;
+      const expanded = button.getAttribute("aria-expanded") === "true";
+      document.querySelectorAll(".topbar-tools.is-open, .compact-tools.is-open").forEach((openTools) => {
+        if (openTools !== tools) {
+          openTools.classList.remove("is-open");
+          const toggle = openTools.querySelector(".site-utility-toggle");
+          const panel = openTools.querySelector(".site-utility-panel");
+          if (toggle) toggle.setAttribute("aria-expanded", "false");
+          if (panel) panel.hidden = true;
+        }
+      });
+      tools.classList.toggle("is-open", !expanded);
+      button.setAttribute("aria-expanded", expanded ? "false" : "true");
+      const panel = tools.querySelector(".site-utility-panel");
+      if (panel) panel.hidden = expanded;
+    });
+  });
+
   document.querySelectorAll("[data-site-lang]").forEach((button) => {
     button.addEventListener("click", () => {
       const lang = button.dataset.siteLang || "ru";
       window.localStorage.setItem("kp-lang", lang);
       applyLanguage(lang);
+      closeUtilityPanels();
     });
   });
 
@@ -591,8 +636,31 @@ function bindUiControls() {
       const theme = button.dataset.siteTheme || "light";
       window.localStorage.setItem("kp-theme", theme);
       applyTheme(theme);
+      closeUtilityPanels();
     });
   });
+
+  document.addEventListener("click", (event) => {
+    document.querySelectorAll(".topbar-tools.is-open, .compact-tools.is-open").forEach((tools) => {
+      if (tools.contains(event.target)) return;
+      closeUtilityPanel(tools);
+    });
+  });
+}
+
+function closeUtilityPanels() {
+  document.querySelectorAll(".topbar-tools.is-open, .compact-tools.is-open").forEach((tools) => {
+    closeUtilityPanel(tools);
+  });
+}
+
+function closeUtilityPanel(tools) {
+  if (!tools) return;
+  tools.classList.remove("is-open");
+  const toggle = tools.querySelector(".site-utility-toggle");
+  const panel = tools.querySelector(".site-utility-panel");
+  if (toggle) toggle.setAttribute("aria-expanded", "false");
+  if (panel) panel.hidden = true;
 }
 
 function applyStoredUi() {
@@ -776,7 +844,7 @@ function bindDraftForms(config) {
       const title = form.dataset.briefForm || document.title;
       const prefix = latestConfig.forms.handoffPrefix ? `${latestConfig.forms.handoffPrefix}\n\n` : "";
       const text = `${prefix}${[title, "", ...lines].join("\n")}`;
-      const apiBase = (latestConfig.integrations?.apiBase || "").replace(/\/+$/, "");
+      const apiBase = detectRuntimeApiBase(latestConfig.integrations?.apiBase || "");
       const leadPayload = buildLeadPayload(form, title, lines, text);
       const shouldOpenTelegram =
         latestConfig.forms.primaryChannel === "telegram" &&

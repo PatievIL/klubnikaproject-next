@@ -15,8 +15,8 @@
   <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png" />
   <link rel="manifest" href="../../site.webmanifest" />
-  <link rel="stylesheet" href="../../styles.css?v=20260403ac" />
-  <link rel="stylesheet" href="../_app/catalog-app.css?v=20260403ac" />
+  <link rel="stylesheet" href="../../styles.css?v=20260404r" />
+  <link rel="stylesheet" href="../_app/catalog-app.css?v=20260405r" />
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -72,65 +72,14 @@
           <span></span>
         </button>
         <nav class="catalog-main-nav nav" aria-label="Основная навигация">
-          <a class="nav-link" href="../../index.html">Главная</a>
-          <div class="nav-group">
-            <button class="nav-trigger" type="button">Решения</button>
-            <div class="nav-menu">
-              <a href="../../farm/index.html"><strong>Расчёт фермы</strong><span>Состав запуска, рамка бюджета и следующий шаг.</span></a>
-              <a href="../../study/index.html"><strong>Сопровождение</strong><span>Разбор действующей фермы, узких мест и технологии.</span></a>
-              <a href="../../consultations/index.html"><strong>Консультации</strong><span>Точечный разбор задачи, совместимости и выбора.</span></a>
-              <a href="../../klubhack/index.html"><strong>Клубничный Хак</strong><span>Практическая база по технологии клубничной фермы.</span></a>
-            </div>
-          </div>
-          <div class="nav-group">
-            <button class="nav-trigger" type="button">Каталог</button>
-            <div class="nav-menu nav-menu-wide">
-              <a href="../../catalog/index.html"><strong>Магазин</strong><span>Вход в рабочие категории и закупку без лишней витринности.</span></a>
-              <a href="../../catalog/led/index.html"><strong>LED</strong><span>Линейные и тепличные сценарии досветки.</span></a>
-              <a href="../../catalog/irrigation/index.html"><strong>Полив</strong><span>Полив, дозирование и расходники по узлам.</span></a>
-              <a href="../../catalog/racks/index.html"><strong>Стеллажи</strong><span>Каркасы, лотки и модульные ряды.</span></a>
-              <a href="../../catalog/substrates/index.html"><strong>Субстрат</strong><span>Маты, кубики и старт корневой зоны.</span></a>
-              <a href="../../seeds/index.html"><strong>Семена и Frigo</strong><span>Посадочный материал под запуск и докупку.</span></a>
-            </div>
-          </div>
+          <a class="nav-link" href="../../index.html">Сайт</a>
+          <a class="nav-link" href="../../catalog/index.html">Каталог</a>
           <a class="nav-link" href="../../calc/index.html">Калькулятор</a>
+          <a class="nav-link" href="../../cabinet/login/index.html">Кабинет</a>
         </nav>
-        <div class="catalog-header-utility">
-          <a class="catalog-icon-pill catalog-header-utility-link" href="#catalog-how-buy">Как купить</a>
-          <a class="catalog-icon-pill catalog-header-utility-link" href="../../account/index.html">Кабинет</a>
-          <button type="button" class="catalog-header-cart" data-action="open-cart">
-            Корзина <span>0</span>
-          </button>
-        </div>
-        <div class="catalog-header-mobile-actions">
-          <button type="button" class="catalog-icon-pill" data-action="open-search" aria-label="Открыть поиск">Поиск</button>
-          <button type="button" class="catalog-icon-pill" data-action="open-cart" aria-label="Открыть корзину">Корзина <span>0</span></button>
-          <button type="button" class="catalog-icon-pill" data-action="open-menu" aria-label="Открыть меню">Меню</button>
-        </div>
-      </div>
-      <div class="catalog-header__bottom">
-        <div class="catalog-header-workbar">
-          <form class="catalog-header-search" data-header-search>
-            <div class="catalog-search-shell">
-              <input type="search" value="" placeholder="Название, артикул или рабочий узел" />
-              <button type="submit" class="catalog-search-submit" aria-label="Искать по магазину">
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <path d="M10.5 4a6.5 6.5 0 1 0 4.018 11.61l4.436 4.436 1.06-1.06-4.436-4.436A6.5 6.5 0 0 0 10.5 4Zm0 1.5a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z" />
-                </svg>
-                <span class="sr-only">Искать</span>
-              </button>
-            </div>
-          </form>
-          <div class="catalog-header-support">
-            <div class="catalog-header-contactline">
-              <a href="tel:+79255831669">+7 925 583-16-69</a>
-            </div>
-            <div class="catalog-header-actions">
-              <a class="catalog-icon-pill catalog-header-anchor" href="#catalog-contacts">Контакты</a>
-              <button type="button" class="catalog-secondary-button" data-action="open-assistant" data-intent="callback">Попросить звонок</button>
-              <button type="button" class="catalog-secondary-button" data-action="open-assistant" data-intent="question">Задать вопрос</button>
-            </div>
-          </div>
+        <div class="catalog-header-contactbar">
+          <a class="catalog-header-phone" href="tel:+79255831669">+7 925 583-16-69</a>
+          <a class="catalog-icon-pill catalog-header-anchor" href="#catalog-contacts">Связь</a>
         </div>
       </div>
     </header>
@@ -138,7 +87,7 @@
       <main class="catalog-main">
         
         
-    <section class="catalog-page-hero">
+    <section class="catalog-page-head catalog-page-head--category">
       
     <nav class="catalog-breadcrumbs" aria-label="Хлебные крошки">
       
@@ -160,408 +109,23 @@
           
     </nav>
   
-      <div class="catalog-page-hero__content">
-        <div class="catalog-page-hero__copy">
-          <span class="catalog-eyebrow">Категория магазина</span>
-          <h1>Линейные светильники</h1>
-          <p>Линейка под ярус, стеллаж и сервисный ряд с фиксированной длиной пролёта.</p>
-          <div class="catalog-page-hero__meta">
-            <span>3 товаров в разделе</span>
-            
-          </div>
-          <div class="catalog-page-hero__actions">
-            <a class="catalog-primary-button" href="#catalog-products">Смотреть товары</a>
-            <a class="catalog-secondary-button" href="../../consultations/index.html">Сверить задачу</a>
-          </div>
-          <div class="catalog-page-hero__rail">
-            <div class="catalog-page-hero__rail-head">
-              <span class="catalog-sibling-row__label">Карта каталога</span>
-              <p>Переключайтесь между верхнеуровневыми разделами без возврата на главную магазина.</p>
-            </div>
-            <div class="catalog-sibling-grid" aria-label="Соседние категории">
-              
-                    <a class="catalog-sibling-card is-active" href="../../catalog/led/index.html">
-                      <span class="catalog-sibling-card__media">
-                        <img src="../../assets/photos/optimized/greenhouse-rack.webp" alt="LED-освещение" loading="lazy" />
-                      </span>
-                      <span class="catalog-sibling-card__body">
-                        <strong>LED-освещение</strong>
-                        <span>5 товаров</span>
-                      </span>
-                    </a>
-                  
-                    <a class="catalog-sibling-card" href="../../catalog/irrigation/index.html">
-                      <span class="catalog-sibling-card__media">
-                        <img src="../../assets/catalog/80128135.webp" alt="Полив и дозирование" loading="lazy" />
-                      </span>
-                      <span class="catalog-sibling-card__body">
-                        <strong>Полив и дозирование</strong>
-                        <span>12 товаров</span>
-                      </span>
-                    </a>
-                  
-                    <a class="catalog-sibling-card" href="../../catalog/racks/index.html">
-                      <span class="catalog-sibling-card__media">
-                        <img src="../../assets/photos/optimized/rack-aisle.webp" alt="Стеллажные системы" loading="lazy" />
-                      </span>
-                      <span class="catalog-sibling-card__body">
-                        <strong>Стеллажные системы</strong>
-                        <span>7 товаров</span>
-                      </span>
-                    </a>
-                  
-                    <a class="catalog-sibling-card" href="../../catalog/substrates/index.html">
-                      <span class="catalog-sibling-card__media">
-                        <img src="../../assets/catalog/grodan_prestige_6_ho.webp" alt="Субстраты и старт-корневая зона" loading="lazy" />
-                      </span>
-                      <span class="catalog-sibling-card__body">
-                        <strong>Субстраты и старт-корневая зона</strong>
-                        <span>5 товаров</span>
-                      </span>
-                    </a>
-                  
-                    <a class="catalog-sibling-card" href="../../catalog/planting-material/index.html">
-                      <span class="catalog-sibling-card__media">
-                        <img src="../../assets/photos/optimized/berry-red.webp" alt="Посадочный материал" loading="lazy" />
-                      </span>
-                      <span class="catalog-sibling-card__body">
-                        <strong>Посадочный материал</strong>
-                        <span>5 товаров</span>
-                      </span>
-                    </a>
-                  
-                    <a class="catalog-sibling-card" href="../../catalog/climate/index.html">
-                      <span class="catalog-sibling-card__media">
-                        <img src="../../assets/photos/optimized/hero-process.webp" alt="Климат и воздух" loading="lazy" />
-                      </span>
-                      <span class="catalog-sibling-card__body">
-                        <strong>Климат и воздух</strong>
-                        <span>4 товаров</span>
-                      </span>
-                    </a>
-                  
-                    <a class="catalog-sibling-card" href="../../catalog/nutrition/index.html">
-                      <span class="catalog-sibling-card__media">
-                        <img src="../../assets/catalog/IMG_4924.webp" alt="Питание и сервис раствора" loading="lazy" />
-                      </span>
-                      <span class="catalog-sibling-card__body">
-                        <strong>Питание и сервис раствора</strong>
-                        <span>4 товаров</span>
-                      </span>
-                    </a>
-                  
-                    <a class="catalog-sibling-card" href="../../catalog/monitoring/index.html">
-                      <span class="catalog-sibling-card__media">
-                        <img src="../../assets/catalog/92611106.webp" alt="Датчики и автоматика" loading="lazy" />
-                      </span>
-                      <span class="catalog-sibling-card__body">
-                        <strong>Датчики и автоматика</strong>
-                        <span>4 товаров</span>
-                      </span>
-                    </a>
-                  
-                    <a class="catalog-sibling-card" href="../../catalog/packaging/index.html">
-                      <span class="catalog-sibling-card__media">
-                        <img src="../../assets/photos/optimized/berry-close.webp" alt="Упаковка и отгрузка" loading="lazy" />
-                      </span>
-                      <span class="catalog-sibling-card__body">
-                        <strong>Упаковка и отгрузка</strong>
-                        <span>2 товаров</span>
-                      </span>
-                    </a>
-                  
-            </div>
-          </div>
-          
-                <div class="catalog-page-hero__support">
-                  <div class="catalog-page-hero__support-head">
-                    <strong>С чего обычно начинают в этом разделе</strong>
-                    <p>Если подкатегорий нет, удобнее начать с самых типовых позиций, а уже потом докручивать состав.</p>
-                  </div>
-                  <div class="catalog-page-hero__shortcut-grid">
-                    
-          <a class="catalog-page-hero__shortcut-card" href="../../catalog/linear-led/luma-line-60/index.html">
-            <strong>Светодиодный светильник 50Вт, 60см</strong>
-            <p>Светодиодный светильник 50Вт, 60см: серия M23, 0,6 м, 8500 Лм, Samsung и логика выбора под многоярусную клубничную ферму.</p>
-            <span>3 630 ₽</span>
-          </a>
-        
-          <a class="catalog-page-hero__shortcut-card" href="../../catalog/linear-led/luma-line-95/index.html">
-            <strong>Светодиодный светильник 50Вт, 95см</strong>
-            <p>Светодиодный светильник 50Вт, 95см: M23FSP50L1 MIX, 9550 Лм, Samsung и логика выбора под клубничный стеллажный пролёт.</p>
-            <span>4 950 ₽</span>
-          </a>
-        
-          <a class="catalog-page-hero__shortcut-card" href="../../catalog/linear-led/luma-line-191/index.html">
-            <strong>Светодиодный светильник 100Вт, 191см</strong>
-            <p>Светодиодный светильник 100Вт, 191см: серия M23 с двумя режимами мощности и логикой выбора под стеллажную ферму.</p>
-            <span>9 900 ₽</span>
-          </a>
-        
-                  </div>
-                </div>
-              
+      <div class="catalog-page-head__copy">
+        <span class="catalog-eyebrow">Раздел каталога</span>
+        <h1>Линейные светильники</h1>
+        <p>Линейка под ярус, стеллаж и сервисный ряд с фиксированной длиной пролёта.</p>
+        <div class="catalog-page-head__meta">
+          <span>3 товаров</span>
+          <span>Цена и наличие сразу в карточках</span>
         </div>
-        <aside class="catalog-page-hero__aside">
-          <div class="catalog-page-hero__card">
-            <strong>Как смотреть этот раздел</strong>
-            <ul>
-              <li>Сначала выберите подкатегорию или сценарий узла, потом уже сравнивайте позиции.</li>
-              <li>3 товаров уже разложены по фильтрам, документам и быстрым действиям.</li>
-              <li>Здесь лучше покупать сразу только те позиции, чья совместимость вам уже понятна.</li>
-            </ul>
-          </div>
-          <div class="catalog-page-hero__card catalog-page-hero__card--accent">
-            <strong>Когда лучше не идти в корзину сразу</strong>
-            <p>Если товар влияет на схему света, полива, стеллажа или запуска в целом, лучше сначала уточнить сценарий, а не собирать модуль поштучно.</p>
-            <div class="catalog-page-hero__actions">
-              <a class="catalog-secondary-button" href="../../consultations/index.html">Сверить задачу</a>
-              <a class="catalog-link-button" href="../../farm/index.html">Перейти к расчёту</a>
-            </div>
-          </div>
-        </aside>
       </div>
     </section>
-    
     <section class="catalog-category-layout" id="catalog-products">
-      <aside class="catalog-category-sidebar">
-        
-    <form class="catalog-filter-panel" data-filter-form="desktop">
-      <div class="catalog-filter-panel__head">
-        <div>
-          <h2>Фильтры</h2>
-          <p>Выбрано фильтров: 0</p>
-        </div>
-        
-      </div>
-      <fieldset class="catalog-filter-group">
-        <legend>Цена</legend>
-        <div class="catalog-price-inputs">
-          <label>
-            <span>От</span>
-            <input type="number" inputmode="numeric" data-filter-kind="price-min" value="" />
-          </label>
-          <label>
-            <span>До</span>
-            <input type="number" inputmode="numeric" data-filter-kind="price-max" value="" />
-          </label>
-        </div>
-        <div class="catalog-filter-note">Диапазон категории: 3 630 ₽ - 9 900 ₽</div>
-      </fieldset>
-      <fieldset class="catalog-filter-group">
-        <legend>Наличие</legend>
-        <div class="catalog-filter-options">
-          
-                <label class="catalog-check">
-                  <input type="checkbox" data-filter-kind="stock" value="in_stock"  />
-                  <span>В наличии</span>
-                  <small>2</small>
-                </label>
-              
-                <label class="catalog-check">
-                  <input type="checkbox" data-filter-kind="stock" value="limited"  />
-                  <span>Осталось мало</span>
-                  <small>1</small>
-                </label>
-              
-        </div>
-      </fieldset>
-      <fieldset class="catalog-filter-group">
-        <legend>Метки</legend>
-        <div class="catalog-filter-options">
-          
-                <label class="catalog-check">
-                  <input type="checkbox" data-filter-kind="badge" value="recommended"  />
-                  <span>Советуем</span>
-                  <small>2</small>
-                </label>
-              
-                <label class="catalog-check">
-                  <input type="checkbox" data-filter-kind="badge" value="hit"  />
-                  <span>Хит</span>
-                  <small>2</small>
-                </label>
-              
-        </div>
-      </fieldset>
-      
-    <fieldset class="catalog-filter-group">
-      <legend>Длина</legend>
-      <div class="catalog-filter-options">
-        
-              <label class="catalog-check">
-                <input
-                  type="checkbox"
-                  data-filter-kind="attribute"
-                  data-filter-key="dlina"
-                  value="0,6 м."
-                  
-                />
-                <span>0,6 м.</span>
-                <small>1</small>
-              </label>
-            
-              <label class="catalog-check">
-                <input
-                  type="checkbox"
-                  data-filter-kind="attribute"
-                  data-filter-key="dlina"
-                  value="0,95 м."
-                  
-                />
-                <span>0,95 м.</span>
-                <small>1</small>
-              </label>
-            
-              <label class="catalog-check">
-                <input
-                  type="checkbox"
-                  data-filter-kind="attribute"
-                  data-filter-key="dlina"
-                  value="1,91 м."
-                  
-                />
-                <span>1,91 м.</span>
-                <small>1</small>
-              </label>
-            
-      </div>
-    </fieldset>
-  
-    <fieldset class="catalog-filter-group">
-      <legend>Модель</legend>
-      <div class="catalog-filter-options">
-        
-              <label class="catalog-check">
-                <input
-                  type="checkbox"
-                  data-filter-kind="attribute"
-                  data-filter-key="model"
-                  value="M23FS50L1 MIX."
-                  
-                />
-                <span>M23FS50L1 MIX.</span>
-                <small>1</small>
-              </label>
-            
-              <label class="catalog-check">
-                <input
-                  type="checkbox"
-                  data-filter-kind="attribute"
-                  data-filter-key="model"
-                  value="M23FSP50L1 MIX."
-                  
-                />
-                <span>M23FSP50L1 MIX.</span>
-                <small>1</small>
-              </label>
-            
-      </div>
-    </fieldset>
-  
-    <fieldset class="catalog-filter-group">
-      <legend>Мощность</legend>
-      <div class="catalog-filter-options">
-        
-              <label class="catalog-check">
-                <input
-                  type="checkbox"
-                  data-filter-kind="attribute"
-                  data-filter-key="moschnost"
-                  value="Два режима: 50 и 100 Вт."
-                  
-                />
-                <span>Два режима: 50 и 100 Вт.</span>
-                <small>1</small>
-              </label>
-            
-      </div>
-    </fieldset>
-  
-    <fieldset class="catalog-filter-group">
-      <legend>Мощность и поток</legend>
-      <div class="catalog-filter-options">
-        
-              <label class="catalog-check">
-                <input
-                  type="checkbox"
-                  data-filter-kind="attribute"
-                  data-filter-key="moschnost-i-potok"
-                  value="50 Вт и 8 500 Лм."
-                  
-                />
-                <span>50 Вт и 8 500 Лм.</span>
-                <small>1</small>
-              </label>
-            
-              <label class="catalog-check">
-                <input
-                  type="checkbox"
-                  data-filter-kind="attribute"
-                  data-filter-key="moschnost-i-potok"
-                  value="50 Вт и 9 550 Лм."
-                  
-                />
-                <span>50 Вт и 9 550 Лм.</span>
-                <small>1</small>
-              </label>
-            
-      </div>
-    </fieldset>
-  
-    <fieldset class="catalog-filter-group">
-      <legend>Световой поток</legend>
-      <div class="catalog-filter-options">
-        
-              <label class="catalog-check">
-                <input
-                  type="checkbox"
-                  data-filter-kind="attribute"
-                  data-filter-key="svetovoy-potok"
-                  value="10 200 / 19 100 Лм."
-                  
-                />
-                <span>10 200 / 19 100 Лм.</span>
-                <small>1</small>
-              </label>
-            
-      </div>
-    </fieldset>
-  
-    <fieldset class="catalog-filter-group">
-      <legend>Спектр</legend>
-      <div class="catalog-filter-options">
-        
-              <label class="catalog-check">
-                <input
-                  type="checkbox"
-                  data-filter-kind="attribute"
-                  data-filter-key="spektr"
-                  value="5216К MIX 87 Ra, 1000 Lux = 3.2 W/m² ФАР."
-                  
-                />
-                <span>5216К MIX 87 Ra, 1000 Lux = 3.2 W/m² ФАР.</span>
-                <small>1</small>
-              </label>
-            
-      </div>
-    </fieldset>
-  
-      <div class="catalog-filter-panel__actions">
-        <button type="button" class="catalog-primary-button" data-action="apply-filters">
-          Показать 3
-        </button>
-        <button type="button" class="catalog-secondary-button" data-action="reset-filters">Сбросить фильтры</button>
-      </div>
-    </form>
-  
-      </aside>
       <div class="catalog-category-main">
         
     <section class="catalog-category-listing">
       <div class="catalog-listing-toolbar">
         <div>
-          <p class="catalog-listing-count">Найдено товаров: 3</p>
+          <p class="catalog-listing-count">3 товаров в разделе</p>
           
         </div>
         <div class="catalog-listing-toolbar__controls">
@@ -601,108 +165,93 @@
       </div>
       <div class="catalog-grid-listing">
     <article class="catalog-product-card">
-      <div class="catalog-product-card__media">
+      <a class="catalog-product-card__media" href="../../catalog/linear-led/luma-line-191/index.html">
         
     <div class="catalog-badge-list">
       <span class="catalog-badge catalog-badge--amber">Хит</span><span class="catalog-badge catalog-badge--green">Советуем</span>
     </div>
   
-        <a class="catalog-product-card__reviews" href="../../catalog/linear-led/luma-line-191/index.html#reviews">2 отзывов</a>
-        <a href="../../catalog/linear-led/luma-line-191/index.html">
-          <img src="../../assets/catalog/50590287.webp" alt="Светодиодный светильник 100Вт, 191см" loading="lazy" />
-        </a>
-      </div>
+        <img src="../../assets/catalog/50590287.webp" alt="Светодиодный светильник 100Вт, 191см" loading="lazy" />
+      </a>
       <div class="catalog-product-card__body">
-        <a class="catalog-product-card__title" href="../../catalog/linear-led/luma-line-191/index.html">Светодиодный светильник 100Вт, 191см</a>
         <div class="catalog-product-card__meta">
           <span class="catalog-stock catalog-stock--green">В наличии</span>
-          <span>Артикул: M23FSP100LL1 MIX</span>
+          <span>Арт. M23FSP100LL1 MIX</span>
         </div>
+        <a class="catalog-product-card__title" href="../../catalog/linear-led/luma-line-191/index.html">Светодиодный светильник 100Вт, 191см</a>
         <p class="catalog-product-card__summary">Светодиодный светильник 100Вт, 191см: серия M23 с двумя режимами мощности и логикой выбора под стеллажную ферму.</p>
         <div class="catalog-product-card__price-row">
           <div>
             <strong>9 900 ₽</strong>
             <span class="catalog-old-price">10 650 ₽</span>
           </div>
-          <button type="button" class="catalog-link-button" data-action="open-price-tiers" data-product-id="prod-luma-line-191">
-            Варианты цен
-          </button>
+          <button type="button" class="catalog-link-button" data-action="open-price-tiers" data-product-id="prod-luma-line-191">Цена по объёму</button>
         </div>
         <div class="catalog-product-card__actions">
-          <a class="catalog-secondary-button" href="../../catalog/linear-led/luma-line-191/index.html">Подробности</a>
-          <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-luma-line-191">Добавить в корзину</button>
+          <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-luma-line-191">В корзину</button>
+          <a class="catalog-secondary-button" href="../../catalog/linear-led/luma-line-191/index.html">Карточка</a>
           
         </div>
       </div>
     </article>
   
     <article class="catalog-product-card">
-      <div class="catalog-product-card__media">
+      <a class="catalog-product-card__media" href="../../catalog/linear-led/luma-line-60/index.html">
         
     <div class="catalog-badge-list">
       <span class="catalog-badge catalog-badge--green">Советуем</span>
     </div>
   
-        
-        <a href="../../catalog/linear-led/luma-line-60/index.html">
-          <img src="../../assets/catalog/12315466.webp" alt="Светодиодный светильник 50Вт, 60см" loading="lazy" />
-        </a>
-      </div>
+        <img src="../../assets/catalog/12315466.webp" alt="Светодиодный светильник 50Вт, 60см" loading="lazy" />
+      </a>
       <div class="catalog-product-card__body">
-        <a class="catalog-product-card__title" href="../../catalog/linear-led/luma-line-60/index.html">Светодиодный светильник 50Вт, 60см</a>
         <div class="catalog-product-card__meta">
           <span class="catalog-stock catalog-stock--green">В наличии</span>
-          <span>Артикул: 01-0002-199</span>
+          <span>Арт. 01-0002-199</span>
         </div>
+        <a class="catalog-product-card__title" href="../../catalog/linear-led/luma-line-60/index.html">Светодиодный светильник 50Вт, 60см</a>
         <p class="catalog-product-card__summary">Светодиодный светильник 50Вт, 60см: серия M23, 0,6 м, 8500 Лм, Samsung и логика выбора под многоярусную клубничную ферму.</p>
         <div class="catalog-product-card__price-row">
           <div>
             <strong>3 630 ₽</strong>
             <span class="catalog-old-price">4 290 ₽</span>
           </div>
-          <button type="button" class="catalog-link-button" data-action="open-price-tiers" data-product-id="prod-luma-line-60">
-            Варианты цен
-          </button>
+          <button type="button" class="catalog-link-button" data-action="open-price-tiers" data-product-id="prod-luma-line-60">Цена по объёму</button>
         </div>
         <div class="catalog-product-card__actions">
-          <a class="catalog-secondary-button" href="../../catalog/linear-led/luma-line-60/index.html">Подробности</a>
-          <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-luma-line-60">Добавить в корзину</button>
+          <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-luma-line-60">В корзину</button>
+          <a class="catalog-secondary-button" href="../../catalog/linear-led/luma-line-60/index.html">Карточка</a>
           
         </div>
       </div>
     </article>
   
     <article class="catalog-product-card">
-      <div class="catalog-product-card__media">
+      <a class="catalog-product-card__media" href="../../catalog/linear-led/luma-line-95/index.html">
         
     <div class="catalog-badge-list">
       <span class="catalog-badge catalog-badge--amber">Хит</span>
     </div>
   
-        
-        <a href="../../catalog/linear-led/luma-line-95/index.html">
-          <img src="../../assets/catalog/62602669.webp" alt="Светодиодный светильник 50Вт, 95см" loading="lazy" />
-        </a>
-      </div>
+        <img src="../../assets/catalog/62602669.webp" alt="Светодиодный светильник 50Вт, 95см" loading="lazy" />
+      </a>
       <div class="catalog-product-card__body">
-        <a class="catalog-product-card__title" href="../../catalog/linear-led/luma-line-95/index.html">Светодиодный светильник 50Вт, 95см</a>
         <div class="catalog-product-card__meta">
           <span class="catalog-stock catalog-stock--amber">Осталось мало</span>
-          <span>Артикул: 01-0009-769</span>
+          <span>Арт. 01-0009-769</span>
         </div>
+        <a class="catalog-product-card__title" href="../../catalog/linear-led/luma-line-95/index.html">Светодиодный светильник 50Вт, 95см</a>
         <p class="catalog-product-card__summary">Светодиодный светильник 50Вт, 95см: M23FSP50L1 MIX, 9550 Лм, Samsung и логика выбора под клубничный стеллажный пролёт.</p>
         <div class="catalog-product-card__price-row">
           <div>
             <strong>4 950 ₽</strong>
             
           </div>
-          <button type="button" class="catalog-link-button" data-action="open-price-tiers" data-product-id="prod-luma-line-95">
-            Варианты цен
-          </button>
+          <button type="button" class="catalog-link-button" data-action="open-price-tiers" data-product-id="prod-luma-line-95">Цена по объёму</button>
         </div>
         <div class="catalog-product-card__actions">
-          <a class="catalog-secondary-button" href="../../catalog/linear-led/luma-line-95/index.html">Подробности</a>
-          <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-luma-line-95">Добавить в корзину</button>
+          <button type="button" class="catalog-primary-button" data-action="toggle-cart" data-product-id="prod-luma-line-95">В корзину</button>
+          <a class="catalog-secondary-button" href="../../catalog/linear-led/luma-line-95/index.html">Карточка</a>
           
         </div>
       </div>
@@ -716,71 +265,40 @@
   
         
     <section class="catalog-info-strip" id="catalog-how-buy">
-      <div class="catalog-section-head">
-        <h2>Как купить</h2>
-        <p>Если задача уже понятна, здесь можно быстро собрать закупку. Если нет, каталог помогает не потерять контекст и перейти к вопросу или расчёту.</p>
-      </div>
-      <div class="catalog-how-buy-grid">
-        <article>
-          <strong>1. Выберите категорию</strong>
-          <p>Если модуль и узел уже понятны, заходите в нужный раздел и отфильтруйте позиции по атрибутам.</p>
-        </article>
-        <article>
-          <strong>2. Сравните цены и характеристики</strong>
-          <p>У каждой позиции есть варианты цен, быстрый просмотр, документы и короткий список того, что важно проверить до оплаты.</p>
-        </article>
-        <article>
-          <strong>3. Добавьте в корзину или задайте вопрос</strong>
-          <p>Понятные позиции можно сразу положить в корзину, а спорные лучше быстро уточнить, не уходя со страницы.</p>
-        </article>
+      <div class="catalog-how-buy-note">
+        <div class="catalog-how-buy-note__copy">
+          <strong>Если схема ещё не собрана</strong>
+          <p>Сначала коротко сверьте состав, сделайте быстрый расчёт или задайте вопрос, чтобы не собирать закупку вслепую.</p>
+        </div>
+        <div class="catalog-how-buy-note__actions">
+          <a class="catalog-link-button" href="/farm/">Сверить состав</a>
+          <a class="catalog-link-button" href="/calc/">Быстрый расчёт</a>
+          <a class="catalog-link-button" href="/consultations/">Короткий вопрос</a>
+        </div>
       </div>
     </section>
   
       </main>
       
     <footer class="catalog-footer" id="catalog-contacts">
-      <div class="catalog-footer__grid">
-        <div>
-          <h2>Klubnika Project</h2>
-          <p>Свет, полив, стеллажи, субстрат, посадочный материал и сервисные позиции для рабочей закупки клубничной фермы.</p>
-          <div class="catalog-footer__socials">
-            <a href="https://t.me/patiev_admin" target="_blank" rel="noreferrer">Telegram</a><a href="https://wa.me/79891250150" target="_blank" rel="noreferrer">WhatsApp</a><a href="https://www.instagram.com/ilya_patiev/" target="_blank" rel="noreferrer">Instagram</a><a href="https://www.youtube.com/@Ilya_patiev" target="_blank" rel="noreferrer">YouTube</a>
+      <div class="catalog-footer__shell">
+        <div class="catalog-footer__meta">
+          <div class="catalog-footer__copy">© Klubnika Project</div>
+          <div class="catalog-footer__links">
+            <a href="https://klubnikaproject.ru/docs/policy">Политика</a>
+            <a href="https://klubnikaproject.ru/docs/offero">Оферта</a>
+            <a href="https://klubnikaproject.ru/docs/warrenty">Гарантия</a>
           </div>
         </div>
-        <div>
-          <h3>Каталог</h3>
-          <ul>
-            <li><a href="../../catalog/led/index.html">LED-освещение</a></li><li><a href="../../catalog/irrigation/index.html">Полив и дозирование</a></li><li><a href="../../catalog/racks/index.html">Стеллажные системы</a></li><li><a href="../../catalog/substrates/index.html">Субстраты и старт-корневая зона</a></li><li><a href="../../catalog/planting-material/index.html">Посадочный материал</a></li><li><a href="../../catalog/climate/index.html">Климат и воздух</a></li><li><a href="../../catalog/nutrition/index.html">Питание и сервис раствора</a></li><li><a href="../../catalog/monitoring/index.html">Датчики и автоматика</a></li><li><a href="../../catalog/packaging/index.html">Упаковка и отгрузка</a></li>
-          </ul>
+        <div class="catalog-footer__contacts">
+          <a href="tel:+79255831669">+7 925 583-16-69</a>
+          <a href="mailto:info@klubnikaproject.ru">info@klubnikaproject.ru</a>
+          <a href="https://t.me/patiev_admin" target="_blank" rel="noreferrer">Telegram</a>
+          <a href="https://wa.me/79891250150" target="_blank" rel="noreferrer">WhatsApp</a>
+          <a href="https://www.instagram.com/ilya_patiev/" target="_blank" rel="noreferrer">Instagram</a>
+          <a href="https://www.youtube.com/@Ilya_patiev" target="_blank" rel="noreferrer">YouTube</a>
+          <span>Москва, проектная комплектация с отгрузкой по РФ</span>
         </div>
-        <div>
-          <h3>Информация</h3>
-          <ul>
-            <li><a href="../../consultations/index.html">Задать вопрос</a></li>
-            <li><a href="../../farm/index.html">Расчёт фермы</a></li>
-            <li><a href="../../study/index.html">Сопровождение</a></li>
-            <li><a href="../../calc/index.html">Калькулятор</a></li>
-          </ul>
-        </div>
-        <div>
-          <h3>Контакты</h3>
-          <ul class="catalog-footer__contacts">
-            <li><a href="tel:+79255831669">+7 925 583-16-69</a></li>
-            <li><a href="mailto:info@klubnikaproject.ru">info@klubnikaproject.ru</a></li>
-            <li>Москва, проектная комплектация с отгрузкой по РФ</li>
-          </ul>
-        </div>
-      </div>
-      <div class="catalog-footer__newsletter">
-        <div>
-          <h3>Подписка на рассылку</h3>
-          <p>Получайте новые позиции, изменения наличия и обновления по категориям.</p>
-        </div>
-        <form class="catalog-newsletter-form" data-newsletter-form>
-          <input type="email" name="email" placeholder="Email для обновлений" required />
-          <button type="submit" class="catalog-primary-button">Подписаться</button>
-        </form>
-        
       </div>
     </footer>
   
@@ -801,7 +319,7 @@
           <input type="search" value="" placeholder="Название, артикул, категория" data-action="search-input" />
         </div>
         <div class="catalog-search-results">
-          <p>Введите название, артикул или рабочий узел, чтобы начать поиск.</p>
+          <p>Введите название, артикул или нужную группу товаров, чтобы начать поиск.</p>
         </div>
       </div>
     </div>
@@ -814,7 +332,7 @@
           <h2 id="catalog-cart-title">Корзина</h2>
           <button type="button" class="catalog-icon-button" data-action="close-dialog" data-dialog="cart" aria-label="Закрыть корзину">×</button>
         </div>
-        <p>Корзина пока пустая. Добавляйте позиции из списка или из карточки товара.</p>
+        <p>Корзина пока пустая. Добавляйте товары из списка или из карточки товара.</p>
       </div>
     </div>
   
@@ -826,7 +344,7 @@
           <h2 id="catalog-assistant-title">Нужна помощь с выбором или заказом</h2>
           <button type="button" class="catalog-icon-button" data-action="close-dialog" data-dialog="assistant" aria-label="Закрыть панель помощи">×</button>
         </div>
-        <p>Можно сразу передать задачу в работу или на подбор, не теряя контекст страницы и выбранных позиций.</p>
+        <p>Можно сразу передать запрос в работу или на подбор, не теряя контекст страницы и выбранных товаров.</p>
         <div class="catalog-assistant-actions">
           <a class="catalog-primary-button" href="tel:+79255831669">+7 925 583-16-69</a>
           <a class="catalog-secondary-button" href="mailto:info@klubnikaproject.ru">Написать на info@klubnikaproject.ru</a>
@@ -840,7 +358,7 @@
       
     <div class="catalog-overlay " data-overlay="menu" aria-hidden="true">
       <div class="catalog-overlay__backdrop" data-action="close-dialog" data-dialog="menu"></div>
-      <div class="catalog-overlay__panel catalog-overlay__panel--side" role="dialog" aria-modal="true" aria-labelledby="catalog-menu-title">
+      <div class="catalog-overlay__panel catalog-overlay__panel--side catalog-overlay__panel--menu" role="dialog" aria-modal="true" aria-labelledby="catalog-menu-title">
         <div class="catalog-overlay__head">
           <h2 id="catalog-menu-title">Меню каталога</h2>
           <button type="button" class="catalog-icon-button" data-action="close-dialog" data-dialog="menu" aria-label="Закрыть меню">×</button>
@@ -854,7 +372,7 @@
           <a href="../../catalog/index.html">Магазин</a>
           <a href="#catalog-how-buy">Как купить</a>
           <a href="#catalog-contacts">Контакты</a>
-          <a class="catalog-mobile-nav__link" href="../../account/index.html">Личный кабинет</a>
+          <a class="catalog-mobile-nav__link" href="../../cabinet/login/index.html">Личный кабинет</a>
           <button type="button" class="catalog-mobile-nav__link" data-action="open-cart">Корзина</button>
         </nav>
         <div class="catalog-mobile-category-tree">
@@ -1160,6 +678,6 @@
     window.__CATALOG_ROUTE__ = {"type":"category","categorySlug":"linear-led"};
     window.__CATALOG_CONTEXT__ = {"route":{"type":"category","categorySlug":"linear-led"},"siteRoot":"../../","catalogRoot":"../"};
   </script>
-  <script type="module" src="../_app/catalog-app.js?v=20260403ac"></script>
+  <script type="module" src="../_app/catalog-app.js?v=20260404q"></script>
 </body>
 </html>

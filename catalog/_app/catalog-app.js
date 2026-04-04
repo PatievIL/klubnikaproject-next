@@ -53,7 +53,6 @@ function buildStateFromLocation() {
       mode: "catalog",
     },
     menuCategorySlug: null,
-    newsletterStatus: "",
     flashMessage: "",
   };
 
@@ -453,13 +452,6 @@ function handleSubmit(event) {
     const input = form.querySelector('input[type="search"]');
     state.search.query = input.value.trim();
     setDialog("search", true);
-    return;
-  }
-
-  if (form.matches("[data-newsletter-form]")) {
-    event.preventDefault();
-    state.newsletterStatus = "Контакт сохранён локально. Чтобы это заработало в проде, нужно подключить backend endpoint.";
-    render();
     return;
   }
 
