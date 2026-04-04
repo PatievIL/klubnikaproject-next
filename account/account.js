@@ -1,4 +1,6 @@
 const SITE_ADMIN_BACKEND_CACHE_KEY = "klubnikaproject.site.backend.settings.v1";
+const ADMIN_SESSION_STORAGE_KEY = "klubnikaproject.admin.session.v1";
+const MEMBER_SESSION_STORAGE_KEY = "klubnikaproject.member.session.v1";
 const DEFAULT_SETTINGS = {
   site: {
     projectName: "Klubnika Project",
@@ -195,6 +197,9 @@ function bindLogin() {
       });
 
       if (adminResponse.ok) {
+        const adminPayload = await adminResponse.json();
+        storeSessionToken("admin", adminPayload?.session_token || "");
+        storeSessionToken("member", "");
         const nextCandidate = new URLSearchParams(window.location.search).get("next") || memberPath("hubPath");
         const next = isAllowedNextPath(nextCandidate) ? nextCandidate : memberPath("hubPath");
         window.location.href = next;
@@ -213,6 +218,8 @@ function bindLogin() {
       }
 
       const payload = await response.json();
+      storeSessionToken("member", payload?.session_token || "");
+      storeSessionToken("admin", "");
       currentSessionUser = payload.user || null;
       await refreshAccessPolicy();
       const nextCandidate = new URLSearchParams(window.location.search).get("next") || memberPath("hubPath");
@@ -226,8 +233,11 @@ function bindLogin() {
 
 async function fetchSession() {
   try {
+    const headers = { Accept: "application/json" };
+    const memberToken = readStoredSessionToken("member");
+    if (memberToken) headers["X-KP-Member-Session"] = memberToken;
     const response = await fetch(`${apiBase()}/auth/session`, {
-      headers: { Accept: "application/json" },
+      headers,
       credentials: "include",
     });
     if (!response.ok) return null;
@@ -243,8 +253,11 @@ async function refreshAccessPolicy() {
     return;
   }
   try {
+    const headers = { Accept: "application/json" };
+    const memberToken = readStoredSessionToken("member");
+    if (memberToken) headers["X-KP-Member-Session"] = memberToken;
     const response = await fetch(`${apiBase()}/auth/access-policy`, {
-      headers: { Accept: "application/json" },
+      headers,
       credentials: "include",
     });
     if (!response.ok) {
@@ -255,6 +268,27 @@ async function refreshAccessPolicy() {
     memberAccessPolicy = payload.policy || null;
   } catch (error) {
     memberAccessPolicy = null;
+  }
+}
+
+function readStoredSessionToken(accountType) {
+  try {
+    return window.localStorage.getItem(accountType === "admin" ? ADMIN_SESSION_STORAGE_KEY : MEMBER_SESSION_STORAGE_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+function storeSessionToken(accountType, token) {
+  try {
+    const key = accountType === "admin" ? ADMIN_SESSION_STORAGE_KEY : MEMBER_SESSION_STORAGE_KEY;
+    if (token) {
+      window.localStorage.setItem(key, token);
+    } else {
+      window.localStorage.removeItem(key);
+    }
+  } catch {
+    // ignore storage failures
   }
 }
 
@@ -404,12 +438,17 @@ function bindLogout() {
       try {
         await fetch(`${apiBase()}/auth/logout`, {
           method: "POST",
-          headers: { Accept: "application/json" },
+          headers: {
+            Accept: "application/json",
+            ...(readStoredSessionToken("member") ? { "X-KP-Member-Session": readStoredSessionToken("member") } : {}),
+          },
           credentials: "include",
         });
       } catch (error) {
         // ignore
       }
+      storeSessionToken("member", "");
+      storeSessionToken("admin", "");
       window.location.href = isMembersEnabled() ? memberPath("loginPath") : "/";
     });
   });

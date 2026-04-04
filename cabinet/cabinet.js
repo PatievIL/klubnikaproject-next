@@ -1,6 +1,8 @@
 const SITE_ADMIN_BACKEND_CACHE_KEY = "klubnikaproject.site.backend.settings.v1";
 const CATALOG_CART_STORAGE_KEY = "klubnika.catalog.cart.v1";
 const MEMBER_SAVED_STORAGE_KEY = "klubnikaproject.cabinet.saved.v1";
+const ADMIN_SESSION_STORAGE_KEY = "klubnikaproject.admin.session.v1";
+const MEMBER_SESSION_STORAGE_KEY = "klubnikaproject.member.session.v1";
 const DEFAULT_SETTINGS = {
   site: {
     projectName: "Klubnika Project",
@@ -161,6 +163,14 @@ async function fetchJson(url, options = {}) {
   try {
     const method = String(options.method || "GET").toUpperCase();
     const headers = { Accept: "application/json", ...(options.headers || {}) };
+    const adminToken = readStoredSessionToken("admin");
+    const memberToken = readStoredSessionToken("member");
+    if (String(url).includes("/admin/") && adminToken && !headers["X-KP-Admin-Session"]) {
+      headers["X-KP-Admin-Session"] = adminToken;
+    }
+    if (!String(url).includes("/admin/") && memberToken && !headers["X-KP-Member-Session"]) {
+      headers["X-KP-Member-Session"] = memberToken;
+    }
     if (!["GET", "HEAD"].includes(method) && !headers["X-KP-Requested-With"]) {
       headers["X-KP-Requested-With"] = "klubnikaproject";
     }
@@ -176,6 +186,32 @@ async function fetchJson(url, options = {}) {
   } catch (error) {
     return { ok: false, status: 0, text: error.message || "network_error" };
   }
+}
+
+function readStoredSessionToken(accountType) {
+  try {
+    return window.localStorage.getItem(accountType === "admin" ? ADMIN_SESSION_STORAGE_KEY : MEMBER_SESSION_STORAGE_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+function storeSessionToken(accountType, token) {
+  try {
+    const key = accountType === "admin" ? ADMIN_SESSION_STORAGE_KEY : MEMBER_SESSION_STORAGE_KEY;
+    if (token) {
+      window.localStorage.setItem(key, token);
+    } else {
+      window.localStorage.removeItem(key);
+    }
+  } catch {
+    // ignore storage failures
+  }
+}
+
+function clearSessionTokens() {
+  storeSessionToken("admin", "");
+  storeSessionToken("member", "");
 }
 
 async function fetchActiveSession() {
@@ -226,6 +262,8 @@ function bindLogin() {
       body: JSON.stringify({ login, password }),
     });
     if (adminLogin.ok) {
+      storeSessionToken("admin", adminLogin.data?.session_token || "");
+      storeSessionToken("member", "");
       const session = await fetchActiveSession();
       if (session?.ok) {
         currentSession = session;
@@ -240,6 +278,8 @@ function bindLogin() {
       body: JSON.stringify({ login, password }),
     });
     if (memberLogin.ok) {
+      storeSessionToken("member", memberLogin.data?.session_token || "");
+      storeSessionToken("admin", "");
       const session = await fetchActiveSession();
       if (session?.ok) {
         currentSession = session;
@@ -419,6 +459,7 @@ function bindLogout() {
       } else {
         await fetchJson(`${apiBase()}/auth/logout`, { method: "POST" });
       }
+      clearSessionTokens();
       window.location.href = cabinetRoutes.login;
     });
   });
