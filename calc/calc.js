@@ -10,6 +10,8 @@ import {
 const STORAGE_KEY = "klubnikaproject.calc.state.v4";
 const BUILD_ID = "calc-20260405ay";
 const AUTH_API_BASE_DEFAULT = "https://api.klubnikaproject.ru/site/v1";
+const ADMIN_SESSION_STORAGE_KEY = "klubnikaproject.admin.session.v1";
+const MEMBER_SESSION_STORAGE_KEY = "klubnikaproject.member.session.v1";
 
 const GOAL_COPY = {
   entry: {
@@ -420,18 +422,34 @@ function detectRuntimeApiBase(configuredBase) {
 
 async function checkCabinetSession() {
   const apiBase = detectRuntimeApiBase(AUTH_API_BASE_DEFAULT);
-  const hasAdminSession = await hasSession(`${apiBase}/admin/auth/session`);
+  const hasAdminSession = await hasSession(`${apiBase}/admin/auth/session`, {
+    "X-KP-Admin-Session": readStoredSessionToken("admin")
+  });
   if (hasAdminSession) {
     return true;
   }
-  return hasSession(`${apiBase}/auth/session`);
+  return hasSession(`${apiBase}/auth/session`, {
+    "X-KP-Member-Session": readStoredSessionToken("member")
+  });
 }
 
-async function hasSession(url) {
+function readStoredSessionToken(accountType) {
   try {
+    return window.localStorage.getItem(accountType === "admin" ? ADMIN_SESSION_STORAGE_KEY : MEMBER_SESSION_STORAGE_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+async function hasSession(url, extraHeaders = {}) {
+  try {
+    const headers = { Accept: "application/json" };
+    Object.entries(extraHeaders || {}).forEach(([key, value]) => {
+      if (value) headers[key] = value;
+    });
     const response = await fetch(url, {
       method: "GET",
-      headers: { Accept: "application/json" },
+      headers,
       credentials: "include"
     });
     return response.ok;
