@@ -92,6 +92,13 @@ function routePath(relativePath = "") {
   return `${basePath}${String(relativePath).replace(/^\//, "")}`;
 }
 
+function resolvePublicPath(path = "") {
+  const raw = String(path || "").trim();
+  if (!raw) return "";
+  if (/^(https?:)?\/\//i.test(raw) || raw.startsWith("mailto:") || raw.startsWith("tel:") || raw.startsWith("data:")) return raw;
+  return routePath(raw);
+}
+
 function cabinetSectionHref(sectionId, params = {}) {
   const search = new URLSearchParams({ section: sectionId });
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -314,48 +321,52 @@ function isAllowedCabinetNext(next) {
 }
 
 function renderUserChips(session) {
-  document.body.dataset.cabinetRole = String(session.policy?.role || session.user.user_role || session.user.role || session.accountType || "member").toLowerCase();
+  const shellModel = buildCabinetShellModel(session);
+  const role = String(session.policy?.role || session.user.user_role || session.user.role || session.accountType || "member").toLowerCase();
+  const accessLabels = collectCabinetAccessLabels(session);
+  const displayName = session.user.user_name || session.user.display_name || "Пользователь";
+  const company = String(session.user.company || "").trim();
+  const pillLabels = session.accountType === "admin"
+    ? [
+        { tone: "role", label: shellModel.roleLabel },
+        { tone: "scope", label: `${shellModel.scopeCount} ${pluralizeRu(shellModel.scopeCount, "раздел", "раздела", "разделов")}` },
+      ]
+    : [
+        { tone: "role", label: shellModel.roleLabel },
+        { tone: "scope", label: `${shellModel.scopeCount} ${pluralizeRu(shellModel.scopeCount, "раздел", "раздела", "разделов")}` },
+      ];
+
+  document.body.dataset.cabinetRole = role;
+  document.body.dataset.cabinetFamily = session.accountType === "admin" ? "admin" : "user";
+
   document.querySelectorAll("[data-cabinet-user]").forEach((target) => {
-    const scopes = session.policy?.scopes || session.user?.scopes || [];
-    const userName = session.user.user_name || session.user.display_name || "Пользователь";
-    const role = session.policy?.role || session.user.user_role || session.user.role || session.accountType;
-    const scopeNote = scopes.length
-      ? `Открыто ${scopes.length} ${pluralizeZones(scopes.length)}.`
-      : "Пока открыт только базовый кабинет.";
     target.innerHTML = `
-      <div class="cabinet-access-card">
-        <span class="cabinet-access-title">Доступ этой сессии</span>
+      <div class="cabinet-access-card${session.accountType === "admin" ? " cabinet-access-card--admin" : ""}">
+        <div class="cabinet-access-title">${session.accountType === "admin" ? "Рабочая зона" : "Ваш доступ"}</div>
         <div class="cabinet-user-main">
-          <strong class="cabinet-user-name">${escapeHtml(userName)}</strong>
-          <span class="cabinet-user-note">${escapeHtml(scopeNote)}</span>
+          <strong class="cabinet-user-name">${escapeHtml(displayName)}</strong>
+          <span class="cabinet-user-note">${escapeHtml(session.accountType === "admin" ? (company || shellModel.identityNote) : buildMemberAccessPurpose(session))}</span>
         </div>
         <div class="cabinet-pill-row">
-          <span class="cabinet-pill is-role">${escapeHtml(humanizeCabinetRole(role))}</span>
-          ${scopes.map((scope) => `<span class="cabinet-pill is-scope">${escapeHtml(humanizeCabinetScope(scope))}</span>`).join("")}
+          ${pillLabels.map((item) => `<span class="cabinet-pill is-${escapeAttribute(item.tone)}">${escapeHtml(item.label)}</span>`).join("")}
         </div>
       </div>
     `;
   });
 
   document.querySelectorAll("[data-cabinet-greeting]").forEach((target) => {
-    const name = session.user.user_name || session.user.display_name || "Пользователь";
-    target.textContent = `Добрый день, ${name}`;
-  });
-
-  document.querySelectorAll("[data-cabinet-head-meta]").forEach((target) => {
-    const scopes = session.policy?.scopes || session.user?.scopes || [];
-    const role = humanizeCabinetRole(session.policy?.role || session.user.user_role || session.user.role || session.accountType);
-    target.textContent = buildCabinetHeadMeta(session, role, scopes.length || 0);
+    target.textContent = `Добрый день, ${displayName}`;
   });
 
   document.querySelectorAll("[data-cabinet-nav-label]").forEach((target) => {
-    target.textContent = session.accountType === "admin" ? "Командные разделы" : "Ваши разделы";
+    target.textContent = shellModel.navLabel;
   });
 
-  document.querySelectorAll("[data-cabinet-rail-meta]").forEach((target) => {
-    const scopes = session.policy?.scopes || session.user?.scopes || [];
-    target.textContent = buildCabinetRailMeta(session, scopes.length || 0);
+  document.querySelectorAll("[data-cabinet-rail-role]").forEach((target) => {
+    target.textContent = shellModel.roleLabel;
   });
+
+  applyCabinetShellModel(shellModel);
 }
 
 function humanizeCabinetRole(role) {
@@ -364,9 +375,10 @@ function humanizeCabinetRole(role) {
     admin: "Админ",
     owner: "Владелец",
     manager: "Менеджер",
+    operator: "Оператор",
     buyer: "Покупатель",
     student: "Участник курса",
-    member: "Пользователь",
+    member: "Покупатель",
   };
   return labels[normalized] || String(role || "Пользователь");
 }
@@ -393,10 +405,18 @@ function humanizeCabinetScope(scope) {
 function humanizeCatalogKind(value) {
   const normalized = String(value || "").trim().toLowerCase();
   if (["catalog", "product"].includes(normalized)) return "Каталог";
-  if (["special", "special_page"].includes(normalized)) return "Материал";
-  if (["route", "page"].includes(normalized)) return "Раздел";
+  if (["special", "special_page"].includes(normalized)) return "Полезный материал";
+  if (["route", "page"].includes(normalized)) return "Полезная страница";
   if (["document", "file"].includes(normalized)) return "Документ";
   return value || "Раздел";
+}
+
+function buildMemberAccessPurpose(session) {
+  const sections = getAllowedSections(session).map((item) => item.id);
+  if (sections.includes("orders") || sections.includes("documents")) return "Заказы, документы и связь.";
+  if (sections.includes("catalog") && sections.includes("requests")) return "Подбор, расчёт и следующий шаг.";
+  if (sections.includes("catalog")) return "Подбор и связь с командой.";
+  return "Главные шаги по вашему проекту.";
 }
 
 function humanizeCatalogPublicationStatus(value) {
@@ -419,9 +439,9 @@ function humanizeCatalogStockStatus(value) {
 
 function humanizeCatalogCtaMode(value) {
   const normalized = String(value || "").trim().toLowerCase();
-  if (normalized === "buy") return "Готово к закупке";
-  if (normalized === "choose") return "Нужно уточнение";
-  if (normalized === "consult") return "Через консультацию";
+  if (normalized === "buy") return "Готово к покупке";
+  if (normalized === "choose") return "Нужно уточнить";
+  if (normalized === "consult") return "Полезно рядом";
   return value || "Режим не указан";
 }
 
@@ -437,7 +457,7 @@ function buildCabinetHeadMeta(session, roleLabel, scopeCount) {
   if (session.accountType === "admin") {
     return `${roleLabel} · ${scopeCount} ${pluralizeZones(scopeCount)} команды`;
   }
-  return `${roleLabel} · ${scopeCount} ${pluralizeZones(scopeCount)} доступа`;
+  return `${roleLabel} · ${scopeCount} ${pluralizeRu(scopeCount, "раздел", "раздела", "разделов")} доступны`;
 }
 
 function buildCabinetRailMeta(session, scopeCount) {
@@ -447,8 +467,235 @@ function buildCabinetRailMeta(session, scopeCount) {
       : `Открыт базовый режим без дополнительных разделов.`;
   }
   return scopeCount
-    ? `Показываем только те входы, которые реально доступны этому аккаунту.`
-    : `Открыт базовый кабинет без дополнительных разделов.`;
+    ? `Здесь только разделы, которые нужны для подбора, заказа, документов и связи.`
+    : `Базовый кабинет уже открыт. Новые разделы появятся по мере движения по проекту.`;
+}
+
+function collectCabinetAccessLabels(session) {
+  const labels = [];
+  if (session.accountType === "admin") {
+    getAllowedSections(session).forEach((section) => {
+      if (section?.label) labels.push(section.label);
+    });
+  } else {
+    const routeAccess = session.policy?.route_access || {};
+    const scopes = session.policy?.scopes || session.user?.scopes || [];
+    if (routeAccess.catalog) labels.push("Подбор");
+    if (routeAccess.special) labels.push("Материалы");
+    scopes.forEach((scope) => {
+      const label = humanizeCabinetScope(scope);
+      if (label) labels.push(label);
+    });
+  }
+  return Array.from(new Set(labels.filter(Boolean)));
+}
+
+function buildCabinetShellModel(session, activeSection = null) {
+  const role = session.policy?.role || session.user.user_role || session.user.role || session.accountType || "member";
+  const roleLabel = humanizeCabinetRole(role);
+  const accessLabels = collectCabinetAccessLabels(session);
+  const scopeCount = accessLabels.length;
+  const section = activeSection || getAllowedSections(session)[0] || { id: "", label: "Главная", note: "Раздел ещё собирается." };
+
+  if (session.accountType === "admin") {
+    const breadcrumb = `Админка / ${section.label || "Сводка"}`;
+    const topbarPrimary = buildAdminTopbarPrimaryAction(session, section.id);
+    const contextActions = normalizeAdminContextActions(
+      buildAdminContextActions(session, section.id),
+      [topbarPrimary.href, cabinetRoutes.site],
+    );
+
+    return {
+      roleLabel,
+      scopeCount,
+      navLabel: "Навигация",
+      modeLabel: "Режим",
+      title: section.label || "Сводка",
+      breadcrumb,
+      meta: buildCabinetHeadMeta(session, roleLabel, scopeCount),
+      note: "Собранный admin-shell без публичной навигации и лишних дублей.",
+      sectionLabel: section.label || "Раздел",
+      sectionNote: section.note || "Раздел уже собран под текущий доступ.",
+      focus: "Приоритет действий",
+      focusNote: "Быстрые переходы и ближайшие действия по текущему разделу.",
+      primaryActionLabel: "",
+      primaryActionHref: "",
+      secondaryActionLabel: contextActions[0]?.label || "",
+      secondaryActionHref: contextActions[0]?.href || "",
+      tertiaryActionLabel: contextActions[1]?.label || "",
+      tertiaryActionHref: contextActions[1]?.href || "",
+      topbarPrimaryActionLabel: topbarPrimary.label,
+      topbarPrimaryActionHref: topbarPrimary.href,
+      topbarSiteActionLabel: "Открыть сайт",
+      topbarSiteActionHref: cabinetRoutes.site,
+      identityNote: "Компактный контур для CRM, каталога, публикации и командного доступа.",
+    };
+  }
+
+  const primarySection = sessionHasSection(session, "messages")
+    ? { label: "Написать по проекту", href: cabinetSectionHref("messages") }
+    : sessionHasSection(session, "requests")
+      ? { label: "Открыть расчёт", href: cabinetSectionHref("requests") }
+      : { label: "Разобрать задачу", href: cabinetRoutes.consultations };
+  const secondarySection = section.id !== "catalog" && sessionHasSection(session, "catalog")
+    ? { label: "Открыть подбор", href: cabinetSectionHref("catalog") }
+    : sessionHasSection(session, "profile")
+      ? { label: "Профиль и доставка", href: cabinetSectionHref("profile") }
+      : { label: "Открыть каталог", href: cabinetRoutes.catalog };
+
+  return {
+    roleLabel,
+    scopeCount,
+    navLabel: "Разделы кабинета",
+    modeLabel: "Доступ",
+    title: section.label || "Главная",
+    breadcrumb: `Кабинет / ${section.label || "Главная"}`,
+    meta: buildCabinetHeadMeta(session, roleLabel, scopeCount),
+    note: "Кабинет собран вокруг подбора, заказа, документов и связи с командой.",
+    sectionLabel: section.label || "Главная",
+    sectionNote: section.note || "Открываем раздел, который нужен прямо сейчас.",
+    focus: section.id === "course" ? "Продолжить обучение" : "Следующий шаг",
+    focusNote: section.id === "course"
+      ? "Здесь только курс и связанные материалы."
+      : "Кабинет должен быстро подсказывать, куда идти дальше.",
+    primaryActionLabel: primarySection.label,
+    primaryActionHref: primarySection.href,
+    secondaryActionLabel: secondarySection.label,
+    secondaryActionHref: secondarySection.href,
+    tertiaryActionLabel: "",
+    tertiaryActionHref: "",
+    topbarPrimaryActionLabel: primarySection.label,
+    topbarPrimaryActionHref: primarySection.href,
+    topbarSiteActionLabel: "",
+    topbarSiteActionHref: "",
+    identityNote: "Спокойный кабинет для подбора, заказа, документов и поддержки.",
+  };
+}
+
+function buildAdminContextActions(session, sectionId = "") {
+  const actions = [];
+  const pushIfAvailable = (label, targetSection) => {
+    if (!targetSection || !sessionHasSection(session, targetSection) || actions.some((item) => item.href === cabinetSectionHref(targetSection))) return;
+    actions.push({ label, href: cabinetSectionHref(targetSection) });
+  };
+
+  if (sectionId === "dashboard") {
+    pushIfAvailable("Каталог", "catalog");
+    pushIfAvailable("Цены калькулятора", "calc-prices");
+  } else if (sectionId === "crm") {
+    pushIfAvailable("Сводка", "dashboard");
+    pushIfAvailable("Пользователи", "users");
+  } else if (sectionId === "catalog") {
+    pushIfAvailable("Цены калькулятора", "calc-prices");
+    pushIfAvailable("Сайт и публикация", "site");
+  } else if (sectionId === "calc-prices") {
+    pushIfAvailable("Сводка", "dashboard");
+    pushIfAvailable("Каталог", "catalog");
+  } else if (sectionId === "users") {
+    pushIfAvailable("CRM", "crm");
+    pushIfAvailable("Аудит", "audit");
+  } else if (sectionId === "audit") {
+    pushIfAvailable("Пользователи", "users");
+    pushIfAvailable("Сайт и публикация", "site");
+  } else if (sectionId === "site") {
+    pushIfAvailable("CRM", "crm");
+    pushIfAvailable("Сводка", "dashboard");
+  }
+
+  if (actions.length < 2) {
+    pushIfAvailable("Сводка", "dashboard");
+    pushIfAvailable("CRM", "crm");
+    pushIfAvailable("Каталог", "catalog");
+  }
+
+  return actions.slice(0, 2);
+}
+
+function normalizeAdminContextActions(actions = [], reservedHrefs = []) {
+  const blocked = new Set((reservedHrefs || []).filter(Boolean));
+  return (Array.isArray(actions) ? actions : [])
+    .filter((item) => item?.href && item?.label && !blocked.has(item.href))
+    .slice(0, 2);
+}
+
+function buildAdminTopbarPrimaryAction(session, sectionId = "") {
+  const currentParams = new URLSearchParams(window.location.search);
+  const crmMode = currentParams.get("mode") === "pipeline" ? "pipeline" : "overview";
+
+  if (sectionId === "crm") {
+    return crmMode === "pipeline"
+      ? { label: "Открыть обзор", href: cabinetSectionHref("crm", { mode: "overview" }) }
+      : { label: "Открыть воронку", href: cabinetSectionHref("crm", { mode: "pipeline" }) };
+  }
+  if (sectionId === "catalog") {
+    return { label: "Открыть магазин", href: cabinetRoutes.catalog };
+  }
+  if (sectionId === "calc-prices") {
+    return { label: "Открыть редактор", href: cabinetRoutes.calcAdmin };
+  }
+  if (sectionId === "site") {
+    return { label: "Открыть сайт", href: cabinetRoutes.site };
+  }
+  if (sectionId === "users") {
+    return sessionHasSection(session, "crm")
+      ? { label: "Открыть CRM", href: cabinetSectionHref("crm") }
+      : { label: "Открыть сводку", href: cabinetSectionHref("dashboard") };
+  }
+  if (sectionId === "audit") {
+    return sessionHasSection(session, "dashboard")
+      ? { label: "Открыть сводку", href: cabinetSectionHref("dashboard") }
+      : { label: "Открыть сайт", href: cabinetRoutes.site };
+  }
+
+  return sessionHasSection(session, "crm")
+    ? { label: "Открыть CRM", href: cabinetSectionHref("crm") }
+    : sessionHasSection(session, "dashboard")
+      ? { label: "Открыть сводку", href: cabinetSectionHref("dashboard") }
+      : { label: "Открыть сайт", href: cabinetRoutes.site };
+}
+
+function applyMemberShellPatch(session, patch = {}) {
+  if (session.accountType !== "member") return;
+  const requestedSection = patch.sectionId || new URLSearchParams(window.location.search).get("section") || preferredSectionId(session);
+  const section = getAllowedSections(session).find((item) => item.id === requestedSection) || null;
+  applyCabinetShellModel({
+    ...buildCabinetShellModel(session, section),
+    ...patch,
+  });
+}
+
+function applyCabinetShellModel(model) {
+  setCabinetText("[data-cabinet-shell-mode-label]", model.modeLabel || "Режим");
+  setCabinetText("[data-cabinet-shell-meta]", model.meta);
+  setCabinetText("[data-cabinet-shell-section-label]", model.sectionLabel);
+  setCabinetText("[data-cabinet-shell-section-note]", model.sectionNote);
+  setCabinetText("[data-cabinet-admin-breadcrumb]", model.breadcrumb || "");
+  setCabinetText("[data-cabinet-admin-title]", model.title || "");
+  setCabinetText("[data-cabinet-rail-role]", model.roleLabel || "");
+  setCabinetLink("[data-cabinet-shell-primary]", model.primaryActionLabel, model.primaryActionHref);
+  setCabinetLink("[data-cabinet-shell-secondary]", model.secondaryActionLabel, model.secondaryActionHref);
+  setCabinetLink("[data-cabinet-shell-tertiary]", model.tertiaryActionLabel, model.tertiaryActionHref);
+  setCabinetLink("[data-cabinet-admin-primary-action]", model.topbarPrimaryActionLabel || model.primaryActionLabel, model.topbarPrimaryActionHref || model.primaryActionHref);
+  setCabinetLink("[data-cabinet-admin-site-link]", model.topbarSiteActionLabel || "Открыть сайт", model.topbarSiteActionHref || cabinetRoutes.site);
+}
+
+function setCabinetText(selector, value) {
+  document.querySelectorAll(selector).forEach((node) => {
+    node.textContent = value || "";
+  });
+}
+
+function setCabinetLink(selector, label, href) {
+  document.querySelectorAll(selector).forEach((node) => {
+    if (!(node instanceof HTMLAnchorElement)) return;
+    node.textContent = label || "";
+    if (href) {
+      node.href = href;
+      node.hidden = false;
+    } else {
+      node.hidden = true;
+    }
+  });
 }
 
 function bindLogout() {
@@ -476,16 +723,19 @@ async function renderCabinet(session) {
   nav.innerHTML = sections.map((section) => `
     <a class="cabinet-nav-link${section.id === active ? " is-active" : ""}" href="${escapeAttribute(cabinetSectionHref(section.id))}">
       <strong>${escapeHtml(section.label)}</strong>
-      <span>${escapeHtml(section.note)}</span>
+      ${session.accountType === "admin" ? "" : `<span>${escapeHtml(section.note)}</span>`}
     </a>
   `).join("");
 
   const section = sections.find((item) => item.id === active) || sections[0];
   if (!section) {
-    content.innerHTML = '<div class="account-empty">Для этого аккаунта пока не собрано ни одного доступного раздела.</div>';
+    content.innerHTML = renderRuntimeEmpty("Кабинет", "Для этого аккаунта пока не собрано ни одного доступного раздела.", [
+      { href: cabinetRoutes.site, label: "Вернуться на сайт", tone: "secondary" },
+    ]);
     return;
   }
 
+  applyCabinetShellModel(buildCabinetShellModel(session, section));
   content.dataset.section = section.id;
   content.innerHTML = '<div class="account-empty">Собираем раздел и проверяем живые данные…</div>';
   try {
@@ -495,7 +745,15 @@ async function renderCabinet(session) {
     bindSectionRuntime(session, section.id);
   } catch (error) {
     if (content.dataset.section !== section.id) return;
-    content.innerHTML = `<div class="account-empty">Не удалось собрать раздел: ${escapeHtml(cleanupError(error.message || "runtime_error"))}</div>`;
+    content.innerHTML = renderSectionUnavailable({
+      kicker: section.label,
+      title: section.label,
+      message: `Не удалось собрать раздел: ${cleanupError(error.message || "runtime_error")}.`,
+      primaryHref: sections[0] ? cabinetSectionHref(sections[0].id) : cabinetRoutes.site,
+      primaryLabel: sections[0] ? `Открыть ${sections[0].label.toLowerCase()}` : "Вернуться на сайт",
+      secondaryHref: cabinetRoutes.site,
+      secondaryLabel: "На сайт",
+    });
   }
 }
 
@@ -505,6 +763,12 @@ function bindSectionRuntime(session, sectionId) {
   }
   if (session.accountType === "admin" && sectionId === "catalog") {
     bindAdminCatalogSection();
+  }
+  if (session.accountType === "admin" && sectionId === "crm") {
+    bindAdminCrmSection();
+  }
+  if (session.accountType === "admin" && sectionId === "audit") {
+    bindAdminAuditSection();
   }
   if (session.accountType === "member" && sectionId === "messages") {
     bindMemberMessagesSection(session);
@@ -518,11 +782,22 @@ function bindSectionRuntime(session, sectionId) {
   if (session.accountType === "member" && sectionId === "cart") {
     bindMemberCartSection(session);
   }
+  if (session.accountType === "admin") {
+    bindAdminTopbarSearch(session);
+  }
 }
 
 function preferredSectionId(session) {
   const sections = getAllowedSections(session);
   return sections[0]?.id || "overview";
+}
+
+function sessionHasSection(session, sectionId) {
+  return getAllowedSections(session).some((section) => section.id === sectionId);
+}
+
+function currentSessionHasSection(sectionId) {
+  return sessionHasSection(currentSession, sectionId);
 }
 
 function getAllowedSections(session) {
@@ -532,23 +807,23 @@ function getAllowedSections(session) {
     return [
       allowed.has("dashboard") && {
         id: "dashboard",
-        label: "Dashboard",
-        note: "Быстрая сводка по команде на сейчас.",
+        label: "Сводка",
+        note: "Деньги, сигналы и ближайшие действия команды.",
       },
       (allowed.has("site") || allowed.has("pages") || allowed.has("forms") || allowed.has("seo") || allowed.has("integrations")) && {
         id: "site",
-        label: "Сайт и настройки",
-        note: "Страницы, формы и публикация.",
+        label: "Сайт и публикация",
+        note: "Публикация, формы, каналы и системные настройки.",
       },
       allowed.has("crm") && {
         id: "crm",
         label: "CRM",
-        note: "Лиды, задачи и очередь команды.",
+        note: "Лиды, задачи, воронка и очередь команды.",
       },
       (allowed.has("catalog") || allowed.has("inventory")) && {
         id: "catalog",
         label: "Каталог",
-        note: "Товары и карточки магазина.",
+        note: "Список товаров и редактор карточек.",
       },
       (scopes.has("calc_prices") || ["owner", "admin"].includes(session.policy?.role || "")) && {
         id: "calc-prices",
@@ -575,6 +850,11 @@ function getAllowedSections(session) {
       id: "overview",
       label: "Главная",
       note: "Главное по заказам, документам и связи.",
+    },
+    routeAccess.catalog && {
+      id: "catalog",
+      label: "Каталог",
+      note: "Позиции под вашу задачу и что из них уже можно брать.",
     },
     {
       id: "cart",
@@ -617,6 +897,7 @@ function getAllowedSections(session) {
 async function renderSection(session, section) {
   if (session.accountType === "member") {
     if (section.id === "overview") return renderMemberOverview(session);
+    if (section.id === "catalog") return renderMemberCatalogSection(session);
     if (section.id === "cart") return renderMemberCartSection(session);
     if (section.id === "requests") return renderMemberRequestsSection(session);
     if (section.id === "course") return renderMemberCourseSection(session);
@@ -627,13 +908,13 @@ async function renderSection(session, section) {
   }
 
   if (session.accountType === "admin") {
-    if (section.id === "dashboard") return renderAdminDashboard();
-    if (section.id === "catalog") return renderAdminCatalogSection();
-    if (section.id === "crm") return renderCrmSection();
-    if (section.id === "calc-prices") return renderCalcPricesSection();
-    if (section.id === "site") return renderAdminSiteSection();
-    if (section.id === "users") return renderAdminUsersSection();
-    if (section.id === "audit") return renderAdminAuditSection();
+    if (section.id === "dashboard") return renderAdminDashboard(session);
+    if (section.id === "catalog") return renderAdminCatalogSection(session);
+    if (section.id === "crm") return renderCrmSection(session);
+    if (section.id === "calc-prices") return renderCalcPricesSection(session);
+    if (section.id === "site") return renderAdminSiteSection(session);
+    if (section.id === "users") return renderAdminUsersSection(session);
+    if (section.id === "audit") return renderAdminAuditSection(session);
   }
 
   return renderPlannedSection(section);
@@ -642,67 +923,104 @@ async function renderSection(session, section) {
 async function renderMemberOverview(session) {
   const bundle = await loadMemberProjectBundle(session);
   const { routeAccess, scopes, catalogItems, specialPages, documentPages } = bundle;
-  const projectState = deriveMemberProjectState({
-    routeAccess,
-    scopes,
+  const canOpenRequests = sessionHasSection(session, "requests");
+  const canOpenOrders = sessionHasSection(session, "orders");
+  const canOpenDocuments = sessionHasSection(session, "documents");
+  const [profile, orders, messages] = await Promise.all([
+    loadMemberProfile(session),
+    canOpenOrders ? loadMemberOrders().catch(() => []) : Promise.resolve([]),
+    loadMemberMessages().catch(() => []),
+  ]);
+  const cartEntries = Object.entries(loadMemberCart())
+    .map(([productId, qty]) => {
+      const product = catalogItems.find((item) => item.id === productId);
+      return product ? { product, qty: Number(qty) || 0 } : null;
+    })
+    .filter(Boolean);
+  const savedItems = loadMemberSaved(session)
+    .map((productId) => catalogItems.find((item) => item.id === productId))
+    .filter(Boolean);
+  const profileCompleteness = getMemberProfileCompleteness(profile);
+  const documentGroups = await Promise.all(
+    (orders || []).slice(0, 3).map(async (order) => ({
+      order,
+      documents: canOpenDocuments ? await loadMemberOrderDocuments(order.id).catch(() => []) : [],
+    })),
+  );
+  const overviewState = deriveMemberHomeState({
+    profile,
+    orders,
+    messages,
+    cartEntries,
+    savedItems,
     catalogItems,
     specialPages,
-    documentPages,
+    documentGroups,
+    canOpenOrders,
+    canOpenDocuments,
   });
-  const nextSectionHref = cabinetSectionHref(projectState.nextSection);
-  const overviewSecondaryActions = [];
-  if (scopes.includes("orders")) {
-    overviewSecondaryActions.push(`<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("orders"))}">Открыть заказы</a>`);
-  }
-  overviewSecondaryActions.push(`<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("messages"))}">Связь</a>`);
-  if (!scopes.includes("orders")) {
-    overviewSecondaryActions.push(`<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("profile"))}">Профиль</a>`);
-  }
-
+  const latestTeamMessage = findLatestTeamMessage(messages);
+  const latestOrder = orders[0] || null;
+  const readyDocuments = documentGroups.reduce((sum, entry) => sum + entry.documents.filter((item) => ["ready", "sent"].includes(String(item.status || "").toLowerCase())).length, 0);
   return `
     <div class="cabinet-section-stack">
       <div class="cabinet-section-intro">
         <div class="cabinet-kicker">Главная</div>
-        <h2 class="calc-card-title">Ваш кабинет</h2>
-        <p class="sublead">Открывайте нужный раздел и сразу двигайтесь дальше: заказ, документы, расчёт или сообщение.</p>
+        <h2 class="calc-card-title">Что делать сейчас</h2>
+        <p class="sublead">Главный экран показывает ближайший шаг, доступные разделы и то, что уже готово для работы.</p>
       </div>
       <div class="cabinet-home-grid cabinet-home-grid--single">
         <div class="cabinet-home-main">
-          <article class="card card-pad cabinet-home-card">
-            <div class="cabinet-kicker">Ближайшее действие</div>
-            <h3 class="calc-card-title">${escapeHtml(projectState.title)}</h3>
-            <p class="sublead">${escapeHtml(projectState.description)}</p>
+          <article class="card card-pad cabinet-home-card cabinet-home-card--focus">
+            <div class="cabinet-kicker">Главный шаг</div>
+            <h3 class="calc-card-title">${escapeHtml(overviewState.title)}</h3>
+            <p class="sublead">${escapeHtml(overviewState.description)}</p>
+            <div class="cabinet-mini-list cabinet-mini-list--compact">
+              <article class="cabinet-mini-card cabinet-mini-card--status">
+                <strong>${escapeHtml(overviewState.statusLabel)}</strong>
+                <span>${escapeHtml(overviewState.supportValue)}</span>
+              </article>
+              <article class="cabinet-mini-card">
+                <strong>Профиль</strong>
+                <span>${profileCompleteness}/3 заполнено</span>
+              </article>
+              <article class="cabinet-mini-card">
+                <strong>Документы</strong>
+                <span>${readyDocuments ? `${readyDocuments} готовы` : "Пока готовятся"}</span>
+              </article>
+            </div>
             <div class="cabinet-home-actions">
-              <a class="btn btn-primary" href="${escapeAttribute(nextSectionHref)}">${escapeHtml(projectState.primaryCta)}</a>
-              ${overviewSecondaryActions.slice(0, 2).join("")}
+              <a class="btn btn-primary" href="${escapeAttribute(overviewState.primaryHref)}">${escapeHtml(overviewState.primaryLabel)}</a>
+              <a class="btn btn-secondary" href="${escapeAttribute(overviewState.secondaryHref)}">${escapeHtml(overviewState.secondaryLabel)}</a>
+              ${canOpenOrders ? `<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("orders"))}">Открыть заказы</a>` : `<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("messages"))}">Связь с командой</a>`}
             </div>
           </article>
           <section class="cabinet-section-grid">
-            ${(routeAccess.special || routeAccess.catalog) ? `
+            ${canOpenRequests ? `
               <article class="card card-pad cabinet-card cabinet-action-card">
                 <div class="cabinet-kicker">Расчёт и консультации</div>
                 <h3 class="calc-card-title">Разобрать задачу</h3>
-                <p class="sublead">${specialPages.length ? `Для вас уже открыто ${specialPages.length} ${pluralizeRu(specialPages.length, "страница", "страницы", "страниц")}.` : "Здесь можно начать с расчёта и консультации."}</p>
+                <p class="sublead">${specialPages.length ? `Уже открыто ${specialPages.length} ${pluralizeRu(specialPages.length, "страница", "страницы", "страниц")} с расчётом, консультацией и материалами.` : "Здесь можно начать с расчёта и консультации."}</p>
                 <div class="cabinet-home-actions">
                   <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("requests"))}">Открыть раздел</a>
                 </div>
               </article>
             ` : ""}
-            ${scopes.includes("orders") ? `
+            ${canOpenOrders ? `
               <article class="card card-pad cabinet-card cabinet-action-card">
                 <div class="cabinet-kicker">Заказы</div>
-                <h3 class="calc-card-title">Вернуться к заказам</h3>
-                <p class="sublead">Проверьте статус и откройте нужный заказ.</p>
+                <h3 class="calc-card-title">${latestOrder ? "Продолжить по заказу" : "Заказы появятся здесь"}</h3>
+                <p class="sublead">${latestOrder ? escapeHtml(describeMemberOrderStatus(latestOrder, profileCompleteness).note) : "Как только вы соберёте первый заказ, он появится в этом разделе."}</p>
                 <div class="cabinet-home-actions">
                   <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("orders"))}">Открыть заказы</a>
                 </div>
               </article>
             ` : ""}
-            ${scopes.includes("documents") ? `
+            ${canOpenDocuments ? `
               <article class="card card-pad cabinet-card cabinet-action-card">
                 <div class="cabinet-kicker">Документы</div>
                 <h3 class="calc-card-title">Файлы под рукой</h3>
-                <p class="sublead">${documentPages.length ? `Уже видно ${documentPages.length} ${pluralizeRu(documentPages.length, "файл", "файла", "файлов")}.` : "Файлов пока нет. Когда появятся счёт и спецификация, они будут здесь."}</p>
+                <p class="sublead">${readyDocuments ? `${readyDocuments} ${pluralizeRu(readyDocuments, "документ", "документа", "документов")} уже готовы к открытию.` : "Файлы пока не добавлены. Когда появятся счёт и спецификация, они будут здесь."}</p>
                 <div class="cabinet-home-actions">
                   <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("documents"))}">Открыть документы</a>
                 </div>
@@ -711,13 +1029,21 @@ async function renderMemberOverview(session) {
             <article class="card card-pad cabinet-card cabinet-action-card">
               <div class="cabinet-kicker">Профиль и доставка</div>
               <h3 class="calc-card-title">Проверить данные</h3>
-              <p class="sublead">Здесь ваши контакты, адрес доставки и уведомления.</p>
+              <p class="sublead">${profileCompleteness === 3 ? "Контакты и доставка уже заполнены." : `Не хватает: ${getMemberProfileMissingFields(profile).join(", ")}.`}</p>
               <div class="cabinet-home-actions">
                 <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("profile"))}">Открыть профиль</a>
               </div>
             </article>
-            ${!routeAccess.catalog && !routeAccess.special && !scopes.includes("orders") && !scopes.includes("documents") ? `
-              <div class="account-empty">Пока тут только базовый кабинет. Остальные разделы подключим по вашему доступу.</div>
+            <article class="card card-pad cabinet-card cabinet-action-card">
+              <div class="cabinet-kicker">Сообщения</div>
+              <h3 class="calc-card-title">${latestTeamMessage ? "Есть ответ от команды" : "Связь с командой"}</h3>
+              <p class="sublead">${latestTeamMessage ? escapeHtml(latestTeamMessage.message || "Последний ответ уже в кабинете.") : "Пишите по подбору, заказу, документам и любым уточнениям."}</p>
+              <div class="cabinet-home-actions">
+                <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("messages"))}">${latestTeamMessage ? "Открыть диалог" : "Написать сообщение"}</a>
+              </div>
+            </article>
+            ${!canOpenRequests && !canOpenOrders && !canOpenDocuments ? `
+              <div class="account-empty">Кабинет уже готов для связи и профиля. Остальные разделы появятся, когда откроется следующий этап.</div>
             ` : ""}
           </section>
         </div>
@@ -729,8 +1055,15 @@ async function renderMemberOverview(session) {
 async function renderMemberCatalogSection(session) {
   const bundle = await loadMemberProjectBundle(session);
   const { routeAccess, catalogItems: items, specialPages, documentPages } = bundle;
+  const canOpenDocuments = sessionHasSection(session, "documents");
+  const canOpenRequests = sessionHasSection(session, "requests");
   if (!items.length) {
-    return renderRuntimeEmpty("Подбор и каталог", "В этом кабинете пока нет позиций, привязанных к вашей задаче.");
+    return renderRuntimeEmpty("Подбор и каталог", "В этом кабинете пока нет позиций, привязанных к вашей задаче.", [
+      canOpenRequests
+        ? { href: cabinetSectionHref("requests"), label: "Открыть расчёт и консультации", tone: "primary" }
+        : { href: cabinetRoutes.calc, label: "Открыть калькулятор", tone: "primary" },
+      { href: cabinetSectionHref("messages"), label: "Написать сообщение", tone: "secondary" },
+    ]);
   }
 
   const categories = Array.from(new Set(items.map((item) => item.category).filter(Boolean))).slice(0, 6);
@@ -741,18 +1074,24 @@ async function renderMemberCatalogSection(session) {
   const verifyCount = items.length - buyReadyCount;
   const projectState = deriveMemberProjectState(bundle);
   const firstReference = specialPages.find((item) => !documentPages.includes(item)) || null;
+  applyMemberShellPatch(session, {
+    sectionId: "catalog",
+    sectionNote: buyReadyCount
+      ? `${buyReadyCount} ${pluralizeRu(buyReadyCount, "позиция", "позиции", "позиций")} уже готовы к покупке, ${verifyCount} лучше сверить.`
+      : `${verifyCount} ${pluralizeRu(verifyCount, "позиция", "позиции", "позиций")} нужно обсудить перед покупкой.`,
+  });
 
   return `
     <div class="cabinet-section-stack">
       <div class="cabinet-section-intro">
         <div class="cabinet-kicker">Подбор и каталог</div>
         <h2 class="calc-card-title">Позиции для вашей задачи</h2>
-        <p class="sublead">Здесь только нужные товары: что можно брать сразу, а что лучше уточнить.</p>
+        <p class="sublead">Здесь только нужные позиции: что уже готово к покупке, что лучше уточнить и что полезно держать рядом.</p>
       </div>
       <div class="cabinet-stat-grid cabinet-stat-grid--member">
         ${renderStatCard("Позиции", String(items.length), "в вашем списке")}
-        ${renderStatCard("Можно брать", String(buyReadyCount), buyReadyCount ? "готово к покупке" : "сначала лучше уточнить")}
-        ${renderStatCard("Уточнить", String(verifyCount), verifyCount ? "есть чувствительные позиции" : "список уже чистый")}
+        ${renderStatCard("Готово к покупке", String(buyReadyCount), buyReadyCount ? "можно переходить к следующему шагу" : "сначала лучше уточнить")}
+        ${renderStatCard("Нужно уточнить", String(verifyCount), verifyCount ? "есть позиции для сверки" : "список уже чистый")}
         ${renderStatCard("Файлы рядом", String(documentPages.length), documentPages.length ? "документы уже на месте" : "пока только товары и материалы")}
       </div>
       <div class="cabinet-home-grid cabinet-home-grid--single">
@@ -763,24 +1102,24 @@ async function renderMemberCatalogSection(session) {
             <p class="sublead">${buyReadyCount ? "Сначала откройте то, что уже готово к покупке. Остальное уточняйте по ходу." : "Сейчас важнее уточнить список, чем покупать сразу."}</p>
             <div class="cabinet-phase-grid">
               <article class="cabinet-phase-card">
-                <strong>Уже можно брать</strong>
+                <strong>Готово к покупке</strong>
                 <span>${buyReadyCount ? `${buyReadyCount} ${pluralizeRu(buyReadyCount, "позиция", "позиции", "позиций")} можно брать без лишних шагов.` : "Пока нет позиций, которые можно брать без уточнения."}</span>
               </article>
               <article class="cabinet-phase-card">
-                <strong>Лучше сверить</strong>
+                <strong>Нужно уточнить</strong>
                 <span>${verifyCount ? `${verifyCount} ${pluralizeRu(verifyCount, "позиция", "позиции", "позиций")} лучше проверить с нами перед покупкой.` : "Проверок почти не осталось."}</span>
               </article>
               <article class="cabinet-phase-card">
-                <strong>Что лежит рядом</strong>
+                <strong>Полезно рядом</strong>
                 <span>${documentPages.length ? "Документы уже рядом, не нужно искать их в переписке." : firstReference ? "Рядом есть полезные материалы для следующего шага." : "Пока рядом только каталог."}</span>
               </article>
             </div>
             <div class="cabinet-home-actions">
-              <a class="btn btn-primary" href="${escapeAttribute(firstReady?.path || cabinetRoutes.catalog)}">${escapeHtml(firstReady ? "Открыть первую готовую позицию" : "Открыть каталог")}</a>
-              ${needsClarification ? `<a class="btn btn-secondary" href="${escapeAttribute(needsClarification.path || cabinetRoutes.catalog)}">Открыть позицию для уточнения</a>` : ""}
-              ${documentPages.length ? `<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("documents"))}">Открыть документы</a>` : routeAccess.special ? `<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("requests"))}">Заявки и расчёты</a>` : ""}
+              <a class="btn btn-primary" href="${escapeAttribute(resolvePublicPath(firstReady?.path || cabinetRoutes.catalog))}">${escapeHtml(firstReady ? "Открыть первую готовую позицию" : "Открыть каталог")}</a>
+              ${needsClarification ? `<a class="btn btn-secondary" href="${escapeAttribute(resolvePublicPath(needsClarification.path || cabinetRoutes.catalog))}">Открыть позицию и сверить</a>` : ""}
+              ${documentPages.length && canOpenDocuments ? `<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("documents"))}">Открыть документы</a>` : canOpenRequests ? `<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("requests"))}">Заявки и расчёты</a>` : ""}
             </div>
-            ${categories.length ? `<div class="cabinet-chip-row">${categories.map((item) => `<span class="account-note-chip">${escapeHtml(item)}</span>`).join("")}</div>` : ""}
+            ${categories.length ? `<div class="cabinet-chip-row">${categories.map((item) => `<span class="account-note-chip">${escapeHtml(humanizeMemberCatalogCategory(item))}</span>`).join("")}</div>` : ""}
           </article>
           <section class="card card-pad cabinet-card">
             <div class="cabinet-kicker">Рабочие позиции</div>
@@ -788,8 +1127,8 @@ async function renderMemberCatalogSection(session) {
             <div class="cabinet-list">
               <div class="cabinet-list-head cabinet-list-head--catalog">
                 <span>Позиция</span>
-                <span>Где работает</span>
-                <span>Как действовать</span>
+                <span>Раздел</span>
+                <span>Следующий шаг</span>
               </div>
               <div class="cabinet-list-body">
                 ${primary.map(renderMemberCatalogRow).join("")}
@@ -806,43 +1145,78 @@ async function renderMemberRequestsSection(session) {
   const items = await loadMemberSpecialPages();
   const routeAccess = session.policy?.route_access || {};
   const documentPages = collectMemberDocumentPages(items);
+  const canOpenDocuments = sessionHasSection(session, "documents");
   const referencePages = items.filter((item) => !documentPages.includes(item));
   const firstReference = referencePages[0] || items[0] || null;
+  applyMemberShellPatch(session, {
+    sectionId: "requests",
+    sectionNote: referencePages.length
+      ? `${referencePages.length} ${pluralizeRu(referencePages.length, "полезная страница", "полезные страницы", "полезных страниц")} уже доступны для выбора следующего шага.`
+      : "Здесь доступны калькулятор, разбор по задаче и полезные материалы.",
+  });
 
   return `
     <div class="cabinet-section-stack">
       <div class="cabinet-section-intro">
         <div class="cabinet-kicker">Расчёт и консультации</div>
         <h2 class="calc-card-title">Расчёт и консультации</h2>
-        <p class="sublead">Тут всё, что помогает принять решение: расчёт, консультации и полезные страницы.</p>
+        <p class="sublead">Здесь всё, что помогает принять решение: каталог, калькулятор, разбор по задаче и полезные материалы.</p>
       </div>
       <div class="cabinet-stat-grid cabinet-stat-grid--member">
-        ${renderStatCard("Страницы", String(items.length), "открыто для вас")}
-        ${renderStatCard("Полезные", String(referencePages.length), referencePages.length ? "есть что открыть сейчас" : "пока в основном документы")}
+        ${renderStatCard("Материалы", String(referencePages.length), referencePages.length ? "есть что открыть сейчас" : "пока доступен базовый маршрут")}
+        ${renderStatCard("Калькулятор", "Доступен", "можно открыть в любой момент")}
+        ${renderStatCard("Разбор по задаче", "Доступен", "команда поможет с подбором")}
         ${renderStatCard("Файлы", String(documentPages.length), documentPages.length ? "документы уже рядом" : "файлы пока не добавлены")}
-        ${renderStatCard("Режим", routeAccess.catalog ? "С подбором" : "Без подбора", "зависит от вашего доступа")}
+        ${renderStatCard("Каталог", routeAccess.catalog ? "Открыт" : "Позже", routeAccess.catalog ? "позиции уже можно посмотреть" : "откроется по мере движения по проекту")}
       </div>
       <div class="cabinet-home-grid cabinet-home-grid--single">
         <div class="cabinet-home-main">
           <article class="card card-pad cabinet-home-card">
-            <div class="cabinet-kicker">С чего начать</div>
-            <h3 class="calc-card-title">Начните с ближайшего шага</h3>
-            <p class="sublead">${escapeHtml(firstReference?.summary || "Здесь будут основные входы: расчёт, консультация и полезные материалы.")}</p>
+            <div class="cabinet-kicker">Что доступно сейчас</div>
+            <h3 class="calc-card-title">С чего лучше начать</h3>
+            <p class="sublead">${escapeHtml(firstReference?.summary || "Сначала выберите ближайший сценарий: расчёт, разбор по задаче или материалы по вашему проекту.")}</p>
             <div class="cabinet-home-actions">
-              ${firstReference ? `<a class="btn btn-primary" href="${escapeAttribute(firstReference.path)}">Открыть первую страницу</a>` : ""}
-              <a class="btn btn-secondary" href="${escapeAttribute(cabinetRoutes.calc)}">Открыть расчёт</a>
-              <a class="btn btn-secondary" href="${escapeAttribute(cabinetRoutes.consultations)}">Открыть консультации</a>
-              ${documentPages.length ? `<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("documents"))}">Открыть документы</a>` : ""}
+              ${routeAccess.catalog ? `<a class="btn btn-primary" href="${escapeAttribute(cabinetSectionHref("catalog"))}">Открыть каталог</a>` : `<a class="btn btn-primary" href="${escapeAttribute(cabinetRoutes.calc)}">Открыть калькулятор</a>`}
+              <a class="btn btn-secondary" href="${escapeAttribute(cabinetRoutes.calc)}">Калькулятор</a>
+              <a class="btn btn-secondary" href="${escapeAttribute(cabinetRoutes.consultations)}">Разбор по задаче</a>
+              ${documentPages.length && canOpenDocuments ? `<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("documents"))}">Открыть документы</a>` : ""}
             </div>
           </article>
-          <section class="card card-pad cabinet-card">
-            <div class="cabinet-kicker">Что уже открыто</div>
-            <h3 class="calc-card-title">Что уже доступно</h3>
-            ${items.length ? `
-              <div class="account-grid">
-                ${items.map(renderMemberSpecialCard).join("")}
+          <section class="cabinet-section-grid">
+            ${routeAccess.catalog ? `
+              <article class="card card-pad cabinet-card cabinet-action-card">
+                <div class="cabinet-kicker">Каталог</div>
+                <h3 class="calc-card-title">Продолжить подбор</h3>
+                <p class="sublead">Здесь собраны позиции под вашу задачу и следующий шаг по каждой из них.</p>
+                <div class="cabinet-home-actions">
+                  <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("catalog"))}">Открыть каталог</a>
+                </div>
+              </article>
+            ` : ""}
+            <article class="card card-pad cabinet-card cabinet-action-card">
+              <div class="cabinet-kicker">Калькулятор</div>
+              <h3 class="calc-card-title">Посчитать проект</h3>
+              <p class="sublead">Подходит, когда нужно быстро проверить размер, конфигурацию и ориентир по стоимости.</p>
+              <div class="cabinet-home-actions">
+                <a class="btn btn-secondary" href="${escapeAttribute(cabinetRoutes.calc)}">Открыть калькулятор</a>
               </div>
-            ` : `<div class="account-empty">Пока тут пусто. Начните с расчёта или консультации.</div>`}
+            </article>
+            <article class="card card-pad cabinet-card cabinet-action-card">
+              <div class="cabinet-kicker">Разбор по задаче</div>
+              <h3 class="calc-card-title">Обсудить проект с командой</h3>
+              <p class="sublead">Подходит, если нужно сверить подбор, состав заказа или следующий шаг по документам.</p>
+              <div class="cabinet-home-actions">
+                <a class="btn btn-secondary" href="${escapeAttribute(cabinetRoutes.consultations)}">Открыть разбор</a>
+              </div>
+            </article>
+            <article class="card card-pad cabinet-card cabinet-action-card">
+              <div class="cabinet-kicker">Полезные материалы</div>
+              <h3 class="calc-card-title">${referencePages.length ? "Что уже можно открыть" : "Материалы появятся здесь"}</h3>
+              <p class="sublead">${referencePages.length ? `${referencePages.length} ${pluralizeRu(referencePages.length, "материал", "материала", "материалов")} уже доступны по вашему проекту.` : "Когда по проекту появятся полезные материалы, они соберутся в этом разделе."}</p>
+              <div class="cabinet-home-actions">
+                ${firstReference ? `<a class="btn btn-secondary" href="${escapeAttribute(firstReference.path)}">Открыть материал</a>` : `<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("messages"))}">Написать команде</a>`}
+              </div>
+            </article>
           </section>
         </div>
       </div>
@@ -852,6 +1226,7 @@ async function renderMemberRequestsSection(session) {
 
 async function renderMemberCourseSection(session) {
   const items = await loadMemberSpecialPages().catch(() => []);
+  const canOpenRequests = sessionHasSection(session, "requests");
   const courseItems = items.filter((item) => {
     const probe = `${item.slug || ""} ${item.path || ""} ${item.title || ""}`.toLowerCase();
     return ["course", "klubhack", "хак"].some((token) => probe.includes(token));
@@ -879,7 +1254,7 @@ async function renderMemberCourseSection(session) {
             <p class="sublead">${escapeHtml(firstLesson?.summary || "Здесь появится ближайший урок.")}</p>
             <div class="cabinet-home-actions">
               ${firstLesson ? `<a class="btn btn-primary" href="${escapeAttribute(firstLesson.path)}">Открыть ближайший урок</a>` : ""}
-              <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("requests"))}">Заявки и расчёты</a>
+              ${canOpenRequests ? `<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("requests"))}">Заявки и расчёты</a>` : `<a class="btn btn-secondary" href="${escapeAttribute(cabinetRoutes.calc)}">Открыть расчёт</a>`}
             </div>
           </article>
           <article class="card card-pad cabinet-home-card">
@@ -897,6 +1272,9 @@ async function renderMemberCourseSection(session) {
 
 async function renderMemberOrdersSection(session) {
   const routeAccess = session.policy?.route_access || {};
+  const canOpenRequests = sessionHasSection(session, "requests");
+  const canOpenDocuments = sessionHasSection(session, "documents");
+  const canOpenOrders = sessionHasSection(session, "orders");
   const profile = await loadMemberProfile(session);
   const [catalogResult, specialResult, ordersResult] = await Promise.all([
     routeAccess.catalog ? loadMemberCatalogItems().catch(() => []) : Promise.resolve([]),
@@ -912,6 +1290,7 @@ async function renderMemberOrdersSection(session) {
   const profileCompleteness = getMemberProfileCompleteness(profile);
   const selectedOrderId = new URLSearchParams(window.location.search).get("order");
   const activeOrder = orders.find((item) => String(item.id) === String(selectedOrderId)) || null;
+  const activeOrdersCount = orders.filter((item) => !["completed", "cancelled"].includes(String(item.status || "").toLowerCase())).length;
 
   if (activeOrder) {
     const messages = await loadMemberMessages().catch(() => []);
@@ -924,6 +1303,13 @@ async function renderMemberOrdersSection(session) {
       profileCompleteness,
       documentsCount: activeOrderDocuments.length,
       messagesCount: activeOrderMessages.length,
+      hasDocumentsSection: canOpenDocuments,
+      hasOrdersSection: canOpenOrders,
+      hasRequestsSection: canOpenRequests,
+    });
+    applyMemberShellPatch(session, {
+      sectionId: "orders",
+      sectionNote: `${activeOrder.title} · ${activeOrderStatus.label.toLowerCase()} · ${activeOrderDocuments.length} ${pluralizeRu(activeOrderDocuments.length, "файл", "файла", "файлов")}.`,
     });
     return `
       <div class="cabinet-section-stack">
@@ -957,8 +1343,8 @@ async function renderMemberOrdersSection(session) {
                 </article>
               </div>
               <div class="cabinet-home-actions">
-                <a class="btn btn-primary" href="${escapeAttribute(orderStage.primaryHref)}">${escapeHtml(orderStage.primaryLabel)}</a>
-                <a class="btn btn-secondary" href="${escapeAttribute(orderStage.secondaryHref)}">${escapeHtml(orderStage.secondaryLabel)}</a>
+              <a class="btn btn-primary" href="${escapeAttribute(orderStage.primaryHref)}">${escapeHtml(orderStage.primaryLabel)}</a>
+              <a class="btn btn-secondary" href="${escapeAttribute(orderStage.secondaryHref)}">${escapeHtml(orderStage.secondaryLabel)}</a>
                 ${orderStage.tertiaryHref ? `<a class="btn btn-secondary" href="${escapeAttribute(orderStage.tertiaryHref)}">${escapeHtml(orderStage.tertiaryLabel)}</a>` : ""}
               </div>
             </article>
@@ -997,10 +1383,10 @@ async function renderMemberOrdersSection(session) {
                         </div>
                         <div class="cabinet-list-cell">
                           <strong>${escapeHtml(String(entry.qty))}</strong>
-                          <span>${escapeHtml(entry.category || "catalog")}</span>
+                          <span>${escapeHtml(humanizeMemberCatalogCategory(entry.category || ""))}</span>
                         </div>
                         <div class="cabinet-list-cell">
-                          <strong><a href="${escapeAttribute(entry.path)}">Открыть позицию</a></strong>
+                          <strong><a href="${escapeAttribute(resolvePublicPath(entry.path))}">Открыть позицию</a></strong>
                           <span>Откройте товар и при необходимости поправьте состав.</span>
                         </div>
                       </article>
@@ -1078,23 +1464,30 @@ async function renderMemberOrdersSection(session) {
     `;
   }
 
+  applyMemberShellPatch(session, {
+    sectionId: "orders",
+    sectionNote: orders.length
+      ? `${activeOrdersCount} ${pluralizeRu(activeOrdersCount, "заказ", "заказа", "заказов")} сейчас в работе.`
+      : "Когда появится первый заказ, он будет виден здесь.",
+  });
+
   return `
     <div class="cabinet-section-stack">
       <div class="cabinet-section-intro">
         <div class="cabinet-kicker">Заказы</div>
         <h2 class="calc-card-title">Ваши заказы</h2>
-        <p class="sublead">Здесь видно, какие заказы уже собраны и что нужно сделать перед покупкой.</p>
+        <p class="sublead">Здесь видно, на каком этапе сейчас каждый заказ и что лучше сделать следующим шагом.</p>
       </div>
       <div class="cabinet-home-grid cabinet-home-grid--single">
         <div class="cabinet-home-main">
           <article class="card card-pad cabinet-home-card">
             <div class="cabinet-kicker">Следующий шаг</div>
-            <h3 class="calc-card-title">С чего начать</h3>
-            <p class="sublead">${buyReady.length ? "Сначала пройдите по готовым позициям. Потом проверьте то, что требует уточнения." : "Пока лучше доуточнить состав, а потом собирать заказ."}</p>
+            <h3 class="calc-card-title">${orders.length ? "Что важно перед заказом" : "Как появится первый заказ"}</h3>
+            <p class="sublead">${orders.length ? "Проверьте профиль, состав заказа и документы. Так следующий шаг будет быстрее и без лишних уточнений." : "Сначала добавьте позиции в корзину или вернитесь к подбору. Первый заказ появится здесь автоматически."}</p>
             <div class="cabinet-home-actions">
               ${firstBuyReady ? `<a class="btn btn-primary" href="${escapeAttribute(firstBuyReady.path)}">Открыть первую готовую позицию</a>` : ""}
-              ${(routeAccess.catalog || routeAccess.special) ? `<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("requests"))}">Открыть заявки и расчёты</a>` : ""}
-              ${orders.length ? `<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("documents"))}">Открыть документы</a>` : ""}
+              ${canOpenRequests ? `<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("requests"))}">Открыть заявки и расчёты</a>` : ""}
+              ${orders.length && canOpenDocuments ? `<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("documents"))}">Открыть документы</a>` : ""}
               <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("profile"))}">Профиль и доставка</a>
               <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("cart"))}">Корзина и сохранённое</a>
             </div>
@@ -1135,7 +1528,18 @@ async function renderMemberOrdersSection(session) {
                   ${orders.map((order) => renderMemberOrderRow(order, profileCompleteness)).join("")}
                 </div>
               </div>
-            ` : `<div class="account-empty">Заказов пока нет. Соберите первый заказ из корзины.</div>`}
+            ` : `
+              <div class="cabinet-mini-list">
+                <article class="cabinet-mini-card">
+                  <strong>Заказов пока нет</strong>
+                  <span>Когда вы соберёте первую корзину или согласуете подбор, заказ появится здесь.</span>
+                </article>
+              </div>
+              <div class="cabinet-home-actions">
+                <a class="btn btn-primary" href="${escapeAttribute(cabinetSectionHref("cart"))}">Открыть корзину</a>
+                <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("catalog"))}">Открыть каталог</a>
+              </div>
+            `}
           </section>
         </div>
       </div>
@@ -1144,15 +1548,9 @@ async function renderMemberOrdersSection(session) {
 }
 
 async function renderMemberDocumentsSection(session) {
-  const [items, ordersResult] = await Promise.all([
-    loadMemberSpecialPages().catch(() => []),
-    loadMemberOrders().catch(() => []),
-  ]);
-  const documentPages = collectMemberDocumentPages(items);
+  const ordersResult = await loadMemberOrders().catch(() => []);
+  const canOpenOrders = sessionHasSection(session, "orders");
   const orders = Array.isArray(ordersResult) ? ordersResult : [];
-  const accountName = session.user.user_name || session.user.display_name || "Пользователь";
-  const profile = await loadMemberProfile(session);
-  const profileCompleteness = getMemberProfileCompleteness(profile);
   const orderDocumentGroups = await Promise.all(
     orders.map(async (order) => ({
       order,
@@ -1164,6 +1562,21 @@ async function renderMemberDocumentsSection(session) {
     (sum, entry) => sum + entry.documents.filter((item) => String(item.status || "").toLowerCase() === "ready").length,
     0,
   );
+  const availableDocuments = orderDocumentGroups.flatMap(({ order, documents }) => (Array.isArray(documents) ? documents : [])
+    .map((item) => ({
+      ...item,
+      orderTitle: order.title || `Заказ #${order.id || "—"}`,
+      orderId: order.id,
+      href: resolveOrderDocumentHref(item.file_url),
+    }))
+    .filter((item) => item.href));
+  const pendingDocuments = Math.max(totalOrderDocuments - availableDocuments.length, 0);
+  applyMemberShellPatch(session, {
+    sectionId: "documents",
+    sectionNote: availableDocuments.length
+      ? `${availableDocuments.length} ${pluralizeRu(availableDocuments.length, "файл", "файла", "файлов")} уже можно скачать.`
+      : "Документы появятся здесь, когда команда их подготовит.",
+  });
 
   return `
     <div class="cabinet-section-stack">
@@ -1176,60 +1589,55 @@ async function renderMemberDocumentsSection(session) {
         <div class="cabinet-home-main">
           <article class="card card-pad cabinet-home-card">
             <div class="cabinet-kicker">Документы</div>
-            <h3 class="calc-card-title">Все файлы в одном месте</h3>
-            <p class="sublead">Ничего не нужно искать в чатах: откройте нужный документ прямо отсюда.</p>
+            <h3 class="calc-card-title">Доступные PDF по заказам</h3>
+            <p class="sublead">Здесь лежат счёт, УПД, расчёт и другие файлы, которые уже можно открыть или скачать без перехода по карточкам.</p>
             <div class="cabinet-inline-meta">
               <span>${orders.length} ${pluralizeRu(orders.length, "заказ", "заказа", "заказов")}</span>
-              <span>${totalOrderDocuments} ${pluralizeRu(totalOrderDocuments, "документ", "документа", "документов")}</span>
-              <span>${readyOrderDocuments} готово</span>
+              <span>${availableDocuments.length} ${pluralizeRu(availableDocuments.length, "файл", "файла", "файлов")} доступно</span>
+              <span>${pendingDocuments} ${pluralizeRu(pendingDocuments, "файл", "файла", "файлов")} готовится</span>
             </div>
             <div class="cabinet-home-actions">
-              <a class="btn btn-primary" href="${escapeAttribute(cabinetSectionHref("orders"))}">Открыть заказы</a>
+              ${canOpenOrders ? `<a class="btn btn-primary" href="${escapeAttribute(cabinetSectionHref("orders"))}">Открыть заказы</a>` : ""}
               <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("messages"))}">Написать сообщение</a>
               <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("profile"))}">Открыть профиль</a>
             </div>
           </article>
           <section class="card card-pad cabinet-card">
-            <div class="cabinet-kicker">По заказам</div>
-            <h3 class="calc-card-title">Документы, привязанные к заказам</h3>
-            ${orderDocumentGroups.length ? `
+            <div class="cabinet-kicker">Список документов</div>
+            <h3 class="calc-card-title">Доступные файлы</h3>
+            ${availableDocuments.length ? `
+              <div class="cabinet-list cabinet-list--documents-window">
+                <div class="cabinet-list-head cabinet-list-head--documents">
+                  <span>Документ</span>
+                  <span>Заказ</span>
+                  <span>Готовность</span>
+                  <span>Скачать</span>
+                </div>
+                <div class="cabinet-list-body">
+                  ${availableDocuments.map(renderMemberAvailableDocumentRow).join("")}
+                </div>
+              </div>
+            ` : orderDocumentGroups.length ? `
               <div class="cabinet-document-group-list">
-                ${orderDocumentGroups.map(({ order, documents }) => renderMemberOrderDocumentGroup(order, documents, profileCompleteness)).join("")}
+                <article class="cabinet-mini-card">
+                  <strong>Файлы ещё готовятся</strong>
+                  <span>Как только команда добавит счёт, УПД или расчёт, они появятся здесь списком и будут доступны для скачивания.</span>
+                </article>
               </div>
             ` : `
               <div class="cabinet-mini-list">
                 <article class="cabinet-mini-card">
                   <strong>Заказов пока нет</strong>
-                  <span>Сначала соберите первый заказ. После этого документы появятся здесь.</span>
-                </article>
-                <article class="cabinet-mini-card">
-                  <strong>Что сделать сейчас</strong>
-                  <span>Откройте заказы, проверьте профиль или напишите нам.</span>
+                  <span>Когда появится первый заказ, его документы соберутся здесь одним списком.</span>
                 </article>
               </div>
               <div class="cabinet-home-actions">
-                <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("orders"))}">Открыть заказы</a>
+                ${canOpenOrders ? `<a class="btn btn-primary" href="${escapeAttribute(cabinetSectionHref("orders"))}">Открыть заказы</a>` : ""}
                 <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("profile"))}">Проверить профиль</a>
                 <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("messages"))}">Написать сообщение</a>
               </div>
             `}
           </section>
-          ${documentPages.length ? `
-            <section class="card card-pad cabinet-card">
-              <div class="cabinet-kicker">Ещё файлы</div>
-              <h3 class="calc-card-title">Связанные документы</h3>
-              <div class="cabinet-list">
-                <div class="cabinet-list-head cabinet-list-head--catalog">
-                  <span>Документ</span>
-                  <span>Тип</span>
-                  <span>Переход</span>
-                </div>
-                <div class="cabinet-list-body">
-                  ${documentPages.slice(0, 6).map(renderMemberDocumentRow).join("")}
-                </div>
-              </div>
-            </section>
-          ` : ""}
         </div>
       </div>
     </div>
@@ -1241,6 +1649,7 @@ async function renderMemberCartSection(session) {
     loadMemberProfile(session),
     loadMemberCatalogItems().catch(() => []),
   ]);
+  const canOpenOrders = sessionHasSection(session, "orders");
   const cart = loadMemberCart();
   const savedIds = loadMemberSaved(session);
   const cartEntries = Object.entries(cart)
@@ -1274,8 +1683,8 @@ async function renderMemberCartSection(session) {
             <h3 class="calc-card-title">Текущие позиции к закупке</h3>
             ${cartEntries.length ? `
               <div class="cabinet-home-actions">
-                <button class="btn btn-primary" type="button" data-member-create-order>Собрать заказ из корзины</button>
-                <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("orders"))}">Открыть заказы</a>
+                ${canOpenOrders ? `<button class="btn btn-primary" type="button" data-member-create-order>Собрать заказ из корзины</button>` : `<a class="btn btn-primary" href="${escapeAttribute(cabinetSectionHref("messages"))}">Написать по корзине</a>`}
+                ${canOpenOrders ? `<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("orders"))}">Открыть заказы</a>` : `<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("profile"))}">Профиль и доставка</a>`}
               </div>
             ` : ""}
             ${cartEntries.length ? `
@@ -1294,10 +1703,10 @@ async function renderMemberCartSection(session) {
                       </div>
                       <div class="cabinet-list-cell">
                         <strong>${escapeHtml(String(entry.qty))}</strong>
-                        <span>${escapeHtml(entry.product.category || entry.product.kind || "catalog")}</span>
+                        <span>${escapeHtml(humanizeMemberCatalogCategory(entry.product.category || entry.product.kind || ""))}</span>
                       </div>
                       <div class="cabinet-list-cell">
-                        <strong><a href="${escapeAttribute(entry.product.path)}">Открыть позицию</a></strong>
+                        <strong><a href="${escapeAttribute(resolvePublicPath(entry.product.path))}">Открыть позицию</a></strong>
                         <span class="cabinet-inline-actions">
                           <button class="btn btn-ghost btn-ghost--small" type="button" data-member-cart-save="${escapeAttribute(entry.product.id)}">В сохранённое</button>
                           <button class="btn btn-ghost btn-ghost--small" type="button" data-member-cart-remove="${escapeAttribute(entry.product.id)}">Убрать</button>
@@ -1307,7 +1716,19 @@ async function renderMemberCartSection(session) {
                   `).join("")}
                 </div>
               </div>
-            ` : `<div class="account-empty">Корзина пока пустая. Добавьте товары из каталога.</div>`}
+            ` : `
+              <div class="cabinet-mini-list">
+                <article class="cabinet-mini-card">
+                  <strong>Корзина пока пустая</strong>
+                  <span>Вернитесь в каталог с уже подобранными позициями или сохраните товары на потом.</span>
+                </article>
+              </div>
+              <div class="cabinet-home-actions">
+                <a class="btn btn-primary" href="${escapeAttribute(cabinetSectionHref("catalog"))}">Открыть каталог</a>
+                <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("messages"))}">Написать по подбору</a>
+              </div>
+            `}
+            ${cartEntries.length && !canOpenOrders ? `<div class="cabinet-inline-hint">Для этого доступа заказы не открыты. Если нужно собрать закупку, напишите нам из кабинета.</div>` : ""}
           </section>
           <section class="card card-pad cabinet-card">
             <div class="cabinet-kicker">Сохранённое</div>
@@ -1319,13 +1740,20 @@ async function renderMemberCartSection(session) {
                     <strong>${escapeHtml(item.title)}</strong>
                     <span>${escapeHtml(item.summary || "Сохранённая позиция")}</span>
                     <div class="cabinet-home-actions">
-                      <a class="btn btn-secondary" href="${escapeAttribute(item.path)}">Открыть позицию</a>
+                      <a class="btn btn-secondary" href="${escapeAttribute(resolvePublicPath(item.path))}">Открыть позицию</a>
                       <button class="btn btn-ghost btn-ghost--small" type="button" data-member-saved-move="${escapeAttribute(item.id)}">Вернуть в корзину</button>
                     </div>
                   </article>
                 `).join("")}
               </div>
-            ` : `<div class="account-empty">Пока ничего не отложено.</div>`}
+            ` : `
+              <div class="cabinet-mini-list">
+                <article class="cabinet-mini-card">
+                  <strong>Пока ничего не отложено</strong>
+                  <span>Когда сохраните интересные позиции, они появятся здесь и будут ждать следующего шага.</span>
+                </article>
+              </div>
+            `}
           </section>
           <article class="card card-pad cabinet-home-card">
             <div class="cabinet-kicker">Перед заказом</div>
@@ -1351,38 +1779,61 @@ async function renderMemberMessagesSection(session) {
   const supportEmail = settings.site?.supportEmail || DEFAULT_SETTINGS.site.supportEmail;
   const supportTelegram = settings.site?.supportTelegram || DEFAULT_SETTINGS.site.supportTelegram;
   const supportTelegramUrl = settings.site?.supportTelegramUrl || DEFAULT_SETTINGS.site.supportTelegramUrl;
+  const timeline = [...messages].sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
+  const latestTeamMessage = findLatestTeamMessage(timeline);
+  applyMemberShellPatch(session, {
+    sectionId: "messages",
+    sectionNote: latestTeamMessage
+      ? `Есть свежий ответ от команды: ${formatAuditTimestamp(latestTeamMessage.created_at || "")}.`
+      : "Диалог открыт. Напишите, если нужен следующий шаг по подбору, заказу или документам.",
+  });
 
   return `
     <div class="cabinet-section-stack">
       <div class="cabinet-section-intro">
         <div class="cabinet-kicker">Сообщения</div>
         <h2 class="calc-card-title">Связь с командой</h2>
-        <p class="sublead">Напишите в кабинете или выберите удобный канал.</p>
+        <p class="sublead">Здесь один человеческий диалог по подбору, заказу и документам без сложной тикетной логики.</p>
       </div>
-      <section class="card card-pad cabinet-card">
-        <div class="cabinet-kicker">Написать сообщение</div>
-        <h3 class="calc-card-title">Напишите нам</h3>
-        <div class="cabinet-field-grid">
-          <label class="cabinet-field">
-            <span class="cabinet-field-label">Тема</span>
-            <input class="admin-input" data-member-message-subject type="text" value="Вопрос по проекту" />
-          </label>
-          <label class="cabinet-field cabinet-field--wide">
-            <span class="cabinet-field-label">Сообщение</span>
-            <textarea class="admin-textarea" data-member-message-body placeholder="Коротко: что нужно сделать?"></textarea>
-          </label>
+      <section class="card card-pad cabinet-card cabinet-message-panel">
+        <div class="cabinet-kicker">Диалог</div>
+        <h3 class="calc-card-title">Один чат по проекту</h3>
+        <div class="cabinet-message-shell">
+          <div class="cabinet-message-window">
+            ${timeline.length ? `
+              <div class="cabinet-message-thread">
+                ${timeline.map((item) => renderMemberMessageItem(item, latestTeamMessage?.id)).join("")}
+              </div>
+            ` : `
+              <div class="cabinet-message-empty">
+                <strong>Сообщений пока нет</strong>
+                <span>Напишите вопрос по подбору, заказу или документам. Ответ появится здесь же.</span>
+              </div>
+            `}
+          </div>
+          <div class="cabinet-message-composer">
+            <label class="cabinet-field">
+              <span class="cabinet-field-label">Тема</span>
+              <input class="admin-input" data-member-message-subject type="text" value="Вопрос по проекту" />
+            </label>
+            <label class="cabinet-field">
+              <span class="cabinet-field-label">Сообщение</span>
+              <textarea class="admin-textarea" data-member-message-body placeholder="Коротко: что нужно сделать?"></textarea>
+            </label>
+            <div class="cabinet-message-composer__actions">
+              <button class="btn btn-primary" type="button" data-member-message-send>Отправить сообщение</button>
+            </div>
+            <div class="cabinet-users-status" data-member-message-status></div>
+          </div>
         </div>
-        <div class="cabinet-user-card-actions">
-          <button class="btn btn-primary" type="button" data-member-message-send>Отправить сообщение</button>
-        </div>
-        <div class="cabinet-users-status" data-member-message-status></div>
       </section>
       <section class="cabinet-section-grid cabinet-section-grid--compact">
         <article class="card card-pad cabinet-card cabinet-action-card">
-          <div class="cabinet-kicker">Быстрые каналы</div>
+          <div class="cabinet-kicker">Другие контакты</div>
+          <h3 class="calc-card-title">Если нужен быстрый канал</h3>
+          <p class="sublead">Для срочного вопроса удобнее начать с Telegram. Email и звонок тоже остаются под рукой.</p>
           <div class="cabinet-home-actions">
-            <a class="btn btn-secondary" href="${escapeAttribute(cabinetRoutes.consultations)}">Консультации</a>
-            <a class="btn btn-secondary" href="${escapeAttribute(supportTelegramUrl)}" target="_blank" rel="noreferrer">Telegram</a>
+            <a class="btn btn-primary" href="${escapeAttribute(supportTelegramUrl)}" target="_blank" rel="noreferrer">Открыть Telegram</a>
             <a class="btn btn-secondary" href="mailto:${escapeAttribute(supportEmail)}">Email</a>
             <a class="btn btn-secondary" href="tel:${escapeAttribute(supportPhone.replace(/[^\d+]/g, ""))}">Позвонить</a>
           </div>
@@ -1390,63 +1841,11 @@ async function renderMemberMessagesSection(session) {
         <article class="card card-pad cabinet-card cabinet-action-card">
           <div class="cabinet-kicker">Чтобы ответить быстрее</div>
           <ul class="cabinet-note-list">
-            <li>Напишите задачу в одном-двух предложениях.</li>
+            <li>Коротко опишите задачу в одном-двух предложениях.</li>
             <li>По товару добавьте ссылку, артикул или список позиций.</li>
             <li>По документам сразу укажите, какой файл нужен.</li>
           </ul>
         </article>
-      </section>
-      <section class="card card-pad cabinet-card">
-        <div class="cabinet-kicker">Ваши сообщения</div>
-        <h3 class="calc-card-title">Диалог в кабинете</h3>
-        ${messages.length ? `
-          <div class="cabinet-message-list">
-            ${messages.map(renderMemberMessageItem).join("")}
-          </div>
-        ` : `<div class="account-empty">Сообщений пока нет. Можете отправить первое сообщение прямо сейчас.</div>`}
-      </section>
-    </div>
-  `;
-}
-
-async function renderMemberNotificationsSection(session) {
-  const bundle = await loadMemberProjectBundle(session);
-  const profile = await loadMemberProfile(session);
-  const scopes = session.policy?.scopes || session.user?.scopes || [];
-  const notifications = [
-    bundle.catalogItems.length
-      ? `В подборе уже видно ${bundle.catalogItems.length} ${pluralizeRu(bundle.catalogItems.length, "позицию", "позиции", "позиций")}.`
-      : "Подбор по проекту ещё не наполнен позициями.",
-    bundle.documentPages.length
-      ? `Документы уже рядом: ${bundle.documentPages.length} ${pluralizeRu(bundle.documentPages.length, "файл", "файла", "файлов")} доступны в кабинете.`
-      : "Файлов пока нет.",
-    scopes.includes("course_access")
-      ? "Клубничный Хак уже открыт для этого аккаунта."
-      : "Клубничный Хак пока не открыт для этого аккаунта.",
-    profile.newsletter
-      ? "Рассылка включена: кабинет будет считать email рабочим каналом для обновлений."
-      : "Рассылка выключена: включить её можно в профиле и доставке.",
-  ];
-
-  return `
-    <div class="cabinet-section-stack">
-      <div class="cabinet-section-intro">
-        <div class="tag">Уведомления</div>
-        <h2 class="calc-card-title">Что важно по вашему кабинету сейчас</h2>
-        <p class="sublead">Коротко: что уже открыто, что обновилось и куда идти дальше.</p>
-      </div>
-      <div class="cabinet-stat-grid">
-        ${renderStatCard("Подбор", String(bundle.catalogItems.length), bundle.catalogItems.length ? "позиции уже открыты" : "пока позиций нет")}
-        ${renderStatCard("Документы", String(bundle.documentPages.length), bundle.documentPages.length ? "файлы уже в кабинете" : "файлы пока не появились")}
-        ${renderStatCard("Материалы", String(bundle.specialPages.length), bundle.specialPages.length ? "есть закрытые страницы" : "материалы ещё не добавлены")}
-        ${renderStatCard("Рассылка", profile.newsletter ? "Вкл" : "Выкл", "настройка хранится в профиле")}
-      </div>
-      <section class="card card-pad cabinet-card">
-        <div class="tag">Сводка</div>
-        <h3 class="calc-card-title">Актуальные сигналы по кабинету</h3>
-        <ul class="cabinet-note-list">
-          ${notifications.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-        </ul>
       </section>
     </div>
   `;
@@ -1455,22 +1854,51 @@ async function renderMemberNotificationsSection(session) {
 async function renderMemberProfileSection(session) {
   const profile = await loadMemberProfile(session);
   const userName = session.user.display_name || session.user.user_name || "Пользователь";
+  const missingFields = getMemberProfileMissingFields(profile);
+  const profileReady = missingFields.length === 0;
+  applyMemberShellPatch(session, {
+    sectionId: "profile",
+    sectionNote: profileReady
+      ? "Контакты и доставка заполнены. Профиль не мешает следующему шагу."
+      : `Нужно добавить: ${missingFields.join(", ")}.`,
+  });
 
   return `
     <div class="cabinet-section-stack">
       <div class="cabinet-section-intro">
         <div class="cabinet-kicker">Профиль и доставка</div>
         <h2 class="calc-card-title">Профиль и доставка</h2>
-        <p class="sublead">Контакты, адрес доставки и уведомления.</p>
+        <p class="sublead">Контакты и доставка нужны, чтобы быстро собрать заказ, подготовить документы и не тормозить следующий шаг.</p>
       </div>
-      <div class="cabinet-stat-grid">
-        ${renderStatCard("Пользователь", userName, "основной аккаунт")}
-        ${renderStatCard("Email", profile.email || "не заполнен", profile.email ? "для счетов и файлов" : "добавьте для связи")}
-        ${renderStatCard("Телефон", profile.phone || "не заполнен", profile.phone ? "для уточнений и доставки" : "добавьте заранее")}
-        ${renderStatCard("Рассылка", profile.newsletter ? "Вкл" : "Выкл", "можно изменить ниже")}
-      </div>
-      <section class="cabinet-section-grid">
-        <article class="card card-pad cabinet-card">
+      <section class="card card-pad cabinet-card cabinet-profile-summary">
+        <div class="cabinet-document-group__head">
+          <div>
+            <div class="cabinet-kicker">Статус профиля</div>
+            <h3 class="calc-card-title">${profileReady ? "Профиль готов к заказу" : "Профиль заполнен не до конца"}</h3>
+            <p class="sublead">${profileReady ? "Контакты и доставка уже заполнены. Можно спокойно двигаться дальше по заказу." : `Сейчас мешает: ${missingFields.join(", ")}.`}</p>
+          </div>
+          <div class="cabinet-inline-meta">
+            <span>${userName}</span>
+            <span>${profileReady ? "Можно оформлять заказ" : "Лучше дозаполнить сейчас"}</span>
+          </div>
+        </div>
+        <div class="cabinet-mini-list cabinet-mini-list--compact">
+          <article class="cabinet-mini-card">
+            <strong>Контакты</strong>
+            <span>${profile.email && profile.phone ? "Email и телефон уже на месте." : "Добавьте email и телефон, чтобы мы могли быстро связаться."}</span>
+          </article>
+          <article class="cabinet-mini-card">
+            <strong>Доставка</strong>
+            <span>${profile.delivery_address ? "Адрес доставки уже указан." : "Без адреса доставки заказ будет дольше двигаться дальше."}</span>
+          </article>
+          <article class="cabinet-mini-card">
+            <strong>Уведомления</strong>
+            <span>${profile.newsletter ? "Обновления по заказам и документам включены." : "Уведомления можно включить ниже."}</span>
+          </article>
+        </div>
+      </section>
+      <section class="cabinet-profile-layout">
+        <article class="card card-pad cabinet-card cabinet-profile-card">
           <div class="cabinet-kicker">Контакты</div>
           <h3 class="calc-card-title">Как с вами связаться</h3>
           <div class="cabinet-field-grid">
@@ -1492,7 +1920,7 @@ async function renderMemberProfileSection(session) {
             </label>
           </div>
         </article>
-        <article class="card card-pad cabinet-card">
+        <article class="card card-pad cabinet-card cabinet-profile-card">
           <div class="cabinet-kicker">Доставка</div>
           <h3 class="calc-card-title">Куда отправлять заказ</h3>
           <div class="cabinet-field-grid">
@@ -1506,97 +1934,332 @@ async function renderMemberProfileSection(session) {
             </label>
           </div>
         </article>
-      </section>
-      <section class="card card-pad cabinet-card">
-        <div class="cabinet-kicker">Настройки</div>
+        <section class="card card-pad cabinet-card cabinet-profile-card cabinet-profile-card--settings">
+          <div class="cabinet-kicker">Настройки</div>
           <h3 class="calc-card-title">Сохранение и уведомления</h3>
-        <label class="cabinet-checkbox-row">
-          <input data-member-profile="newsletter" type="checkbox" ${profile.newsletter ? "checked" : ""} />
-          <span>Получать обновления по заказам и документам.</span>
-        </label>
-        <div class="cabinet-user-card-actions">
-          <button class="btn btn-primary" type="button" data-member-profile-save>Сохранить данные</button>
-          <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("messages"))}">Нужна помощь</a>
-        </div>
-        <div class="cabinet-users-status" data-member-profile-status></div>
+          <label class="cabinet-checkbox-row">
+            <input data-member-profile="newsletter" type="checkbox" ${profile.newsletter ? "checked" : ""} />
+            <span>Получать обновления по заказам и документам.</span>
+          </label>
+          <div class="cabinet-inline-hint">${profileReady ? "Данные уже выглядят достаточно полными для следующего шага." : `Перед заказом лучше добавить: ${missingFields.join(", ")}.`}</div>
+          <div class="cabinet-user-card-actions">
+            <button class="btn btn-primary" type="button" data-member-profile-save>Сохранить данные</button>
+            <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("messages"))}">Нужна помощь</a>
+          </div>
+          <div class="cabinet-users-status" data-member-profile-status></div>
+        </section>
       </section>
     </div>
   `;
 }
 
-async function renderAdminDashboard() {
-  const [catalogItems, pricing] = await Promise.all([
-    loadAdminCatalogItems().catch(() => []),
-    loadCalcPricing().catch(() => null),
-  ]);
-  const crmBundle = isCrmEnabled() ? await loadCrmBundle().catch(() => null) : null;
+async function renderAdminDashboard(session) {
+  const role = normalizeCabinetRole(session.policy?.role || session.user.user_role || session.user.role || "admin");
+  const data = await loadAdminDashboardData();
+  if (role === "operator") return renderOperatorDashboard(session, data);
+  if (role === "manager") return renderManagerDashboard(session, data);
+  return renderOwnerDashboard(session, data);
+}
 
-  const crmAvailable = isCrmEnabled() && Boolean(crmBundle);
-  const leadCount = crmBundle?.leads?.length || 0;
-  const overdueTasks = (crmBundle?.tasks || []).filter((task) => String(task.due_state || task.follow_up_state || "").toLowerCase() === "overdue").length;
-  const priceCount = pricing?.items?.length || 0;
-  const latestLead = crmBundle?.leads?.[0] || null;
-  const latestTask = crmBundle?.tasks?.[0] || null;
+function renderOwnerDashboard(session, data) {
+  const revenueHref = sessionHasSection(session, "crm") ? cabinetSectionHref("crm") : cabinetSectionHref("dashboard");
+  const catalogHref = sessionHasSection(session, "catalog") ? cabinetSectionHref("catalog") : cabinetSectionHref("dashboard");
+  const pricingHref = sessionHasSection(session, "calc-prices") ? cabinetSectionHref("calc-prices") : cabinetSectionHref("dashboard");
+  const siteHref = sessionHasSection(session, "site") ? cabinetSectionHref("site") : cabinetRoutes.site;
+  const usersHref = sessionHasSection(session, "users") ? cabinetSectionHref("users") : cabinetSectionHref("dashboard");
+  const urgentItems = [
+    {
+      tone: data.overdueTasks.length ? "danger" : "ok",
+      title: "Просроченные задачи",
+      note: data.overdueTasks.length ? `${data.overdueTasks.length} требуют реакции команды.` : "Срочных задач сейчас нет.",
+      cta: "Открыть CRM",
+      href: revenueHref,
+    },
+    {
+      tone: data.unassignedLeads.length ? "warning" : "ok",
+      title: "Лиды без ответственного",
+      note: data.unassignedLeads.length ? `${data.unassignedLeads.length} ждут назначения.` : "Все лиды уже закреплены.",
+      cta: "Назначить owner",
+      href: revenueHref,
+    },
+    {
+      tone: data.duplicateLeads.length ? "warning" : "ok",
+      title: "Дубли и чистота базы",
+      note: data.duplicateLeads.length ? `${data.duplicateLeads.length} записи требуют ручной проверки.` : "Подозрительных дублей не видно.",
+      cta: "Проверить поток",
+      href: revenueHref,
+    },
+    {
+      tone: data.priceCount ? "ok" : "warning",
+      title: "Цены калькулятора",
+      note: data.priceCount ? `${data.priceCount} позиций доступны для расчёта.` : "Pricing пока пустой, расчётам не на что опираться.",
+      cta: "Открыть цены",
+      href: pricingHref,
+    },
+    {
+      tone: data.syncIssues ? "warning" : "ok",
+      title: "Сайт и каналы",
+      note: data.syncIssues ? "Нужно проверить публикацию, формы и маршрут в CRM." : "Публикация и каналы работают штатно.",
+      cta: "Открыть сайт",
+      href: siteHref,
+    },
+  ];
+
+  const healthItems = [
+    {
+      label: "CRM",
+      state: data.crmAvailable ? "В работе" : (isCrmEnabled() ? "Недоступна" : "Выключена"),
+      tone: data.crmAvailable ? "ok" : "warning",
+      note: data.crmAvailable ? `${data.leads.length} лидов в live-выборке.` : (isCrmEnabled() ? "Нужно проверить интеграцию." : "Раздел отключён в настройках."),
+    },
+    {
+      label: "Каталог",
+      state: data.catalogItems.length ? "Собран" : "Пусто",
+      tone: data.catalogItems.length ? "ok" : "warning",
+      note: data.catalogItems.length ? `${data.catalogItems.length} позиций в базе.` : "Нет позиций для работы команды.",
+    },
+    {
+      label: "Калькулятор",
+      state: data.priceCount ? "Готов" : "Требует прохода",
+      tone: data.priceCount ? "ok" : "warning",
+      note: data.priceCount ? "Ценовой файл читается." : "В pricing не найдено ни одной позиции.",
+    },
+    {
+      label: "Качество данных",
+      state: data.syncIssues ? `${data.syncIssues} сигналов` : "Чисто",
+      tone: data.syncIssues ? "warning" : "ok",
+      note: data.syncIssues ? "Есть расхождения в CRM-данных." : "Критичных сигналов не видно.",
+    },
+  ];
 
   return `
-    <div class="cabinet-section-stack">
-      <div class="cabinet-section-intro">
-        <div class="tag">Командный dashboard</div>
-        <h2 class="calc-card-title">Что важно для команды сейчас</h2>
-        <p class="sublead">${crmAvailable ? "CRM, каталог и цены собраны в одном экране, чтобы быстрее начать работу." : isCrmEnabled() ? "Каталог и цены доступны. CRM сейчас недоступна." : "Каталог и цены доступны. CRM выключена в настройках."}</p>
+    <div class="cabinet-section-stack cabinet-admin-page cabinet-owner-dashboard">
+      <div class="cabinet-section-intro cabinet-section-intro--dashboard cabinet-admin-page__intro">
+        <div class="tag">Сводка владельца</div>
+        <h2 class="calc-card-title">Где деньги и что требует реакции</h2>
+        <p class="sublead">${data.crmAvailable ? "Сначала срочное, затем воронка, команда и системные сигналы." : "CRM сейчас не даёт live-картину, поэтому фокус на каталоге, ценах и состоянии системы."}</p>
       </div>
-      <div class="cabinet-stat-grid">
-        ${renderStatCard("Каталог", String(catalogItems.length), "позиций в текущей базе кабинета")}
-        ${renderStatCard("CRM", String(leadCount), crmAvailable ? "лидов в короткой выборке" : isCrmEnabled() ? "CRM не отвечает, работаем без live-данных" : "CRM выключена в настройках")}
-        ${renderStatCard("Просрочено", String(overdueTasks), "задач требуют реакции")}
-        ${renderStatCard("Калькулятор", String(priceCount), "ценовых позиций в pricing.json")}
-      </div>
-      <div class="cabinet-home-grid cabinet-home-grid--single">
-        <div class="cabinet-home-main">
-          <article class="card card-pad cabinet-home-card">
-            <div class="tag">Приоритет на сейчас</div>
-            <h3 class="calc-card-title">Куда команде идти первым</h3>
-            <div class="cabinet-mini-list">
-              <article class="cabinet-mini-card">
-                <strong>CRM</strong>
-                <span>${escapeHtml(crmAvailable ? (latestLead?.title || latestLead?.name || "Проверьте лиды и ближайшие задачи.") : isCrmEnabled() ? "CRM сейчас недоступна." : "CRM выключена в настройках.")}</span>
-              </article>
-              <article class="cabinet-mini-card">
-                <strong>Каталог</strong>
-                <span>${catalogItems.length ? `Сейчас доступно ${catalogItems.length} пози${catalogItems.length === 1 ? "ция" : "ций"}.` : "Каталог готов к следующему проходу."}</span>
-              </article>
-              <article class="cabinet-mini-card">
-                <strong>Цены калькулятора</strong>
-                <span>${priceCount ? `Сейчас ${priceCount} ценовых позиций.` : "Раздел цен пока пуст."}</span>
-              </article>
+
+      <section class="cabinet-owner-kpi-strip cabinet-owner-kpi-strip--executive">
+        <a class="card card-pad cabinet-owner-kpi cabinet-owner-kpi--money" href="${escapeAttribute(revenueHref)}">
+          <span class="cabinet-owner-kpi__label">Новые лиды</span>
+          <strong class="cabinet-owner-kpi__value">${escapeHtml(String(data.newLeads))}</strong>
+          <span class="cabinet-owner-kpi__note">${escapeHtml(data.crmAvailable ? "требуют первого ответа или прохода по воронке" : "CRM сейчас не даёт live-выборку")}</span>
+        </a>
+        <a class="card card-pad cabinet-owner-kpi cabinet-owner-kpi--money" href="${escapeAttribute(revenueHref)}">
+          <span class="cabinet-owner-kpi__label">Потенциал воронки</span>
+          <strong class="cabinet-owner-kpi__value">${escapeHtml(formatRub(data.pipelineValue))}</strong>
+          <span class="cabinet-owner-kpi__note">${escapeHtml(data.pipelineValue > 0 ? "по активным сделкам и стадиям" : "в CRM пока не отмечены суммы по активным сделкам")}</span>
+        </a>
+        <a class="card card-pad cabinet-owner-kpi cabinet-owner-kpi--money" href="${escapeAttribute(revenueHref)}">
+          <span class="cabinet-owner-kpi__label">Оплачено</span>
+          <strong class="cabinet-owner-kpi__value">${escapeHtml(formatRub(data.paidRevenue))}</strong>
+          <span class="cabinet-owner-kpi__note">${escapeHtml(data.paidRevenue > 0 ? "по оплаченной стадии и закрытым сделкам" : "в CRM пока не отмечены оплаты")}</span>
+        </a>
+        <a class="card card-pad cabinet-owner-kpi cabinet-owner-kpi--alert" href="${escapeAttribute(revenueHref)}">
+          <span class="cabinet-owner-kpi__label">Просрочено и без движения</span>
+          <strong class="cabinet-owner-kpi__value">${escapeHtml(String(data.overdueTasks.length + data.unassignedLeads.length))}</strong>
+          <span class="cabinet-owner-kpi__note">задачи и сделки, которые требуют прохода сейчас</span>
+        </a>
+      </section>
+
+      <section class="cabinet-owner-grid">
+        <article class="card card-pad cabinet-owner-panel cabinet-owner-panel--focus cabinet-admin-widget">
+          <div class="cabinet-kicker">Что делать сейчас</div>
+          <h3 class="calc-card-title">Срочные действия</h3>
+          <div class="cabinet-owner-action-list">
+            ${urgentItems.map(renderOwnerActionRow).join("")}
+          </div>
+        </article>
+        <article class="card card-pad cabinet-owner-panel cabinet-admin-widget">
+          <div class="cabinet-kicker">Состояние системы</div>
+          <h3 class="calc-card-title">Что в норме, а что требует проверки</h3>
+          <div class="cabinet-owner-health-list">
+            ${healthItems.map(renderOwnerHealthItem).join("")}
+          </div>
+        </article>
+      </section>
+
+      <section class="cabinet-owner-grid cabinet-owner-grid--secondary">
+        <article class="card card-pad cabinet-owner-panel cabinet-admin-widget">
+          <div class="cabinet-kicker">Воронка и деньги</div>
+          <h3 class="calc-card-title">Куда смотреть дальше</h3>
+          ${data.pipelinePreview.length ? `
+            <div class="cabinet-owner-stage-list">
+              ${data.pipelinePreview.map(renderOwnerPipelineRow).join("")}
             </div>
-            <div class="cabinet-home-actions">
-              ${crmAvailable ? `<a class="btn btn-primary" href="${escapeAttribute(cabinetSectionHref("crm"))}">Открыть CRM</a>` : `<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("crm"))}">Статус CRM</a>`}
-              <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("catalog"))}">Открыть каталог</a>
-              <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("calc-prices"))}">Открыть цены калькулятора</a>
+          ` : `<div class="account-empty">Стадии ещё не вернулись из CRM.</div>`}
+        </article>
+        <article class="card card-pad cabinet-owner-panel cabinet-admin-widget">
+          <div class="cabinet-kicker">Команда</div>
+          <h3 class="calc-card-title">Нагрузка по команде</h3>
+          ${data.ownerPreview.length ? `
+            <div class="cabinet-owner-team-list">
+              ${data.ownerPreview.map(renderCrmWorkloadItem).join("")}
             </div>
-          </article>
-          <article class="card card-pad cabinet-home-card">
-            <div class="tag">Что требует внимания</div>
-            <h3 class="calc-card-title">Короткая сводка</h3>
-            <div class="cabinet-mini-list">
-              <article class="cabinet-mini-card">
-                <strong>Просроченные задачи</strong>
-                <span>${overdueTasks ? `${overdueTasks} задач${overdueTasks === 1 ? "а" : overdueTasks < 5 ? "и" : ""} требуют реакции.` : "Просроченных задач сейчас нет."}</span>
-              </article>
-              <article class="cabinet-mini-card">
-                <strong>Ближайшая задача</strong>
-                <span>${escapeHtml(latestTask?.title || latestTask?.text || "Следующая рабочая задача появится здесь, как только CRM её вернёт.")}</span>
-              </article>
+          ` : `<div class="account-empty">Нагрузка по команде появится, когда CRM вернёт owner-workload.</div>`}
+        </article>
+      </section>
+
+      <section class="cabinet-owner-grid cabinet-owner-grid--secondary">
+        <article class="card card-pad cabinet-owner-panel cabinet-admin-widget">
+          <div class="cabinet-kicker">Очередь</div>
+          <h3 class="calc-card-title">Что застряло без движения</h3>
+          ${data.queuePreview.length ? `
+            <div class="cabinet-owner-queue-list">
+              ${data.queuePreview.map(renderCrmQueueItem).join("")}
             </div>
-          </article>
-        </div>
-      </div>
+          ` : `<div class="account-empty">Очередь пуста или CRM пока не вернула элементы.</div>`}
+        </article>
+        <article class="card card-pad cabinet-owner-panel cabinet-admin-widget">
+          <div class="cabinet-kicker">Ключевые сигналы</div>
+          <h3 class="calc-card-title">Что открыть после срочного</h3>
+          <div class="cabinet-owner-signal-list">
+            <article class="cabinet-owner-signal">
+              <strong>Калькулятор</strong>
+              <span>${escapeHtml(data.priceCount ? `В pricing ${data.priceCount} ценовых позиций.` : "Ценовой слой пуст, расчёт не на что опереть.")}</span>
+            </article>
+            <article class="cabinet-owner-signal">
+              <strong>Последний лид</strong>
+              <span>${escapeHtml(data.latestLead?.title || data.latestLead?.name || "Последний лид ещё не подгрузился.")}</span>
+            </article>
+            <article class="cabinet-owner-signal">
+              <strong>Ближайшая задача</strong>
+              <span>${escapeHtml(data.latestTask?.title || data.latestTask?.subject || data.latestTask?.text || "Следующая задача появится здесь, когда CRM её вернёт.")}</span>
+            </article>
+          </div>
+          <div class="cabinet-home-actions cabinet-home-actions--compact">
+            ${sessionHasSection(session, "crm") ? `<a class="btn btn-primary" href="${escapeAttribute(revenueHref)}">Открыть CRM</a>` : ""}
+            ${sessionHasSection(session, "catalog") ? `<a class="btn btn-secondary" href="${escapeAttribute(catalogHref)}">Каталог</a>` : ""}
+            ${sessionHasSection(session, "calc-prices") ? `<a class="btn btn-secondary" href="${escapeAttribute(pricingHref)}">Цены</a>` : ""}
+            ${sessionHasSection(session, "users") ? `<a class="btn btn-secondary" href="${escapeAttribute(usersHref)}">Пользователи</a>` : ""}
+          </div>
+        </article>
+      </section>
     </div>
   `;
 }
 
-async function renderAdminCatalogSection() {
+function renderManagerDashboard(session, data) {
+  const crmHref = sessionHasSection(session, "crm") ? cabinetSectionHref("crm") : cabinetSectionHref("dashboard");
+  const newTasks = data.tasks.filter((task) => {
+    const state = String(task.due_state || task.status || task.follow_up_state || "").toLowerCase();
+    return state.includes("today") || state.includes("new") || state.includes("planned");
+  });
+  return `
+    <div class="cabinet-section-stack cabinet-admin-page cabinet-owner-dashboard cabinet-manager-dashboard">
+      <div class="cabinet-section-intro cabinet-section-intro--dashboard">
+        <div class="tag">Сводка менеджера</div>
+        <h2 class="calc-card-title">Кому ответить и что довести до денег</h2>
+        <p class="sublead">Экран менеджера держит в фокусе реакцию, просрочку и ближайшие шаги по сделкам.</p>
+      </div>
+      <section class="cabinet-owner-kpi-strip">
+        <a class="card card-pad cabinet-owner-kpi" href="${escapeAttribute(crmHref)}">
+          <span class="cabinet-owner-kpi__label">Новые лиды</span>
+          <strong class="cabinet-owner-kpi__value">${escapeHtml(String(data.newLeads))}</strong>
+          <span class="cabinet-owner-kpi__note">кто ждёт первого ответа</span>
+        </a>
+        <a class="card card-pad cabinet-owner-kpi" href="${escapeAttribute(crmHref)}">
+          <span class="cabinet-owner-kpi__label">Просрочено</span>
+          <strong class="cabinet-owner-kpi__value">${escapeHtml(String(data.overdueTasks.length))}</strong>
+          <span class="cabinet-owner-kpi__note">что нельзя потерять</span>
+        </a>
+        <a class="card card-pad cabinet-owner-kpi" href="${escapeAttribute(crmHref)}">
+          <span class="cabinet-owner-kpi__label">Без owner</span>
+          <strong class="cabinet-owner-kpi__value">${escapeHtml(String(data.unassignedLeads.length))}</strong>
+          <span class="cabinet-owner-kpi__note">нужна фиксация ответственного</span>
+        </a>
+        <a class="card card-pad cabinet-owner-kpi" href="${escapeAttribute(crmHref)}">
+          <span class="cabinet-owner-kpi__label">Сегодня</span>
+          <strong class="cabinet-owner-kpi__value">${escapeHtml(String(newTasks.length))}</strong>
+          <span class="cabinet-owner-kpi__note">задач на день</span>
+        </a>
+      </section>
+      <section class="cabinet-owner-grid">
+        <article class="card card-pad cabinet-owner-panel cabinet-owner-panel--focus cabinet-admin-widget">
+          <div class="cabinet-kicker">Нужна реакция</div>
+          <h3 class="calc-card-title">Сначала отвечаем и двигаем этап</h3>
+          <div class="cabinet-owner-action-list">
+            ${[
+              { tone: data.overdueTasks.length ? "danger" : "ok", title: "Просроченные follow-up", note: data.overdueTasks.length ? `${data.overdueTasks.length} задач висят без реакции.` : "Просрочки сейчас нет.", cta: "Открыть CRM", href: crmHref },
+              { tone: data.unassignedLeads.length ? "warning" : "ok", title: "Без owner", note: data.unassignedLeads.length ? `${data.unassignedLeads.length} лидов ждут закрепления.` : "Все лиды распределены.", cta: "Разобрать", href: crmHref },
+              { tone: data.duplicateLeads.length ? "warning" : "ok", title: "Дубли", note: data.duplicateLeads.length ? `${data.duplicateLeads.length} кандидатов на дубли.` : "Подозрительных дублей не видно.", cta: "Проверить", href: crmHref },
+            ].map(renderOwnerActionRow).join("")}
+          </div>
+        </article>
+        <article class="card card-pad cabinet-owner-panel cabinet-admin-widget">
+          <div class="cabinet-kicker">Ближайшие записи</div>
+          <h3 class="calc-card-title">Лиды и задачи на сейчас</h3>
+          <div class="cabinet-owner-team-list">
+            ${data.leadPreview.slice(0, 2).map(renderCrmLeadItem).join("")}
+            ${data.taskPreview.slice(0, 2).map(renderCrmTaskItem).join("")}
+          </div>
+        </article>
+      </section>
+    </div>
+  `;
+}
+
+function renderOperatorDashboard(session, data) {
+  const crmHref = sessionHasSection(session, "crm") ? cabinetSectionHref("crm") : cabinetSectionHref("dashboard");
+  const usersHref = sessionHasSection(session, "users") ? cabinetSectionHref("users") : cabinetSectionHref("dashboard");
+  const siteHref = sessionHasSection(session, "site") ? cabinetSectionHref("site") : cabinetSectionHref("dashboard");
+  return `
+    <div class="cabinet-section-stack cabinet-admin-page cabinet-owner-dashboard cabinet-operator-dashboard">
+      <div class="cabinet-section-intro cabinet-section-intro--dashboard">
+        <div class="tag">Сводка оператора</div>
+        <h2 class="calc-card-title">Очередь, подтверждения и обработка</h2>
+        <p class="sublead">Операторский экран держит в фокусе очередь, просрочку, назначения и ошибки обработки.</p>
+      </div>
+      <section class="cabinet-owner-kpi-strip">
+        <a class="card card-pad cabinet-owner-kpi" href="${escapeAttribute(crmHref)}">
+          <span class="cabinet-owner-kpi__label">Очередь</span>
+          <strong class="cabinet-owner-kpi__value">${escapeHtml(String(data.queuePreview.length))}</strong>
+          <span class="cabinet-owner-kpi__note">элементов в работе</span>
+        </a>
+        <a class="card card-pad cabinet-owner-kpi" href="${escapeAttribute(crmHref)}">
+          <span class="cabinet-owner-kpi__label">Просрочено</span>
+          <strong class="cabinet-owner-kpi__value">${escapeHtml(String(data.overdueTasks.length))}</strong>
+          <span class="cabinet-owner-kpi__note">нужно снять сегодня</span>
+        </a>
+        <a class="card card-pad cabinet-owner-kpi" href="${escapeAttribute(usersHref)}">
+          <span class="cabinet-owner-kpi__label">Без owner</span>
+          <strong class="cabinet-owner-kpi__value">${escapeHtml(String(data.unassignedLeads.length))}</strong>
+          <span class="cabinet-owner-kpi__note">требуют назначения</span>
+        </a>
+        <a class="card card-pad cabinet-owner-kpi" href="${escapeAttribute(siteHref)}">
+          <span class="cabinet-owner-kpi__label">Сигналы</span>
+          <strong class="cabinet-owner-kpi__value">${escapeHtml(String(data.syncIssues))}</strong>
+          <span class="cabinet-owner-kpi__note">нужно проверить</span>
+        </a>
+      </section>
+      <section class="cabinet-owner-grid">
+        <article class="card card-pad cabinet-owner-panel cabinet-owner-panel--focus cabinet-admin-widget">
+          <div class="cabinet-kicker">Очередь</div>
+          <h3 class="calc-card-title">Что обработать первым</h3>
+          ${data.queuePreview.length ? `
+            <div class="cabinet-owner-queue-list">
+              ${data.queuePreview.map(renderCrmQueueItem).join("")}
+            </div>
+          ` : `<div class="account-empty">Очередь сейчас пуста.</div>`}
+        </article>
+        <article class="card card-pad cabinet-owner-panel cabinet-admin-widget">
+          <div class="cabinet-kicker">Проверки</div>
+          <h3 class="calc-card-title">Что нельзя пропустить</h3>
+          <div class="cabinet-owner-action-list">
+            ${[
+              { tone: data.overdueTasks.length ? "danger" : "ok", title: "Просроченные follow-up", note: data.overdueTasks.length ? `${data.overdueTasks.length} задач без реакции.` : "Просрочек сейчас нет.", cta: "Открыть CRM", href: crmHref },
+              { tone: data.unassignedLeads.length ? "warning" : "ok", title: "Лиды без owner", note: data.unassignedLeads.length ? `${data.unassignedLeads.length} записей ждут назначения.` : "Все записи закреплены.", cta: "Пользователи", href: usersHref },
+              { tone: data.syncIssues ? "warning" : "ok", title: "Системные сигналы", note: data.syncIssues ? `${data.syncIssues} проблемных сигнала в данных.` : "Критичных сигналов не видно.", cta: "Сайт и публикация", href: siteHref },
+            ].map(renderOwnerActionRow).join("")}
+          </div>
+        </article>
+      </section>
+    </div>
+  `;
+}
+
+async function renderAdminCatalogSection(session) {
   const [items, snapshot, adminProducts] = await Promise.all([
     loadAdminCatalogItems(),
     loadAdminCatalogSnapshot(),
@@ -1604,67 +2267,73 @@ async function renderAdminCatalogSection() {
   ]);
   const categories = extractSnapshotCategories(snapshot);
   const products = extractSnapshotProducts(snapshot);
-  const categoryNames = categories.slice(0, 6).map((item) => item.name || item.title || item.slug).filter(Boolean);
   const selectedSlug = new URLSearchParams(window.location.search).get("product") || adminProducts[0]?.slug || "";
   const selectedProduct = selectedSlug ? adminProducts.find((item) => item.slug === selectedSlug) || null : null;
+  const draftCount = adminProducts.filter((item) => String(item.status || "").toLowerCase() === "draft").length;
+  const publishedCount = adminProducts.filter((item) => String(item.status || "").toLowerCase() === "published").length;
+  const hiddenCount = adminProducts.filter((item) => String(item.status || "").toLowerCase() === "hidden").length;
 
   return `
-    <div class="cabinet-section-stack">
-      <div class="cabinet-section-intro">
+    <div class="cabinet-section-stack cabinet-admin-page cabinet-admin-page--catalog">
+      <div class="cabinet-section-intro cabinet-admin-page__intro">
         <div class="tag">Каталог</div>
         <h2 class="calc-card-title">Каталог и товары</h2>
-        <p class="sublead">Отсюда можно открыть магазин и быстро перейти к редактированию нужного товара.</p>
+        <p class="sublead">Слева поиск, фильтры и рабочий список. Справа только редактор выбранной карточки без плавающих конфликтов и лишней дробности.</p>
       </div>
-      <div class="cabinet-home-grid cabinet-home-grid--single">
-        <div class="cabinet-home-main">
-          <article class="card card-pad cabinet-home-card">
-            <div class="cabinet-kicker">Быстрые входы</div>
-            <h3 class="calc-card-title">Быстрый вход</h3>
-            <div class="cabinet-inline-meta">
-              <span>${items.length} ${pluralizeRu(items.length, "позиция", "позиции", "позиций")} в каталоге</span>
-              <span>${products.length} товаров в магазине</span>
-              <span>${categories.length} категорий</span>
-            </div>
-            <div class="cabinet-home-actions">
-              <a class="btn btn-primary" href="${escapeAttribute(cabinetRoutes.catalog)}">Открыть магазин</a>
-              <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("dashboard"))}">Открыть обзор кабинета</a>
-            </div>
-            ${categoryNames.length ? `
-              <div class="cabinet-mini-list">
-                <article class="cabinet-mini-card">
-                  <strong>Главные категории</strong>
-                  <span>${escapeHtml(categoryNames.join(" · "))}</span>
-                </article>
-              </div>
-            ` : ""}
-          </article>
-          <section class="card card-pad cabinet-card">
-            <div class="cabinet-kicker">База товаров</div>
-            <h3 class="calc-card-title">Выберите товар для редактирования</h3>
-            <label class="cabinet-field">
-              <span class="cabinet-field-label">Быстрый поиск по товарам</span>
-              <input class="admin-input" type="search" data-catalog-manager-search placeholder="Название, slug, артикул, категория" />
-            </label>
-            <p class="cabinet-inline-hint">Показываем весь список товаров. Поиск помогает сразу открыть нужную карточку.</p>
-            <div class="cabinet-list">
-              <div class="cabinet-list-head cabinet-list-head--catalog">
-                <span>Позиция</span>
-                <span>Slug</span>
-                <span>Статус</span>
-              </div>
-              <div class="cabinet-list-body" data-catalog-manager-list>
-                ${adminProducts.map((item) => renderAdminCatalogManagerRow(item, selectedSlug)).join("")}
-              </div>
-            </div>
-          </section>
-          ${selectedProduct ? renderAdminCatalogProductEditor(selectedProduct, adminProducts) : ""}
+      <section class="card card-pad cabinet-admin-toolbar">
+        <div class="cabinet-admin-toolbar__main">
+          <label class="cabinet-admin-search">
+            <span>Поиск</span>
+            <input class="admin-input" type="search" data-catalog-manager-search placeholder="Название, slug, артикул, категория" />
+          </label>
+          <div class="cabinet-admin-filter-row">
+            <button class="cabinet-filter-chip is-active" type="button" data-catalog-filter="all">Все ${adminProducts.length}</button>
+            <button class="cabinet-filter-chip" type="button" data-catalog-filter="published">Опубликовано ${publishedCount}</button>
+            <button class="cabinet-filter-chip" type="button" data-catalog-filter="draft">Черновики ${draftCount}</button>
+            <button class="cabinet-filter-chip" type="button" data-catalog-filter="hidden">Скрытые ${hiddenCount}</button>
+            <span class="cabinet-filter-chip is-static">${categories.length} категорий</span>
+          </div>
         </div>
-      </div>
+        <div class="cabinet-admin-toolbar__actions">
+          <button class="btn btn-secondary btn-ghost--small" type="button" data-catalog-toolbar-create>Новый черновик</button>
+          <a class="btn btn-secondary btn-ghost--small" href="${escapeAttribute(cabinetRoutes.catalog)}" target="_blank" rel="noopener noreferrer">Открыть магазин</a>
+        </div>
+      </section>
+      <section class="cabinet-admin-split">
+        <article class="card card-pad cabinet-admin-widget cabinet-admin-split__master cabinet-catalog-master">
+          <div class="cabinet-kicker">База товаров</div>
+          <h3 class="calc-card-title">Список товаров</h3>
+          <div class="cabinet-inline-meta">
+            <span>${products.length} товаров в storefront</span>
+            <span>${categories.length} категорий</span>
+            <span>${selectedProduct ? `Открыт: ${selectedProduct.name || selectedProduct.slug}` : "Выберите карточку"}</span>
+          </div>
+          <div class="cabinet-list">
+            <div class="cabinet-list-head cabinet-list-head--catalog">
+              <span>Позиция</span>
+              <span>Slug</span>
+              <span>Статус</span>
+            </div>
+            <div class="cabinet-list-body" data-catalog-manager-list>
+              ${adminProducts.map((item) => renderAdminCatalogManagerRow(item, selectedSlug)).join("")}
+            </div>
+          </div>
+        </article>
+        <div class="cabinet-admin-split__detail">
+          ${selectedProduct ? renderAdminCatalogProductEditor(selectedProduct, adminProducts) : `
+            <article class="card card-pad cabinet-admin-widget">
+              <div class="cabinet-kicker">Редактор</div>
+              <h3 class="calc-card-title">Выберите товар слева</h3>
+              <p class="sublead">После выбора справа откроется карточка с основными данными, медиа, SEO, связями и публикацией.</p>
+            </article>
+          `}
+        </div>
+      </section>
     </div>
   `;
 }
 
-async function renderCrmSection() {
+async function renderCrmSection(session) {
   if (!isCrmEnabled()) {
     return renderCrmDisabledState();
   }
@@ -1696,116 +2365,348 @@ async function renderCrmSection() {
   const duplicatePreview = duplicateLeads.slice(0, 3);
   const duplicateCount = duplicateLeads.length;
   const syncIssues = readCrmHealthCount(dataQuality);
+  const crmMode = new URLSearchParams(window.location.search).get("mode") === "pipeline" ? "pipeline" : "overview";
+  const modeTabs = [
+    { id: "overview", label: "Обзор", note: "сигналы и ближайшие действия" },
+    { id: "pipeline", label: "Воронка", note: "kanban и рабочий проход" },
+  ];
+  const pipelineColumns = (pipelines.length ? pipelines : [{ title: "Новые" }, { title: "В работе" }, { title: "Счёт" }, { title: "Оплачено" }]).slice(0, 4);
 
   return `
-    <div class="cabinet-section-stack">
-      <div class="cabinet-section-intro">
+    <div class="cabinet-section-stack cabinet-crm-grid cabinet-admin-page">
+      <div class="cabinet-section-intro cabinet-admin-page__intro">
         <div class="tag">CRM</div>
-        <h2 class="calc-card-title">CRM команды</h2>
-        <p class="sublead">Сначала обработайте новые лиды, просроченные задачи и очередь без ответственного.</p>
+        <h2 class="calc-card-title">${crmMode === "pipeline" ? "Воронка и рабочие карточки" : "Обзор CRM"}</h2>
+        <p class="sublead">${crmMode === "pipeline" ? "Колонки, поиск и быстрый проход по лидам без перехода в отдельный экран." : "Что пришло, что просрочено и где нужна реакция прямо сейчас."}</p>
       </div>
-      <div class="cabinet-home-grid cabinet-home-grid--single">
-        <div class="cabinet-home-main">
-          <article class="card card-pad cabinet-home-card">
-            <div class="cabinet-kicker">На сейчас</div>
-            <h3 class="calc-card-title">Что требует реакции первым</h3>
-            <div class="cabinet-inline-meta">
-              <span>${leads.length} ${pluralizeRu(leads.length, "лид", "лида", "лидов")} в выборке</span>
-              <span>${countCrmNewLeads(leads)} новых</span>
-              <span>${overdueTasks.length} просрочено</span>
-              <span>${unassignedLeads.length} без ответственного</span>
-              <span>${syncIssues} проблем синхронизации</span>
-            </div>
-            <div class="cabinet-mini-list">
-              <article class="cabinet-mini-card">
-                <strong>Что требует реакции сейчас</strong>
-                <span>${overdueTasks.length ? `Сначала закройте ${overdueTasks.length} просроченных задач.` : "Просроченных задач сейчас нет."}</span>
-              </article>
-              <article class="cabinet-mini-card">
-                <strong>Очередь без owner</strong>
-                <span>${unassignedLeads.length ? `${unassignedLeads.length} лидов ещё без ответственного.` : "Все лиды уже назначены."}</span>
-              </article>
-              <article class="cabinet-mini-card">
-                <strong>Качество данных</strong>
-                <span>${duplicateCount ? `Есть ${duplicateCount} кандидатов на дубли.` : "Явных дублей не видно."}</span>
-              </article>
-            </div>
-            <div class="cabinet-home-actions">
-              <a class="btn btn-primary" href="${escapeAttribute(cabinetSectionHref("crm"))}">Открыть CRM</a>
-              <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("users"))}">Проверить owners</a>
-            </div>
-          </article>
-          <section class="card card-pad cabinet-card">
-            <div class="cabinet-kicker">Лиды и задачи</div>
-            <h3 class="calc-card-title">Ближайшие элементы потока</h3>
-            ${(leadPreview.length || taskPreview.length) ? `
-              <div class="cabinet-mini-list">
-                ${leadPreview.map(renderCrmLeadItem).join("")}
-                ${taskPreview.map(renderCrmTaskItem).join("")}
-              </div>
-            ` : `<div class="account-empty">CRM не вернул рабочую выборку по лидам и задачам.</div>`}
-          </section>
-          <article class="card card-pad cabinet-home-card cabinet-home-card--compact">
-            <div class="cabinet-kicker">Owners и очередь</div>
-            <h3 class="calc-card-title">Кому что достаётся</h3>
-            ${(ownerPreview.length || queuePreview.length) ? `
-              <div class="cabinet-mini-list">
-                ${ownerPreview.map(renderCrmWorkloadItem).join("")}
-                ${queuePreview.map(renderCrmQueueItem).join("")}
-              </div>
-            ` : `<div class="account-empty">CRM не вернула данные по owners для этой сессии.</div>`}
-          </article>
-          <article class="card card-pad cabinet-home-card cabinet-home-card--compact">
-            <div class="cabinet-kicker">Pipeline и чистота</div>
-            <h3 class="calc-card-title">Состояние CRM</h3>
-            <div class="cabinet-inline-meta">
-              <span>${pipelines.length} стадий</span>
-              <span>${duplicateCount} кандидатов на дубль</span>
-              <span>${crmUsers.length} участников команды</span>
-              <span>${statusItem ? escapeHtml(statusItem.account_name || statusItem.title || "CRM подключена") : "статус не вернулся"}</span>
-            </div>
-            ${(pipelinePreview.length || duplicatePreview.length) ? `
-              <div class="cabinet-mini-list">
-                ${pipelinePreview.map(renderCrmPipelineItem).join("")}
-                ${duplicatePreview.map(renderCrmDuplicateItem).join("")}
-              </div>
-            ` : `<div class="account-empty">CRM не вернула pipeline и качество данных.</div>`}
-          </article>
+      <section class="card card-pad cabinet-admin-toolbar">
+        <div class="cabinet-admin-toolbar__main">
+          <div class="cabinet-admin-tabs">
+            ${modeTabs.map((tab) => `<a class="cabinet-admin-tab${crmMode === tab.id ? " is-active" : ""}" href="${escapeAttribute(cabinetSectionHref("crm", { mode: tab.id }))}">${escapeHtml(tab.label)}</a>`).join("")}
+          </div>
+          <label class="cabinet-admin-search">
+            <span>Поиск</span>
+            <input class="admin-input" type="search" data-crm-search placeholder="Лид, ответственный, стадия" />
+          </label>
+          <div class="cabinet-admin-filter-row">
+            <button class="cabinet-filter-chip is-active" type="button" data-crm-filter="all">Все ${leads.length + tasks.length}</button>
+            <button class="cabinet-filter-chip" type="button" data-crm-filter="new">Новые ${countCrmNewLeads(leads)}</button>
+            <button class="cabinet-filter-chip" type="button" data-crm-filter="overdue">Просрочено ${overdueTasks.length}</button>
+            <button class="cabinet-filter-chip" type="button" data-crm-filter="unassigned">Без ответственного ${unassignedLeads.length}</button>
+          </div>
         </div>
+        <div class="cabinet-admin-toolbar__actions">
+          <a class="btn btn-secondary btn-ghost--small" href="${escapeAttribute(cabinetSectionHref("users"))}">Ответственные</a>
+          <a class="btn btn-primary" href="${escapeAttribute(cabinetSectionHref("crm", { mode: crmMode }))}">Обновить экран</a>
+        </div>
+      </section>
+      <div class="cabinet-owner-kpi-strip cabinet-owner-kpi-strip--executive">
+        <a class="card card-pad cabinet-owner-kpi" href="${escapeAttribute(cabinetSectionHref("crm", { mode: "overview" }))}">
+          <span class="cabinet-owner-kpi__label">Лиды</span>
+          <strong class="cabinet-owner-kpi__value">${escapeHtml(String(leads.length))}</strong>
+          <span class="cabinet-owner-kpi__note">${countCrmNewLeads(leads)} новых</span>
+        </a>
+        <a class="card card-pad cabinet-owner-kpi cabinet-owner-kpi--alert" href="${escapeAttribute(cabinetSectionHref("crm", { mode: "overview" }))}">
+          <span class="cabinet-owner-kpi__label">Просрочено</span>
+          <strong class="cabinet-owner-kpi__value">${escapeHtml(String(overdueTasks.length))}</strong>
+          <span class="cabinet-owner-kpi__note">требуют реакции</span>
+        </a>
+        <a class="card card-pad cabinet-owner-kpi" href="${escapeAttribute(cabinetSectionHref("crm", { mode: "overview" }))}">
+          <span class="cabinet-owner-kpi__label">Без ответственного</span>
+          <strong class="cabinet-owner-kpi__value">${escapeHtml(String(unassignedLeads.length))}</strong>
+          <span class="cabinet-owner-kpi__note">очередь без ответственного</span>
+        </a>
+        <a class="card card-pad cabinet-owner-kpi" href="${escapeAttribute(cabinetSectionHref("crm", { mode: "pipeline" }))}">
+          <span class="cabinet-owner-kpi__label">Воронка</span>
+          <strong class="cabinet-owner-kpi__value">${escapeHtml(String(pipelineColumns.length))}</strong>
+          <span class="cabinet-owner-kpi__note">${duplicateCount} кандидатов на дубли</span>
+        </a>
       </div>
+      ${crmMode === "overview" ? `
+        <section class="cabinet-owner-grid">
+          <article class="card card-pad cabinet-owner-panel cabinet-owner-panel--focus cabinet-admin-widget">
+            <div class="cabinet-kicker">Что делать сейчас</div>
+            <h3 class="calc-card-title">Ближайшие действия</h3>
+            <div class="cabinet-owner-action-list">
+              ${[
+                { tone: overdueTasks.length ? "danger" : "ok", title: "Просроченные задачи", note: overdueTasks.length ? `${overdueTasks.length} задач ждут реакции.` : "Срочных задач сейчас нет.", cta: "Открыть CRM", href: cabinetSectionHref("crm", { mode: "overview" }) },
+                { tone: unassignedLeads.length ? "warning" : "ok", title: "Лиды без ответственного", note: unassignedLeads.length ? `${unassignedLeads.length} лидов ждут закрепления.` : "Все лиды уже назначены.", cta: "Назначить", href: cabinetSectionHref("users") },
+                { tone: duplicateCount ? "warning" : "ok", title: "Чистота базы", note: duplicateCount ? `${duplicateCount} кандидатов на дубли.` : "Подозрительных дублей не видно.", cta: "Проверить", href: cabinetSectionHref("crm", { mode: "overview" }) },
+              ].map(renderOwnerActionRow).join("")}
+            </div>
+          </article>
+          <article class="card card-pad cabinet-owner-panel cabinet-admin-widget">
+            <div class="cabinet-kicker">Статус CRM</div>
+            <h3 class="calc-card-title">Сигналы и поток</h3>
+            <div class="cabinet-owner-health-list">
+              ${[
+                { label: "Интеграция", state: statusItem ? "Онлайн" : "Проверить", tone: statusItem ? "ok" : "warning", note: statusItem ? "CRM отвечает и отдаёт выборку." : "Статус не прочитался." },
+                { label: "Очередь", state: queuePreview.length ? `${queuePreview.length} в очереди` : "Пусто", tone: queuePreview.length ? "warning" : "ok", note: queuePreview.length ? "Есть лиды, которые лучше разобрать сейчас." : "Очередь сейчас чистая." },
+                { label: "Качество данных", state: syncIssues ? `${syncIssues} сигналов` : "Чисто", tone: syncIssues ? "warning" : "ok", note: syncIssues ? "Есть проблемы в CRM-данных." : "Критичных сигналов не видно." },
+              ].map(renderOwnerHealthItem).join("")}
+            </div>
+          </article>
+        </section>
+        <section class="cabinet-owner-grid cabinet-owner-grid--secondary">
+          <article class="card card-pad cabinet-owner-panel cabinet-admin-widget">
+            <div class="cabinet-kicker">Лиды</div>
+            <h3 class="calc-card-title">Новые и без ответственного</h3>
+            <div class="cabinet-mini-list cabinet-mini-list--tight" data-crm-search-scope="cards">
+              ${leadPreview.slice(0, 4).map((lead) => renderCrmLeadCard(lead)).join("")}
+            </div>
+          </article>
+          <article class="card card-pad cabinet-owner-panel cabinet-admin-widget">
+            <div class="cabinet-kicker">Задачи</div>
+            <h3 class="calc-card-title">Просрочка и ближайшие касания</h3>
+            <div class="cabinet-mini-list cabinet-mini-list--tight" data-crm-search-scope="cards">
+              ${taskPreview.slice(0, 4).map((task) => renderCrmTaskCard(task)).join("")}
+            </div>
+          </article>
+        </section>
+      ` : `
+        <section class="cabinet-owner-grid">
+          <article class="card card-pad cabinet-owner-panel cabinet-owner-panel--focus cabinet-admin-widget">
+            <div class="cabinet-kicker">Следующий проход</div>
+            <h3 class="calc-card-title">Как идти по воронке сейчас</h3>
+            <div class="cabinet-owner-action-list">
+              ${[
+                { tone: overdueTasks.length ? "danger" : "ok", title: "Снять просрочку", note: overdueTasks.length ? `${overdueTasks.length} задач мешают движению по стадиям.` : "Просроченные задачи не мешают текущему проходу.", cta: "Обзор CRM", href: cabinetSectionHref("crm", { mode: "overview" }) },
+                { tone: unassignedLeads.length ? "warning" : "ok", title: "Назначить ответственных", note: unassignedLeads.length ? `${unassignedLeads.length} лидов нельзя провести дальше без owner.` : "Все карточки уже закреплены.", cta: "Пользователи", href: cabinetSectionHref("users") },
+                { tone: duplicateCount ? "warning" : "ok", title: "Проверить дубли", note: duplicateCount ? `${duplicateCount} кандидатов на дубли мешают чистому канбану.` : "Дубли не мешают рабочему проходу.", cta: "Обзор CRM", href: cabinetSectionHref("crm", { mode: "overview" }) },
+              ].map(renderOwnerActionRow).join("")}
+            </div>
+          </article>
+          <article class="card card-pad cabinet-owner-panel cabinet-admin-widget">
+            <div class="cabinet-kicker">Срез по потоку</div>
+            <h3 class="calc-card-title">Что видно до открытия карточек</h3>
+            <div class="cabinet-owner-health-list">
+              ${[
+                { label: "Колонки", state: `${pipelineColumns.length}`, tone: "ok", note: "Базовая канбан-структура уже собрана." },
+                { label: "Очередь", state: queuePreview.length ? `${queuePreview.length} в очереди` : "Чисто", tone: queuePreview.length ? "warning" : "ok", note: queuePreview.length ? "Есть карточки, которые лучше разобрать до канбана." : "Лишнего навеса над воронкой нет." },
+                { label: "Команда", state: ownerPreview.length ? `${ownerPreview.length} owner` : "Нет данных", tone: ownerPreview.length ? "ok" : "warning", note: ownerPreview.length ? "Нагрузка по owner уже видна." : "CRM не вернула owner-workload." },
+              ].map(renderOwnerHealthItem).join("")}
+            </div>
+          </article>
+        </section>
+        <section class="card card-pad cabinet-admin-widget cabinet-crm-kanban-shell">
+          <div class="cabinet-kicker">Воронка</div>
+          <h3 class="calc-card-title">Воронка лидов</h3>
+          <div class="cabinet-crm-kanban">
+            ${pipelineColumns.map((column) => {
+              const stageLeads = leads.filter((lead) => crmStageMatches(column, lead)).slice(0, 5);
+              return `
+                <section class="cabinet-crm-column">
+                  <header class="cabinet-crm-column__head">
+                    <strong>${escapeHtml(column.title || column.name || column.code || "Стадия")}</strong>
+                    <span>${escapeHtml(String(stageLeads.length))}</span>
+                  </header>
+                  <div class="cabinet-crm-column__body" data-crm-search-scope="cards">
+                    ${stageLeads.length ? stageLeads.map((lead) => renderCrmLeadCard(lead)).join("") : `<div class="cabinet-empty">Пусто</div>`}
+                  </div>
+                </section>
+              `;
+            }).join("")}
+          </div>
+        </section>
+      `}
     </div>
   `;
 }
 
+function renderCrmLeadCard(lead) {
+  const title = lead.name || lead.title || lead.request_name || `Лид #${lead.id || "—"}`;
+  const summary = lead.request_type || lead.message || lead.note || "Без краткого описания";
+  const owner = lead.owner_name || lead.owner || "Без ответственного";
+  const stage = lead.status_name || lead.status_code || lead.status || lead.pipeline_stage || "Без стадии";
+  const amount = readCrmMoneyValue(lead);
+  const searchIndex = [title, summary, owner, stage, lead.phone, lead.email, lead.telegram].filter(Boolean).join(" ").toLowerCase();
+  const tags = [
+    countCrmNewLeads([lead]) ? "new" : "",
+    !String(lead.owner_name || lead.owner || lead.owner_id || "").trim() ? "unassigned" : "",
+  ].filter(Boolean).join(" ");
+
+  return `
+    <article class="cabinet-crm-card" data-crm-card data-crm-search-index="${escapeAttribute(searchIndex)}" data-crm-tags="${escapeAttribute(tags)}">
+      <div class="cabinet-crm-card__main">
+        <strong>${escapeHtml(title)}</strong>
+        <span>${escapeHtml(summary)}</span>
+      </div>
+      <div class="cabinet-inline-meta">
+        <span>${escapeHtml(owner)}</span>
+        <span>${escapeHtml(stage)}</span>
+        ${amount > 0 ? `<span>${escapeHtml(formatRub(amount))}</span>` : ""}
+      </div>
+    </article>
+  `;
+}
+
+function renderCrmTaskCard(task) {
+  const title = task.title || task.subject || task.text || "Задача CRM";
+  const entity = task.lead_name || task.lead_title || task.entity_name || "Без привязки к лиду";
+  const owner = task.owner_name || task.owner || "Без ответственного";
+  const dueState = String(task.due_state || task.follow_up_state || task.status || "planned").toLowerCase();
+  const dueLabel = dueState === "overdue" ? "Просрочено" : task.due_state || task.follow_up_state || task.status || "Запланировано";
+  const searchIndex = [title, entity, owner, dueLabel].filter(Boolean).join(" ").toLowerCase();
+  const tags = [
+    dueState === "overdue" ? "overdue" : "",
+  ].filter(Boolean).join(" ");
+
+  return `
+    <article class="cabinet-crm-card cabinet-crm-card--task" data-crm-card data-crm-search-index="${escapeAttribute(searchIndex)}" data-crm-tags="${escapeAttribute(tags)}">
+      <div class="cabinet-crm-card__main">
+        <strong>${escapeHtml(title)}</strong>
+        <span>${escapeHtml(entity)}</span>
+      </div>
+      <div class="cabinet-inline-meta">
+        <span>${escapeHtml(owner)}</span>
+        <span>${escapeHtml(dueLabel)}</span>
+      </div>
+    </article>
+  `;
+}
+
+function crmStageMatches(column, lead) {
+  const stageLabel = String(column?.title || column?.name || column?.code || "").trim().toLowerCase();
+  const leadStage = [
+    lead?.status_name,
+    lead?.status_code,
+    lead?.status,
+    lead?.pipeline_stage,
+    lead?.pipeline_name,
+  ].map((value) => String(value || "").trim().toLowerCase()).filter(Boolean);
+  if (!stageLabel) return true;
+  if (!leadStage.length) return stageLabel.includes("нов");
+  return leadStage.some((value) => value === stageLabel || value.includes(stageLabel) || stageLabel.includes(value));
+}
+
+function applyCrmCardFilters() {
+  const searchField = document.querySelector("[data-crm-search]");
+  const activeFilter = document.querySelector("[data-crm-filter].is-active")?.dataset.crmFilter || "all";
+  const needle = String(searchField?.value || "").trim().toLowerCase();
+
+  document.querySelectorAll("[data-crm-card]").forEach((card) => {
+    const searchIndex = String(card.getAttribute("data-crm-search-index") || "");
+    const tags = String(card.getAttribute("data-crm-tags") || "");
+    const matchesSearch = !needle || searchIndex.includes(needle);
+    const matchesFilter = activeFilter === "all" || tags.split(/\s+/).includes(activeFilter);
+    card.hidden = !(matchesSearch && matchesFilter);
+  });
+
+  document.querySelectorAll(".cabinet-crm-column").forEach((column) => {
+    const visible = Array.from(column.querySelectorAll("[data-crm-card]")).some((card) => !card.hidden);
+    const empty = column.querySelector(".cabinet-empty");
+    column.classList.toggle("is-empty", !visible);
+    if (empty) empty.hidden = visible;
+  });
+}
+
+function bindAdminCrmSection() {
+  const searchField = document.querySelector("[data-crm-search]");
+  if (searchField) {
+    searchField.addEventListener("input", applyCrmCardFilters);
+  }
+  document.querySelectorAll("[data-crm-filter]").forEach((button) => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll("[data-crm-filter]").forEach((node) => node.classList.remove("is-active"));
+      button.classList.add("is-active");
+      applyCrmCardFilters();
+    });
+  });
+  applyCrmCardFilters();
+}
+
+function bindAdminAuditSection() {
+  const apply = () => applyAdminAuditFilters();
+  document.querySelectorAll("[data-audit-filter]").forEach((field) => {
+    field.addEventListener("input", apply);
+    field.addEventListener("change", apply);
+  });
+  document.querySelectorAll("[data-audit-segment]").forEach((button) => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll("[data-audit-segment]").forEach((node) => node.classList.remove("is-active"));
+      button.classList.add("is-active");
+      apply();
+    });
+  });
+  apply();
+}
+
+function applyAdminAuditFilters() {
+  const action = String(document.querySelector('[data-audit-filter="action"]')?.value || "").trim();
+  const actor = String(document.querySelector('[data-audit-filter="actor"]')?.value || "").trim();
+  const area = String(document.querySelector('[data-audit-filter="area"]')?.value || "").trim();
+  const from = String(document.querySelector('[data-audit-filter="from"]')?.value || "").trim();
+  const to = String(document.querySelector('[data-audit-filter="to"]')?.value || "").trim();
+  const segment = document.querySelector("[data-audit-segment].is-active")?.dataset.auditSegment || "all";
+  let visibleCount = 0;
+
+  document.querySelectorAll("[data-audit-row]").forEach((row) => {
+    const rowAction = String(row.getAttribute("data-audit-action") || "");
+    const rowActor = String(row.getAttribute("data-audit-actor") || "");
+    const rowArea = String(row.getAttribute("data-audit-area") || "");
+    const rowDate = String(row.getAttribute("data-audit-date") || "");
+    const rowSegment = String(row.getAttribute("data-audit-segment") || "");
+    const matches =
+      (!action || rowAction === action)
+      && (!actor || rowActor === actor)
+      && (!area || rowArea === area)
+      && (segment === "all" || rowSegment === segment)
+      && (!from || (rowDate && rowDate >= from))
+      && (!to || (rowDate && rowDate <= to));
+    row.hidden = !matches;
+    if (matches) visibleCount += 1;
+  });
+
+  const counter = document.querySelector("[data-audit-visible-count]");
+  if (counter) counter.textContent = `${visibleCount} видно`;
+}
+
+function bindAdminTopbarSearch(session) {
+  const field = document.querySelector("[data-cabinet-admin-search]");
+  if (!field || field.dataset.adminSearchBound) return;
+  field.dataset.adminSearchBound = "true";
+
+  const mirrorLocalSearch = () => {
+    const localSearch = document.querySelector("[data-catalog-manager-search], [data-crm-search], [data-user-search]");
+    if (!localSearch || localSearch === field) return false;
+    localSearch.value = field.value;
+    localSearch.dispatchEvent(new Event("input", { bubbles: true }));
+    return true;
+  };
+
+  field.addEventListener("input", () => {
+    mirrorLocalSearch();
+  });
+
+  field.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    const query = String(field.value || "").trim().toLowerCase();
+    if (!query) return;
+    if (mirrorLocalSearch()) return;
+    const nextSection = getAllowedSections(session).find((section) => {
+      const haystack = `${section.label || ""} ${section.note || ""}`.toLowerCase();
+      return haystack.includes(query);
+    });
+    if (nextSection) {
+      window.location.href = cabinetSectionHref(nextSection.id);
+    }
+  });
+}
+
 function renderCrmOfflineState() {
   return `
-    <div class="cabinet-section-stack">
+    <div class="cabinet-section-stack cabinet-crm-grid">
       <div class="cabinet-section-intro">
         <div class="tag">CRM</div>
-        <h2 class="calc-card-title">CRM команды</h2>
-        <p class="sublead">Кабинет работает, но CRM сейчас не подключена.</p>
+        <h2 class="calc-card-title">Поток лидов</h2>
+        <p class="sublead">Подключение сейчас недоступно.</p>
       </div>
-      <article class="card card-pad cabinet-home-card">
-        <div class="cabinet-kicker">Статус системы</div>
-        <h3 class="calc-card-title">CRM не подключена</h3>
-        <div class="cabinet-mini-list">
-          <article class="cabinet-mini-card">
-            <strong>Статус</strong>
-            <span>Кабинет доступен, но CRM пока не отдаёт лиды и задачи.</span>
-          </article>
-          <article class="cabinet-mini-card">
-            <strong>Что недоступно</strong>
-            <span>Очередь лидов, задачи и статусы пока не загружаются.</span>
-          </article>
-          <article class="cabinet-mini-card">
-            <strong>Что делать дальше</strong>
-            <span>Подключите CRM или тестовые данные, и раздел снова станет рабочим.</span>
-          </article>
-        </div>
+      <article class="card card-pad cabinet-home-card cabinet-crm-primary">
+        <div class="cabinet-kicker">Статус</div>
+        <h3 class="calc-card-title">Данные пока не загружены</h3>
+        <div class="cabinet-inline-hint">Раздел открыт, но подключение недоступно.</div>
         <div class="cabinet-home-actions">
-          <a class="btn btn-primary" href="${escapeAttribute(cabinetSectionHref("dashboard"))}">Назад к dashboard</a>
-          <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("catalog"))}">Открыть каталог</a>
-          <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("users"))}">Проверить пользователей</a>
+          ${currentSessionHasSection("dashboard") ? `<a class="btn btn-primary" href="${escapeAttribute(cabinetSectionHref("dashboard"))}">Назад</a>` : ""}
         </div>
       </article>
     </div>
@@ -1814,80 +2715,188 @@ function renderCrmOfflineState() {
 
 function renderCrmDisabledState() {
   return `
-    <div class="cabinet-section-stack">
+    <div class="cabinet-section-stack cabinet-crm-grid">
       <div class="cabinet-section-intro">
         <div class="tag">CRM</div>
-        <h2 class="calc-card-title">CRM команды</h2>
-        <p class="sublead">CRM сейчас выключена в настройках сайта.</p>
+        <h2 class="calc-card-title">Поток лидов</h2>
+        <p class="sublead">Раздел выключен в настройках.</p>
       </div>
-      <article class="card card-pad cabinet-home-card">
-        <div class="cabinet-kicker">Статус системы</div>
-        <h3 class="calc-card-title">CRM отключена</h3>
-        <div class="cabinet-mini-list">
-          <article class="cabinet-mini-card">
-            <strong>Почему так</strong>
-            <span>В backend-настройках флаг CRM стоит в положении «выключено».</span>
-          </article>
-          <article class="cabinet-mini-card">
-            <strong>Что доступно</strong>
-            <span>Каталог, цены калькулятора, пользователи и аудит работают в штатном режиме.</span>
-          </article>
-          <article class="cabinet-mini-card">
-            <strong>Как включить</strong>
-            <span>Включите CRM в настройках backend, и раздел снова начнёт показывать лиды и задачи.</span>
-          </article>
-        </div>
+      <article class="card card-pad cabinet-home-card cabinet-crm-primary">
+        <div class="cabinet-kicker">Статус</div>
+        <h3 class="calc-card-title">Раздел отключён</h3>
+        <div class="cabinet-inline-hint">Включите его в backend, чтобы увидеть лиды и задачи.</div>
         <div class="cabinet-home-actions">
-          <a class="btn btn-primary" href="${escapeAttribute(cabinetSectionHref("dashboard"))}">Назад к dashboard</a>
-          <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("site"))}">Открыть настройки сайта</a>
-          <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("catalog"))}">Открыть каталог</a>
+          ${currentSessionHasSection("dashboard") ? `<a class="btn btn-primary" href="${escapeAttribute(cabinetSectionHref("dashboard"))}">Назад</a>` : ""}
+          ${currentSessionHasSection("site") ? `<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("site"))}">Настройки</a>` : ""}
         </div>
       </article>
     </div>
   `;
 }
 
-async function renderCalcPricesSection() {
-  const pricing = await loadCalcPricing();
-  const items = Array.isArray(pricing?.items) ? pricing.items : [];
+async function renderCalcPricesSection(session) {
+  const pricing = await loadCalcPricing().catch(() => null);
+  const pricingAvailable = Boolean(pricing);
+  const optionGroups = Array.isArray(pricing?.optionGroups) ? pricing.optionGroups : [];
+  const presets = Array.isArray(pricing?.presets) ? pricing.presets : [];
   const constants = pricing?.constants ? Object.keys(pricing.constants).length : 0;
   const inputs = pricing?.inputs ? Object.keys(pricing.inputs).length : 0;
-  const topItems = [...items].sort((a, b) => Number(b.unitPrice || 0) - Number(a.unitPrice || 0)).slice(0, 6);
-  const frameCount = items.filter((item) => Number(item.id) <= 11).length;
-  const systemCount = items.filter((item) => Number(item.id) > 11).length;
+  const topDrivers = [...optionGroups]
+    .filter((item) => Number(item.unitPrice || 0) > 0)
+    .sort((a, b) => Number(b.unitPrice || 0) - Number(a.unitPrice || 0))
+    .slice(0, 6);
+  const defaultInputs = Object.entries(pricing?.inputs || {}).slice(0, 6);
+  const constantPreview = flattenPricingConstantPreview(pricing?.constants || {}).slice(0, 6);
+  const missingDrivers = optionGroups.filter((item) => !(Number(item.unitPrice || 0) > 0)).slice(0, 6);
+  const includedByDefault = optionGroups.filter((item) => item.includedByDefault);
 
   return `
-    <div class="cabinet-section-stack">
-      <div class="cabinet-section-intro">
+    <div class="cabinet-section-stack cabinet-admin-page cabinet-admin-page--pricing">
+      <div class="cabinet-section-intro cabinet-admin-page__intro">
         <div class="tag">Цены калькулятора</div>
         <h2 class="calc-card-title">Цены калькулятора</h2>
-        <p class="sublead">Здесь видно, сколько цен в модели и какие из них сильнее влияют на расчёт.</p>
+        <p class="sublead">${pricingAvailable ? "Здесь видно, что сильнее всего влияет на расчёт: ценовые драйверы, константы, вводные по умолчанию и пустые места модели." : "Файл pricing сейчас не прочитался. Редактор всё равно можно открыть отдельно."}</p>
       </div>
       <div class="cabinet-stat-grid">
-        ${renderStatCard("Позиции", String(items.length), "в текущем pricing.json")}
-        ${renderStatCard("Константы", String(constants), "постоянные параметры")}
-        ${renderStatCard("Вводные", String(inputs), "значения по умолчанию")}
-        ${renderStatCard("Группы", `${frameCount} / ${systemCount}`, "каркас / системы")}
+        ${renderStatCard("Драйверы", String(optionGroups.length), "ценовые группы и опции")}
+        ${renderStatCard("Константы", String(constants), "структурные параметры модели")}
+        ${renderStatCard("Вводные", String(inputs), "стартовые значения")}
+        ${renderStatCard("Пресеты", String(presets.length), "готовые размеры")}
       </div>
-      <article class="card card-pad cabinet-card">
-        <div class="tag">Самые тяжёлые позиции</div>
-        <h3 class="calc-card-title">Что сильнее влияет на расчёт</h3>
-        <div class="cabinet-mini-list">
-          ${topItems.map((item) => renderCalcPriceItem(item)).join("")}
-        </div>
-      </article>
+      <section class="cabinet-owner-grid">
+        <article class="card card-pad cabinet-owner-panel cabinet-owner-panel--focus cabinet-admin-widget">
+          <div class="cabinet-kicker">Что влияет сильнее всего</div>
+          <h3 class="calc-card-title">Главные драйверы расчёта</h3>
+          ${topDrivers.length ? `
+            <div class="cabinet-mini-list cabinet-mini-list--tight">
+              ${topDrivers.map((item) => renderCalcPriceItem(item)).join("")}
+            </div>
+          ` : `<div class="account-empty">${pricingAvailable ? "В модели нет ни одного драйвера с ценой. Проверьте optionGroups." : "Не удалось прочитать pricing.json из этого окружения."}</div>`}
+        </article>
+        <article class="card card-pad cabinet-owner-panel cabinet-admin-widget">
+          <div class="cabinet-kicker">Что включено по умолчанию</div>
+          <h3 class="calc-card-title">Базовый состав модели</h3>
+          <div class="cabinet-mini-list cabinet-mini-list--tight">
+            ${includedByDefault.length
+              ? includedByDefault.slice(0, 6).map((item) => `
+                <article class="cabinet-mini-card">
+                  <strong>${escapeHtml(item.label || item.id || "Опция")}</strong>
+                  <span>${escapeHtml(item.note || "Входит в стартовый расчёт")} · ${escapeHtml(formatRub(Number(item.unitPrice || 0)))}</span>
+                </article>
+              `).join("")
+              : '<div class="account-empty">В pricing нет групп, включённых по умолчанию.</div>'}
+          </div>
+        </article>
+      </section>
+      <section class="cabinet-owner-grid cabinet-owner-grid--secondary">
+        <article class="card card-pad cabinet-owner-panel cabinet-admin-widget">
+          <div class="cabinet-kicker">Вводные</div>
+          <h3 class="calc-card-title">Стартовые значения калькулятора</h3>
+          <div class="cabinet-mini-list cabinet-mini-list--tight">
+            ${defaultInputs.map(([key, value]) => {
+              const meta = getCalcInputMeta(key);
+              return `
+                <article class="cabinet-mini-card">
+                  <strong>${escapeHtml(meta.label)}</strong>
+                  <span>${escapeHtml(`${formatPricingValue(value)} ${meta.unit}`.trim())} · ${escapeHtml(meta.note)}</span>
+                </article>
+              `;
+            }).join("")}
+          </div>
+        </article>
+        <article class="card card-pad cabinet-owner-panel cabinet-admin-widget">
+          <div class="cabinet-kicker">Константы</div>
+          <h3 class="calc-card-title">Какие блоки держат модель</h3>
+          <div class="cabinet-mini-list cabinet-mini-list--tight">
+            ${constantPreview.length
+              ? constantPreview.map((item) => `
+                <article class="cabinet-mini-card">
+                  <strong>${escapeHtml(item.label)}</strong>
+                  <span>${escapeHtml(item.value)}</span>
+                </article>
+              `).join("")
+              : '<div class="account-empty">Константы не прочитались.</div>'}
+          </div>
+        </article>
+      </section>
+      <section class="cabinet-owner-grid cabinet-owner-grid--secondary">
+        <article class="card card-pad cabinet-owner-panel cabinet-admin-widget">
+          <div class="cabinet-kicker">Что ещё пусто</div>
+          <h3 class="calc-card-title">Позиции, которые стоит проверить</h3>
+          <div class="cabinet-mini-list cabinet-mini-list--tight">
+            ${missingDrivers.length
+              ? missingDrivers.map((item) => `
+                <article class="cabinet-mini-card">
+                  <strong>${escapeHtml(item.label || item.id || "Опция")}</strong>
+                  <span>${escapeHtml(item.note || "Цена пока не указана")} · unitPrice = 0</span>
+                </article>
+              `).join("")
+              : '<div class="account-empty">Явно пустых драйверов цены не видно.</div>'}
+          </div>
+        </article>
+        <article class="card card-pad cabinet-owner-panel cabinet-admin-widget">
+          <div class="cabinet-kicker">Быстрые действия</div>
+          <h3 class="calc-card-title">Куда идти после этого экрана</h3>
+          <div class="cabinet-owner-action-list">
+            ${[
+              { tone: topDrivers.length ? "ok" : "warning", title: "Проверить дорогие группы", note: topDrivers.length ? `Сверьте ${topDrivers.length} самых тяжёлых драйверов с реальной экономикой.` : "Сначала задайте unitPrice у optionGroups.", cta: "Редактор pricing", href: cabinetRoutes.calcAdmin },
+              { tone: presets.length ? "ok" : "warning", title: "Сверить пресеты", note: presets.length ? `${presets.length} базовых размеров влияют на стартовую конфигурацию.` : "В модели нет пресетов.", cta: "Калькулятор", href: cabinetRoutes.calc },
+              { tone: constants ? "ok" : "warning", title: "Проверить константы", note: constants ? `${constants} блоков управляют геометрией, энергией и экономикой.` : "Константы не загружены.", cta: "Сводка", href: cabinetSectionHref("dashboard") },
+            ].map(renderOwnerActionRow).join("")}
+          </div>
+        </article>
+      </section>
       <div class="account-actions">
         <a class="btn btn-primary" href="${escapeAttribute(cabinetRoutes.calcAdmin)}">Открыть редактор pricing.json</a>
         <a class="btn btn-secondary" href="${escapeAttribute(cabinetRoutes.calc)}">Открыть калькулятор</a>
+        ${sessionHasSection(session, "dashboard") ? `<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("dashboard"))}">Открыть кабинет</a>` : ""}
       </div>
     </div>
   `;
 }
 
-async function renderAdminSiteSection() {
+function readCalcPricingDriverCount(pricing) {
+  const directItems = Array.isArray(pricing?.items) ? pricing.items.length : 0;
+  if (directItems) return directItems;
+  return Array.isArray(pricing?.optionGroups) ? pricing.optionGroups.length : 0;
+}
+
+function getCalcInputMeta(key) {
+  const labels = {
+    a0: { label: "Ширина помещения", unit: "м", note: "влияет на число рядов" },
+    a1: { label: "Длина помещения", unit: "м", note: "влияет на число секций" },
+    a2: { label: "Высота помещения", unit: "м", note: "влияет на плотность посадки" },
+    a3: { label: "Цена 1 кВт", unit: "руб/кВт", note: "влияет на энергетику" },
+    a4: { label: "Аренда", unit: "руб/м²", note: "влияет на ежемесячную экономику" },
+    a5: { label: "Цена ягоды", unit: "руб/кг", note: "влияет на выручку" },
+  };
+  return labels[key] || { label: key, unit: "", note: "значение по умолчанию" };
+}
+
+function formatPricingValue(value) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 }).format(value);
+  }
+  return String(value ?? "");
+}
+
+function flattenPricingConstantPreview(constants = {}) {
+  return Object.entries(constants).map(([key, value]) => {
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      const inner = Object.entries(value).slice(0, 2).map(([innerKey, innerValue]) => `${innerKey}: ${formatPricingValue(innerValue)}`).join(" · ");
+      return { label: key, value: inner || "объект параметров" };
+    }
+    if (Array.isArray(value)) {
+      return { label: key, value: `${value.length} ${pluralizeRu(value.length, "элемент", "элемента", "элементов")}` };
+    }
+    return { label: key, value: formatPricingValue(value) };
+  });
+}
+
+async function renderAdminSiteSection(session) {
   const response = await fetchJson(`${apiBase()}/admin/settings`);
-  if (!response.ok) throw new Error(cleanupError(response.text || `HTTP ${response.status}`));
-  const settingsPayload = response.data.settings || {};
+  const settingsAvailable = response.ok;
+  const settingsPayload = settingsAvailable ? (response.data.settings || {}) : {};
   const pages = Array.isArray(settingsPayload.pages) ? settingsPayload.pages : [];
   const forms = settingsPayload.forms || {};
   const seo = settingsPayload.seo || {};
@@ -1901,86 +2910,134 @@ async function renderAdminSiteSection() {
     forms.collectTelegram,
     forms.collectStage,
   ].filter(Boolean).length;
+  const visiblePages = pages.slice(0, 5);
+  const extraPages = Math.max(0, pages.length - visiblePages.length);
+  const seoReady = Boolean(seo.canonicalOrigin) && Boolean(seo.includeSitemap);
+  const formReady = Boolean(forms.primaryChannel || forms.mode);
+  const crmReady = Boolean(crm.enabled || crm.primaryChannel || forms.primaryChannel);
+  const integrationReady = Boolean(integrations.catalogSource || integrations.futureCms);
 
   return `
-    <div class="cabinet-section-stack">
-      <div class="cabinet-section-intro">
+    <div class="cabinet-section-stack cabinet-admin-page">
+      <div class="cabinet-section-intro cabinet-admin-page__intro">
         <div class="tag">Сайт и настройки</div>
         <h2 class="calc-card-title">Сайт и публикация</h2>
-        <p class="sublead">Здесь страницы, форма заявки, SEO и канал в CRM.</p>
+        <p class="sublead">${settingsAvailable ? "Публикация, формы, маршрут заявки и каналы связаны в один рабочий экран без справочных блоков." : "Настройки backend сейчас не ответили. Можно открыть публичный сайт и вернуться к разделу позже."}</p>
       </div>
-      <div class="cabinet-stat-grid">
-        ${renderStatCard("Страницы", String(pages.length), `${publishedPages} опубликовано`)}
-        ${renderStatCard("Форма", String(enabledFormFields), `поля включены · ${humanizeBoolean(forms.openTelegramAfterCopy)} авто-telegram`)}
-        ${renderStatCard("SEO", seo.indexPublicPages ? "включено" : "выключено", seo.titleSuffix || "без suffix")}
-        ${renderStatCard("CRM", crm.primaryChannel || forms.primaryChannel || "manual", crm.enabled ? "канал включён" : "ручной режим")}
+      <div class="cabinet-owner-kpi-strip cabinet-owner-kpi-strip--executive">
+        <article class="card card-pad cabinet-owner-kpi">
+          <span class="cabinet-owner-kpi__label">Страницы</span>
+          <strong class="cabinet-owner-kpi__value">${escapeHtml(String(pages.length))}</strong>
+          <span class="cabinet-owner-kpi__note">${publishedPages} опубликовано</span>
+        </article>
+        <article class="card card-pad cabinet-owner-kpi">
+          <span class="cabinet-owner-kpi__label">Форма</span>
+          <strong class="cabinet-owner-kpi__value">${escapeHtml(String(enabledFormFields))}</strong>
+          <span class="cabinet-owner-kpi__note">${humanizeBoolean(forms.openTelegramAfterCopy)} авто-переход в Telegram</span>
+        </article>
+        <article class="card card-pad cabinet-owner-kpi">
+          <span class="cabinet-owner-kpi__label">CRM</span>
+          <strong class="cabinet-owner-kpi__value">${escapeHtml(crm.primaryChannel || forms.primaryChannel || "manual")}</strong>
+          <span class="cabinet-owner-kpi__note">${crm.enabled ? "канал включён" : "ручной режим"}</span>
+        </article>
+        <article class="card card-pad cabinet-owner-kpi ${crmReady && seoReady && formReady ? "" : "cabinet-owner-kpi--alert"}">
+          <span class="cabinet-owner-kpi__label">Каналы</span>
+          <strong class="cabinet-owner-kpi__value">${escapeHtml(String([seoReady, formReady, crmReady, integrationReady].filter(Boolean).length))}/4</strong>
+          <span class="cabinet-owner-kpi__note">готово к рабочей публикации</span>
+        </article>
       </div>
-      <div class="cabinet-home-grid cabinet-home-grid--single">
-        <div class="cabinet-home-main">
-          <article class="card card-pad cabinet-home-card">
-            <div class="tag">Быстрые входы</div>
-            <h3 class="calc-card-title">Куда идти первым</h3>
-            <div class="cabinet-home-actions">
-              <a class="btn btn-primary" href="${escapeAttribute(cabinetRoutes.site)}">Открыть сайт</a>
-              <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("dashboard"))}">Открыть кабинет</a>
-            </div>
-            <div class="cabinet-mini-list">
-              <article class="cabinet-mini-card">
-                <strong>Публичный сайт</strong>
-                <span>${escapeHtml(site.projectName || "Klubnika Project")} · ${escapeHtml(site.primaryDomain || site.publicUrl || "домен не задан")}</span>
-              </article>
-              <article class="cabinet-mini-card">
-                <strong>Форма захвата</strong>
-                <span>${escapeHtml(forms.mode || "backend_submit")} · канал ${escapeHtml(forms.primaryChannel || "manual")}</span>
-              </article>
-              <article class="cabinet-mini-card">
-                <strong>Интеграции</strong>
-                <span>${escapeHtml(integrations.catalogSource || "catalog source")} · ${escapeHtml(integrations.futureCms || "future CMS")}</span>
-              </article>
-            </div>
-          </article>
-          <section class="card card-pad cabinet-card">
-            <div class="tag">Публикация</div>
-            <h3 class="calc-card-title">Что сейчас опубликовано</h3>
-            <div class="cabinet-list">
-              <div class="cabinet-list-head cabinet-list-head--site-pages">
-                <span>Страница</span>
-                <span>Роль страницы</span>
-                <span>CTA</span>
-                <span>Статус</span>
-              </div>
-              <div class="cabinet-list-body">
-                ${pages.length ? pages.map(renderSitePageRow).join("") : '<div class="account-empty">Список страниц пока не загрузился.</div>'}
-              </div>
-            </div>
-          </section>
-          <article class="card card-pad cabinet-home-card">
-            <div class="tag">Настройки</div>
-            <h3 class="calc-card-title">Что важно по сайту сейчас</h3>
-            <div class="cabinet-mini-list">
-              <article class="cabinet-mini-card">
-                <strong>SEO</strong>
-                <span>canonical ${escapeHtml(seo.canonicalOrigin || "не задан")} · sitemap ${humanizeBoolean(seo.includeSitemap)}</span>
-              </article>
-              <article class="cabinet-mini-card">
-                <strong>Форма</strong>
-                <span>${enabledFormFields} полей · канал ${escapeHtml(forms.primaryChannel || "manual")}</span>
-              </article>
-              <article class="cabinet-mini-card">
-                <strong>CRM</strong>
-                <span>${escapeHtml(crm.note || "CRM работает через текущий канал")}</span>
-              </article>
-            </div>
-          </article>
-        </div>
-      </div>
+      <section class="cabinet-owner-grid">
+        <article class="card card-pad cabinet-owner-panel cabinet-owner-panel--focus cabinet-admin-widget">
+          <div class="cabinet-kicker">Управление публикацией</div>
+          <h3 class="calc-card-title">Что проверить перед выпуском</h3>
+          <div class="cabinet-owner-action-list">
+            ${[
+              {
+                tone: seoReady ? "ok" : "warning",
+                title: "SEO и индексация",
+                note: seoReady ? `canonical ${seo.canonicalOrigin}` : "Нужно проверить canonical origin и sitemap.",
+                cta: "Открыть настройки",
+                href: cabinetRoutes.site,
+              },
+              {
+                tone: formReady ? "ok" : "warning",
+                title: "Форма захвата",
+                note: formReady ? `${enabledFormFields} полей, режим ${forms.mode || "backend_submit"}.` : "Не подтверждён режим формы или канал отправки.",
+                cta: "Проверить форму",
+                href: cabinetRoutes.site,
+              },
+              {
+                tone: crmReady ? "ok" : "warning",
+                title: "Маршрут заявки в CRM",
+                note: crmReady ? `Канал ${crm.primaryChannel || forms.primaryChannel || "manual"} активен.` : "Маршрут заявки нужно проверить вручную.",
+                cta: "Проверить маршрут",
+                href: cabinetSectionHref("crm"),
+              },
+            ].map(renderOwnerActionRow).join("")}
+          </div>
+        </article>
+        <article class="card card-pad cabinet-owner-panel cabinet-admin-widget">
+          <div class="cabinet-kicker">Статус каналов</div>
+          <h3 class="calc-card-title">Сайт, формы, CRM, интеграции</h3>
+          <div class="cabinet-owner-health-list">
+            ${[
+              { label: "Сайт", state: site.primaryDomain || site.publicUrl || "домен не задан", tone: publishedPages ? "ok" : "warning", note: publishedPages ? `${publishedPages} страниц уже опубликовано.` : "Нужна публикация хотя бы одной страницы." },
+              { label: "Формы", state: formReady ? "Готово" : "Проверить", tone: formReady ? "ok" : "warning", note: `${enabledFormFields} полей · ${humanizeBoolean(forms.openTelegramAfterCopy)} авто-переход.` },
+              { label: "CRM", state: crmReady ? "Маршрут собран" : "Проверить", tone: crmReady ? "ok" : "warning", note: crm.note || "Заявка должна уходить в CRM без ручных шагов." },
+              { label: "Интеграции", state: integrationReady ? "Подключены" : "Не заданы", tone: integrationReady ? "ok" : "warning", note: `${integrations.catalogSource || "источник каталога не задан"} · ${integrations.futureCms || "CMS не задана"}` },
+            ].map(renderOwnerHealthItem).join("")}
+          </div>
+        </article>
+      </section>
+      <section class="cabinet-owner-grid cabinet-owner-grid--secondary">
+        <article class="card card-pad cabinet-owner-panel cabinet-admin-widget cabinet-site-pages-card">
+          <div class="cabinet-kicker">Публикация</div>
+          <h3 class="calc-card-title">Опубликованные страницы</h3>
+          <div class="cabinet-site-page-list">
+            ${visiblePages.length ? visiblePages.map(renderSitePageRow).join("") : `<div class="account-empty">${settingsAvailable ? "Список страниц пока не загрузился." : "Backend-настройки не прочитались, поэтому список страниц сейчас недоступен."}</div>`}
+          </div>
+          ${extraPages ? `<div class="cabinet-inline-hint">Ещё ${extraPages} страниц в полном списке.</div>` : ""}
+        </article>
+        <article class="card card-pad cabinet-owner-panel cabinet-admin-widget">
+          <div class="cabinet-kicker">Быстрые переходы</div>
+          <h3 class="calc-card-title">Куда идти дальше</h3>
+          <div class="cabinet-mini-list cabinet-mini-list--tight">
+            <article class="cabinet-mini-card">
+              <strong>Публичный сайт</strong>
+              <span>${escapeHtml(site.projectName || "Klubnika Project")} · ${escapeHtml(site.primaryDomain || site.publicUrl || "домен не задан")}</span>
+            </article>
+            <article class="cabinet-mini-card">
+              <strong>Форма заявки</strong>
+              <span>${escapeHtml(forms.mode || "backend_submit")} · канал ${escapeHtml(forms.primaryChannel || "manual")}</span>
+            </article>
+            <article class="cabinet-mini-card">
+              <strong>Интеграции</strong>
+              <span>${escapeHtml(integrations.catalogSource || "источник каталога не задан")} · ${escapeHtml(integrations.futureCms || "CMS не задана")}</span>
+            </article>
+          </div>
+          <div class="cabinet-home-actions">
+            <a class="btn btn-primary" href="${escapeAttribute(cabinetRoutes.site)}">Открыть сайт</a>
+            <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("crm"))}">Открыть CRM</a>
+          </div>
+        </article>
+      </section>
     </div>
   `;
 }
 
-async function renderAdminUsersSection() {
+async function renderAdminUsersSection(session) {
   const response = await fetchJson(`${apiBase()}/admin/users`);
-  if (!response.ok) throw new Error(cleanupError(response.text || `HTTP ${response.status}`));
+  if (!response.ok) {
+    return renderSectionUnavailable({
+      kicker: "Пользователи",
+      title: "Пользователи и доступы",
+      message: `Раздел пользователей сейчас не ответил: ${cleanupError(response.text || `HTTP ${response.status}`)}.`,
+      primaryHref: currentSessionHasSection("dashboard") ? cabinetSectionHref("dashboard") : "",
+      primaryLabel: "Назад",
+      secondaryHref: currentSessionHasSection("site") ? cabinetSectionHref("site") : "",
+      secondaryLabel: "Открыть настройки сайта",
+    });
+  }
   const users = response.data.items || [];
   const memberUsers = users.filter((item) => item.account_type === "member");
   const ordersByUser = Object.fromEntries(
@@ -1998,62 +3055,158 @@ async function renderAdminUsersSection() {
   const activeUsers = users.filter((item) => item.is_active);
   const courseUsers = users.filter((item) => Array.isArray(item.scopes) && item.scopes.includes("course_access"));
   const adminUsers = users.filter((item) => item.account_type === "admin").length;
+  const inactiveUsers = users.length - activeUsers.length;
+  const selectedUserId = String(new URLSearchParams(window.location.search).get("user") || users[0]?.id || "");
+  const selectedUser = users.find((user) => String(user.id) === selectedUserId) || users[0] || null;
 
   return `
-    <div class="cabinet-section-stack">
-      <div class="cabinet-section-intro">
+    <div class="cabinet-section-stack cabinet-admin-page cabinet-admin-page--users">
+      <div class="cabinet-section-intro cabinet-admin-page__intro">
         <div class="tag">Пользователи</div>
         <h2 class="calc-card-title">Пользователи и доступы</h2>
-        <p class="sublead">Здесь создаются аккаунты, настраиваются права и открывается курс.</p>
+        <p class="sublead">Слева список аккаунтов, справа живая карточка пользователя с доступами, заказами, сообщениями и активностью.</p>
       </div>
-      <article class="card card-pad cabinet-home-card">
-        <div class="cabinet-kicker">Управление</div>
-        <h3 class="calc-card-title">Создать или обновить аккаунт</h3>
-        <p class="sublead">Имя, права, пароль и доступ к Клубничному Хаку настраиваются в одной карточке.</p>
-        <div class="cabinet-inline-meta">
-          <span>${users.length} ${pluralizeRu(users.length, "аккаунт", "аккаунта", "аккаунтов")}</span>
-          <span>${activeUsers.length} активных</span>
-          <span>${adminUsers} в команде</span>
-          <span>${courseUsers.length} с доступом к курсу</span>
+      <section class="card card-pad cabinet-admin-toolbar">
+        <div class="cabinet-admin-toolbar__main">
+          <label class="cabinet-admin-search">
+            <span>Поиск</span>
+            <input class="admin-input" type="search" data-user-search placeholder="Имя, email, slug, роль" />
+          </label>
+          <div class="cabinet-admin-filter-row">
+            <button class="cabinet-filter-chip is-active" type="button" data-user-filter="all">Все ${users.length}</button>
+            <button class="cabinet-filter-chip" type="button" data-user-filter="admin">Команда ${adminUsers}</button>
+            <button class="cabinet-filter-chip" type="button" data-user-filter="member">Клиенты ${memberUsers.length}</button>
+            <button class="cabinet-filter-chip" type="button" data-user-filter="inactive">Выключены ${inactiveUsers}</button>
+            <button class="cabinet-filter-chip" type="button" data-user-filter="course">С курсом ${courseUsers.length}</button>
+          </div>
         </div>
-        <div class="cabinet-home-actions cabinet-home-actions--compact">
+        <div class="cabinet-admin-toolbar__actions">
           <button class="btn btn-primary" type="button" data-cabinet-user-create>Создать пользователя</button>
         </div>
-        <div class="cabinet-inline-hint">Для оплативших курс нажмите «Выдать Клубничный Хак», потом сохраните карточку.</div>
-        <div class="cabinet-users-status" data-cabinet-users-status></div>
-      </article>
-      <section class="card card-pad cabinet-card">
-        <div class="cabinet-kicker">Аккаунты</div>
-        <h3 class="calc-card-title">Кто сейчас есть в системе</h3>
-        <div class="cabinet-user-editor-grid">
-          ${users.map((user) => renderAdminUserEditor(user, ordersByUser[user.id] || [], documentsByOrder)).join("")}
+      </section>
+      <section class="cabinet-admin-split">
+        <article class="card card-pad cabinet-admin-widget cabinet-admin-split__master cabinet-users-master">
+          <div class="cabinet-kicker">Аккаунты</div>
+          <h3 class="calc-card-title">Кто сейчас в системе</h3>
+          <div class="cabinet-inline-meta">
+            <span>${activeUsers.length} активных</span>
+            <span>${adminUsers} в команде</span>
+            <span>${courseUsers.length} с курсом</span>
+          </div>
+          <div class="cabinet-list">
+            <div class="cabinet-list-head cabinet-list-head--users">
+              <span>Пользователь</span>
+              <span>Тип</span>
+              <span>Доступ</span>
+              <span>Статус</span>
+            </div>
+            <div class="cabinet-list-body" data-user-list>
+              ${users.map((user) => renderAdminUserListRow(user, selectedUserId)).join("")}
+            </div>
+          </div>
+        </article>
+        <div class="cabinet-admin-split__detail">
+          ${selectedUser
+            ? renderAdminUserDetail(selectedUser, ordersByUser[selectedUser.id] || [], documentsByOrder)
+            : `
+              <article class="card card-pad cabinet-admin-widget">
+                <div class="cabinet-kicker">Карточка</div>
+                <h3 class="calc-card-title">Выберите пользователя слева</h3>
+                <p class="sublead">Справа откроются аккаунт, доступ, заказы, сообщения и активность.</p>
+              </article>
+            `}
+          <div class="cabinet-users-status" data-cabinet-users-status></div>
         </div>
       </section>
     </div>
   `;
 }
 
-async function renderAdminAuditSection() {
-  const response = await fetchJson(`${apiBase()}/admin/audit-events?limit=12`);
-  if (!response.ok) throw new Error(cleanupError(response.text || `HTTP ${response.status}`));
+async function renderAdminAuditSection(session) {
+  const response = await fetchJson(`${apiBase()}/admin/audit-events?limit=60`);
+  if (!response.ok) {
+    return renderSectionUnavailable({
+      kicker: "Аудит",
+      title: "Последние действия",
+      message: `Аудит сейчас не ответил: ${cleanupError(response.text || `HTTP ${response.status}`)}.`,
+      primaryHref: currentSessionHasSection("dashboard") ? cabinetSectionHref("dashboard") : "",
+      primaryLabel: "Назад",
+      secondaryHref: currentSessionHasSection("site") ? cabinetSectionHref("site") : "",
+      secondaryLabel: "Открыть сайт и настройки",
+    });
+  }
   const items = response.data.items || [];
   const actorCount = new Set(items.map((item) => item.actor_name || item.actor_id || "system")).size;
   const areaCount = new Set(items.map((item) => item.area || "system")).size;
   const latestTs = items[0]?.created_at || items[0]?.createdAt || "";
+  const actionOptions = Array.from(new Set(items.map((item) => humanizeAuditAction(item.action)).filter(Boolean))).sort((a, b) => a.localeCompare(b, "ru"));
+  const actorOptions = Array.from(new Set(items.map((item) => item.actor_name || "Система").filter(Boolean))).sort((a, b) => a.localeCompare(b, "ru"));
+  const areaOptions = Array.from(new Set(items.map((item) => humanizeAuditArea(item.area)).filter(Boolean))).sort((a, b) => a.localeCompare(b, "ru"));
+  const segmentCounts = {
+    auth: items.filter((item) => getAuditSegment(item) === "auth").length,
+    content: items.filter((item) => getAuditSegment(item) === "content").length,
+    access: items.filter((item) => getAuditSegment(item) === "access").length,
+    crm: items.filter((item) => getAuditSegment(item) === "crm").length,
+  };
 
   return `
-    <div class="cabinet-section-stack">
-      <div class="cabinet-section-intro">
+    <div class="cabinet-section-stack cabinet-admin-page cabinet-admin-page--audit">
+      <div class="cabinet-section-intro cabinet-admin-page__intro">
         <div class="tag">Аудит</div>
-        <h2 class="calc-card-title">Последние действия</h2>
-        <p class="sublead">Лента входов и изменений по кабинету, CRM и настройкам.</p>
+        <h2 class="calc-card-title">Аудит и последние действия</h2>
+        <p class="sublead">Это уже не просто лента. Здесь можно сузить события по типу, зоне, исполнителю и периоду.</p>
       </div>
       <div class="cabinet-stat-grid">
-        ${renderStatCard("События", String(items.length), "в текущей короткой выборке")}
+        ${renderStatCard("События", String(items.length), "в текущей рабочей выборке")}
         ${renderStatCard("Зоны", String(areaCount), "слоёв системы попали в аудит")}
         ${renderStatCard("Участники", String(actorCount), "кто оставил след в последних событиях")}
         ${renderStatCard("Последнее", latestTs ? formatAuditTimestamp(latestTs) : "пусто", latestTs ? "самое свежее событие" : "событий пока нет")}
       </div>
+      <section class="card card-pad cabinet-admin-toolbar cabinet-audit-toolbar">
+        <div class="cabinet-admin-toolbar__main">
+          <div class="cabinet-admin-filter-row cabinet-audit-segments">
+            <button class="cabinet-filter-chip is-active" type="button" data-audit-segment="all">Все ${items.length}</button>
+            <button class="cabinet-filter-chip" type="button" data-audit-segment="auth">Авторизация ${segmentCounts.auth}</button>
+            <button class="cabinet-filter-chip" type="button" data-audit-segment="content">Контент ${segmentCounts.content}</button>
+            <button class="cabinet-filter-chip" type="button" data-audit-segment="access">Доступы ${segmentCounts.access}</button>
+            <button class="cabinet-filter-chip" type="button" data-audit-segment="crm">CRM ${segmentCounts.crm}</button>
+          </div>
+          <div class="cabinet-field-grid cabinet-field-grid--audit">
+            <label class="cabinet-field">
+              <span class="cabinet-field-label">Тип события</span>
+              <select class="admin-select" data-audit-filter="action">
+                <option value="">Все</option>
+                ${actionOptions.map((value) => `<option value="${escapeAttribute(value)}">${escapeHtml(value)}</option>`).join("")}
+              </select>
+            </label>
+            <label class="cabinet-field">
+              <span class="cabinet-field-label">Кто</span>
+              <select class="admin-select" data-audit-filter="actor">
+                <option value="">Все</option>
+                ${actorOptions.map((value) => `<option value="${escapeAttribute(value)}">${escapeHtml(value)}</option>`).join("")}
+              </select>
+            </label>
+            <label class="cabinet-field">
+              <span class="cabinet-field-label">Зона</span>
+              <select class="admin-select" data-audit-filter="area">
+                <option value="">Все</option>
+                ${areaOptions.map((value) => `<option value="${escapeAttribute(value)}">${escapeHtml(value)}</option>`).join("")}
+              </select>
+            </label>
+            <label class="cabinet-field">
+              <span class="cabinet-field-label">С даты</span>
+              <input class="admin-input" type="date" data-audit-filter="from" />
+            </label>
+            <label class="cabinet-field">
+              <span class="cabinet-field-label">По дату</span>
+              <input class="admin-input" type="date" data-audit-filter="to" />
+            </label>
+          </div>
+        </div>
+        <div class="cabinet-admin-toolbar__actions">
+          <span class="cabinet-filter-chip is-static" data-audit-visible-count>${items.length} видно</span>
+        </div>
+      </section>
       <section class="card card-pad cabinet-card">
         <div class="tag">Лента событий</div>
         <h3 class="calc-card-title">Последние события</h3>
@@ -2084,6 +3237,39 @@ function renderPlannedSection(section) {
         <div class="tag">Следующий этап</div>
         <h3 class="calc-card-title">Этот раздел ещё не собран до конца</h3>
         <p class="sublead">Архитектура уже зафиксирована, но сам экран ещё не доведён до рабочего состояния.</p>
+        <div class="cabinet-home-actions">
+          ${currentSessionHasSection("dashboard") ? `<a class="btn btn-primary" href="${escapeAttribute(cabinetSectionHref("dashboard"))}">Назад в обзор</a>` : ""}
+          ${currentSessionHasSection("site") ? `<a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("site"))}">Открыть сайт и настройки</a>` : ""}
+        </div>
+      </article>
+    </div>
+  `;
+}
+
+function renderSectionUnavailable({
+  kicker,
+  title,
+  message,
+  primaryHref = "",
+  primaryLabel = "",
+  secondaryHref = "",
+  secondaryLabel = "",
+}) {
+  return `
+    <div class="cabinet-section-stack">
+      <div class="cabinet-section-intro">
+        <div class="tag">${escapeHtml(kicker || title || "Раздел")}</div>
+        <h2 class="calc-card-title">${escapeHtml(title || "Раздел временно недоступен")}</h2>
+        <p class="sublead">${escapeHtml(message || "Этот раздел сейчас не ответил.")}</p>
+      </div>
+      <article class="card card-pad cabinet-card">
+        <div class="tag">Что делать</div>
+        <h3 class="calc-card-title">Рабочий fallback</h3>
+        <p class="sublead">Проблема не должна останавливать весь кабинет. Вернитесь в соседний рабочий раздел и проверьте этот экран позже.</p>
+        <div class="cabinet-home-actions">
+          ${primaryHref && primaryLabel ? `<a class="btn btn-primary" href="${escapeAttribute(primaryHref)}">${escapeHtml(primaryLabel)}</a>` : ""}
+          ${secondaryHref && secondaryLabel ? `<a class="btn btn-secondary" href="${escapeAttribute(secondaryHref)}">${escapeHtml(secondaryLabel)}</a>` : ""}
+        </div>
       </article>
     </div>
   `;
@@ -2236,6 +3422,81 @@ async function loadCalcPricing() {
   return response.data || {};
 }
 
+async function loadAdminDashboardData() {
+  const [catalogItems, pricing] = await Promise.all([
+    loadAdminCatalogItems().catch(() => []),
+    loadCalcPricing().catch(() => null),
+  ]);
+
+  let crmBundle = null;
+  let ownerQueue = [];
+  let ownerWorkload = [];
+  let duplicateLeads = [];
+  let dataQuality = null;
+
+  if (isCrmEnabled()) {
+    crmBundle = await loadCrmBundle().catch(() => null);
+    if (crmBundle) {
+      [ownerQueue, ownerWorkload, duplicateLeads, dataQuality] = await Promise.all([
+        loadCrmOwnerQueue().catch(() => []),
+        loadCrmOwnerWorkload().catch(() => []),
+        loadCrmDuplicateLeads().catch(() => []),
+        loadCrmDataQuality().catch(() => null),
+      ]);
+    }
+  }
+
+  const crmAvailable = isCrmEnabled() && Boolean(crmBundle);
+  const leads = crmBundle?.leads || [];
+  const tasks = crmBundle?.tasks || [];
+  const pipelines = crmBundle?.pipelines || [];
+  const overdueTasks = tasks.filter((task) => String(task.due_state || task.follow_up_state || task.status || "").toLowerCase() === "overdue");
+  const unassignedLeads = leads.filter((lead) => !String(lead.owner_name || lead.owner || lead.owner_id || "").trim());
+  const todayTasks = tasks.filter((task) => {
+    const state = String(task.due_state || task.follow_up_state || task.status || "").toLowerCase();
+    return state.includes("today") || state.includes("new") || state.includes("planned");
+  });
+  const paidPipelineStage = pipelines.find((item) => {
+    const probe = `${item.title || ""} ${item.name || ""} ${item.code || ""}`.toLowerCase();
+    return ["оплач", "won", "closed", "paid", "выигр"].some((token) => probe.includes(token));
+  });
+  const paidRevenue = paidPipelineStage ? readCrmStageValue(paidPipelineStage) : leads.reduce((total, lead) => {
+    const probe = `${lead.status_name || ""} ${lead.status_code || ""} ${lead.pipeline_stage || ""}`.toLowerCase();
+    return ["оплач", "won", "paid", "closed"].some((token) => probe.includes(token))
+      ? total + readCrmMoneyValue(lead)
+      : total;
+  }, 0);
+
+  return {
+    catalogItems,
+    pricing,
+    crmBundle,
+    crmAvailable,
+    leads,
+    tasks,
+    pipelines,
+    ownerQueue,
+    ownerWorkload,
+    duplicateLeads,
+    dataQuality,
+    leadPreview: leads.slice(0, 4),
+    taskPreview: tasks.slice(0, 4),
+    pipelinePreview: pipelines.slice(0, 4),
+    queuePreview: ownerQueue.slice(0, 5),
+    ownerPreview: ownerWorkload.slice(0, 4),
+    overdueTasks,
+    todayTasks,
+    unassignedLeads,
+    newLeads: countCrmNewLeads(leads),
+    pipelineValue: sumCrmLeadPotential(leads),
+    paidRevenue,
+    syncIssues: readCrmHealthCount(dataQuality),
+    priceCount: readCalcPricingDriverCount(pricing),
+    latestLead: leads[0] || null,
+    latestTask: tasks[0] || null,
+  };
+}
+
 function extractSnapshotCategories(snapshot) {
   if (Array.isArray(snapshot.categories)) return snapshot.categories;
   if (Array.isArray(snapshot.sections)) return snapshot.sections;
@@ -2258,6 +3519,44 @@ function renderStatCard(label, value, note = "") {
   `;
 }
 
+function renderOwnerActionRow(item) {
+  return `
+    <a class="cabinet-owner-action cabinet-owner-action--${escapeAttribute(item.tone || "neutral")}" href="${escapeAttribute(item.href || cabinetSectionHref("dashboard"))}">
+      <div class="cabinet-owner-action__copy">
+        <strong>${escapeHtml(item.title || "Действие")}</strong>
+        <span>${escapeHtml(item.note || "")}</span>
+      </div>
+      <span class="cabinet-owner-action__cta">${escapeHtml(item.cta || "Открыть")}</span>
+    </a>
+  `;
+}
+
+function renderOwnerHealthItem(item) {
+  return `
+    <article class="cabinet-owner-health cabinet-owner-health--${escapeAttribute(item.tone || "neutral")}">
+      <div class="cabinet-owner-health__main">
+        <strong>${escapeHtml(item.label || "Система")}</strong>
+        <span>${escapeHtml(item.note || "")}</span>
+      </div>
+      <span class="cabinet-owner-health__state">${escapeHtml(item.state || "Проверить")}</span>
+    </article>
+  `;
+}
+
+function renderOwnerPipelineRow(item) {
+  const count = readCrmStageCount(item);
+  const amount = readCrmStageValue(item);
+  return `
+    <article class="cabinet-owner-stage">
+      <div class="cabinet-owner-stage__main">
+        <strong>${escapeHtml(item.title || item.name || item.code || "Стадия")}</strong>
+        <span>${escapeHtml(count ? `${count} ${pluralizeRu(count, "лид", "лида", "лидов")}` : "количество пока не вернулось")}</span>
+      </div>
+      <span class="cabinet-owner-stage__value">${escapeHtml(formatRub(amount))}</span>
+    </article>
+  `;
+}
+
 function renderMemberCatalogCard(item) {
   return `
     <article class="card card-pad account-card">
@@ -2265,18 +3564,18 @@ function renderMemberCatalogCard(item) {
       <h3 class="calc-card-title">${escapeHtml(item.title)}</h3>
       <p class="sublead">${escapeHtml(item.summary || "Без описания")}</p>
       <div class="account-item-meta">
-        <span>${escapeHtml(item.category || "без категории")}</span>
+        <span>${escapeHtml(humanizeMemberCatalogCategory(item.category || item.kind || ""))}</span>
         <span>${escapeHtml(humanizeCatalogPublicationStatus(item.status || "published"))}</span>
       </div>
       <div class="account-actions">
-        <a class="btn btn-primary" href="${escapeAttribute(item.path)}">Открыть страницу</a>
+        <a class="btn btn-primary" href="${escapeAttribute(resolvePublicPath(item.path))}">Открыть страницу</a>
       </div>
     </article>
   `;
 }
 
 function renderMemberCatalogRow(item) {
-  const nextStep = String(item.cta_mode || "").toLowerCase() === "buy" ? "Можно брать" : "Лучше уточнить";
+  const selectionState = describeMemberSelectionState(item.cta_mode);
   return `
     <article class="cabinet-list-row cabinet-list-row--catalog">
       <div class="cabinet-list-cell">
@@ -2284,25 +3583,26 @@ function renderMemberCatalogRow(item) {
         <span>${escapeHtml(item.summary || "Без описания")}</span>
       </div>
       <div class="cabinet-list-cell">
-        <strong>${escapeHtml(item.category || "без категории")}</strong>
+        <strong>${escapeHtml(humanizeMemberCatalogCategory(item.category || ""))}</strong>
         <span>${escapeHtml(humanizeCatalogKind(item.kind || "catalog"))}</span>
       </div>
       <div class="cabinet-list-cell">
-        <strong>${escapeHtml(nextStep)}</strong>
-        <span><a href="${escapeAttribute(item.path)}">Открыть страницу</a></span>
+        <strong>${escapeHtml(selectionState.label)}</strong>
+        <span>${escapeHtml(selectionState.note)} <a href="${escapeAttribute(resolvePublicPath(item.path))}">Открыть позицию</a></span>
       </div>
     </article>
   `;
 }
 
 function renderMemberSpecialCard(item) {
+  const contentLabel = humanizeCatalogKind(item.kind || "route");
   return `
     <article class="card card-pad account-card">
-      <div class="tag">${escapeHtml(humanizeCatalogKind(item.kind || "route"))}</div>
+      <div class="tag">${escapeHtml(contentLabel)}</div>
       <h3 class="calc-card-title">${escapeHtml(item.title)}</h3>
       <p class="sublead">${escapeHtml(item.summary || "Без описания")}</p>
       <div class="account-actions">
-        <a class="btn btn-secondary" href="${escapeAttribute(item.path)}">Перейти</a>
+        <a class="btn btn-secondary" href="${escapeAttribute(resolvePublicPath(item.path))}">${escapeHtml(contentLabel === "Полезная страница" ? "Открыть страницу" : "Открыть материал")}</a>
       </div>
     </article>
   `;
@@ -2320,8 +3620,8 @@ function renderMemberDocumentRow(item) {
         <span>${escapeHtml(item.slug || item.path || "файл")}</span>
       </div>
       <div class="cabinet-list-cell">
-        <strong>Открыть</strong>
-        <span><a href="${escapeAttribute(item.path)}">Перейти</a></span>
+        <strong>Открыть файл</strong>
+        <span><a href="${escapeAttribute(resolvePublicPath(item.path))}">Перейти</a></span>
       </div>
     </article>
   `;
@@ -2330,6 +3630,8 @@ function renderMemberDocumentRow(item) {
 function humanizeOrderDocumentType(value) {
   const type = String(value || "").toLowerCase();
   if (type === "invoice") return "Счёт";
+  if (type === "upd") return "УПД";
+  if (type === "calculation") return "Расчёт";
   if (type === "specification") return "Спецификация";
   if (type === "pdf") return "PDF";
   if (type === "checklist") return "Чек-лист";
@@ -2340,7 +3642,7 @@ function humanizeOrderDocumentStatus(value) {
   const status = String(value || "").toLowerCase();
   if (status === "ready") return "Готов";
   if (status === "sent") return "Отправлен";
-  return "Черновик";
+  return "Готовится";
 }
 
 function resolveOrderDocumentHref(fileUrl) {
@@ -2374,6 +3676,31 @@ function renderMemberOrderDocumentRow(item) {
   `;
 }
 
+function renderMemberAvailableDocumentRow(item) {
+  const href = resolveOrderDocumentHref(item.file_url || item.href);
+  const timestamp = formatAuditTimestamp(item.updated_at || item.created_at || "");
+  return `
+    <article class="cabinet-list-row cabinet-list-row--documents">
+      <div class="cabinet-list-cell">
+        <strong>${escapeHtml(item.title || humanizeOrderDocumentType(item.document_type) || "Документ")}</strong>
+        <span>${escapeHtml(humanizeOrderDocumentType(item.document_type))}${item.file_size ? ` · ${escapeHtml(item.file_size)}` : ""}</span>
+      </div>
+      <div class="cabinet-list-cell">
+        <strong>${escapeHtml(item.orderTitle || `Заказ #${item.orderId || "—"}`)}</strong>
+        <span>${item.orderId ? `Заказ #${escapeHtml(String(item.orderId))}` : "Текущий заказ"}</span>
+      </div>
+      <div class="cabinet-list-cell">
+        <strong>${renderOrderDocumentStatusChip(item.status || "ready")}</strong>
+        <span>${escapeHtml(timestamp || "Файл уже доступен")}</span>
+      </div>
+      <div class="cabinet-list-cell">
+        <strong><a href="${escapeAttribute(href)}" download target="_blank" rel="noopener">Скачать PDF</a></strong>
+        <span>${escapeHtml(item.file_size || "PDF")}</span>
+      </div>
+    </article>
+  `;
+}
+
 function getOrderDocumentLatestStatus(documents) {
   const items = Array.isArray(documents) ? documents : [];
   const firstSent = items.find((item) => String(item.status || "").toLowerCase() === "sent");
@@ -2386,7 +3713,7 @@ function getOrderDocumentLatestStatus(documents) {
 function renderMemberOrderDocumentGroup(order, documents, profileCompleteness) {
   const items = Array.isArray(documents) ? documents : [];
   const orderStatus = describeMemberOrderStatus(order, profileCompleteness);
-  const latestStatus = items.length ? getOrderDocumentLatestStatus(items) : "";
+  const readiness = describeMemberDocumentReadiness(items);
   return `
     <article class="card card-pad cabinet-card cabinet-document-group">
       <div class="cabinet-document-group__head">
@@ -2397,9 +3724,10 @@ function renderMemberOrderDocumentGroup(order, documents, profileCompleteness) {
         </div>
         <div class="cabinet-inline-meta">
           <span>${items.length} ${pluralizeRu(items.length, "документ", "документа", "документов")}</span>
-          <span>${items.length ? humanizeOrderDocumentStatus(latestStatus) : "Пока пусто"}</span>
+          <span>${escapeHtml(readiness.label)}</span>
         </div>
       </div>
+      <div class="cabinet-inline-hint">${escapeHtml(readiness.note)}</div>
       ${items.length ? `
         <div class="cabinet-list">
           <div class="cabinet-list-head cabinet-list-head--catalog">
@@ -2411,7 +3739,7 @@ function renderMemberOrderDocumentGroup(order, documents, profileCompleteness) {
             ${items.map(renderMemberOrderDocumentRow).join("")}
           </div>
         </div>
-      ` : `<div class="account-empty">Документов по этому заказу пока нет.</div>`}
+      ` : `<div class="account-empty">Документов по этому заказу пока нет. Когда счёт, спецификация или PDF будут готовы, они появятся здесь.</div>`}
       <div class="cabinet-inline-actions">
         <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("orders", { order: order.id }))}">Открыть заказ</a>
       </div>
@@ -2427,6 +3755,9 @@ function getMemberOrderStageModel(order, context = {}) {
   const profileCompleteness = Number(context.profileCompleteness || 0);
   const documentsCount = Number(context.documentsCount || 0);
   const messagesCount = Number(context.messagesCount || 0);
+  const hasDocumentsSection = Boolean(context.hasDocumentsSection);
+  const hasOrdersSection = Boolean(context.hasOrdersSection);
+  const hasRequestsSection = Boolean(context.hasRequestsSection);
   const lineCount = Array.isArray(order?.line_items) ? order.line_items.length : 0;
   const status = String(order?.status || "").toLowerCase();
 
@@ -2453,8 +3784,8 @@ function getMemberOrderStageModel(order, context = {}) {
       description: "В заказе пока нет позиций. Добавьте товары, и можно двигаться дальше.",
       primaryLabel: "Открыть корзину",
       primaryHref: cabinetSectionHref("cart"),
-      secondaryLabel: "Открыть расчёт",
-      secondaryHref: cabinetSectionHref("requests"),
+      secondaryLabel: hasRequestsSection ? "Открыть расчёт" : "Профиль и доставка",
+      secondaryHref: hasRequestsSection ? cabinetSectionHref("requests") : cabinetSectionHref("profile"),
       tertiaryLabel: "",
       tertiaryHref: "",
       notes: [
@@ -2490,8 +3821,8 @@ function getMemberOrderStageModel(order, context = {}) {
       primaryHref: "#order-thread",
       secondaryLabel: "Профиль и доставка",
       secondaryHref: cabinetSectionHref("profile"),
-      tertiaryLabel: documentsCount ? "Документы рядом" : "",
-      tertiaryHref: documentsCount ? cabinetSectionHref("documents") : "",
+      tertiaryLabel: documentsCount && hasDocumentsSection ? "Документы рядом" : "",
+      tertiaryHref: documentsCount && hasDocumentsSection ? cabinetSectionHref("documents") : "",
       notes: [
         messagesCount ? "Переписка уже есть, продолжайте в том же треде." : "Напишите по заказу прямо из этого экрана.",
         "После подтверждения здесь появятся документы.",
@@ -2508,8 +3839,8 @@ function getMemberOrderStageModel(order, context = {}) {
       primaryHref: "#order-thread",
       secondaryLabel: "Профиль и доставка",
       secondaryHref: cabinetSectionHref("profile"),
-      tertiaryLabel: documentsCount ? "Документы рядом" : "",
-      tertiaryHref: documentsCount ? cabinetSectionHref("documents") : "",
+      tertiaryLabel: documentsCount && hasDocumentsSection ? "Документы рядом" : "",
+      tertiaryHref: documentsCount && hasDocumentsSection ? cabinetSectionHref("documents") : "",
       notes: [
         "Нужно уточнить состав или сроки, пишите прямо здесь.",
         "Как только заказ подтвердим, добавим документы.",
@@ -2524,8 +3855,8 @@ function getMemberOrderStageModel(order, context = {}) {
       description: documentsCount
         ? "Заказ подтверждён. Теперь главное здесь документы и финальные шаги."
         : "Заказ подтверждён, но документов пока нет. Напишите нам и запросите счёт или спецификацию.",
-      primaryLabel: documentsCount ? "Открыть документы" : "Запросить документы",
-      primaryHref: documentsCount ? cabinetSectionHref("documents") : "#order-thread",
+      primaryLabel: documentsCount && hasDocumentsSection ? "Открыть документы" : "Запросить документы",
+      primaryHref: documentsCount && hasDocumentsSection ? cabinetSectionHref("documents") : "#order-thread",
       secondaryLabel: "Связь по заказу",
       secondaryHref: "#order-thread",
       tertiaryLabel: "Профиль и доставка",
@@ -2542,8 +3873,8 @@ function getMemberOrderStageModel(order, context = {}) {
     return {
       title: "Заказ в отгрузке",
       description: "Сейчас держите под рукой документы и переписку по доставке.",
-      primaryLabel: documentsCount ? "Открыть документы" : "Открыть связь по заказу",
-      primaryHref: documentsCount ? cabinetSectionHref("documents") : "#order-thread",
+      primaryLabel: documentsCount && hasDocumentsSection ? "Открыть документы" : "Открыть связь по заказу",
+      primaryHref: documentsCount && hasDocumentsSection ? cabinetSectionHref("documents") : "#order-thread",
       secondaryLabel: "Связь по заказу",
       secondaryHref: "#order-thread",
       tertiaryLabel: "Профиль и доставка",
@@ -2559,10 +3890,10 @@ function getMemberOrderStageModel(order, context = {}) {
   return {
     title: "Заказ завершён",
     description: "Этот экран остаётся как история заказа: документы, сообщения и состав.",
-    primaryLabel: documentsCount ? "Открыть документы" : "Открыть сообщения",
-    primaryHref: documentsCount ? cabinetSectionHref("documents") : cabinetSectionHref("messages"),
-    secondaryLabel: "Открыть все заказы",
-    secondaryHref: cabinetSectionHref("orders"),
+    primaryLabel: documentsCount && hasDocumentsSection ? "Открыть документы" : "Открыть сообщения",
+    primaryHref: documentsCount && hasDocumentsSection ? cabinetSectionHref("documents") : cabinetSectionHref("messages"),
+    secondaryLabel: hasOrdersSection ? "Открыть все заказы" : "Профиль и доставка",
+    secondaryHref: hasOrdersSection ? cabinetSectionHref("orders") : cabinetSectionHref("profile"),
     tertiaryLabel: "",
     tertiaryHref: "",
     notes: [
@@ -2575,33 +3906,18 @@ function getMemberOrderStageModel(order, context = {}) {
 
 function humanizeOrderLeadDeliveryStatus(value) {
   const normalized = String(value || "").trim().toLowerCase();
-  if (normalized === "succeeded") return "CRM принял лид";
-  if (normalized === "failed") return "CRM не принял лид";
-  if (normalized === "disabled") return "CRM сейчас отключена";
-  return "Ждёт отправки в CRM";
+  if (normalized === "succeeded") return "Заявка принята в работу";
+  if (normalized === "failed") return "Нужно проверить заявку";
+  if (normalized === "disabled") return "Обрабатываем вручную";
+  return "Ждём следующий шаг";
 }
 
 function buildOrderLeadSummary(order) {
-  const leadId = Number(order?.lead_id || 0) || 0;
-  const crmLeadId = Number(order?.lead_crm_lead_id || 0) || 0;
-  const owner = String(order?.lead_owner || "").trim();
+  const lineCount = Array.isArray(order?.line_items) ? order.line_items.length : 0;
   const deliveryLabel = humanizeOrderLeadDeliveryStatus(order?.lead_delivery_status || "");
-  const deliveryError = String(order?.lead_delivery_error || "").trim();
-  const linkError = String(order?.lead_link_error || "").trim();
-  if (!leadId) {
-    return {
-      title: "Лид в CRM ещё не создан",
-      note: linkError || "Заказ сохранён, но до CRM ещё не отправлен.",
-    };
-  }
-  const title = crmLeadId ? `CRM лид #${crmLeadId}` : `Лид #${leadId} создан`;
-  const details = [deliveryLabel];
-  if (owner) details.push(`ответственный: ${owner}`);
-  if (deliveryError) details.push(`ошибка: ${deliveryError}`);
-  if (linkError) details.push(`подробности: ${linkError}`);
   return {
-    title,
-    note: `${details.join(" · ")}.`,
+    title: lineCount ? `${lineCount} ${pluralizeRu(lineCount, "позиция", "позиции", "позиций")} в заказе` : "Заказ собирается",
+    note: `${deliveryLabel}.`,
   };
 }
 
@@ -2634,7 +3950,7 @@ function renderMemberOrderRow(order, profileCompleteness) {
       </div>
       <div class="cabinet-list-cell">
         <strong><a href="${escapeAttribute(cabinetSectionHref("orders", { order: order.id }))}">Открыть заказ</a></strong>
-        <span>${escapeHtml(leadSummary.title)}</span>
+        <span>${escapeHtml(leadSummary.note)}</span>
       </div>
     </article>
   `;
@@ -2652,24 +3968,24 @@ function describeMemberOrderStatus(order, profileCompleteness) {
   const status = String(order?.status || "").toLowerCase();
   const lineCount = Array.isArray(order?.line_items) ? order.line_items.length : 0;
   if (status === "submitted") {
-    return { label: "На подтверждении", note: "Заказ уже в работе, ждём подтверждение." };
+    return { label: "В работе", note: "Заказ уже принят и сейчас обрабатывается." };
   }
   if (status === "confirmed") {
-    return { label: "Подтверждён", note: "Заказ подтверждён. Следом будут документы и отгрузка." };
+    return { label: "Готовится", note: "Подтверждение уже есть. Дальше подготовим документы и следующий шаг." };
   }
   if (status === "shipped") {
-    return { label: "В отгрузке", note: "Заказ уже двигается к доставке." };
+    return { label: "Отгружается", note: "Заказ уже движется к доставке." };
   }
   if (status === "completed") {
-    return { label: "Закрыт", note: "Заказ завершён. Документы и история остаются здесь." };
+    return { label: "Готово", note: "Заказ завершён. Документы и история остаются здесь." };
   }
   if (!lineCount) {
-    return { label: "Черновик", note: "Заказ пока пустой и ещё не собран." };
+    return { label: "Собирается", note: "Заказ пока пустой и ещё собирается." };
   }
   if (profileCompleteness < 3) {
-    return { label: "Заполните профиль", note: "Позиции собраны, но не хватает контактов и доставки." };
+    return { label: "Ждём данные", note: "Позиции собраны, но не хватает контактов и доставки." };
   }
-  return { label: "Готов к подтверждению", note: "Состав собран, профиль заполнен, можно подтверждать." };
+  return { label: "Собирается", note: "Состав собран, можно переходить к следующему шагу." };
 }
 
 function renderAdminCatalogCard(item) {
@@ -2714,7 +4030,7 @@ function renderAdminCatalogManagerRow(item, selectedSlug = "") {
     item.short_description || item.summary || "",
   ].join(" ").toLowerCase();
   return `
-    <article class="cabinet-list-row cabinet-list-row--catalog${isSelected ? " is-selected" : ""}" data-catalog-manager-row data-catalog-search-index="${escapeAttribute(searchIndex)}">
+    <article class="cabinet-list-row cabinet-list-row--catalog${isSelected ? " is-selected" : ""}" data-catalog-manager-row data-catalog-search-index="${escapeAttribute(searchIndex)}" data-catalog-status="${escapeAttribute(String(item.status || "published").toLowerCase())}">
       <div class="cabinet-list-cell">
         <strong>${escapeHtml(item.name || item.title || "Без названия")}</strong>
         <span>${escapeHtml(item.short_description || item.summary || "Рабочая запись товара")}</span>
@@ -2976,7 +4292,7 @@ function renderCatalogMediaSection(product) {
     <section class="cabinet-editor-section cabinet-editor-section--media">
       <div class="cabinet-editor-section__head">
         <div>
-          <div class="cabinet-kicker">Media manager</div>
+          <div class="cabinet-kicker">Медиа</div>
           <h4 class="calc-card-title">Галерея товара</h4>
         </div>
         <div class="cabinet-media-toolbar">
@@ -3029,101 +4345,118 @@ function renderAdminCatalogProductEditor(product, adminProducts = []) {
   const productOptions = buildCatalogProductOptions(adminProducts, product.slug);
   return `
     <article class="card card-pad cabinet-card cabinet-product-editor" data-catalog-product-editor="${escapeAttribute(product.slug)}">
-      <div class="cabinet-kicker">Редактор товара</div>
-      <h3 class="calc-card-title">${escapeHtml(product.name || product.slug || "Товар")}</h3>
-      <div class="cabinet-inline-meta">
-        <span>${escapeHtml(product.slug || "")}</span>
-        <span>${escapeHtml(product.category_slug || "без категории")}</span>
-        <span>${escapeHtml(product.path || "без public path")}</span>
+      <div class="cabinet-product-editor__head">
+        <div class="cabinet-product-editor__copy">
+          <div class="cabinet-kicker">Редактор товара</div>
+          <h3 class="calc-card-title">${escapeHtml(product.name || product.slug || "Товар")}</h3>
+          <div class="cabinet-inline-meta">
+            <span>${escapeHtml(product.slug || "")}</span>
+            <span>${escapeHtml(product.category_slug || "без категории")}</span>
+            <span>${escapeHtml(product.path || "без публичного пути")}</span>
+          </div>
+        </div>
+        <div class="cabinet-product-editor__summary">
+          <article class="cabinet-mini-card">
+            <strong>Публикация</strong>
+            <span>${escapeHtml(humanizeCatalogPublicationStatus(product.status || "published"))} · ${escapeHtml(humanizeCatalogStockStatus(product.stock_status || "in_stock"))}</span>
+          </article>
+          <article class="cabinet-mini-card">
+            <strong>Медиа</strong>
+            <span>${Array.isArray(product.images) ? product.images.length : 0} ${pluralizeRu(Array.isArray(product.images) ? product.images.length : 0, "файл", "файла", "файлов")}</span>
+          </article>
+          <article class="cabinet-mini-card">
+            <strong>Структура</strong>
+            <span>${(product.attributes || []).length} хар-к · ${(product.documents || []).length} документов · ${(product.faq || []).length} FAQ</span>
+          </article>
+          <article class="cabinet-mini-card">
+            <strong>Связи</strong>
+            <span>${(product.related_products || []).length} связанных · ${(product.compatibility || []).length} совместимостей</span>
+          </article>
+        </div>
       </div>
-      <div class="cabinet-product-editor__actions">
-        <button class="btn btn-primary" type="button" data-catalog-product-save="${escapeAttribute(product.slug)}">Сохранить товар</button>
-        <a class="btn btn-secondary" href="${escapeAttribute(product.path || cabinetRoutes.catalog)}" target="_blank" rel="noopener noreferrer">Открыть страницу товара</a>
-        <div class="cabinet-users-status cabinet-product-editor__status" data-catalog-product-status></div>
+
+      <div class="cabinet-product-editor__stickybar">
+        <div class="cabinet-product-editor__stickycopy">
+          <strong>${escapeHtml(product.name || product.slug || "Товар")}</strong>
+          <span>Сохраняйте изменения без прокрутки к концу формы.</span>
+        </div>
+        <div class="cabinet-product-editor__actions">
+          <button class="btn btn-primary" type="button" data-catalog-product-save="${escapeAttribute(product.slug)}">Сохранить товар</button>
+          <a class="btn btn-secondary" href="${escapeAttribute(resolvePublicPath(product.path || cabinetRoutes.catalog))}" target="_blank" rel="noopener noreferrer">Открыть публичную страницу</a>
+          <div class="cabinet-users-status cabinet-product-editor__status" data-catalog-product-status></div>
+        </div>
       </div>
-      <div class="cabinet-product-editor__summary">
-        <article class="cabinet-mini-card">
-          <strong>Публичность</strong>
-          <span>${escapeHtml(humanizeCatalogPublicationStatus(product.status || "published"))} · ${escapeHtml(humanizeCatalogStockStatus(product.stock_status || "in_stock"))}</span>
-        </article>
-        <article class="cabinet-mini-card">
-          <strong>Медиа</strong>
-          <span>${Array.isArray(product.images) ? product.images.length : 0} ${pluralizeRu(Array.isArray(product.images) ? product.images.length : 0, "файл", "файла", "файлов")}</span>
-        </article>
-        <article class="cabinet-mini-card">
-          <strong>Структура</strong>
-          <span>${(product.attributes || []).length} хар-к · ${(product.documents || []).length} док. · ${(product.faq || []).length} FAQ</span>
-        </article>
-        <article class="cabinet-mini-card">
-          <strong>Связи</strong>
-          <span>${(product.related_products || []).length} связанных · ${(product.compatibility || []).length} совместимостей</span>
-        </article>
+
+      <div class="cabinet-admin-tabs cabinet-admin-tabs--editor">
+        <button class="cabinet-admin-tab is-active" type="button" data-catalog-editor-tab="main">Основное</button>
+        <button class="cabinet-admin-tab" type="button" data-catalog-editor-tab="media">Медиа</button>
+        <button class="cabinet-admin-tab" type="button" data-catalog-editor-tab="seo">SEO</button>
+        <button class="cabinet-admin-tab" type="button" data-catalog-editor-tab="relations">Связи</button>
+        <button class="cabinet-admin-tab" type="button" data-catalog-editor-tab="publish">Наличие и публикация</button>
       </div>
-      <div class="cabinet-field-grid">
-        <label class="cabinet-field">
-          <span class="cabinet-field-label">Название</span>
-          <input class="admin-input" type="text" data-catalog-product-field="name" value="${escapeAttribute(product.name || "")}" />
-        </label>
-        <label class="cabinet-field">
-          <span class="cabinet-field-label">Артикул</span>
-          <input class="admin-input" type="text" data-catalog-product-field="article" value="${escapeAttribute(product.article || "")}" />
-        </label>
-        <label class="cabinet-field">
-          <span class="cabinet-field-label">Цена</span>
-          <input class="admin-input" type="number" step="1" data-catalog-product-field="price" value="${escapeAttribute(product.price ?? "")}" />
-        </label>
-        <label class="cabinet-field">
-          <span class="cabinet-field-label">Старая цена</span>
-          <input class="admin-input" type="number" step="1" data-catalog-product-field="old_price" value="${escapeAttribute(product.old_price ?? "")}" />
-        </label>
-        <label class="cabinet-field">
-          <span class="cabinet-field-label">Статус страницы</span>
-          <select class="admin-select" data-catalog-product-field="status">
-            ${["published", "draft", "hidden"].map((status) => `<option value="${status}" ${product.status === status ? "selected" : ""}>${escapeHtml(humanizeCatalogPublicationStatus(status))}</option>`).join("")}
-          </select>
-        </label>
-        <label class="cabinet-field">
-          <span class="cabinet-field-label">Наличие</span>
-          <select class="admin-select" data-catalog-product-field="stock_status">
-            ${["in_stock", "limited", "preorder", "out_of_stock"].map((status) => `<option value="${status}" ${product.stock_status === status ? "selected" : ""}>${escapeHtml(humanizeCatalogStockStatus(status))}</option>`).join("")}
-          </select>
-        </label>
-        <label class="cabinet-field cabinet-field--wide">
-          <span class="cabinet-field-label">Короткое описание</span>
-          <textarea class="admin-textarea" rows="3" data-catalog-product-field="short_description">${escapeHtml(product.short_description || "")}</textarea>
-        </label>
-        <label class="cabinet-field cabinet-field--wide">
-          <span class="cabinet-field-label">Полное описание</span>
-          <textarea class="admin-textarea" rows="7" data-catalog-product-field="full_description">${escapeHtml(product.full_description || "")}</textarea>
-        </label>
-        <label class="cabinet-field cabinet-field--wide">
-          <span class="cabinet-field-label">Badge logic</span>
-          ${renderCatalogBadgeControls(product.badges || [])}
-        </label>
-      </div>
-      ${renderCatalogMediaSection(product)}
-      ${renderCatalogCollectionSection({
-        kicker: "Характеристики",
-        title: "Что показывать в карточке и фильтрах",
-        note: "Каждая характеристика живёт отдельной записью: label, value, key и группа.",
-        type: "attributes",
-        addLabel: "Добавить характеристику",
-        content: attributes.map(renderCatalogAttributeRow).join(""),
-      })}
-      ${renderCatalogCollectionSection({
-        kicker: "Документы",
-        title: "Файлы рядом с товаром",
-        note: "Паспорта, чек-листы и спецификации храните здесь, а не в описании.",
-        type: "documents",
-        addLabel: "Добавить документ",
-        content: documents.map(renderCatalogDocumentRow).join(""),
-      })}
-      ${renderCatalogCollapsibleSection({
-        kicker: "SEO",
-        title: "Поиск",
-        note: "Здесь только SEO-текст для поиска и сниппета.",
-        open: false,
-        content: `
+
+      <section class="cabinet-product-editor__panel is-active" data-catalog-editor-panel="main">
+        <div class="cabinet-field-grid">
+          <label class="cabinet-field">
+            <span class="cabinet-field-label">Название</span>
+            <input class="admin-input" type="text" data-catalog-product-field="name" value="${escapeAttribute(product.name || "")}" />
+          </label>
+          <label class="cabinet-field">
+            <span class="cabinet-field-label">Артикул</span>
+            <input class="admin-input" type="text" data-catalog-product-field="article" value="${escapeAttribute(product.article || "")}" />
+          </label>
+          <label class="cabinet-field">
+            <span class="cabinet-field-label">Цена</span>
+            <input class="admin-input" type="number" step="1" data-catalog-product-field="price" value="${escapeAttribute(product.price ?? "")}" />
+          </label>
+          <label class="cabinet-field">
+            <span class="cabinet-field-label">Старая цена</span>
+            <input class="admin-input" type="number" step="1" data-catalog-product-field="old_price" value="${escapeAttribute(product.old_price ?? "")}" />
+          </label>
+          <label class="cabinet-field cabinet-field--wide">
+            <span class="cabinet-field-label">Короткое описание</span>
+            <textarea class="admin-textarea" rows="3" data-catalog-product-field="short_description">${escapeHtml(product.short_description || "")}</textarea>
+          </label>
+          <label class="cabinet-field cabinet-field--wide">
+            <span class="cabinet-field-label">Полное описание</span>
+            <textarea class="admin-textarea" rows="7" data-catalog-product-field="full_description">${escapeHtml(product.full_description || "")}</textarea>
+          </label>
+          <label class="cabinet-field cabinet-field--wide">
+            <span class="cabinet-field-label">Бейджи карточки</span>
+            ${renderCatalogBadgeControls(product.badges || [])}
+          </label>
+        </div>
+        ${renderCatalogCollectionSection({
+          kicker: "Характеристики",
+          title: "Что показывать в карточке и фильтрах",
+          note: "Каждая характеристика живёт отдельной записью: label, value, key и группа.",
+          type: "attributes",
+          addLabel: "Добавить характеристику",
+          content: attributes.map(renderCatalogAttributeRow).join(""),
+        })}
+      </section>
+
+      <section class="cabinet-product-editor__panel" data-catalog-editor-panel="media" hidden>
+        ${renderCatalogMediaSection(product)}
+        ${renderCatalogCollectionSection({
+          kicker: "Документы",
+          title: "Файлы рядом с товаром",
+          note: "Паспорта, чек-листы и спецификации храним здесь, а не в описании.",
+          type: "documents",
+          addLabel: "Добавить документ",
+          content: documents.map(renderCatalogDocumentRow).join(""),
+        })}
+      </section>
+
+      <section class="cabinet-product-editor__panel" data-catalog-editor-panel="seo" hidden>
+        <section class="cabinet-editor-section">
+          <div class="cabinet-editor-section__head">
+            <div>
+              <div class="cabinet-kicker">SEO</div>
+              <h4 class="calc-card-title">Поиск и сниппет</h4>
+            </div>
+          </div>
+          <p class="cabinet-inline-hint">Здесь только SEO-текст для поиска и сниппета.</p>
           <div class="cabinet-field-grid">
             <label class="cabinet-field cabinet-field--wide">
               <span class="cabinet-field-label">SEO title</span>
@@ -3134,71 +4467,86 @@ function renderAdminCatalogProductEditor(product, adminProducts = []) {
               <textarea class="admin-textarea" rows="3" data-catalog-product-field="seo_description">${escapeHtml(product.seo_description || "")}</textarea>
             </label>
           </div>
-        `,
-      })}
-      ${renderCatalogCollapsibleSection({
-        kicker: "FAQ",
-        title: "Вопросы и ответы по товару",
-        note: "Этот блок нужен для нормальной карточки товара и для снятия повторяющихся вопросов до переписки.",
-        open: false,
-        content: `
+        </section>
+        <section class="cabinet-editor-section">
           <div class="cabinet-editor-section__head">
-            <div></div>
+            <div>
+              <div class="cabinet-kicker">FAQ</div>
+              <h4 class="calc-card-title">Вопросы и ответы</h4>
+            </div>
             <button class="btn btn-secondary btn-ghost--small" type="button" data-catalog-collection-add="faq">Добавить вопрос</button>
           </div>
+          <p class="cabinet-inline-hint">Этот блок снимает повторяющиеся вопросы ещё до переписки.</p>
           <div class="cabinet-repeater" data-catalog-collection="faq">${faq.map(renderCatalogFaqRow).join("")}</div>
-        `,
-      })}
-      ${renderCatalogCollapsibleSection({
-        kicker: "Связи",
-        title: "Связанные товары",
-        note: "Сюда складываем соседние позиции, которые логично показывать рядом: модуль, комплект, следующий шаг.",
-        open: false,
-        content: `
+        </section>
+      </section>
+
+      <section class="cabinet-product-editor__panel" data-catalog-editor-panel="relations" hidden>
+        <section class="cabinet-editor-section">
           <div class="cabinet-editor-section__head">
-            <div></div>
+            <div>
+              <div class="cabinet-kicker">Связи</div>
+              <h4 class="calc-card-title">Связанные товары</h4>
+            </div>
             <button class="btn btn-secondary btn-ghost--small" type="button" data-catalog-collection-add="related_products">Добавить связанную позицию</button>
           </div>
+          <p class="cabinet-inline-hint">Сюда складываем соседние позиции, которые логично показывать рядом: модуль, комплект, следующий шаг.</p>
           <div class="cabinet-repeater" data-catalog-collection="related_products">${relatedProducts.map((item) => renderCatalogRelatedRow(item)).join("")}</div>
-        `,
-      })}
-      ${renderCatalogCollapsibleSection({
-        kicker: "Совместимость",
-        title: "Совместимость",
-        note: "Короткие пометки: с чем совместимо, где нужна проверка и когда нужен адаптер.",
-        open: false,
-        content: `
+        </section>
+        <section class="cabinet-editor-section">
           <div class="cabinet-editor-section__head">
-            <div></div>
-            <button class="btn btn-secondary btn-ghost--small" type="button" data-catalog-collection-add="compatibility">Добавить правило совместимости</button>
+            <div>
+              <div class="cabinet-kicker">Совместимость</div>
+              <h4 class="calc-card-title">Проверки совместимости</h4>
+            </div>
+            <button class="btn btn-secondary btn-ghost--small" type="button" data-catalog-collection-add="compatibility">Добавить правило</button>
           </div>
+          <p class="cabinet-inline-hint">Короткие пометки: с чем совместимо, где нужна проверка и когда нужен адаптер.</p>
           <div class="cabinet-repeater" data-catalog-collection="compatibility">${compatibility.map((item) => renderCatalogCompatibilityRow(item)).join("")}</div>
-        `,
-      })}
-      <div class="cabinet-home-actions">
-        <button class="btn btn-primary" type="button" data-catalog-product-save="${escapeAttribute(product.slug)}">Сохранить товар</button>
-        <a class="btn btn-secondary" href="${escapeAttribute(product.path || cabinetRoutes.catalog)}" target="_blank" rel="noopener noreferrer">Открыть страницу товара</a>
-      </div>
+        </section>
+      </section>
+
+      <section class="cabinet-product-editor__panel" data-catalog-editor-panel="publish" hidden>
+        <section class="cabinet-editor-section">
+          <div class="cabinet-editor-section__head">
+            <div>
+              <div class="cabinet-kicker">Наличие и публикация</div>
+              <h4 class="calc-card-title">Статус карточки</h4>
+            </div>
+          </div>
+          <div class="cabinet-field-grid">
+            <label class="cabinet-field">
+              <span class="cabinet-field-label">Статус страницы</span>
+              <select class="admin-select" data-catalog-product-field="status">
+                ${["published", "draft", "hidden"].map((status) => `<option value="${status}" ${product.status === status ? "selected" : ""}>${escapeHtml(humanizeCatalogPublicationStatus(status))}</option>`).join("")}
+              </select>
+            </label>
+            <label class="cabinet-field">
+              <span class="cabinet-field-label">Наличие</span>
+              <select class="admin-select" data-catalog-product-field="stock_status">
+                ${["in_stock", "limited", "preorder", "out_of_stock"].map((status) => `<option value="${status}" ${product.stock_status === status ? "selected" : ""}>${escapeHtml(humanizeCatalogStockStatus(status))}</option>`).join("")}
+              </select>
+            </label>
+          </div>
+        </section>
+      </section>
+
+      <datalist id="catalog-related-options">${productOptions}</datalist>
+      <datalist id="catalog-compatibility-options">${productOptions}</datalist>
     </article>
   `;
 }
 
 function renderSitePageRow(item) {
   return `
-    <article class="cabinet-list-row cabinet-list-row--site-pages">
-      <div class="cabinet-list-cell">
+    <article class="cabinet-site-page-row">
+      <div class="cabinet-site-page-main">
         <strong>${escapeHtml(item.label || item.id || "Без имени")}</strong>
-        <span>${escapeHtml(item.id || "страница")}</span>
+        <span>${escapeHtml(item.goal || item.id || "страница")} · ${escapeHtml(item.primaryCta || "Без CTA")}</span>
       </div>
-      <div class="cabinet-list-cell">
-        <strong>${escapeHtml(item.goal || "Без цели")}</strong>
-      </div>
-      <div class="cabinet-list-cell">
-        <strong>${escapeHtml(item.primaryCta || "Без CTA")}</strong>
-        <span>${escapeHtml(item.secondaryCta || "Без secondary CTA")}</span>
-      </div>
-      <div class="cabinet-list-cell">
-        <strong>${escapeHtml(humanizeCatalogPublicationStatus(item.status || "draft"))}</strong>
+      <div class="cabinet-site-page-meta">
+        <span class="cabinet-site-page-cta">${escapeHtml(item.secondaryCta || "Без второй кнопки")}</span>
+        <span class="cabinet-site-page-status">${escapeHtml(humanizeCatalogPublicationStatus(item.status || "draft"))}</span>
       </div>
     </article>
   `;
@@ -3337,9 +4685,253 @@ function renderAdminOrderDocumentEditor(order, documents) {
   `;
 }
 
+const CABINET_SCOPE_OPTIONS = [
+  { id: "crm", label: "CRM", group: "Команда" },
+  { id: "catalog", label: "Каталог", group: "Контент" },
+  { id: "special_pages", label: "Материалы", group: "Контент" },
+  { id: "orders", label: "Заказы", group: "Клиентский путь" },
+  { id: "documents", label: "Документы", group: "Клиентский путь" },
+  { id: "course_access", label: "Клубничный Хак", group: "Клиентский путь" },
+  { id: "calc_prices", label: "Цены калькулятора", group: "Система" },
+  { id: "site_settings", label: "Сайт", group: "Система" },
+  { id: "catalog_settings", label: "Настройки каталога", group: "Система" },
+  { id: "users_manage", label: "Пользователи", group: "Система" },
+  { id: "integrations", label: "Интеграции", group: "Система" },
+  { id: "audit", label: "Аудит", group: "Система" },
+];
+
+function getScopeOptionsForAccountType(accountType = "member") {
+  const normalized = String(accountType || "member").toLowerCase();
+  if (normalized === "admin") {
+    return CABINET_SCOPE_OPTIONS.filter((item) => ["Команда", "Контент", "Система"].includes(item.group));
+  }
+  return CABINET_SCOPE_OPTIONS.filter((item) => ["Контент", "Клиентский путь"].includes(item.group));
+}
+
+function renderAdminUserListRow(user, selectedUserId = "") {
+  const scopes = Array.isArray(user.scopes) ? user.scopes : [];
+  const isSelected = String(user.id) === String(selectedUserId);
+  const searchIndex = [
+    user.display_name,
+    user.email,
+    user.slug,
+    user.role,
+    user.account_type,
+    ...scopes,
+  ].filter(Boolean).join(" ").toLowerCase();
+  const tags = [
+    String(user.account_type || "").toLowerCase(),
+    user.is_active ? "active" : "inactive",
+    scopes.includes("course_access") ? "course" : "",
+  ].filter(Boolean).join(" ");
+
+  return `
+    <article class="cabinet-list-row cabinet-list-row--users${isSelected ? " is-selected" : ""}" data-user-row data-user-search-index="${escapeAttribute(searchIndex)}" data-user-tags="${escapeAttribute(tags)}">
+      <div class="cabinet-list-cell">
+        <strong><a href="${escapeAttribute(cabinetSectionHref("users", { user: user.id }))}">${escapeHtml(user.display_name || user.slug || "Без имени")}</a></strong>
+        <span>${escapeHtml(user.email || user.slug || "Без email")}</span>
+      </div>
+      <div class="cabinet-list-cell">
+        <strong>${escapeHtml(user.account_type === "admin" ? "Команда" : "Клиент")}</strong>
+        <span>${escapeHtml(humanizeCabinetRole(user.role || user.account_type || "member"))}</span>
+      </div>
+      <div class="cabinet-list-cell">
+        ${scopes.length ? `<div class="cabinet-chip-row">${scopes.slice(0, 3).map((scope) => `<span class="account-note-chip">${escapeHtml(humanizeCabinetScope(scope))}</span>`).join("")}</div>` : "<span>Базовый доступ</span>"}
+      </div>
+      <div class="cabinet-list-cell">
+        <strong>${user.is_active ? "Активен" : "Выключен"}</strong>
+        <span>${escapeHtml(formatAuditTimestamp(user.updated_at || user.created_at || ""))}</span>
+      </div>
+    </article>
+  `;
+}
+
+function renderScopeCheckboxGrid(user) {
+  const scopes = new Set(Array.isArray(user.scopes) ? user.scopes : []);
+  const options = getScopeOptionsForAccountType(user.account_type || "member");
+  const groups = Array.from(new Set(options.map((item) => item.group)));
+  return `
+    <div class="cabinet-permission-grid">
+      ${groups.map((group) => `
+        <section class="cabinet-permission-group">
+          <div class="cabinet-kicker">${escapeHtml(group)}</div>
+          <div class="cabinet-permission-group__items">
+            ${options
+              .filter((item) => item.group === group)
+              .map((item) => `
+                <label class="cabinet-choice-chip">
+                  <input type="checkbox" data-user-scope="${escapeAttribute(user.id)}" value="${escapeAttribute(item.id)}" ${scopes.has(item.id) ? "checked" : ""} />
+                  <span>${escapeHtml(item.label)}</span>
+                </label>
+              `).join("")}
+          </div>
+        </section>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderAdminUserDetail(user, orders = [], documentsByOrder = {}) {
+  const scopes = Array.isArray(user.scopes) ? user.scopes : [];
+  const roleOptions = getRoleOptionsForAccountType(user.account_type || "member");
+  const accountOptions = ["admin", "member"];
+  const documentsCount = orders.reduce((sum, order) => sum + (documentsByOrder[order.id] || []).length, 0);
+
+  return `
+    <article class="card card-pad cabinet-card cabinet-user-detail" data-cabinet-user-card="${escapeAttribute(user.id)}">
+      <div class="cabinet-user-editor__head">
+        <div class="cabinet-user-editor__identity">
+          <strong>${escapeHtml(user.display_name || user.slug || "Без имени")}</strong>
+          <span>${escapeHtml(user.email || user.slug || "Без email")}</span>
+        </div>
+        <div class="cabinet-chip-row">
+          <span class="account-note-chip">${escapeHtml(user.account_type === "admin" ? "Команда" : "Клиент")}</span>
+          <span class="account-note-chip">${escapeHtml(humanizeCabinetRole(user.role || user.account_type || "member"))}</span>
+          <span class="account-note-chip">${user.is_active ? "Активен" : "Выключен"}</span>
+          <span class="account-note-chip">${user.has_password ? "Пароль задан" : "Без пароля"}</span>
+        </div>
+      </div>
+
+      <div class="cabinet-user-detail__summary">
+        <article class="cabinet-mini-card">
+          <strong>Доступ</strong>
+          <span>${scopes.length ? `${scopes.length} ${pluralizeRu(scopes.length, "раздел", "раздела", "разделов")} и сценариев` : "Базовый доступ без дополнительных разделов"}</span>
+        </article>
+        <article class="cabinet-mini-card">
+          <strong>Заказы и документы</strong>
+          <span>${orders.length} ${pluralizeRu(orders.length, "заказ", "заказа", "заказов")} · ${documentsCount} ${pluralizeRu(documentsCount, "документ", "документа", "документов")}</span>
+        </article>
+        <article class="cabinet-mini-card">
+          <strong>Активность</strong>
+          <span>Создан ${escapeHtml(formatAuditTimestamp(user.created_at || "")) || "недавно"} · обновлён ${escapeHtml(formatAuditTimestamp(user.updated_at || user.created_at || ""))}</span>
+        </article>
+      </div>
+
+      <div class="cabinet-admin-tabs cabinet-admin-tabs--editor">
+        <button class="cabinet-admin-tab is-active" type="button" data-user-detail-tab="account">Аккаунт</button>
+        <button class="cabinet-admin-tab" type="button" data-user-detail-tab="access">Доступ</button>
+        <button class="cabinet-admin-tab" type="button" data-user-detail-tab="orders">Заказы и документы</button>
+        <button class="cabinet-admin-tab" type="button" data-user-detail-tab="messages">Сообщения</button>
+        <button class="cabinet-admin-tab" type="button" data-user-detail-tab="activity">Активность</button>
+      </div>
+
+      <section class="cabinet-product-editor__panel is-active" data-user-detail-panel="account">
+        <div class="cabinet-field-grid">
+          <label class="cabinet-field">
+            <span class="cabinet-field-label">Имя</span>
+            <input class="admin-input" data-user-name="${user.id}" type="text" value="${escapeAttribute(user.display_name || "")}" />
+          </label>
+          <label class="cabinet-field">
+            <span class="cabinet-field-label">Email</span>
+            <input class="admin-input" data-user-email="${user.id}" type="text" value="${escapeAttribute(user.email || "")}" />
+          </label>
+          <label class="cabinet-field">
+            <span class="cabinet-field-label">Роль</span>
+            <select class="admin-select" data-user-role="${user.id}">
+              ${roleOptions.map((role) => `<option value="${role}" ${user.role === role ? "selected" : ""}>${humanizeCabinetRole(role)}</option>`).join("")}
+            </select>
+          </label>
+          <label class="cabinet-field">
+            <span class="cabinet-field-label">Тип аккаунта</span>
+            <select class="admin-select" data-user-account-type="${user.id}">
+              ${accountOptions.map((accountType) => `<option value="${accountType}" ${user.account_type === accountType ? "selected" : ""}>${accountType === "admin" ? "Команда" : "Клиент"}</option>`).join("")}
+            </select>
+          </label>
+          <label class="cabinet-checkbox-row cabinet-checkbox-row--field">
+            <input class="admin-input" data-user-active="${user.id}" type="checkbox" ${user.is_active ? "checked" : ""} />
+            <span>Аккаунт активен</span>
+          </label>
+        </div>
+        <div class="cabinet-user-card-actions">
+          <button class="btn btn-primary" type="button" data-user-save="${user.id}">Сохранить карточку</button>
+          <button class="btn btn-secondary" type="button" data-user-password="${user.id}">Задать пароль</button>
+          <button class="btn btn-secondary" type="button" data-user-klubhack="${user.id}">Выдать Клубничный Хак</button>
+        </div>
+      </section>
+
+      <section class="cabinet-product-editor__panel" data-user-detail-panel="access" hidden>
+        <section class="cabinet-editor-section">
+          <div class="cabinet-editor-section__head">
+            <div>
+              <div class="cabinet-kicker">Права</div>
+              <h4 class="calc-card-title">Какие разделы открыты</h4>
+            </div>
+          </div>
+          <p class="cabinet-inline-hint">Вместо raw-строки доступы собираются чекбоксами по группам.</p>
+          ${renderScopeCheckboxGrid(user)}
+        </section>
+      </section>
+
+      <section class="cabinet-product-editor__panel" data-user-detail-panel="orders" hidden>
+        <section class="cabinet-editor-section">
+          <div class="cabinet-editor-section__head">
+            <div>
+              <div class="cabinet-kicker">Заказы и документы</div>
+              <h4 class="calc-card-title">Что привязано к пользователю</h4>
+            </div>
+          </div>
+          ${user.account_type === "member"
+            ? (orders.length
+              ? orders.map((order) => renderAdminOrderDocumentEditor(order, documentsByOrder[order.id] || [])).join("")
+              : `<div class="cabinet-mini-card"><strong>Заказов пока нет</strong><span>Когда пользователь соберёт первую закупку, здесь появятся заказы и документы.</span></div>`)
+            : `<div class="cabinet-mini-card"><strong>Заказы не используются</strong><span>Для команды этот таб служит только для единообразия detail-layout.</span></div>`}
+        </section>
+      </section>
+
+      <section class="cabinet-product-editor__panel" data-user-detail-panel="messages" hidden>
+        <section class="cabinet-editor-section">
+          <div class="cabinet-editor-section__head">
+            <div>
+              <div class="cabinet-kicker">Сообщения</div>
+              <h4 class="calc-card-title">Быстрый ответ в кабинет</h4>
+            </div>
+          </div>
+          <p class="cabinet-inline-hint">Используйте короткий human-readable ответ, а не системный комментарий.</p>
+          <label class="cabinet-field">
+            <span class="cabinet-field-label">Сообщение</span>
+            <textarea class="admin-textarea" data-user-message-body="${user.id}" rows="5" placeholder="Коротко опишите следующий шаг для клиента или команды"></textarea>
+          </label>
+          <div class="cabinet-user-card-actions">
+            <button class="btn btn-secondary" type="button" data-user-message-send="${user.id}">Отправить сообщение</button>
+          </div>
+        </section>
+      </section>
+
+      <section class="cabinet-product-editor__panel" data-user-detail-panel="activity" hidden>
+        <section class="cabinet-editor-section">
+          <div class="cabinet-editor-section__head">
+            <div>
+              <div class="cabinet-kicker">Активность</div>
+              <h4 class="calc-card-title">Состояние аккаунта</h4>
+            </div>
+          </div>
+          <div class="cabinet-mini-list cabinet-mini-list--tight">
+            <article class="cabinet-mini-card">
+              <strong>Slug</strong>
+              <span>${escapeHtml(user.slug || "не задан")}</span>
+            </article>
+            <article class="cabinet-mini-card">
+              <strong>Последнее обновление</strong>
+              <span>${escapeHtml(formatAuditTimestamp(user.updated_at || user.created_at || ""))}</span>
+            </article>
+            <article class="cabinet-mini-card">
+              <strong>Пароль</strong>
+              <span>${user.has_password ? "Задан и готов к входу" : "Ещё не установлен"}</span>
+            </article>
+            <article class="cabinet-mini-card">
+              <strong>Разделы</strong>
+              <span>${scopes.length ? scopes.map((scope) => humanizeCabinetScope(scope)).join(", ") : "Базовый доступ"}</span>
+            </article>
+          </div>
+        </section>
+      </section>
+    </article>
+  `;
+}
+
 function renderAdminUserEditor(user, orders = [], documentsByOrder = {}) {
   const scopes = Array.isArray(user.scopes) ? user.scopes : [];
-  const roleOptions = ["owner", "admin", "manager", "editor", "viewer", "buyer", "student"];
+  const roleOptions = getRoleOptionsForAccountType(user.account_type || "member");
   const accountOptions = ["admin", "member"];
   return `
     <article class="cabinet-user-editor" data-cabinet-user-card="${escapeAttribute(user.id)}">
@@ -3424,11 +5016,12 @@ function renderAdminUserEditor(user, orders = [], documentsByOrder = {}) {
   `;
 }
 
-function renderMemberMessageItem(item) {
+function renderMemberMessageItem(item, latestTeamMessageId = null) {
   const isStaff = String(item.sender_type || "").toLowerCase() === "staff";
+  const isLatestTeam = isStaff && latestTeamMessageId != null && String(item.id) === String(latestTeamMessageId);
   return `
-    <article class="cabinet-mini-card">
-      <strong>${escapeHtml(item.subject || (isStaff ? "Ответ команды" : "Сообщение"))}</strong>
+    <article class="cabinet-message-card${isStaff ? " cabinet-message-card--staff" : " cabinet-message-card--user"}${isLatestTeam ? " cabinet-message-card--latest" : ""}">
+      <strong>${escapeHtml(item.subject || (isStaff ? "Ответ команды" : "Ваше сообщение"))}</strong>
       <span>${escapeHtml(item.message || "")}</span>
       <div class="cabinet-inline-meta">
         <span>${escapeHtml(isStaff ? item.sender_name || "Команда" : "Вы")}</span>
@@ -3483,7 +5076,7 @@ function renderCrmOwnerItem(item) {
 }
 
 function renderCrmWorkloadItem(item) {
-  const ownerName = item.owner_name || item.display_name || item.name || item.slug || "Owner";
+  const ownerName = item.owner_name || item.display_name || item.name || item.slug || "Ответственный";
   const openCount = item.open_count ?? item.lead_count ?? item.active_count ?? item.count ?? 0;
   const overdueCount = item.overdue_count ?? item.overdue ?? item.late_count ?? 0;
   return `
@@ -3496,8 +5089,8 @@ function renderCrmWorkloadItem(item) {
 
 function renderCrmQueueItem(item) {
   const title = item.lead_name || item.name || item.title || `Лид #${item.lead_id || item.id || "—"}`;
-  const source = item.source || item.request_type || item.pipeline_name || "owner queue";
-  const owner = item.owner_name || item.owner || "без owner";
+  const source = item.source || item.request_type || item.pipeline_name || "очередь CRM";
+  const owner = item.owner_name || item.owner || "без ответственного";
   return `
     <article class="cabinet-mini-card">
       <strong>${escapeHtml(title)}</strong>
@@ -3527,8 +5120,8 @@ function renderCrmDuplicateItem(item) {
 function renderCalcPriceItem(item) {
   return `
     <article class="cabinet-mini-card">
-      <strong>${escapeHtml(item.name || `Позиция ${item.id}`)}</strong>
-      <span>ID ${escapeHtml(item.id)} · ${formatRub(item.unitPrice)}</span>
+      <strong>${escapeHtml(item.label || item.name || `Позиция ${item.id}`)}</strong>
+      <span>${escapeHtml(item.note || item.type || "драйвер расчёта")} · ${formatRub(Number(item.unitPrice || 0))}</span>
     </article>
   `;
 }
@@ -3537,21 +5130,39 @@ function renderAuditItem(item) {
   const action = humanizeAuditAction(item.action);
   const area = humanizeAuditArea(item.area);
   const targetType = humanizeAuditTarget(item.target_type);
+  const actor = item.actor_name || "Система";
+  const createdAt = item.created_at || item.createdAt || "";
+  let isoDate = "";
+  if (createdAt) {
+    try {
+      isoDate = new Date(createdAt).toISOString().slice(0, 10);
+    } catch {}
+  }
+  const segment = getAuditSegment(item);
   return `
-    <article class="cabinet-list-row cabinet-list-row--audit">
+    <article class="cabinet-list-row cabinet-list-row--audit" data-audit-row data-audit-action="${escapeAttribute(action)}" data-audit-actor="${escapeAttribute(actor)}" data-audit-area="${escapeAttribute(area)}" data-audit-date="${escapeAttribute(isoDate)}" data-audit-segment="${escapeAttribute(segment)}">
       <div class="cabinet-list-cell">
         <strong>${escapeHtml(action)} · ${escapeHtml(area)}</strong>
         <span>${escapeHtml(targetType)}${item.target_id ? ` · ${escapeHtml(item.target_id)}` : ""}</span>
       </div>
       <div class="cabinet-list-cell">
-        <strong>${escapeHtml(item.actor_name || "Система")}</strong>
+        <strong>${escapeHtml(actor)}</strong>
         <span>${escapeHtml(humanizeActorRole(item.actor_role || ""))}</span>
       </div>
       <div class="cabinet-list-cell">
-        <strong>${escapeHtml(formatAuditTimestamp(item.created_at || item.createdAt || ""))}</strong>
+        <strong>${escapeHtml(formatAuditTimestamp(createdAt))}</strong>
       </div>
     </article>
   `;
+}
+
+function getAuditSegment(item) {
+  const action = String(item?.action || "").toLowerCase();
+  const area = String(item?.area || "").toLowerCase();
+  if (action.includes("login") || action.includes("logout") || area === "auth") return "auth";
+  if (area === "crm" || String(item?.target_type || "").toLowerCase() === "lead") return "crm";
+  if (area === "users" || action.includes("password")) return "access";
+  return "content";
 }
 
 function humanizeAuditAction(value) {
@@ -3594,12 +5205,28 @@ function humanizeAuditTarget(value) {
 function humanizeActorRole(value) {
   const role = String(value || "").toLowerCase();
   if (!role) return "системная роль";
-  if (role === "owner") return "owner";
-  if (role === "admin") return "admin";
-  if (role === "manager") return "manager";
+  if (role === "owner") return "владелец";
+  if (role === "admin") return "админ";
+  if (role === "manager") return "менеджер";
+  if (role === "operator") return "оператор";
+  if (role === "editor") return "редактор";
   if (role === "student") return "участник курса";
   if (role === "buyer") return "клиент";
   return value;
+}
+
+function getRoleOptionsForAccountType(accountType) {
+  return accountType === "admin"
+    ? ["owner", "admin", "manager", "operator", "editor"]
+    : ["buyer", "student"];
+}
+
+function normalizeCabinetRoleByAccountType(role, accountType) {
+  const normalizedRole = String(role || "").trim().toLowerCase();
+  const normalizedAccountType = String(accountType || "member").trim().toLowerCase();
+  const allowed = new Set(getRoleOptionsForAccountType(normalizedAccountType));
+  if (allowed.has(normalizedRole)) return normalizedRole;
+  return normalizedAccountType === "admin" ? "manager" : "buyer";
 }
 
 function extractCrmItems(payload) {
@@ -3618,6 +5245,75 @@ function countCrmNewLeads(leads) {
   }).length;
 }
 
+function normalizeCabinetRole(role) {
+  const normalized = String(role || "").trim().toLowerCase();
+  if (["owner", "admin", "editor", "manager", "operator"].includes(normalized)) {
+    return normalized;
+  }
+  return "admin";
+}
+
+function sumCrmLeadPotential(leads) {
+  return leads.reduce((total, lead) => total + readCrmMoneyValue(lead), 0);
+}
+
+function readCrmMoneyValue(item) {
+  const candidates = [
+    item?.budget,
+    item?.expected_value,
+    item?.amount,
+    item?.price,
+    item?.value,
+    item?.sum,
+    item?.revenue,
+  ];
+  for (const candidate of candidates) {
+    const parsed = parseLooseNumber(candidate);
+    if (parsed > 0) return parsed;
+  }
+  return 0;
+}
+
+function readCrmStageCount(item) {
+  const candidates = [
+    item?.lead_count,
+    item?.count,
+    item?.items_count,
+    item?.open_count,
+    item?.total,
+  ];
+  for (const candidate of candidates) {
+    const parsed = Number(candidate);
+    if (Number.isFinite(parsed) && parsed > 0) return parsed;
+  }
+  return 0;
+}
+
+function readCrmStageValue(item) {
+  const candidates = [
+    item?.amount,
+    item?.value,
+    item?.budget,
+    item?.sum,
+    item?.revenue,
+  ];
+  for (const candidate of candidates) {
+    const parsed = parseLooseNumber(candidate);
+    if (parsed > 0) return parsed;
+  }
+  return 0;
+}
+
+function parseLooseNumber(value) {
+  if (typeof value === "number" && Number.isFinite(value)) return Math.round(value);
+  const normalized = String(value || "")
+    .replace(/\s+/g, "")
+    .replace(/[^0-9,.-]/g, "")
+    .replace(/,(?=\d{1,2}$)/, ".");
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? Math.round(parsed) : 0;
+}
+
 function readCrmHealthCount(payload) {
   if (!payload || typeof payload !== "object") return 0;
   const direct = [
@@ -3632,7 +5328,7 @@ function readCrmHealthCount(payload) {
   return Array.isArray(arrays) ? arrays.length : 0;
 }
 
-function renderRuntimeEmpty(label, message) {
+function renderRuntimeEmpty(label, message, actions = []) {
   return `
     <div class="cabinet-section-stack">
       <div class="cabinet-section-intro">
@@ -3640,6 +5336,17 @@ function renderRuntimeEmpty(label, message) {
         <h2 class="calc-card-title">${escapeHtml(label)}</h2>
         <p class="sublead">${escapeHtml(message)}</p>
       </div>
+      ${actions.length ? `
+        <article class="card card-pad cabinet-card">
+          <div class="tag">Что делать</div>
+          <h3 class="calc-card-title">Следующий шаг</h3>
+          <div class="cabinet-home-actions">
+            ${actions.map((action) => `
+              <a class="btn ${action.tone === "secondary" ? "btn-secondary" : "btn-primary"}" href="${escapeAttribute(action.href)}">${escapeHtml(action.label)}</a>
+            `).join("")}
+          </div>
+        </article>
+      ` : ""}
     </div>
   `;
 }
@@ -3649,6 +5356,18 @@ function humanizeBoolean(value) {
 }
 
 function bindAdminUsersSection() {
+  document.querySelectorAll("[data-user-account-type]").forEach((field) => {
+    syncUserRoleOptions(field.dataset.userAccountType);
+    field.addEventListener("change", () => syncUserRoleOptions(field.dataset.userAccountType));
+  });
+  document.querySelector("[data-user-search]")?.addEventListener("input", applyAdminUserFilters);
+  document.querySelectorAll("[data-user-filter]").forEach((button) => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll("[data-user-filter]").forEach((node) => node.classList.remove("is-active"));
+      button.classList.add("is-active");
+      applyAdminUserFilters();
+    });
+  });
   document.querySelector('[data-cabinet-user-create]')?.addEventListener("click", () => {
     handleAdminUserCreate();
   });
@@ -3673,15 +5392,57 @@ function bindAdminUsersSection() {
   document.querySelectorAll("[data-admin-order-save]").forEach((button) => {
     button.addEventListener("click", () => handleAdminOrderSave(button.dataset.adminOrderSave));
   });
+  document.querySelectorAll("[data-user-detail-tab]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const tabId = button.dataset.userDetailTab;
+      document.querySelectorAll("[data-user-detail-tab]").forEach((node) => {
+        node.classList.toggle("is-active", node === button);
+      });
+      document.querySelectorAll("[data-user-detail-panel]").forEach((panel) => {
+        const isActive = panel.dataset.userDetailPanel === tabId;
+        panel.classList.toggle("is-active", isActive);
+        panel.hidden = !isActive;
+      });
+    });
+  });
+  applyAdminUserFilters();
+}
+
+function applyAdminUserFilters() {
+  const needle = String(document.querySelector("[data-user-search]")?.value || "").trim().toLowerCase();
+  const activeFilter = document.querySelector("[data-user-filter].is-active")?.dataset.userFilter || "all";
+  document.querySelectorAll("[data-user-row]").forEach((row) => {
+    const haystack = String(row.getAttribute("data-user-search-index") || "");
+    const tags = String(row.getAttribute("data-user-tags") || "");
+    const matchesSearch = !needle || haystack.includes(needle);
+    const matchesFilter = activeFilter === "all" || tags.split(/\s+/).includes(activeFilter);
+    row.hidden = !(matchesSearch && matchesFilter);
+  });
+}
+
+function syncUserRoleOptions(userId) {
+  if (!userId) return;
+  const accountTypeField = document.querySelector(`[data-user-account-type="${userId}"]`);
+  const roleField = document.querySelector(`[data-user-role="${userId}"]`);
+  if (!accountTypeField || !roleField) return;
+  const accountType = String(accountTypeField.value || "member").trim().toLowerCase();
+  const options = getRoleOptionsForAccountType(accountType);
+  const currentValue = normalizeCabinetRoleByAccountType(roleField.value, accountType);
+  roleField.innerHTML = options.map((role) => `<option value="${role}" ${role === currentValue ? "selected" : ""}>${role}</option>`).join("");
+  roleField.value = currentValue;
 }
 
 function bindAdminCatalogSection() {
-  document.querySelector("[data-catalog-manager-search]")?.addEventListener("input", (event) => {
-    const needle = String(event.target?.value || "").trim().toLowerCase();
-    document.querySelectorAll("[data-catalog-manager-row]").forEach((row) => {
-      const haystack = String(row.getAttribute("data-catalog-search-index") || "");
-      row.hidden = needle ? !haystack.includes(needle) : false;
+  document.querySelector("[data-catalog-manager-search]")?.addEventListener("input", applyAdminCatalogFilters);
+  document.querySelectorAll("[data-catalog-filter]").forEach((button) => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll("[data-catalog-filter]").forEach((node) => node.classList.remove("is-active"));
+      button.classList.add("is-active");
+      applyAdminCatalogFilters();
     });
+  });
+  document.querySelector("[data-catalog-toolbar-create]")?.addEventListener("click", () => {
+    handleAdminCatalogCreateDraft();
   });
   document.querySelectorAll("[data-catalog-product-save]").forEach((button) => {
     button.addEventListener("click", () => handleAdminCatalogProductSave(button.dataset.catalogProductSave));
@@ -3696,6 +5457,38 @@ function bindAdminCatalogSection() {
   });
   document.querySelectorAll("[data-catalog-product-editor]").forEach((editor) => {
     bindCatalogMediaManager(editor);
+    bindCatalogEditorTabs(editor);
+  });
+  applyAdminCatalogFilters();
+}
+
+function applyAdminCatalogFilters() {
+  const needle = String(document.querySelector("[data-catalog-manager-search]")?.value || "").trim().toLowerCase();
+  const activeFilter = document.querySelector("[data-catalog-filter].is-active")?.dataset.catalogFilter || "all";
+  document.querySelectorAll("[data-catalog-manager-row]").forEach((row) => {
+    const haystack = String(row.getAttribute("data-catalog-search-index") || "");
+    const status = String(row.getAttribute("data-catalog-status") || "");
+    const matchesSearch = !needle || haystack.includes(needle);
+    const matchesFilter = activeFilter === "all" || status === activeFilter;
+    row.hidden = !(matchesSearch && matchesFilter);
+  });
+}
+
+function bindCatalogEditorTabs(editor) {
+  editor.querySelectorAll("[data-catalog-editor-tab]").forEach((button) => {
+    if (button.dataset.catalogTabBound) return;
+    button.dataset.catalogTabBound = "true";
+    button.addEventListener("click", () => {
+      const tabId = button.dataset.catalogEditorTab;
+      editor.querySelectorAll("[data-catalog-editor-tab]").forEach((node) => {
+        node.classList.toggle("is-active", node === button);
+      });
+      editor.querySelectorAll("[data-catalog-editor-panel]").forEach((panel) => {
+        const isActive = panel.dataset.catalogEditorPanel === tabId;
+        panel.classList.toggle("is-active", isActive);
+        panel.hidden = !isActive;
+      });
+    });
   });
 }
 
@@ -3773,6 +5566,7 @@ function bindMemberProfileSection(session) {
 }
 
 function bindMemberCartSection(session) {
+  const canOpenOrders = sessionHasSection(session, "orders");
   document.querySelectorAll("[data-member-create-order]").forEach((button) => {
     button.addEventListener("click", async () => {
       const cart = loadMemberCart();
@@ -3809,7 +5603,7 @@ function bindMemberCartSection(session) {
           line_items: lineItems,
         });
         saveMemberCart({});
-        window.location.href = cabinetSectionHref("orders", { order: created?.id || "" });
+        window.location.href = canOpenOrders ? cabinetSectionHref("orders", { order: created?.id || "" }) : cabinetSectionHref("profile");
       } catch (error) {
         button.disabled = false;
         button.textContent = originalLabel;
@@ -3862,7 +5656,13 @@ async function handleAdminUserCreate() {
   if (!displayName) return;
   const email = window.prompt("Email пользователя", "") || "";
   const accountType = (window.prompt("Тип аккаунта: admin/member", "member") || "member").trim().toLowerCase();
-  const role = (window.prompt("Роль: owner/admin/manager/editor/viewer/buyer/student", accountType === "admin" ? "manager" : "buyer") || "").trim() || "buyer";
+  const role = normalizeCabinetRoleByAccountType(
+    (window.prompt(
+      `Роль: ${getRoleOptionsForAccountType(accountType).join("/")}`,
+      accountType === "admin" ? "manager" : "buyer",
+    ) || "").trim(),
+    accountType,
+  );
   const defaultScopes = accountType === "admin" ? "admin, crm, catalog, special_pages" : "catalog, special_pages";
   const scopesRaw = window.prompt("Scopes через запятую", defaultScopes) || defaultScopes;
   const password = window.prompt("Пароль (минимум 8 символов, можно оставить пустым)", "") || "";
@@ -3896,18 +5696,24 @@ async function handleAdminUserSave(userId) {
   const accountTypeField = document.querySelector(`[data-user-account-type="${userId}"]`);
   const scopesField = document.querySelector(`[data-user-scopes="${userId}"]`);
   const activeField = document.querySelector(`[data-user-active="${userId}"]`);
-  if (!nameField || !roleField || !accountTypeField || !scopesField || !activeField) return;
+  const scopeChecks = Array.from(document.querySelectorAll(`[data-user-scope="${userId}"]:checked`));
+  if (!nameField || !roleField || !accountTypeField || !activeField) return;
 
   setCabinetUsersStatus("Сохраняем пользователя…");
+  const normalizedAccountType = String(accountTypeField.value || "member").trim().toLowerCase();
+  const normalizedRole = normalizeCabinetRoleByAccountType(roleField.value, normalizedAccountType);
+  const scopes = scopeChecks.length
+    ? scopeChecks.map((field) => field.value).filter(Boolean)
+    : parseCommaValues(scopesField?.value || "");
   const response = await fetchJson(`${apiBase()}/admin/users/${userId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       display_name: nameField.value.trim(),
       email: emailField?.value.trim() || "",
-      role: roleField.value,
-      account_type: accountTypeField.value,
-      scopes: parseCommaValues(scopesField.value),
+      role: normalizedRole,
+      account_type: normalizedAccountType,
+      scopes,
       is_active: Boolean(activeField.checked),
     }),
   });
@@ -4031,6 +5837,46 @@ async function handleAdminOrderSave(orderId) {
   }
   setCabinetUsersStatus("Заказ обновлён.");
   await rerenderCurrentSection();
+}
+
+async function handleAdminCatalogCreateDraft() {
+  const name = window.prompt("Название нового товара");
+  if (!name) return;
+  const suggestedSlug = String(name)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9а-яё]+/gi, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/ё/g, "e");
+  const slug = (window.prompt("Slug товара", suggestedSlug) || "").trim().toLowerCase();
+  if (!slug) return;
+
+  const payload = {
+    name,
+    article: "",
+    short_description: "",
+    full_description: "",
+    price: null,
+    old_price: null,
+    status: "draft",
+    stock_status: "in_stock",
+    images: [],
+    badges: [],
+    seo_title: "",
+    seo_description: "",
+    attributes: [],
+    documents: [],
+    faq: [],
+    related_products: [],
+    compatibility: [],
+  };
+
+  try {
+    await saveAdminCatalogProduct(slug, payload);
+    window.location.href = cabinetSectionHref("catalog", { product: slug });
+  } catch (error) {
+    window.alert(`Не удалось создать черновик: ${cleanupError(error.message || "runtime_error")}`);
+  }
 }
 
 async function handleAdminCatalogProductSave(slug) {
@@ -4515,6 +6361,222 @@ function getMemberProfileCompleteness(profile) {
   return fields.filter((value) => String(value || "").trim()).length;
 }
 
+function getMemberProfileMissingFields(profile) {
+  const missing = [];
+  if (!String(profile?.email || "").trim()) missing.push("email");
+  if (!String(profile?.phone || "").trim()) missing.push("телефон");
+  if (!String(profile?.delivery_address || "").trim()) missing.push("адрес доставки");
+  return missing;
+}
+
+function describeMemberSelectionState(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (normalized === "buy") {
+    return {
+      label: "Готово к покупке",
+      note: "Можно открывать позицию и двигаться дальше.",
+      tone: "ready",
+    };
+  }
+  if (normalized === "consult") {
+    return {
+      label: "Полезно рядом",
+      note: "Можно держать рядом как ориентир или дополнительную позицию.",
+      tone: "related",
+    };
+  }
+  return {
+    label: "Нужно уточнить",
+    note: "Лучше сверить состав, параметры или совместимость перед покупкой.",
+    tone: "check",
+  };
+}
+
+function humanizeMemberCatalogCategory(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (!normalized) return "Подбор";
+  const labels = {
+    ventilation: "Вентиляция",
+    accessories: "Комплектующие",
+    modules: "Модули",
+    glazing: "Остекление",
+    fittings: "Фурнитура",
+    led: "Освещение",
+    "linear-led": "Освещение",
+    "greenhouse-led": "Освещение",
+    irrigation: "Полив",
+    "irrigation-kits": "Полив",
+    drippers: "Полив",
+    "ph-ec-control": "Питание и раствор",
+    racks: "Стеллажи",
+    "rack-frames": "Стеллажи",
+    substrates: "Субстрат",
+    "substrate-slabs": "Субстрат",
+    "propagation-plugs": "Субстрат",
+    "planting-material": "Посадочный материал",
+    "frigo-plants": "Посадочный материал",
+    seeds: "Посадочный материал",
+    "seed-series": "Посадочный материал",
+    climate: "Климат-контроль",
+    "air-circulation": "Климат-контроль",
+    humidification: "Климат-контроль",
+    monitoring: "Контроль и датчики",
+    sensors: "Контроль и датчики",
+    controllers: "Автоматика",
+    catalog: "Подбор",
+  };
+  return labels[normalized] || String(value || "").replace(/[_-]+/g, " ");
+}
+
+function findLatestTeamMessage(messages) {
+  return [...(Array.isArray(messages) ? messages : [])]
+    .filter((item) => String(item.sender_type || "").toLowerCase() === "staff")
+    .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())[0] || null;
+}
+
+function describeMemberDocumentReadiness(documents = []) {
+  const items = Array.isArray(documents) ? documents : [];
+  if (!items.length) {
+    return {
+      label: "Ещё не добавлен",
+      note: "Документ появится здесь, когда команда его подготовит.",
+      tone: "missing",
+    };
+  }
+  const readyCount = items.filter((item) => ["ready", "sent"].includes(String(item.status || "").toLowerCase())).length;
+  if (readyCount === items.length) {
+    return {
+      label: "Готов",
+      note: `${readyCount} ${pluralizeRu(readyCount, "файл", "файла", "файлов")} уже можно открыть.`,
+      tone: "ready",
+    };
+  }
+  return {
+    label: "Готовится",
+    note: `${readyCount} из ${items.length} уже доступны.`,
+    tone: "progress",
+  };
+}
+
+function deriveMemberHomeState({
+  profile,
+  orders,
+  messages,
+  cartEntries,
+  savedItems,
+  catalogItems,
+  specialPages,
+  documentGroups,
+  canOpenOrders,
+  canOpenDocuments,
+}) {
+  const profileMissing = getMemberProfileMissingFields(profile);
+  const latestTeamMessage = findLatestTeamMessage(messages);
+  const latestOrder = (orders || [])[0] || null;
+  const latestOrderDocuments = latestOrder
+    ? (documentGroups.find((entry) => String(entry.order?.id) === String(latestOrder.id))?.documents || [])
+    : [];
+  const readyCatalogItem = (catalogItems || []).find((item) => String(item.cta_mode || "").toLowerCase() === "buy") || null;
+
+  if (profileMissing.length) {
+    return {
+      title: "Сначала заполните профиль",
+      description: `Не хватает: ${profileMissing.join(", ")}. Так нам будет проще быстро оформить заказ и подготовить документы.`,
+      primaryLabel: "Заполнить профиль",
+      primaryHref: cabinetSectionHref("profile"),
+      secondaryLabel: "Написать сообщение",
+      secondaryHref: cabinetSectionHref("messages"),
+      statusLabel: "Нужны данные",
+      supportLabel: "Профиль",
+      supportValue: `${3 - profileMissing.length}/3 заполнено`,
+    };
+  }
+
+  if (latestOrder && canOpenOrders && !latestOrderDocuments.length) {
+    return {
+      title: "По заказу пока нет документов",
+      description: "Заказ уже собран. Когда команда подготовит счёт или спецификацию, они появятся здесь же.",
+      primaryLabel: "Открыть заказ",
+      primaryHref: cabinetSectionHref("orders", { order: latestOrder.id }),
+      secondaryLabel: canOpenDocuments ? "Открыть документы" : "Написать сообщение",
+      secondaryHref: canOpenDocuments ? cabinetSectionHref("documents") : cabinetSectionHref("messages"),
+      statusLabel: "Заказ в работе",
+      supportLabel: "Документы",
+      supportValue: "Пока готовятся",
+    };
+  }
+
+  if (savedItems.length) {
+    return {
+      title: "У вас есть отложенные позиции",
+      description: "Вернитесь к подбору: часть товаров уже сохранена и ждёт следующего шага.",
+      primaryLabel: "Открыть корзину и сохранённое",
+      primaryHref: cabinetSectionHref("cart"),
+      secondaryLabel: "Открыть каталог",
+      secondaryHref: cabinetSectionHref("catalog"),
+      statusLabel: "Подбор продолжается",
+      supportLabel: "Сохранено",
+      supportValue: `${savedItems.length} ${pluralizeRu(savedItems.length, "позиция", "позиции", "позиций")}`,
+    };
+  }
+
+  if (cartEntries.length) {
+    return {
+      title: "Корзина уже собрана",
+      description: "Проверьте состав и переходите к заказу, когда всё готово.",
+      primaryLabel: "Открыть корзину",
+      primaryHref: cabinetSectionHref("cart"),
+      secondaryLabel: canOpenOrders ? "Открыть заказы" : "Профиль и доставка",
+      secondaryHref: canOpenOrders ? cabinetSectionHref("orders") : cabinetSectionHref("profile"),
+      statusLabel: "Можно двигаться дальше",
+      supportLabel: "В корзине",
+      supportValue: `${cartEntries.length} ${pluralizeRu(cartEntries.length, "позиция", "позиции", "позиций")}`,
+    };
+  }
+
+  if (latestTeamMessage) {
+    return {
+      title: "Есть ответ от команды",
+      description: "Последнее важное сообщение уже в кабинете. Лучше продолжить диалог в том же разделе.",
+      primaryLabel: "Открыть сообщения",
+      primaryHref: cabinetSectionHref("messages"),
+      secondaryLabel: "Открыть профиль",
+      secondaryHref: cabinetSectionHref("profile"),
+      statusLabel: "Есть обновление",
+      supportLabel: "Последний ответ",
+      supportValue: formatAuditTimestamp(latestTeamMessage.created_at || ""),
+    };
+  }
+
+  if (readyCatalogItem) {
+    return {
+      title: "Можно вернуться к подбору",
+      description: "Для вас уже есть позиции, с которых удобно продолжить подбор или покупку.",
+      primaryLabel: "Открыть каталог",
+      primaryHref: cabinetSectionHref("catalog"),
+      secondaryLabel: "Написать сообщение",
+      secondaryHref: cabinetSectionHref("messages"),
+      statusLabel: "Подбор открыт",
+      supportLabel: "Готово к покупке",
+      supportValue: readyCatalogItem.title || "Есть позиция",
+    };
+  }
+
+  return {
+    title: "Начните с ближайшего шага",
+    description: specialPages.length
+      ? "Сначала откройте материалы и консультации, затем возвращайтесь к подбору и заказу."
+      : "Кабинет уже готов для связи, профиля и следующих шагов по проекту.",
+    primaryLabel: specialPages.length ? "Открыть расчёт и консультации" : "Написать сообщение",
+    primaryHref: specialPages.length ? cabinetSectionHref("requests") : cabinetSectionHref("messages"),
+    secondaryLabel: "Открыть профиль",
+    secondaryHref: cabinetSectionHref("profile"),
+    statusLabel: "Старт",
+    supportLabel: "Доступ",
+    supportValue: "Кабинет готов",
+  };
+}
+
 function pluralizeRu(value, one, few, many) {
   const n = Math.abs(Number(value)) || 0;
   const mod10 = n % 10;
@@ -4547,7 +6609,7 @@ function collectMemberDocumentPages(items) {
 function deriveMemberProjectState({ routeAccess, scopes, catalogItems, specialPages, documentPages }) {
   const hasCatalog = routeAccess.catalog && catalogItems.length > 0;
   const hasMaterials = routeAccess.special && specialPages.length > 0;
-  const hasDocuments = documentPages.length > 0;
+  const hasDocuments = scopes.includes("documents") && documentPages.length > 0;
   const hasCourse = scopes.includes("course_access");
 
   if (hasDocuments) {

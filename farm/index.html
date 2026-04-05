@@ -22,7 +22,7 @@
       "@type": "WebPage",
       "@id": "https://klubnikaproject.ru/farm/#webpage",
       "url": "https://klubnikaproject.ru/farm/",
-      "name": "Расчёт клубничной фермы под ваш объект",
+      "name": "Уточнение расчёта под ваш объект",
       "description": "Расчёт клубничной фермы под ваш объект: стеллажи, свет, полив, субстрат, посадочный материал, состав комплекта и следующий коммерческий шаг.",
       "inLanguage": "ru-RU",
       "isPartOf": {
@@ -36,26 +36,26 @@
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "С чего начать, если у меня только идея?",
+          "name": "Можно ли идти сюда, если есть только первая цифра из калькулятора?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "С площади, формата объекта и задачи. Этого уже достаточно, чтобы собрать первую рамку решения."
+            "text": "Да. Как раз для этого страница и нужна: взять предварительный расчёт и сверить его с реальным объектом."
           }
         },
         {
           "@type": "Question",
-          "name": "Можно ли посчитать только часть системы?",
+          "name": "Что здесь меняется по сравнению с калькулятором?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Да. Но важно понимать, когда часть системы можно считать отдельно, а когда она зависит от общей конфигурации фермы."
+            "text": "Появляются реальные ограничения: помещение, проходы, вода, свет, уже принятые решения и логика запуска."
           }
         },
         {
           "@type": "Question",
-          "name": "Что я получу после расчёта?",
+          "name": "Что я получу на выходе?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Понимание состава решения, логики комплекта, порядка закупки и границ между типовыми и проектными узлами."
+            "text": "Понимание, что в расчёте можно оставить как есть, а что лучше поправить до закупки и монтажа."
           }
         },
         {
@@ -63,23 +63,7 @@
           "name": "Если ферма уже работает, мне сюда или в сопровождение?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Если нужно собрать рамку следующей очереди или комплекта, сюда. Если вопрос уже в технологии и проблемах текущего объекта, лучше идти в сопровождение."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Считается ли здесь бюджет?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Да, в логике проекта и состава решения. Финальные условия зависят от фактических вводных и состава комплекта."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Можно ли после расчёта перейти в магазин?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Да. Если часть позиций типовая, их потом можно спокойно добрать через магазин и карточки товаров."
+            "text": "Если вопрос в следующей очереди, комплекте или пересборке схемы, сюда. Если проблема уже в действующей работе фермы, лучше идти в сопровождение."
           }
         }
       ]
@@ -180,7 +164,7 @@
             <div class="farm-hero-proof__visual">
               <img
                 class="farm-hero-proof__image"
-                src="../assets/photos/optimized/greenhouse-rack.webp"
+                src="../assets/catalog/catalog-racks/greenhouse-rack-context.webp"
                 alt="Клубничная ферма"
               />
               <div class="farm-hero-proof__note">Базовая цифра уже есть. Здесь проверяем, как она меняется на реальном объекте.</div>
@@ -252,15 +236,15 @@
     <div class="container">
       <div class="section-photo-rail">
         <article class="photo-card">
-          <img src="../assets/photos/optimized/greenhouse-rack.webp" alt="Система клубничной фермы" />
+          <img src="../assets/catalog/catalog-racks/greenhouse-rack-context.webp" alt="Система клубничной фермы" />
           <div class="photo-card-caption">Хороший расчёт сразу показывает, как стеллаж, свет, полив и запуск работают как одна система, а не как набор случайных покупок.</div>
         </article>
         <article class="photo-card">
-          <img src="../assets/photos/optimized/rack-aisle.webp" alt="Проход и обслуживание фермы" />
+          <img src="../assets/catalog/catalog-racks/rack-aisle-context.webp" alt="Проход и обслуживание фермы" />
           <div class="photo-card-caption">Даже проходы, обслуживание и логистика меняют итоговую схему. Поэтому здесь проверяют не позиции по отдельности, а весь объект целиком.</div>
         </article>
         <article class="photo-card">
-          <img src="../assets/photos/optimized/berry-red.webp" alt="Результат расчёта для качества ягоды" />
+          <img src="../assets/catalog/catalog-context/berry-red-context.webp" alt="Результат расчёта для качества ягоды" />
           <div class="photo-card-caption">Когда модель собрана правильно на старте, потом проще держать под контролем и бюджет запуска, и качество ягоды на выходе.</div>
         </article>
       </div>
@@ -376,30 +360,74 @@
     </div>
   </section>
 
-    <footer class="footer-main">
+  <footer class="footer-main">
     <div class="container">
       <div class="footer-shell">
-        <div class="footer-meta">
-          <div class="footer-copy">© Klubnika Project</div>
-          <div class="footer-service-links">
-            <a href="https://klubnikaproject.ru/docs/policy">Политика</a>
-            <a href="https://klubnikaproject.ru/docs/offero">Оферта</a>
-            <a href="https://klubnikaproject.ru/docs/warrenty">Гарантия</a>
+        <div class="footer-topline">
+          <div class="footer-copy-block">
+            <span class="footer-kicker">Klubnika Project</span>
+            <div class="footer-copy">Собранная система для запуска и развития клубничной фермы</div>
+            <p>Расчёт, каталог, подбор узлов и сопровождение в одной рабочей логике, без лишней суеты и случайных решений.</p>
+            <div class="footer-badges" aria-label="Ключевые направления">
+              <span>Расчёт</span>
+              <span>Каталог</span>
+              <span>Сопровождение</span>
+              <span>Посадочный материал</span>
+            </div>
+          </div>
+          <div class="footer-top-actions">
+            <a class="btn btn-primary footer-top-cta" href="../farm/">Разобрать объект под запуск</a>
+            <a class="footer-top-link" href="../catalog/">Открыть каталог решений</a>
           </div>
         </div>
-        <div class="footer-contacts">
-          <a href="tel:+79255831669">+7 925 583-16-69</a>
-          <a href="mailto:info@klubnikaproject.ru">info@klubnikaproject.ru</a>
-          <a href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">Telegram</a>
-          <a href="https://wa.me/79891250150" target="_blank" rel="noopener noreferrer">WhatsApp</a>
-          <a href="https://www.instagram.com/ilya_patiev/" target="_blank" rel="noopener noreferrer">Instagram</a>
-          <a href="https://www.youtube.com/@Ilya_patiev" target="_blank" rel="noopener noreferrer">YouTube</a>
+
+        <div class="footer-grid">
+          <div class="footer-column">
+            <div class="footer-column-title">Маршруты</div>
+            <div class="footer-links footer-links-main">
+              <a href="../">Главная</a>
+              <a href="../farm/">Расчёт фермы</a>
+              <a href="../study/">Сопровождение</a>
+              <a href="../consultations/">Консультации</a>
+              <a href="../klubhack/">Клубничный Хак</a>
+              <a href="../seeds/">Посадочный материал</a>
+            </div>
+          </div>
+
+          <div class="footer-column">
+            <div class="footer-column-title">Инструменты и документы</div>
+            <div class="footer-links footer-service-links">
+              <a href="../calc/">Калькулятор</a>
+              <a href="../catalog/">Каталог</a>
+              <a href="https://klubnikaproject.ru/docs/policy">Политика конфиденциальности</a>
+              <a href="https://klubnikaproject.ru/docs/offero">Оферта</a>
+              <a href="https://klubnikaproject.ru/docs/warrenty">Гарантия на товары</a>
+            </div>
+          </div>
+
+          <div class="footer-column">
+            <div class="footer-column-title">Связь</div>
+            <div class="footer-links footer-contacts">
+              <a href="tel:+79255831669">+7 925 583-16-69</a>
+              <a href="mailto:info@klubnikaproject.ru">info@klubnikaproject.ru</a>
+              <a href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">Telegram</a>
+              <a href="https://wa.me/79891250150" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+              <a href="https://www.instagram.com/ilya_patiev/" target="_blank" rel="noopener noreferrer">Instagram</a>
+              <a href="https://www.youtube.com/@Ilya_patiev" target="_blank" rel="noopener noreferrer">YouTube</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-bottomline">
+          <span>© Klubnika Project, 2026</span>
+          <span>Работаем по всей России и СНГ</span>
+          <span>Свет, полив, стеллажи, посадка и запуск</span>
         </div>
       </div>
     </div>
   </footer>
 
-  <script src="../site.js?v=20260405j" defer></script>
+  <script src="../site.js?v=20260405m" defer></script>
   <script src="./farm.js"></script>
 </body>
 </html>

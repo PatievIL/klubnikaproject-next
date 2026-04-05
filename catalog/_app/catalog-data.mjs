@@ -1,4 +1,5 @@
 import { catalogLegacyOverrides } from "./catalog-legacy-overrides.mjs";
+import { catalogUfarmsOverrides } from "./catalog-ufarms-overrides.generated.mjs";
 
 const SITE_ORIGIN = "https://klubnikaproject.ru";
 const CATALOG_BASE_PATH = "/catalog/";
@@ -226,6 +227,18 @@ function normalizeCatalogCopyText(value = "") {
   return normalized.replace(/__SOLUTION_NODE__/g, "растворный узел");
 }
 
+function normalizeProductImages(product, images = []) {
+  const unique = Array.from(new Set((Array.isArray(images) ? images : []).filter(Boolean)));
+  if (!unique.length) return unique;
+
+  if (product.categoryId === "linear-led" || product.categoryId === "greenhouse-led") {
+    const productShots = unique.filter((image) => String(image).startsWith("assets/catalog/"));
+    return productShots.length ? productShots : [unique[0]];
+  }
+
+  return unique;
+}
+
 const sharedDocuments = {
   "led-passport": documentRef(
     "led-passport",
@@ -295,7 +308,7 @@ const categoriesSeed = [
     parentId: null,
     slug: "led",
     name: "LED-освещение",
-    image: "assets/photos/optimized/greenhouse-rack.webp",
+    image: "assets/catalog/catalog-racks/greenhouse-rack-context.webp",
     description: "Линейный свет, тепличные штанги и сценарии досветки для полок, рядов и сервисных зон.",
     sortOrder: 10,
     seoTitle: "LED-освещение для клубничной фермы",
@@ -306,7 +319,7 @@ const categoriesSeed = [
     parentId: "led",
     slug: "linear-led",
     name: "Линейные светильники",
-    image: "assets/catalog/50590287.webp",
+    image: "assets/catalog/catalog-led/luma-line-191-main.webp",
     description: "Линейка под ярус, стеллаж и сервисный ряд с фиксированной длиной пролёта.",
     sortOrder: 11,
     seoTitle: "Линейные светильники для ярусов и стеллажей",
@@ -317,7 +330,7 @@ const categoriesSeed = [
     parentId: "led",
     slug: "greenhouse-led",
     name: "Тепличные световые модули",
-    image: "assets/catalog/67446574.webp",
+    image: "assets/catalog/catalog-led/canopy-boost-200-main.webp",
     description: "Более мощные решения для зон досветки, тепличных рядов и комбинированных сценариев.",
     sortOrder: 12,
     seoTitle: "Тепличные световые модули",
@@ -328,7 +341,7 @@ const categoriesSeed = [
     parentId: null,
     slug: "irrigation",
     name: "Полив и дозирование",
-    image: "assets/catalog/80128135.webp",
+    image: "assets/catalog/catalog-irrigation/rivulet-dripper-22-main.webp",
     description: "Капельницы, магистрали, фитинги и готовые наборы под стеллаж и рабочий модуль.",
     sortOrder: 20,
     seoTitle: "Полив и дозирование для клубничной фермы",
@@ -339,7 +352,7 @@ const categoriesSeed = [
     parentId: "irrigation",
     slug: "drippers",
     name: "Капельницы и подача",
-    image: "assets/catalog/80128135.webp",
+    image: "assets/catalog/catalog-irrigation/rivulet-dripper-22-main.webp",
     description: "Точечная подача раствора, компенсирующие капельницы и готовые комплекты на растение.",
     sortOrder: 21,
     seoTitle: "Капельницы и подача",
@@ -350,7 +363,7 @@ const categoriesSeed = [
     parentId: "irrigation",
     slug: "fittings",
     name: "Фитинги и магистрали",
-    image: "assets/catalog/IMG_4724.webp",
+    image: "assets/catalog/catalog-context/irrigation-detail-01.webp",
     description: "Магистрали, пробойники, фильтры и расходники для сборки линии без лишних переходников.",
     sortOrder: 22,
     seoTitle: "Фитинги и магистрали полива",
@@ -361,7 +374,7 @@ const categoriesSeed = [
     parentId: "irrigation",
     slug: "irrigation-kits",
     name: "Готовые наборы полива",
-    image: "assets/catalog/IMG_6061.webp",
+    image: "assets/catalog/catalog-context/irrigation-context-01.webp",
     description: "Наборы под базовый модуль, дополнительный ряд и типовые схемы дооснащения.",
     sortOrder: 23,
     seoTitle: "Готовые наборы полива",
@@ -372,7 +385,7 @@ const categoriesSeed = [
     parentId: null,
     slug: "racks",
     name: "Стеллажные системы",
-    image: "assets/photos/optimized/rack-aisle.webp",
+    image: "assets/catalog/catalog-racks/rack-aisle-context.webp",
     description: "Каркасы, ряды, лотки и сервисные элементы для построения рабочей геометрии фермы.",
     sortOrder: 30,
     seoTitle: "Стеллажные системы для клубничной фермы",
@@ -383,7 +396,7 @@ const categoriesSeed = [
     parentId: "racks",
     slug: "rack-frames",
     name: "Каркасы и модули",
-    image: "assets/photos/optimized/rack-aisle.webp",
+    image: "assets/catalog/catalog-racks/rack-aisle-context.webp",
     description: "Базовые и расширенные каркасы под заданное число матов и рядов.",
     sortOrder: 31,
     seoTitle: "Каркасы и модули",
@@ -394,7 +407,7 @@ const categoriesSeed = [
     parentId: "racks",
     slug: "trays-gutters",
     name: "Лотки и сервисные элементы",
-    image: "assets/catalog/11811908.webp",
+    image: "assets/catalog/catalog-seeds/seed-delizzimo-main.webp",
     description: "Лотки, желоба и сервисные полки для аккуратной сборки ряда.",
     sortOrder: 32,
     seoTitle: "Лотки и сервисные элементы",
@@ -405,7 +418,7 @@ const categoriesSeed = [
     parentId: null,
     slug: "substrates",
     name: "Субстраты и старт-корневая зона",
-    image: "assets/catalog/grodan_prestige_6_ho.webp",
+    image: "assets/catalog/catalog-substrates/grodan-prestige-main.webp",
     description: "Субстратные маты, кубики и стартовые форматы под посадку и пересадку.",
     sortOrder: 40,
     seoTitle: "Субстраты для клубничной фермы",
@@ -416,7 +429,7 @@ const categoriesSeed = [
     parentId: "substrates",
     slug: "substrate-slabs",
     name: "Субстратные маты",
-    image: "assets/catalog/grodan_prestige_6_ho.webp",
+    image: "assets/catalog/catalog-substrates/grodan-prestige-main.webp",
     description: "Маты под плодоношение и рабочий ряд с контролируемым дренажом.",
     sortOrder: 41,
     seoTitle: "Субстратные маты",
@@ -427,7 +440,7 @@ const categoriesSeed = [
     parentId: "substrates",
     slug: "propagation-plugs",
     name: "Кубики и стартовые пробки",
-    image: "assets/catalog/20550842.webp",
+    image: "assets/catalog/catalog-irrigation/rack-irrigation-module-main.webp",
     description: "Стартовые форматы для рассады, пикировки и раннего этапа до пересадки в мат.",
     sortOrder: 42,
     seoTitle: "Кубики и стартовые пробки",
@@ -438,7 +451,7 @@ const categoriesSeed = [
     parentId: null,
     slug: "planting-material",
     name: "Посадочный материал",
-    image: "assets/photos/optimized/berry-red.webp",
+    image: "assets/catalog/catalog-context/berry-red-context.webp",
     description: "Frigo и семенные серии под старт, ротацию и типовые производственные сценарии.",
     sortOrder: 50,
     seoTitle: "Посадочный материал для клубничной фермы",
@@ -449,7 +462,7 @@ const categoriesSeed = [
     parentId: "planting-material",
     slug: "frigo-plants",
     name: "Frigo-рассада",
-    image: "assets/photos/optimized/berry-close.webp",
+    image: "assets/catalog/catalog-context/berry-close-context.webp",
     description: "Классы Frigo под быстрый старт цикла и выровненный запуск ряда.",
     sortOrder: 51,
     seoTitle: "Frigo-рассада",
@@ -460,7 +473,7 @@ const categoriesSeed = [
     parentId: "planting-material",
     slug: "seed-series",
     name: "Семенные серии",
-    image: "assets/photos/optimized/berry-cluster.webp",
+    image: "assets/catalog/catalog-context/berry-cluster-context.webp",
     description: "Семенные гибриды и серии под плановую загрузку фермы и стабильную фасовку.",
     sortOrder: 52,
     seoTitle: "Семенные серии клубники",
@@ -471,7 +484,7 @@ const categoriesSeed = [
     parentId: null,
     slug: "climate",
     name: "Климат и воздух",
-    image: "assets/photos/optimized/hero-process.webp",
+    image: "assets/catalog/catalog-context/hero-process-context.webp",
     description: "Вентиляция, туман, сервисные климатические решения и мягкое управление микроклиматом.",
     sortOrder: 60,
     seoTitle: "Климат и воздух для клубничной фермы",
@@ -482,7 +495,7 @@ const categoriesSeed = [
     parentId: "climate",
     slug: "air-circulation",
     name: "Циркуляция воздуха",
-    image: "assets/photos/optimized/hero-process.webp",
+    image: "assets/catalog/catalog-context/hero-process-context.webp",
     description: "Вентиляторы и циркуляционные решения под плотную посадку и равномерную среду.",
     sortOrder: 61,
     seoTitle: "Циркуляция воздуха",
@@ -493,7 +506,7 @@ const categoriesSeed = [
     parentId: "climate",
     slug: "humidification",
     name: "Увлажнение и туман",
-    image: "assets/photos/optimized/greenhouse-rack.webp",
+    image: "assets/catalog/catalog-racks/greenhouse-rack-context.webp",
     description: "Компактные станции тумана и сервисные контуры под мягкое регулирование влажности.",
     sortOrder: 62,
     seoTitle: "Увлажнение и туман",
@@ -504,7 +517,7 @@ const categoriesSeed = [
     parentId: null,
     slug: "nutrition",
     name: "Питание и сервис раствора",
-    image: "assets/catalog/IMG_4924.webp",
+    image: "assets/catalog/catalog-racks/rack-context-01.webp",
     description: "Базовые растворы, буферы, корректоры pH/EC и сервисные наборы контроля.",
     sortOrder: 70,
     seoTitle: "Питание и сервис раствора",
@@ -515,7 +528,7 @@ const categoriesSeed = [
     parentId: "nutrition",
     slug: "base-nutrition",
     name: "Базовые линии питания",
-    image: "assets/catalog/IMG_4924.webp",
+    image: "assets/catalog/catalog-racks/rack-context-01.webp",
     description: "Растворы под рост, плодоношение и плавный переход между фазами.",
     sortOrder: 71,
     seoTitle: "Базовые линии питания",
@@ -526,7 +539,7 @@ const categoriesSeed = [
     parentId: "nutrition",
     slug: "ph-ec-control",
     name: "pH / EC контроль",
-    image: "assets/catalog/18341837.webp",
+    image: "assets/catalog/catalog-irrigation/dosatron-main.webp",
     description: "Буферы, корректоры и сервисные наборы под регулярные замеры раствора.",
     sortOrder: 72,
     seoTitle: "pH и EC контроль",
@@ -537,7 +550,7 @@ const categoriesSeed = [
     parentId: null,
     slug: "monitoring",
     name: "Датчики и автоматика",
-    image: "assets/catalog/92611106.webp",
+    image: "assets/catalog/catalog-seeds/seed-rowena-main.webp",
     description: "Контроллеры, датчики среды и телеметрия для рабочего контроля фермы.",
     sortOrder: 80,
     seoTitle: "Датчики и автоматика",
@@ -548,7 +561,7 @@ const categoriesSeed = [
     parentId: "monitoring",
     slug: "controllers",
     name: "Контроллеры",
-    image: "assets/catalog/92611106.webp",
+    image: "assets/catalog/catalog-seeds/seed-rowena-main.webp",
     description: "Компактные контроллеры для сервиса климата, полива и тревог по объекту.",
     sortOrder: 81,
     seoTitle: "Контроллеры фермы",
@@ -559,7 +572,7 @@ const categoriesSeed = [
     parentId: "monitoring",
     slug: "sensors",
     name: "Датчики среды",
-    image: "assets/catalog/20880535.webp",
+    image: "assets/catalog/catalog-context/berry-reference-main.webp",
     description: "Температура, влажность, лист, дренаж и сигналы, которые видны без похода к ряду.",
     sortOrder: 82,
     seoTitle: "Датчики среды",
@@ -570,7 +583,7 @@ const categoriesSeed = [
     parentId: null,
     slug: "packaging",
     name: "Упаковка и отгрузка",
-    image: "assets/photos/optimized/berry-close.webp",
+    image: "assets/catalog/catalog-context/berry-close-context.webp",
     description: "Фасовка, этикетка и сервисные расходники для аккуратной отгрузки ягоды.",
     sortOrder: 90,
     seoTitle: "Упаковка и отгрузка",
@@ -581,7 +594,7 @@ const categoriesSeed = [
     parentId: "packaging",
     slug: "consumer-packaging",
     name: "Потребительская упаковка",
-    image: "assets/photos/optimized/berry-close.webp",
+    image: "assets/catalog/catalog-context/berry-close-context.webp",
     description: "Контейнеры, клипсы и маркировка для аккуратной выдачи и фасовки урожая.",
     sortOrder: 91,
     seoTitle: "Потребительская упаковка",
@@ -616,9 +629,7 @@ const productsSeed = [
     badges: ["recommended"],
     popularity: 96,
     images: [
-      "assets/catalog/12315466.webp",
-      "assets/photos/optimized/greenhouse-rack.webp",
-      "assets/photos/optimized/rack-aisle.webp",
+      "assets/catalog/catalog-led/luma-line-60-main.webp",
     ],
     documents: [sharedDocuments["led-passport"], sharedDocuments["mounting-checklist"]],
     attributes: [
@@ -660,9 +671,7 @@ const productsSeed = [
     badges: ["hit"],
     popularity: 93,
     images: [
-      "assets/catalog/62602669.webp",
-      "assets/catalog/50590287.webp",
-      "assets/photos/optimized/greenhouse-rack.webp",
+      "assets/catalog/catalog-led/luma-line-95-main.webp",
     ],
     documents: [sharedDocuments["led-passport"], sharedDocuments["mounting-checklist"]],
     attributes: [
@@ -704,9 +713,7 @@ const productsSeed = [
     badges: ["hit", "recommended"],
     popularity: 99,
     images: [
-      "assets/catalog/50590287.webp",
-      "assets/catalog/300wt.webp",
-      "assets/photos/optimized/rack-aisle.webp",
+      "assets/catalog/catalog-led/luma-line-191-main.webp",
     ],
     documents: [sharedDocuments["led-passport"], sharedDocuments["mounting-checklist"]],
     attributes: [
@@ -752,9 +759,7 @@ const productsSeed = [
     badges: ["new"],
     popularity: 77,
     images: [
-      "assets/catalog/57331861.webp",
-      "assets/photos/optimized/greenhouse-rack.webp",
-      "assets/photos/optimized/hero-process.webp",
+      "assets/catalog/catalog-led/canopy-boost-140-main.webp",
     ],
     documents: [sharedDocuments["led-passport"], sharedDocuments["mounting-checklist"], sharedDocuments["climate-sheet"]],
     attributes: [
@@ -795,9 +800,7 @@ const productsSeed = [
     badges: ["sale"],
     popularity: 74,
     images: [
-      "assets/catalog/67446574.webp",
-      "assets/photos/optimized/rack-aisle.webp",
-      "assets/photos/optimized/greenhouse-rack.webp",
+      "assets/catalog/catalog-led/canopy-boost-200-main.webp",
     ],
     documents: [sharedDocuments["led-passport"], sharedDocuments["climate-sheet"]],
     attributes: [
@@ -838,9 +841,9 @@ const productsSeed = [
     badges: ["hit"],
     popularity: 97,
     images: [
-      "assets/catalog/80128135.webp",
-      "assets/catalog/IMG_6061.webp",
-      "assets/catalog/IMG_4724.webp",
+      "assets/catalog/catalog-irrigation/rivulet-dripper-22-main.webp",
+      "assets/catalog/catalog-context/irrigation-context-01.webp",
+      "assets/catalog/catalog-context/irrigation-detail-01.webp",
     ],
     documents: [sharedDocuments["irrigation-passport"]],
     attributes: [
@@ -886,9 +889,9 @@ const productsSeed = [
     badges: ["recommended"],
     popularity: 83,
     images: [
-      "assets/catalog/80999720.webp",
-      "assets/catalog/IMG_6061.webp",
-      "assets/catalog/IMG_4724.webp",
+      "assets/catalog/catalog-irrigation/fittings-kit-module-main.webp",
+      "assets/catalog/catalog-context/irrigation-context-01.webp",
+      "assets/catalog/catalog-context/irrigation-detail-01.webp",
     ],
     documents: [sharedDocuments["irrigation-passport"]],
     attributes: [
@@ -929,9 +932,9 @@ const productsSeed = [
     badges: ["new"],
     popularity: 78,
     images: [
-      "assets/catalog/65274928.webp",
-      "assets/catalog/IMG_6061.webp",
-      "assets/photos/optimized/berry-red.webp",
+      "assets/catalog/catalog-irrigation/irrigation-base-rack-main.webp",
+      "assets/catalog/catalog-context/irrigation-context-01.webp",
+      "assets/catalog/catalog-context/berry-red-context.webp",
     ],
     documents: [sharedDocuments["irrigation-passport"]],
     attributes: [
@@ -969,9 +972,9 @@ const productsSeed = [
     badges: [],
     popularity: 82,
     images: [
-      "assets/catalog/11811908.webp",
-      "assets/catalog/IMG_4724.webp",
-      "assets/catalog/IMG_6063.webp",
+      "assets/catalog/catalog-seeds/seed-delizzimo-main.webp",
+      "assets/catalog/catalog-context/irrigation-detail-01.webp",
+      "assets/catalog/catalog-racks/rack-context-02.webp",
     ],
     documents: [sharedDocuments["irrigation-passport"]],
     attributes: [
@@ -1009,9 +1012,9 @@ const productsSeed = [
     badges: ["sale"],
     popularity: 79,
     images: [
-      "assets/catalog/29752526.webp",
-      "assets/catalog/IMG_4724.webp",
-      "assets/catalog/IMG_6063.webp",
+      "assets/catalog/catalog-irrigation/disc-filter-34-main.webp",
+      "assets/catalog/catalog-context/irrigation-detail-01.webp",
+      "assets/catalog/catalog-racks/rack-context-02.webp",
     ],
     documents: [sharedDocuments["irrigation-passport"]],
     attributes: [
@@ -1049,9 +1052,9 @@ const productsSeed = [
     badges: ["recommended"],
     popularity: 75,
     images: [
-      "assets/catalog/86171232.webp",
-      "assets/catalog/IMG_6063.webp",
-      "assets/catalog/IMG_4724.webp",
+      "assets/catalog/catalog-irrigation/tube-blank-line-main.webp",
+      "assets/catalog/catalog-racks/rack-context-02.webp",
+      "assets/catalog/catalog-context/irrigation-detail-01.webp",
     ],
     documents: [sharedDocuments["irrigation-passport"]],
     attributes: [
@@ -1089,9 +1092,9 @@ const productsSeed = [
     badges: [],
     popularity: 71,
     images: [
-      "assets/catalog/75043878.webp",
-      "assets/catalog/IMG_6063.webp",
-      "assets/catalog/IMG_4724.webp",
+      "assets/catalog/catalog-irrigation/punch-16-20-main.webp",
+      "assets/catalog/catalog-racks/rack-context-02.webp",
+      "assets/catalog/catalog-context/irrigation-detail-01.webp",
     ],
     documents: [sharedDocuments["irrigation-passport"]],
     attributes: [
@@ -1129,9 +1132,9 @@ const productsSeed = [
     badges: ["recommended"],
     popularity: 63,
     images: [
-      "assets/catalog/18341837.webp",
-      "assets/photos/optimized/hero-process.webp",
-      "assets/photos/optimized/rack-aisle.webp",
+      "assets/catalog/catalog-irrigation/dosatron-main.webp",
+      "assets/catalog/catalog-context/hero-process-context.webp",
+      "assets/catalog/catalog-racks/rack-aisle-context.webp",
     ],
     documents: [sharedDocuments["irrigation-passport"], sharedDocuments["nutrition-sheet"]],
     attributes: [
@@ -1169,9 +1172,9 @@ const productsSeed = [
     badges: [],
     popularity: 57,
     images: [
-      "assets/catalog/80999720.webp",
-      "assets/photos/optimized/greenhouse-rack.webp",
-      "assets/photos/optimized/hero-process.webp",
+      "assets/catalog/catalog-irrigation/fittings-kit-module-main.webp",
+      "assets/catalog/catalog-racks/greenhouse-rack-context.webp",
+      "assets/catalog/catalog-context/hero-process-context.webp",
     ],
     documents: [sharedDocuments["irrigation-passport"]],
     attributes: [
@@ -1209,9 +1212,9 @@ const productsSeed = [
     badges: ["hit"],
     popularity: 91,
     images: [
-      "assets/catalog/IMG_6061.webp",
-      "assets/catalog/IMG_4724.webp",
-      "assets/photos/optimized/greenhouse-rack.webp",
+      "assets/catalog/catalog-context/irrigation-context-01.webp",
+      "assets/catalog/catalog-context/irrigation-detail-01.webp",
+      "assets/catalog/catalog-racks/greenhouse-rack-context.webp",
     ],
     documents: [sharedDocuments["irrigation-passport"], sharedDocuments["rack-spec"]],
     attributes: [
@@ -1253,9 +1256,9 @@ const productsSeed = [
     badges: ["recommended"],
     popularity: 64,
     images: [
-      "assets/catalog/65274928.webp",
-      "assets/photos/optimized/hero-process.webp",
-      "assets/photos/optimized/greenhouse-rack.webp",
+      "assets/catalog/catalog-irrigation/irrigation-base-rack-main.webp",
+      "assets/catalog/catalog-context/hero-process-context.webp",
+      "assets/catalog/catalog-racks/greenhouse-rack-context.webp",
     ],
     documents: [sharedDocuments["irrigation-passport"], sharedDocuments["rack-spec"]],
     attributes: [
@@ -1293,9 +1296,9 @@ const productsSeed = [
     badges: ["recommended"],
     popularity: 80,
     images: [
-      "assets/catalog/IMG_6061.webp",
-      "assets/photos/optimized/rack-aisle.webp",
-      "assets/catalog/IMG_4724.webp",
+      "assets/catalog/catalog-context/irrigation-context-01.webp",
+      "assets/catalog/catalog-racks/rack-aisle-context.webp",
+      "assets/catalog/catalog-context/irrigation-detail-01.webp",
     ],
     documents: [sharedDocuments["irrigation-passport"], sharedDocuments["rack-spec"]],
     attributes: [
@@ -1334,9 +1337,9 @@ const productsSeed = [
     badges: ["recommended"],
     popularity: 85,
     images: [
-      "assets/photos/optimized/rack-aisle.webp",
-      "assets/photos/optimized/greenhouse-rack.webp",
-      "assets/catalog/11811908.webp",
+      "assets/catalog/catalog-racks/rack-aisle-context.webp",
+      "assets/catalog/catalog-racks/greenhouse-rack-context.webp",
+      "assets/catalog/catalog-seeds/seed-delizzimo-main.webp",
     ],
     documents: [sharedDocuments["rack-spec"], sharedDocuments["mounting-checklist"]],
     attributes: [
@@ -1375,9 +1378,9 @@ const productsSeed = [
     badges: ["hit"],
     popularity: 88,
     images: [
-      "assets/photos/optimized/rack-aisle.webp",
-      "assets/photos/optimized/greenhouse-rack.webp",
-      "assets/catalog/50590287.webp",
+      "assets/catalog/catalog-racks/rack-aisle-context.webp",
+      "assets/catalog/catalog-racks/greenhouse-rack-context.webp",
+      "assets/catalog/catalog-led/luma-line-191-main.webp",
     ],
     documents: [sharedDocuments["rack-spec"], sharedDocuments["mounting-checklist"]],
     attributes: [
@@ -1416,9 +1419,9 @@ const productsSeed = [
     badges: ["new"],
     popularity: 73,
     images: [
-      "assets/photos/optimized/greenhouse-rack.webp",
-      "assets/photos/optimized/rack-aisle.webp",
-      "assets/catalog/50590287.webp",
+      "assets/catalog/catalog-racks/greenhouse-rack-context.webp",
+      "assets/catalog/catalog-racks/rack-aisle-context.webp",
+      "assets/catalog/catalog-led/luma-line-191-main.webp",
     ],
     documents: [sharedDocuments["rack-spec"], sharedDocuments["mounting-checklist"]],
     attributes: [
@@ -1457,9 +1460,9 @@ const productsSeed = [
     badges: ["new"],
     popularity: 60,
     images: [
-      "assets/catalog/IMG_4924.webp",
-      "assets/catalog/IMG_6061.webp",
-      "assets/photos/optimized/rack-aisle.webp",
+      "assets/catalog/catalog-racks/rack-context-01.webp",
+      "assets/catalog/catalog-context/irrigation-context-01.webp",
+      "assets/catalog/catalog-racks/rack-aisle-context.webp",
     ],
     documents: [sharedDocuments["rack-spec"], sharedDocuments["mounting-checklist"]],
     attributes: [
@@ -1497,9 +1500,9 @@ const productsSeed = [
     badges: ["hit"],
     popularity: 84,
     images: [
-      "assets/catalog/11811908.webp",
-      "assets/photos/optimized/rack-aisle.webp",
-      "assets/catalog/IMG_4924.webp",
+      "assets/catalog/catalog-seeds/seed-delizzimo-main.webp",
+      "assets/catalog/catalog-racks/rack-aisle-context.webp",
+      "assets/catalog/catalog-racks/rack-context-01.webp",
     ],
     documents: [sharedDocuments["rack-spec"]],
     attributes: [
@@ -1537,9 +1540,9 @@ const productsSeed = [
     badges: ["recommended"],
     popularity: 69,
     images: [
-      "assets/catalog/44332731.webp",
-      "assets/photos/optimized/rack-aisle.webp",
-      "assets/catalog/11811908.webp",
+      "assets/catalog/catalog-seeds/seed-hybrid-red-main.webp",
+      "assets/catalog/catalog-racks/rack-aisle-context.webp",
+      "assets/catalog/catalog-seeds/seed-delizzimo-main.webp",
     ],
     documents: [sharedDocuments["rack-spec"]],
     attributes: [
@@ -1577,9 +1580,9 @@ const productsSeed = [
     badges: ["new"],
     popularity: 58,
     images: [
-      "assets/catalog/20880535.webp",
-      "assets/photos/optimized/rack-aisle.webp",
-      "assets/photos/optimized/hero-process.webp",
+      "assets/catalog/catalog-context/berry-reference-main.webp",
+      "assets/catalog/catalog-racks/rack-aisle-context.webp",
+      "assets/catalog/catalog-context/hero-process-context.webp",
     ],
     documents: [sharedDocuments["rack-spec"]],
     attributes: [
@@ -1617,9 +1620,9 @@ const productsSeed = [
     badges: ["hit"],
     popularity: 90,
     images: [
-      "assets/catalog/grodan_prestige_6_ho.webp",
-      "assets/photos/optimized/berry-close.webp",
-      "assets/catalog/IMG_4924.webp",
+      "assets/catalog/catalog-substrates/grodan-prestige-main.webp",
+      "assets/catalog/catalog-context/berry-close-context.webp",
+      "assets/catalog/catalog-racks/rack-context-01.webp",
     ],
     documents: [sharedDocuments["substrate-guide"]],
     attributes: [
@@ -1661,9 +1664,9 @@ const productsSeed = [
     badges: ["recommended"],
     popularity: 72,
     images: [
-      "assets/catalog/grodan_prestige_6_ho.webp",
-      "assets/photos/optimized/berry-close.webp",
-      "assets/catalog/20550842.webp",
+      "assets/catalog/catalog-substrates/grodan-prestige-main.webp",
+      "assets/catalog/catalog-context/berry-close-context.webp",
+      "assets/catalog/catalog-irrigation/rack-irrigation-module-main.webp",
     ],
     documents: [sharedDocuments["substrate-guide"]],
     attributes: [
@@ -1702,9 +1705,9 @@ const productsSeed = [
     badges: ["new"],
     popularity: 64,
     images: [
-      "assets/catalog/18341837.webp",
-      "assets/photos/optimized/berry-close.webp",
-      "assets/catalog/grodan_prestige_6_ho.webp",
+      "assets/catalog/catalog-irrigation/dosatron-main.webp",
+      "assets/catalog/catalog-context/berry-close-context.webp",
+      "assets/catalog/catalog-substrates/grodan-prestige-main.webp",
     ],
     documents: [sharedDocuments["substrate-guide"]],
     attributes: [
@@ -1743,9 +1746,9 @@ const productsSeed = [
     badges: ["recommended"],
     popularity: 67,
     images: [
-      "assets/catalog/20550842.webp",
-      "assets/photos/optimized/berry-cluster.webp",
-      "assets/catalog/IMG_4924.webp",
+      "assets/catalog/catalog-irrigation/rack-irrigation-module-main.webp",
+      "assets/catalog/catalog-context/berry-cluster-context.webp",
+      "assets/catalog/catalog-racks/rack-context-01.webp",
     ],
     documents: [sharedDocuments["substrate-guide"], sharedDocuments["planting-note"]],
     attributes: [
@@ -1783,9 +1786,9 @@ const productsSeed = [
     badges: [],
     popularity: 59,
     images: [
-      "assets/catalog/20550842.webp",
-      "assets/photos/optimized/berry-cluster.webp",
-      "assets/catalog/grodan_prestige_6_ho.webp",
+      "assets/catalog/catalog-irrigation/rack-irrigation-module-main.webp",
+      "assets/catalog/catalog-context/berry-cluster-context.webp",
+      "assets/catalog/catalog-substrates/grodan-prestige-main.webp",
     ],
     documents: [sharedDocuments["substrate-guide"], sharedDocuments["planting-note"]],
     attributes: [
@@ -1823,9 +1826,9 @@ const productsSeed = [
     badges: ["hit"],
     popularity: 87,
     images: [
-      "assets/photos/optimized/berry-red.webp",
-      "assets/photos/optimized/berry-close.webp",
-      "assets/photos/optimized/berry-cluster.webp",
+      "assets/catalog/catalog-context/berry-red-context.webp",
+      "assets/catalog/catalog-context/berry-close-context.webp",
+      "assets/catalog/catalog-context/berry-cluster-context.webp",
     ],
     documents: [sharedDocuments["planting-note"]],
     attributes: [
@@ -1870,9 +1873,9 @@ const productsSeed = [
     badges: ["new"],
     popularity: 66,
     images: [
-      "assets/photos/optimized/berry-red.webp",
-      "assets/photos/optimized/berry-cluster.webp",
-      "assets/photos/optimized/berry-close.webp",
+      "assets/catalog/catalog-context/berry-red-context.webp",
+      "assets/catalog/catalog-context/berry-cluster-context.webp",
+      "assets/catalog/catalog-context/berry-close-context.webp",
     ],
     documents: [sharedDocuments["planting-note"]],
     attributes: [
@@ -1910,9 +1913,9 @@ const productsSeed = [
     badges: ["recommended"],
     popularity: 70,
     images: [
-      "assets/photos/optimized/berry-cluster.webp",
-      "assets/photos/optimized/berry-red.webp",
-      "assets/photos/optimized/berry-close.webp",
+      "assets/catalog/catalog-context/berry-cluster-context.webp",
+      "assets/catalog/catalog-context/berry-red-context.webp",
+      "assets/catalog/catalog-context/berry-close-context.webp",
     ],
     documents: [sharedDocuments["planting-note"]],
     attributes: [
@@ -1950,9 +1953,9 @@ const productsSeed = [
     badges: ["hit"],
     popularity: 76,
     images: [
-      "assets/photos/optimized/berry-close.webp",
-      "assets/photos/optimized/berry-red.webp",
-      "assets/photos/optimized/berry-cluster.webp",
+      "assets/catalog/catalog-context/berry-close-context.webp",
+      "assets/catalog/catalog-context/berry-red-context.webp",
+      "assets/catalog/catalog-context/berry-cluster-context.webp",
     ],
     documents: [sharedDocuments["planting-note"], sharedDocuments["packaging-sheet"]],
     attributes: [
@@ -1990,9 +1993,9 @@ const productsSeed = [
     badges: ["sale"],
     popularity: 61,
     images: [
-      "assets/photos/optimized/berry-close.webp",
-      "assets/photos/optimized/berry-red.webp",
-      "assets/photos/optimized/berry-cluster.webp",
+      "assets/catalog/catalog-context/berry-close-context.webp",
+      "assets/catalog/catalog-context/berry-red-context.webp",
+      "assets/catalog/catalog-context/berry-cluster-context.webp",
     ],
     documents: [sharedDocuments["planting-note"]],
     attributes: [
@@ -2030,9 +2033,9 @@ const productsSeed = [
     badges: ["recommended"],
     popularity: 65,
     images: [
-      "assets/photos/optimized/hero-process.webp",
-      "assets/photos/optimized/greenhouse-rack.webp",
-      "assets/catalog/92611106.webp",
+      "assets/catalog/catalog-context/hero-process-context.webp",
+      "assets/catalog/catalog-racks/greenhouse-rack-context.webp",
+      "assets/catalog/catalog-seeds/seed-rowena-main.webp",
     ],
     documents: [sharedDocuments["climate-sheet"]],
     attributes: [
@@ -2070,9 +2073,9 @@ const productsSeed = [
     badges: ["new"],
     popularity: 62,
     images: [
-      "assets/photos/optimized/hero-process.webp",
-      "assets/photos/optimized/rack-aisle.webp",
-      "assets/photos/optimized/greenhouse-rack.webp",
+      "assets/catalog/catalog-context/hero-process-context.webp",
+      "assets/catalog/catalog-racks/rack-aisle-context.webp",
+      "assets/catalog/catalog-racks/greenhouse-rack-context.webp",
     ],
     documents: [sharedDocuments["climate-sheet"]],
     attributes: [
@@ -2110,9 +2113,9 @@ const productsSeed = [
     badges: ["recommended"],
     popularity: 57,
     images: [
-      "assets/photos/optimized/greenhouse-rack.webp",
-      "assets/photos/optimized/hero-process.webp",
-      "assets/photos/optimized/berry-cluster.webp",
+      "assets/catalog/catalog-racks/greenhouse-rack-context.webp",
+      "assets/catalog/catalog-context/hero-process-context.webp",
+      "assets/catalog/catalog-context/berry-cluster-context.webp",
     ],
     documents: [sharedDocuments["climate-sheet"]],
     attributes: [
@@ -2150,9 +2153,9 @@ const productsSeed = [
     badges: ["sale"],
     popularity: 51,
     images: [
-      "assets/photos/optimized/greenhouse-rack.webp",
-      "assets/photos/optimized/hero-process.webp",
-      "assets/catalog/92611106.webp",
+      "assets/catalog/catalog-racks/greenhouse-rack-context.webp",
+      "assets/catalog/catalog-context/hero-process-context.webp",
+      "assets/catalog/catalog-seeds/seed-rowena-main.webp",
     ],
     documents: [sharedDocuments["climate-sheet"], sharedDocuments["monitoring-guide"]],
     attributes: [
@@ -2190,9 +2193,9 @@ const productsSeed = [
     badges: ["recommended"],
     popularity: 68,
     images: [
-      "assets/catalog/IMG_4924.webp",
-      "assets/photos/optimized/berry-close.webp",
-      "assets/catalog/18341837.webp",
+      "assets/catalog/catalog-racks/rack-context-01.webp",
+      "assets/catalog/catalog-context/berry-close-context.webp",
+      "assets/catalog/catalog-irrigation/dosatron-main.webp",
     ],
     documents: [sharedDocuments["nutrition-sheet"]],
     attributes: [
@@ -2230,9 +2233,9 @@ const productsSeed = [
     badges: ["hit"],
     popularity: 73,
     images: [
-      "assets/catalog/IMG_4924.webp",
-      "assets/photos/optimized/berry-red.webp",
-      "assets/catalog/18341837.webp",
+      "assets/catalog/catalog-racks/rack-context-01.webp",
+      "assets/catalog/catalog-context/berry-red-context.webp",
+      "assets/catalog/catalog-irrigation/dosatron-main.webp",
     ],
     documents: [sharedDocuments["nutrition-sheet"]],
     attributes: [
@@ -2270,9 +2273,9 @@ const productsSeed = [
     badges: ["recommended"],
     popularity: 64,
     images: [
-      "assets/catalog/18341837.webp",
-      "assets/catalog/IMG_4924.webp",
-      "assets/photos/optimized/hero-process.webp",
+      "assets/catalog/catalog-irrigation/dosatron-main.webp",
+      "assets/catalog/catalog-racks/rack-context-01.webp",
+      "assets/catalog/catalog-context/hero-process-context.webp",
     ],
     documents: [sharedDocuments["nutrition-sheet"]],
     attributes: [
@@ -2310,9 +2313,9 @@ const productsSeed = [
     badges: [],
     popularity: 55,
     images: [
-      "assets/catalog/18341837.webp",
-      "assets/photos/optimized/hero-process.webp",
-      "assets/catalog/IMG_4924.webp",
+      "assets/catalog/catalog-irrigation/dosatron-main.webp",
+      "assets/catalog/catalog-context/hero-process-context.webp",
+      "assets/catalog/catalog-racks/rack-context-01.webp",
     ],
     documents: [sharedDocuments["nutrition-sheet"]],
     attributes: [
@@ -2350,9 +2353,9 @@ const productsSeed = [
     badges: ["recommended"],
     popularity: 63,
     images: [
-      "assets/catalog/92611106.webp",
-      "assets/photos/optimized/hero-process.webp",
-      "assets/catalog/20880535.webp",
+      "assets/catalog/catalog-seeds/seed-rowena-main.webp",
+      "assets/catalog/catalog-context/hero-process-context.webp",
+      "assets/catalog/catalog-context/berry-reference-main.webp",
     ],
     documents: [sharedDocuments["monitoring-guide"]],
     attributes: [
@@ -2390,9 +2393,9 @@ const productsSeed = [
     badges: ["new"],
     popularity: 54,
     images: [
-      "assets/catalog/92611106.webp",
-      "assets/catalog/20880535.webp",
-      "assets/photos/optimized/hero-process.webp",
+      "assets/catalog/catalog-seeds/seed-rowena-main.webp",
+      "assets/catalog/catalog-context/berry-reference-main.webp",
+      "assets/catalog/catalog-context/hero-process-context.webp",
     ],
     documents: [sharedDocuments["monitoring-guide"], sharedDocuments["nutrition-sheet"]],
     attributes: [
@@ -2430,9 +2433,9 @@ const productsSeed = [
     badges: ["hit"],
     popularity: 71,
     images: [
-      "assets/catalog/20880535.webp",
-      "assets/catalog/92611106.webp",
-      "assets/photos/optimized/hero-process.webp",
+      "assets/catalog/catalog-context/berry-reference-main.webp",
+      "assets/catalog/catalog-seeds/seed-rowena-main.webp",
+      "assets/catalog/catalog-context/hero-process-context.webp",
     ],
     documents: [sharedDocuments["monitoring-guide"]],
     attributes: [
@@ -2470,9 +2473,9 @@ const productsSeed = [
     badges: ["new"],
     popularity: 49,
     images: [
-      "assets/catalog/20880535.webp",
-      "assets/photos/optimized/berry-close.webp",
-      "assets/photos/optimized/hero-process.webp",
+      "assets/catalog/catalog-context/berry-reference-main.webp",
+      "assets/catalog/catalog-context/berry-close-context.webp",
+      "assets/catalog/catalog-context/hero-process-context.webp",
     ],
     documents: [sharedDocuments["monitoring-guide"]],
     attributes: [
@@ -2510,9 +2513,9 @@ const productsSeed = [
     badges: ["hit"],
     popularity: 69,
     images: [
-      "assets/photos/optimized/berry-close.webp",
-      "assets/photos/optimized/berry-red.webp",
-      "assets/photos/optimized/berry-cluster.webp",
+      "assets/catalog/catalog-context/berry-close-context.webp",
+      "assets/catalog/catalog-context/berry-red-context.webp",
+      "assets/catalog/catalog-context/berry-cluster-context.webp",
     ],
     documents: [sharedDocuments["packaging-sheet"]],
     attributes: [
@@ -2554,9 +2557,9 @@ const productsSeed = [
     badges: ["sale"],
     popularity: 45,
     images: [
-      "assets/photos/optimized/berry-red.webp",
-      "assets/photos/optimized/berry-close.webp",
-      "assets/photos/optimized/berry-cluster.webp",
+      "assets/catalog/catalog-context/berry-red-context.webp",
+      "assets/catalog/catalog-context/berry-close-context.webp",
+      "assets/catalog/catalog-context/berry-cluster-context.webp",
     ],
     documents: [sharedDocuments["packaging-sheet"]],
     attributes: [
@@ -2594,9 +2597,9 @@ const productsSeed = [
     badges: ["recommended"],
     popularity: 67,
     images: [
-      "assets/catalog/osmos-1600.jpg",
-      "assets/catalog/membrane-1600.png",
-      "assets/catalog/prefilter-1600.jpg",
+      "assets/catalog/catalog-irrigation/osmos-1600-main.jpg",
+      "assets/catalog/catalog-irrigation/membrane-1600-main.png",
+      "assets/catalog/catalog-irrigation/prefilter-set-1600-main.jpg",
     ],
     documents: [sharedDocuments["irrigation-passport"], sharedDocuments["nutrition-sheet"]],
     attributes: [
@@ -2636,9 +2639,9 @@ const productsSeed = [
     badges: [],
     popularity: 58,
     images: [
-      "assets/catalog/membrane-1600.png",
-      "assets/catalog/osmos-1600.jpg",
-      "assets/catalog/prefilter-1600.jpg",
+      "assets/catalog/catalog-irrigation/membrane-1600-main.png",
+      "assets/catalog/catalog-irrigation/osmos-1600-main.jpg",
+      "assets/catalog/catalog-irrigation/prefilter-set-1600-main.jpg",
     ],
     documents: [sharedDocuments["irrigation-passport"]],
     attributes: [
@@ -2678,9 +2681,9 @@ const productsSeed = [
     badges: ["recommended"],
     popularity: 61,
     images: [
-      "assets/catalog/prefilter-1600.jpg",
-      "assets/catalog/osmos-1600.jpg",
-      "assets/catalog/membrane-1600.png",
+      "assets/catalog/catalog-irrigation/prefilter-set-1600-main.jpg",
+      "assets/catalog/catalog-irrigation/osmos-1600-main.jpg",
+      "assets/catalog/catalog-irrigation/membrane-1600-main.png",
     ],
     documents: [sharedDocuments["irrigation-passport"]],
     attributes: [
@@ -2720,9 +2723,9 @@ const productsSeed = [
     badges: ["recommended"],
     popularity: 65,
     images: [
-      "assets/catalog/fertilizer-year-1000.jpg",
-      "assets/catalog/IMG_4924.webp",
-      "assets/catalog/18341837.webp",
+      "assets/catalog/catalog-irrigation/fertilizer-year-1000-main.jpg",
+      "assets/catalog/catalog-racks/rack-context-01.webp",
+      "assets/catalog/catalog-irrigation/dosatron-main.webp",
     ],
     documents: [sharedDocuments["nutrition-sheet"]],
     attributes: [
@@ -2762,9 +2765,9 @@ const productsSeed = [
     badges: [],
     popularity: 52,
     images: [
-      "assets/catalog/mixing-kit-scale.jpg",
-      "assets/catalog/18341837.webp",
-      "assets/photos/optimized/hero-process.webp",
+      "assets/catalog/catalog-irrigation/mixing-kit-scale-main.jpg",
+      "assets/catalog/catalog-irrigation/dosatron-main.webp",
+      "assets/catalog/catalog-context/hero-process-context.webp",
     ],
     documents: [sharedDocuments["nutrition-sheet"]],
     attributes: [
@@ -2804,9 +2807,9 @@ const productsSeed = [
     badges: ["new"],
     popularity: 60,
     images: [
-      "assets/catalog/smart-home-kit.jpg",
-      "assets/catalog/92611106.webp",
-      "assets/catalog/20880535.webp",
+      "assets/catalog/catalog-irrigation/smart-home-kit-main.jpg",
+      "assets/catalog/catalog-seeds/seed-rowena-main.webp",
+      "assets/catalog/catalog-context/berry-reference-main.webp",
     ],
     documents: [sharedDocuments["monitoring-guide"]],
     attributes: [
@@ -2846,9 +2849,9 @@ const productsSeed = [
     badges: ["recommended"],
     popularity: 63,
     images: [
-      "assets/catalog/split-system-climate.png",
-      "assets/photos/optimized/hero-process.webp",
-      "assets/photos/optimized/greenhouse-rack.webp",
+      "assets/catalog/catalog-irrigation/split-system-climate-main.png",
+      "assets/catalog/catalog-context/hero-process-context.webp",
+      "assets/catalog/catalog-racks/greenhouse-rack-context.webp",
     ],
     documents: [sharedDocuments["climate-sheet"]],
     attributes: [
@@ -2888,9 +2891,9 @@ const productsSeed = [
     badges: ["recommended"],
     popularity: 59,
     images: [
-      "assets/catalog/water-tank-kit.jpg",
-      "assets/catalog/osmos-1600.jpg",
-      "assets/catalog/prefilter-1600.jpg",
+      "assets/catalog/catalog-irrigation/water-tank-kit-main.jpg",
+      "assets/catalog/catalog-irrigation/osmos-1600-main.jpg",
+      "assets/catalog/catalog-irrigation/prefilter-set-1600-main.jpg",
     ],
     documents: [sharedDocuments["irrigation-passport"], sharedDocuments["nutrition-sheet"]],
     attributes: [
@@ -2930,9 +2933,9 @@ const productsSeed = [
     badges: [],
     popularity: 56,
     images: [
-      "assets/photos/optimized/hero-process.webp",
-      "assets/catalog/split-system-climate.png",
-      "assets/photos/optimized/greenhouse-rack.webp",
+      "assets/catalog/catalog-context/hero-process-context.webp",
+      "assets/catalog/catalog-irrigation/split-system-climate-main.png",
+      "assets/catalog/catalog-racks/greenhouse-rack-context.webp",
     ],
     documents: [sharedDocuments["climate-sheet"]],
     attributes: [
@@ -2972,9 +2975,9 @@ const productsSeed = [
     badges: [],
     popularity: 57,
     images: [
-      "assets/catalog/smart-home-kit.jpg",
-      "assets/catalog/92611106.webp",
-      "assets/photos/optimized/hero-process.webp",
+      "assets/catalog/catalog-irrigation/smart-home-kit-main.jpg",
+      "assets/catalog/catalog-seeds/seed-rowena-main.webp",
+      "assets/catalog/catalog-context/hero-process-context.webp",
     ],
     documents: [sharedDocuments["monitoring-guide"], sharedDocuments["climate-sheet"]],
     attributes: [
@@ -3007,7 +3010,7 @@ const reviewSeed = [
     media: [
       {
         type: "image",
-        url: "assets/photos/optimized/greenhouse-rack.webp",
+        url: "assets/catalog/catalog-racks/greenhouse-rack-context.webp",
         title: "Фото ряда после замены",
       },
     ],
@@ -3041,7 +3044,7 @@ const reviewSeed = [
     media: [
       {
         type: "image",
-        url: "assets/catalog/IMG_6061.webp",
+        url: "assets/catalog/catalog-context/irrigation-context-01.webp",
         title: "Узел на рабочем модуле",
       },
     ],
@@ -3075,7 +3078,7 @@ const reviewSeed = [
     media: [
       {
         type: "image",
-        url: "assets/photos/optimized/rack-aisle.webp",
+        url: "assets/catalog/catalog-racks/rack-aisle-context.webp",
         title: "Рабочий ряд",
       },
     ],
@@ -3109,7 +3112,7 @@ const reviewSeed = [
     media: [
       {
         type: "image",
-        url: "assets/photos/optimized/berry-red.webp",
+        url: "assets/catalog/catalog-context/berry-red-context.webp",
         title: "Старт партии",
       },
     ],
@@ -3129,7 +3132,7 @@ const reviewSeed = [
     media: [
       {
         type: "video",
-        url: "assets/photos/optimized/berry-close.webp",
+        url: "assets/catalog/catalog-context/berry-close-context.webp",
         title: "Короткое видео урожая",
       },
     ],
@@ -3191,7 +3194,7 @@ const reviewSeed = [
     media: [
       {
         type: "image",
-        url: "assets/photos/optimized/berry-close.webp",
+        url: "assets/catalog/catalog-context/berry-close-context.webp",
         title: "Фасовка 250 г",
       },
     ],
@@ -3241,21 +3244,32 @@ const averageRating = (productId) => {
   return Number((list.reduce((sum, review) => sum + review.rating, 0) / list.length).toFixed(1));
 };
 
+const EXCLUDED_PRODUCT_SLUGS = new Set(["frame-base-12", "berry-tray-160", "service-shelf-rail"]);
+
 const products = productsSeed.map((product) => {
   const rating = averageRating(product.id);
   const reviewCount = (reviewsByProductId.get(product.id) || []).length;
   const categorySlug = getCategoryById(product.categoryId)?.slug || "";
   const legacyOverride = catalogLegacyOverrides[product.slug] || null;
+  const ufarmsOverride = catalogUfarmsOverrides[product.slug] || null;
   const normalized = {
     ...product,
     ...(legacyOverride || {}),
+    ...(ufarmsOverride || {}),
     categorySlug,
     rating,
     reviewCount,
-    images: legacyOverride?.images?.length ? legacyOverride.images : product.images,
+    images: normalizeProductImages(
+      product,
+      ufarmsOverride?.images?.length
+        ? ufarmsOverride.images
+        : legacyOverride?.images?.length
+          ? legacyOverride.images
+          : product.images
+    ),
     price: legacyOverride?.price ?? product.price,
-    article: legacyOverride?.article || product.article,
-    name: normalizeCatalogCopyText(legacyOverride?.name || product.name),
+    article: ufarmsOverride?.article || legacyOverride?.article || product.article,
+    name: normalizeCatalogCopyText(ufarmsOverride?.name || legacyOverride?.name || product.name),
     shortDescription: normalizeCatalogCopyText(legacyOverride?.shortDescription || product.shortDescription),
     fullDescription: normalizeCatalogCopyText(legacyOverride?.fullDescription || product.fullDescription),
     attributes: (legacyOverride?.attributes?.length ? legacyOverride.attributes : product.attributes).map((attribute) => ({
@@ -3274,10 +3288,13 @@ const products = productsSeed.map((product) => {
       title: normalizeCatalogCopyText(document.title),
     })),
   };
+  if (EXCLUDED_PRODUCT_SLUGS.has(normalized.slug)) {
+    return null;
+  }
   productsById.set(normalized.id, normalized);
   productsBySlug.set(normalized.slug, normalized);
   return normalized;
-});
+}).filter(Boolean);
 
 const descendantCache = new Map();
 
@@ -3705,7 +3722,7 @@ export function buildLandingMeta() {
     description:
       "Каталог Klubnika Project помогает быстро перейти в нужную категорию, проверить наличие и собрать закупку для клубничной фермы без пустой витринной подачи.",
     canonical: `${SITE_ORIGIN}${CATALOG_BASE_PATH}`,
-    ogImage: "assets/photos/optimized/greenhouse-rack.webp",
+    ogImage: "assets/catalog/catalog-racks/greenhouse-rack-context.webp",
   };
 }
 

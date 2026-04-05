@@ -271,7 +271,7 @@ export const DEFAULT_CATALOG_ITEMS = [
   },
   {
     "slug": "catalog-product-luma-line-60",
-    "title": "Светодиодный светильник 50Вт, 60см",
+    "title": "Светодиодный светильник 50Вт, MIX, 220В, 60см, для стеллажей, М23",
     "kind": "product",
     "category": "linear-led",
     "path": "/catalog/linear-led/luma-line-60/",
@@ -281,7 +281,7 @@ export const DEFAULT_CATALOG_ITEMS = [
   },
   {
     "slug": "catalog-product-luma-line-95",
-    "title": "Светодиодный светильник 50Вт, 95см",
+    "title": "Светодиодный светильник 50Вт, MIX, 220В, 95см, для стеллажей, М23",
     "kind": "product",
     "category": "linear-led",
     "path": "/catalog/linear-led/luma-line-95/",
@@ -291,7 +291,7 @@ export const DEFAULT_CATALOG_ITEMS = [
   },
   {
     "slug": "catalog-product-luma-line-191",
-    "title": "Светодиодный светильник 100Вт, 191см",
+    "title": "Светодиодный светильник 100Вт, MIX, 220В, 191см,для стеллажей, М23",
     "kind": "product",
     "category": "linear-led",
     "path": "/catalog/linear-led/luma-line-191/",
@@ -301,7 +301,7 @@ export const DEFAULT_CATALOG_ITEMS = [
   },
   {
     "slug": "catalog-product-canopy-boost-140",
-    "title": "Светодиодный светильник 300Вт, 140см, для теплиц",
+    "title": "Светодиодный светильник 300Вт, MIX, 220В, 140см, для теплицы, М23",
     "kind": "product",
     "category": "greenhouse-led",
     "path": "/catalog/greenhouse-led/canopy-boost-140/",
@@ -311,7 +311,7 @@ export const DEFAULT_CATALOG_ITEMS = [
   },
   {
     "slug": "catalog-product-canopy-boost-200",
-    "title": "Светодиодный светильник 450Вт, 200см, для теплиц",
+    "title": "Светодиодный светильник 450Вт, MIX, 220В, 200см,для теплицы, М23",
     "kind": "product",
     "category": "greenhouse-led",
     "path": "/catalog/greenhouse-led/canopy-boost-200/",
@@ -321,7 +321,7 @@ export const DEFAULT_CATALOG_ITEMS = [
   },
   {
     "slug": "catalog-product-rivulet-dripper-22",
-    "title": "Капельница Rivulis Supertif в сборе 2,2л/ч",
+    "title": "Капельница в сборе (капельница,микротрубка,стрелка), 2,2л/ч, Rivulis Supertif",
     "kind": "product",
     "category": "drippers",
     "path": "/catalog/drippers/rivulet-dripper-22/",
@@ -361,7 +361,7 @@ export const DEFAULT_CATALOG_ITEMS = [
   },
   {
     "slug": "catalog-product-tube-blank-roll",
-    "title": "Трубка для капельной линии слепая, белая (Бухта)",
+    "title": "Трубка для капельной линии слепая, белая",
     "kind": "product",
     "category": "fittings",
     "path": "/catalog/fittings/tube-blank-roll/",
@@ -401,7 +401,7 @@ export const DEFAULT_CATALOG_ITEMS = [
   },
   {
     "slug": "catalog-product-fittings-kit-module",
-    "title": "Комплект фитингов для модульного стеллажа",
+    "title": "Комплект фитингов для модульного стеллажа №2",
     "kind": "product",
     "category": "fittings",
     "path": "/catalog/fittings/fittings-kit-module/",
@@ -440,18 +440,8 @@ export const DEFAULT_CATALOG_ITEMS = [
     "summary": "Комплект полива для дополнительного стеллажа: готовый комплект под расширение существующего модульного ряда с проверкой fit по базовой схеме."
   },
   {
-    "slug": "catalog-product-frame-base-12",
-    "title": "Каркас Base Frame 12",
-    "kind": "product",
-    "category": "rack-frames",
-    "path": "/catalog/rack-frames/frame-base-12/",
-    "cta_mode": "consult",
-    "status": "published",
-    "summary": "Базовый каркас под 12 матов и понятную рабочую геометрию для компактного модуля."
-  },
-  {
     "slug": "catalog-product-frame-plus-16",
-    "title": "Модульный стеллаж для земляники (базовый) 16 матов, 800Вт",
+    "title": "Стеллаж 210*200*230см, базовый, модульный, для земляники, 16матов, 800Вт",
     "kind": "product",
     "category": "rack-frames",
     "path": "/catalog/rack-frames/frame-plus-16/",
@@ -471,7 +461,7 @@ export const DEFAULT_CATALOG_ITEMS = [
   },
   {
     "slug": "catalog-product-rack-extra-16mats",
-    "title": "Модульный стеллаж для земляники (дополнительный) 16 матов, 800Вт",
+    "title": "Стеллаж 210*200*230см, дополнительный, модульный для земляники, 16матов, 800Вт",
     "kind": "product",
     "category": "rack-frames",
     "path": "/catalog/rack-frames/rack-extra-16mats/",
@@ -488,26 +478,6 @@ export const DEFAULT_CATALOG_ITEMS = [
     "cta_mode": "buy",
     "status": "published",
     "summary": "Лоток металлический для стеллажа 210 см: компонент стеллажного узла под понятную геометрию модуля, логику полива и формат корневой зоны."
-  },
-  {
-    "slug": "catalog-product-berry-tray-160",
-    "title": "Сервисный лоток Berry Tray 160",
-    "kind": "product",
-    "category": "trays-gutters",
-    "path": "/catalog/trays-gutters/berry-tray-160/",
-    "cta_mode": "buy",
-    "status": "published",
-    "summary": "Облегчённый лоток под сервисный ряд, локальную зону и компактные схемы."
-  },
-  {
-    "slug": "catalog-product-service-shelf-rail",
-    "title": "Сервисная полка Rail Service",
-    "kind": "product",
-    "category": "trays-gutters",
-    "path": "/catalog/trays-gutters/service-shelf-rail/",
-    "cta_mode": "buy",
-    "status": "published",
-    "summary": "Полка под обслуживание, вынос расходников и спокойную работу по ряду без лишней суеты."
   },
   {
     "slug": "catalog-product-rootslab-classic-100",

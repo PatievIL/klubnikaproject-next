@@ -264,7 +264,7 @@ function handleClick(event) {
     return;
   }
   if (action === "open-account") {
-    window.location.href = `${ctx.siteRoot}account/index.html`;
+    window.location.href = `${ctx.siteRoot}cabinet/login/`;
     return;
   }
   if (action === "open-assistant") {

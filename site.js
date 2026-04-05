@@ -206,7 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!hasFooter) {
     injectSharedFooter(root);
   } else {
-    normalizeExistingFooter();
+    normalizeExistingFooter(root);
   }
 
   normalizeSecondaryCtas();
@@ -312,65 +312,121 @@ function injectCompactShell(root) {
 function injectSharedFooter(root) {
   const footer = document.createElement("footer");
   footer.className = "footer-main";
-  footer.innerHTML = `
-    <div class="container">
-      <div class="footer-grid">
-        <div class="footer-card">
-          <h3>Klubnika Project</h3>
-          <p class="sublead">Расчёт, каталог, подбор и сопровождение для клубничной фермы без лишней суеты.</p>
-        </div>
-        <div class="footer-card">
-          <h3>Сценарии</h3>
-          <ul class="footer-links">
-            <li><a href="${root}farm/">Расчёт фермы</a></li>
-            <li><a href="${root}${withStaticIndexPath("catalog/")}">Каталог</a></li>
-            <li><a href="${root}study/">Сопровождение</a></li>
-            <li><a href="${root}klubhack/">Клубничный Хак</a></li>
-            <li><a href="${root}seeds/">Посадочный материал</a></li>
-          </ul>
-        </div>
-        <div class="footer-card">
-          <h3>Информация</h3>
-          <ul class="footer-links">
-            <li><a href="https://klubnikaproject.ru/docs/offero">Оферта</a></li>
-            <li><a href="https://klubnikaproject.ru/docs/warrenty">Гарантия на товары</a></li>
-            <li><a href="https://klubnikaproject.ru/docs/policy">Политика конфиденциальности</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-row">
-        <div>© Klubnika Project</div>
-        <div>Расчёт, каталог, подбор и сопровождение без лишней суеты</div>
-      </div>
-    </div>
-  `;
+  footer.innerHTML = buildSharedFooterMarkup(root);
 
   document.body.appendChild(footer);
 }
 
-function normalizeExistingFooter() {
+function buildSharedFooterMarkup(root) {
+  return `
+    <div class="container">
+      <div class="footer-shell">
+        <div class="footer-topline">
+          <div class="footer-copy-block">
+            <span class="footer-kicker">Klubnika Project</span>
+            <div class="footer-copy">Собранная система для запуска и развития клубничной фермы</div>
+            <p>Расчёт, каталог решений, сопровождение и обучение собраны в одной понятной системе без лишнего шума.</p>
+            <div class="footer-badges" aria-label="Ключевые направления">
+              <span>Расчёт</span>
+              <span>Каталог</span>
+              <span>Сопровождение</span>
+              <span>Посадочный материал</span>
+              <span>Обучение</span>
+            </div>
+          </div>
+          <div class="footer-top-actions">
+            <div class="footer-top-actions__copy">
+              <span class="footer-top-actions__label">Финальный переход</span>
+              <p class="footer-top-note">Если нужно быстро понять следующий шаг, начните с разбора объекта или перейдите сразу в каталог решений.</p>
+            </div>
+            <a class="btn btn-primary footer-top-cta" href="${root}farm/">Разобрать объект под запуск</a>
+            <a class="footer-top-link" href="${root}${withStaticIndexPath("catalog/")}">Открыть каталог решений</a>
+          </div>
+        </div>
+
+        <div class="footer-grid">
+          <div class="footer-column footer-column--routes">
+            <div class="footer-column-title">Маршруты</div>
+            <div class="footer-links footer-links-main">
+              <a href="${root}farm/">Расчёт фермы</a>
+              <a href="${root}${withStaticIndexPath("catalog/")}">Каталог решений</a>
+              <a href="${root}study/">Сопровождение</a>
+              <a href="${root}klubhack/">Клубничный Хак</a>
+            </div>
+          </div>
+
+          <div class="footer-column footer-column--docs">
+            <div class="footer-column-title">Документы</div>
+            <div class="footer-links footer-service-links">
+              <a href="https://klubnikaproject.ru/docs/policy">Политика конфиденциальности</a>
+              <a href="https://klubnikaproject.ru/docs/offero">Оферта</a>
+              <a href="https://klubnikaproject.ru/docs/warrenty">Гарантия</a>
+            </div>
+          </div>
+
+          <div class="footer-column footer-column--contacts">
+            <div class="footer-column-title">Связь</div>
+            <div class="footer-links footer-contacts footer-contacts-main">
+              <a data-site-contact="phone" href="tel:+79255831669">+7 925 583-16-69</a>
+              <a data-site-contact="email" href="mailto:info@klubnikaproject.ru">info@klubnikaproject.ru</a>
+            </div>
+            <div class="footer-contact-chips">
+              <a data-site-contact="telegram" href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">Telegram</a>
+              <a data-site-contact="whatsapp" href="https://wa.me/79891250150" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+              <a data-site-contact="instagram" href="https://www.instagram.com/ilya_patiev/" target="_blank" rel="noopener noreferrer">Instagram</a>
+              <a data-site-contact="youtube" href="https://www.youtube.com/@Ilya_patiev" target="_blank" rel="noopener noreferrer">YouTube</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-bottomline">
+          <span>© Klubnika Project, 2026</span>
+          <span>Россия и СНГ</span>
+          <span>Свет, полив, стеллажи, посадка и запуск</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function normalizeExistingFooter(root) {
   const footer = document.querySelector(".footer-main");
   if (!footer) return;
-
-  const primaryHeading = footer.querySelector(".footer-card h3");
-  if (primaryHeading) {
-    primaryHeading.textContent = "Klubnika Project";
-  }
-
-  const footerRowCells = footer.querySelectorAll(".footer-row > div");
-  if (footerRowCells[0]) footerRowCells[0].textContent = "© Klubnika Project";
-  if (footerRowCells[1]) footerRowCells[1].textContent = "Расчёт, каталог, подбор и сопровождение без лишней суеты";
+  footer.innerHTML = buildSharedFooterMarkup(root);
 }
 
 function applyGlobalContactLayer(config) {
+  const supportEmail = config.site.supportEmail || "info@klubnikaproject.ru";
+  const supportWhatsapp = config.site.supportWhatsapp || "https://wa.me/79891250150";
   const telegramHref = config.site.supportTelegramUrl || "https://t.me/patiev_admin";
   const telegramHandle = config.site.supportTelegram || "@patiev_admin";
+  const instagramHref = config.site.supportInstagramUrl || "https://www.instagram.com/ilya_patiev/";
+  const youtubeHref = config.site.supportYoutubeUrl || "https://www.youtube.com/@Ilya_patiev";
+
+  document.querySelectorAll('a[href^="mailto:"], a[data-site-contact="email"]').forEach((link) => {
+    link.href = `mailto:${supportEmail}`;
+    if (normalizeText(link.textContent).includes("@")) {
+      link.textContent = supportEmail;
+    }
+  });
 
   document.querySelectorAll('a[href*="t.me/patiev_admin"], a[data-site-contact="telegram"]').forEach((link) => {
     link.href = telegramHref;
     if (normalizeText(link.textContent) === "@patiev_admin") {
       link.textContent = telegramHandle;
     }
+  });
+
+  document.querySelectorAll('a[href*="wa.me/"], a[data-site-contact="whatsapp"]').forEach((link) => {
+    link.href = supportWhatsapp;
+  });
+
+  document.querySelectorAll('a[href*="instagram.com/"], a[data-site-contact="instagram"]').forEach((link) => {
+    link.href = instagramHref;
+  });
+
+  document.querySelectorAll('a[href*="youtube.com/"], a[data-site-contact="youtube"]').forEach((link) => {
+    link.href = youtubeHref;
   });
 }
 
@@ -1354,6 +1410,20 @@ const TRANSLATIONS_EN = {
   "Гарантия на товары": "Product warranty",
   "Политика конфиденциальности": "Privacy policy",
   "Клубничные фермы в контролируемой среде": "Strawberry farms in controlled environments",
+  "Нужно запустить ферму или просто понять следующий шаг?": "Need to launch a farm or just understand the next step?",
+  "Начните с расчёта, каталога или короткого разбора задачи. Без длинных форм и лишних слов.": "Start with an estimate, the catalog, or a quick task review. No long forms and no extra words.",
+  "Разбор": "Review",
+  "Посадка": "Planting",
+  "Начать с расчёта": "Start with an estimate",
+  "Перейти в каталог": "Go to catalog",
+  "Если пока не уверены, куда идти, начните с расчёта. Так быстрее понять следующий шаг.": "If you are not sure where to start, begin with the estimate. It is the fastest way to see the next step.",
+  "Куда идти": "Where to go",
+  "Полезное": "Useful",
+  "Политика": "Policy",
+  "Гарантия": "Warranty",
+  "Как связаться": "How to reach us",
+  "Россия и СНГ": "Russia and CIS",
+  "Свет, полив, стеллажи и посадка": "Lighting, irrigation, racks, and planting",
   "Расчёт, закупка и запуск клубничной фермы без лишней суеты": "Planning, sourcing, and launch for a strawberry farm without unnecessary fuss",
   "Расчёт, закупка и запуск в одной логике": "Planning, sourcing, and launch in one clear workflow",
   "Быстрый расчёт фермы, чтобы спокойно понять следующий шаг": "A quick farm estimate to calmly understand the next step",

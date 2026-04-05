@@ -27,6 +27,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   await refreshSettings();
   hydrateStaticLinks();
   bindLogout();
+  const session = await fetchSession();
+
+  if (session?.ok && session.accountType === "admin") {
+    redirectAuthenticatedAdmin();
+    return;
+  }
 
   const view = document.body.dataset.accountView || "hub";
   if (!isMembersEnabled()) {
@@ -35,7 +41,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   if (view === "login") {
-    const session = await fetchSession();
     if (session?.ok) {
       currentSessionUser = session.user;
       await refreshAccessPolicy();
@@ -46,7 +51,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  const session = await fetchSession();
   if (!session?.ok) {
     redirectToLogin();
     return;
@@ -122,7 +126,16 @@ function detectBasePath() {
 }
 
 function routePath(relativePath = "") {
-  return `${basePath}${String(relativePath).replace(/^\//, "")}`;
+  const clean = String(relativePath || "").replace(/^\/+/, "");
+  return clean ? `${basePath}${clean}` : basePath;
+}
+
+function normalizeAppPath(path = "") {
+  const raw = String(path || "").trim();
+  if (!raw) return "";
+  if (/^https?:\/\//i.test(raw)) return raw;
+  if (raw.startsWith(basePath)) return raw;
+  return routePath(raw);
 }
 
 function detectRuntimeApiBase(configuredBase) {
@@ -152,10 +165,14 @@ function hasScope(user, scope) {
 }
 
 function preferredMemberPath(user) {
-  if (memberAccessPolicy?.preferred_path) return memberAccessPolicy.preferred_path;
-  if (hasScope(user, "catalog")) return memberPath("catalogPath");
-  if (hasScope(user, "special_pages")) return memberPath("specialPath");
+  if (memberAccessPolicy?.route_access?.catalog || hasScope(user, "catalog")) return memberPath("catalogPath");
+  if (memberAccessPolicy?.route_access?.special || hasScope(user, "special_pages")) return memberPath("specialPath");
+  if (memberAccessPolicy?.preferred_path) return normalizeAppPath(memberAccessPolicy.preferred_path);
   return memberPath("hubPath");
+}
+
+function adminHubPath() {
+  return routePath("cabinet/?section=dashboard");
 }
 
 function withNext(url) {
@@ -200,8 +217,8 @@ function bindLogin() {
         const adminPayload = await adminResponse.json();
         storeSessionToken("admin", adminPayload?.session_token || "");
         storeSessionToken("member", "");
-        const nextCandidate = new URLSearchParams(window.location.search).get("next") || memberPath("hubPath");
-        const next = isAllowedNextPath(nextCandidate) ? nextCandidate : memberPath("hubPath");
+        const nextCandidate = new URLSearchParams(window.location.search).get("next");
+        const next = isAllowedAdminNextPath(nextCandidate) ? normalizeAppPath(nextCandidate) : adminHubPath();
         window.location.href = next;
         return;
       }
@@ -232,6 +249,33 @@ function bindLogin() {
 }
 
 async function fetchSession() {
+  const adminSession = await fetchAdminSession();
+  if (adminSession?.ok) return adminSession;
+  return fetchMemberSession();
+}
+
+async function fetchAdminSession() {
+  try {
+    const headers = { Accept: "application/json" };
+    const adminToken = readStoredSessionToken("admin");
+    if (adminToken) headers["X-KP-Admin-Session"] = adminToken;
+    const response = await fetch(`${apiBase()}/admin/auth/session`, {
+      headers,
+      credentials: "include",
+    });
+    if (!response.ok) return null;
+    const payload = await response.json();
+    return {
+      ok: true,
+      accountType: "admin",
+      user: payload.user || null,
+    };
+  } catch (error) {
+    return null;
+  }
+}
+
+async function fetchMemberSession() {
   try {
     const headers = { Accept: "application/json" };
     const memberToken = readStoredSessionToken("member");
@@ -241,7 +285,11 @@ async function fetchSession() {
       credentials: "include",
     });
     if (!response.ok) return null;
-    return response.json();
+    const payload = await response.json();
+    return {
+      ...payload,
+      accountType: "member",
+    };
   } catch (error) {
     return null;
   }
@@ -269,6 +317,13 @@ async function refreshAccessPolicy() {
   } catch (error) {
     memberAccessPolicy = null;
   }
+}
+
+function buildMemberAuthHeaders() {
+  const headers = { Accept: "application/json" };
+  const memberToken = readStoredSessionToken("member");
+  if (memberToken) headers["X-KP-Member-Session"] = memberToken;
+  return headers;
 }
 
 function readStoredSessionToken(accountType) {
@@ -351,7 +406,7 @@ async function renderMemberCatalog() {
   container.innerHTML = '<div class="account-empty">Загружаю каталог…</div>';
   try {
     const response = await fetch(`${apiBase()}/member/catalog/items`, {
-      headers: { Accept: "application/json" },
+      headers: buildMemberAuthHeaders(),
       credentials: "include",
     });
     if (!response.ok) {
@@ -379,7 +434,7 @@ async function renderSpecialPages() {
   container.innerHTML = '<div class="account-empty">Загружаю спецстраницы…</div>';
   try {
     const response = await fetch(`${apiBase()}/member/special-pages`, {
-      headers: { Accept: "application/json" },
+      headers: buildMemberAuthHeaders(),
       credentials: "include",
     });
     if (!response.ok) {
@@ -413,7 +468,7 @@ function renderCatalogCard(item) {
         <span>${escapeHtml(humanizeMemberItemStatus(item.status || "published"))}</span>
       </div>
       <div class="account-actions">
-        <a class="btn btn-primary" href="${escapeAttribute(item.path)}">Открыть страницу</a>
+        <a class="btn btn-primary" href="${escapeAttribute(normalizeAppPath(item.path))}">Открыть страницу</a>
       </div>
     </article>
   `;
@@ -426,7 +481,7 @@ function renderSpecialCard(item) {
       <h3 class="calc-card-title">${escapeHtml(item.title)}</h3>
       <p class="sublead">${escapeHtml(item.summary || "Без описания")}</p>
       <div class="account-actions">
-        <a class="btn btn-secondary" href="${escapeAttribute(item.path)}">Перейти</a>
+        <a class="btn btn-secondary" href="${escapeAttribute(normalizeAppPath(item.path))}">Перейти</a>
       </div>
     </article>
   `;
@@ -438,10 +493,7 @@ function bindLogout() {
       try {
         await fetch(`${apiBase()}/auth/logout`, {
           method: "POST",
-          headers: {
-            Accept: "application/json",
-            ...(readStoredSessionToken("member") ? { "X-KP-Member-Session": readStoredSessionToken("member") } : {}),
-          },
+          headers: buildMemberAuthHeaders(),
           credentials: "include",
         });
       } catch (error) {
@@ -449,14 +501,14 @@ function bindLogout() {
       }
       storeSessionToken("member", "");
       storeSessionToken("admin", "");
-      window.location.href = isMembersEnabled() ? memberPath("loginPath") : "/";
+      window.location.href = isMembersEnabled() ? memberPath("loginPath") : routePath("");
     });
   });
 }
 
 function redirectToLogin() {
   if (!isMembersEnabled()) {
-    window.location.href = "/";
+    window.location.href = routePath("");
     return;
   }
   window.location.href = withNext(memberPath("loginPath"));
@@ -465,20 +517,34 @@ function redirectToLogin() {
 function redirectAuthenticatedMember(user) {
   const nextCandidate = new URLSearchParams(window.location.search).get("next");
   if (isAllowedNextPath(nextCandidate)) {
-    window.location.href = nextCandidate;
+    window.location.href = normalizeAppPath(nextCandidate);
     return;
   }
   window.location.href = preferredMemberPath(user);
 }
 
+function redirectAuthenticatedAdmin() {
+  const nextCandidate = new URLSearchParams(window.location.search).get("next");
+  if (isAllowedAdminNextPath(nextCandidate)) {
+    window.location.href = normalizeAppPath(nextCandidate);
+    return;
+  }
+  window.location.href = adminHubPath();
+}
+
 function isAllowedNextPath(path) {
   if (!path || !path.startsWith("/")) return false;
-  const normalized = path.replace(/\/+$/, "/");
+  const normalized = normalizeAppPath(path).replace(/\/+$/, "/");
   if (normalized === memberPath("hubPath")) return true;
   if (normalized.startsWith(memberPath("catalogPath"))) return Boolean(memberAccessPolicy?.route_access?.catalog ?? hasScope(currentSessionUser, "catalog"));
   if (normalized.startsWith(memberPath("specialPath"))) return Boolean(memberAccessPolicy?.route_access?.special ?? hasScope(currentSessionUser, "special_pages"));
   if (normalized.startsWith(memberPath("loginPath"))) return true;
   return false;
+}
+
+function isAllowedAdminNextPath(path) {
+  if (!path || !path.startsWith("/")) return false;
+  return normalizeAppPath(path).startsWith(routePath("cabinet/"));
 }
 
 function renderMembersDisabled(view) {

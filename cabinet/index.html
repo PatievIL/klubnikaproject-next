@@ -11,11 +11,26 @@
     name="description"
     content="Universal cabinet shell для клиентов, студентов и команды Klubnika Project."
   />
-  <link rel="stylesheet" href="../styles.css?v=20260405g" />
+  <link rel="stylesheet" href="../styles.css?v=20260405h" />
   <link rel="stylesheet" href="../account/account.css?v=20260402b" />
-  <link rel="stylesheet" href="./cabinet.css?v=20260405e" />
+  <link rel="stylesheet" href="./cabinet.css?v=20260405r" />
   <!-- SEO:START -->
-  <meta name="robots" content="noindex, nofollow" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <link rel="canonical" href="https://klubnikaproject.ru/cabinet/" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": "https://klubnikaproject.ru/cabinet/#webpage",
+    "url": "https://klubnikaproject.ru/cabinet/",
+    "name": "Кабинет — Klubnika Project",
+    "description": "Universal cabinet shell для клиентов, студентов и команды Klubnika Project.",
+    "inLanguage": "ru-RU",
+    "isPartOf": {
+      "@id": "https://klubnikaproject.ru/#website"
+    }
+  }
+  </script>
   <!-- SEO:END -->
 </head>
 <body data-cabinet-view="shell">
@@ -30,16 +45,34 @@
             </a>
           </div>
 
-          <nav class="nav">
+          <nav class="nav cabinet-topbar-public-nav">
             <a class="nav-link" href="../">Главная</a>
             <a class="nav-link" href="../catalog/">Каталог</a>
             <a class="nav-link" href="../calc/">Калькулятор</a>
             <a class="nav-link" aria-current="page" href="./">Кабинет</a>
           </nav>
 
-          <div class="site-header-actions site-header-actions--cabinet">
+          <div class="cabinet-topbar-admin" aria-label="Панель управления кабинетом">
+            <div class="cabinet-topbar-admin__context">
+              <div class="cabinet-admin-breadcrumb" data-cabinet-admin-breadcrumb>Кабинет</div>
+              <div class="cabinet-admin-title" data-cabinet-admin-title>Рабочая зона</div>
+            </div>
+            <label class="cabinet-command-field" aria-label="Быстрый поиск по админке">
+              <span class="cabinet-command-field__icon">/</span>
+              <input type="search" value="" placeholder="Поиск по лидам, товарам и разделам" data-cabinet-admin-search />
+            </label>
+          </div>
+
+          <div class="site-header-actions site-header-actions--cabinet cabinet-topbar-public-actions">
             <div class="cabinet-header-greeting" data-cabinet-greeting>Добрый день</div>
             <a class="nav-cta" href="../consultations/#request">Разобрать задачу</a>
+          </div>
+
+          <div class="cabinet-topbar-admin-actions">
+            <a class="btn btn-primary" href="./?section=dashboard" data-cabinet-admin-primary-action>Открыть раздел</a>
+            <button class="cabinet-admin-userchip" type="button" aria-label="Меню кабинета">
+              <span class="cabinet-admin-userchip__name" data-cabinet-greeting>Добрый день</span>
+            </button>
           </div>
 
           <a class="site-mobile-quick" href="tel:+79255831669">Связь</a>
@@ -57,23 +90,36 @@
         <div class="section-frame cabinet-frame cabinet-frame--shell">
           <div class="cabinet-workbench">
             <section class="card card-pad cabinet-shell-head">
-              <div class="cabinet-shell-head__copy">
-                <div class="tag">Кабинет</div>
-                <h1 class="calc-card-title">Ваш рабочий кабинет</h1>
-                <p class="sublead">Рабочие зоны собраны по текущему доступу и сразу готовы к работе.</p>
+              <div class="cabinet-shell-head__mode">
+                <span class="cabinet-shell-pill" data-cabinet-shell-mode-label>Режим</span>
+                <strong data-cabinet-shell-meta>Проверяем сессию</strong>
               </div>
-              <div class="cabinet-shell-head__meta" data-cabinet-head-meta></div>
+
+              <div class="cabinet-shell-head__section">
+                <span class="cabinet-shell-pill cabinet-shell-pill--muted">Сейчас открыт</span>
+                <strong data-cabinet-shell-section-label>Собираем shell</strong>
+                <span data-cabinet-shell-section-note>Навигация и контент подстроятся под ваш доступ.</span>
+              </div>
+
+              <div class="cabinet-shell-head__actions">
+                <a class="btn btn-secondary btn-ghost--small" href="../catalog/" data-cabinet-shell-secondary>Открыть каталог</a>
+                <a class="btn btn-secondary btn-ghost--small" href="../consultations/#request" data-cabinet-shell-tertiary>Открыть сайт</a>
+                <a class="btn btn-primary" href="../consultations/#request" data-cabinet-shell-primary>Разобрать задачу</a>
+              </div>
             </section>
 
             <div class="cabinet-app-layout">
               <aside class="card card-pad cabinet-rail">
                 <div class="cabinet-rail__head">
-                  <div class="cabinet-nav-label" data-cabinet-nav-label>Разделы</div>
-                  <div class="cabinet-rail__meta" data-cabinet-rail-meta></div>
+                  <div class="cabinet-rail__identity">
+                    <div class="cabinet-nav-label" data-cabinet-nav-label>Разделы</div>
+                    <strong class="cabinet-rail__role" data-cabinet-rail-role>Рабочая зона</strong>
+                  </div>
                   <div class="cabinet-user" data-cabinet-user></div>
                 </div>
                 <nav class="cabinet-nav cabinet-nav--rail" id="cabinet-nav" aria-label="Разделы кабинета"></nav>
                 <div class="cabinet-rail__actions">
+                  <a class="btn btn-secondary btn-ghost--small" href="../" data-cabinet-admin-site-link>Открыть сайт</a>
                   <button class="btn btn-secondary" type="button" data-cabinet-logout>Выйти</button>
                 </div>
               </aside>
@@ -91,27 +137,53 @@
   <footer class="footer-main">
     <div class="container">
       <div class="footer-shell">
-        <div class="footer-meta">
-          <div class="footer-copy">© Klubnika Project</div>
-          <div class="footer-service-links">
-            <a href="https://klubnikaproject.ru/docs/policy">Политика</a>
-            <a href="https://klubnikaproject.ru/docs/offero">Оферта</a>
-            <a href="https://klubnikaproject.ru/docs/warrenty">Гарантия</a>
+        <div class="footer-grid">
+          <div class="footer-column">
+            <div class="footer-column-title">Куда идти</div>
+            <div class="footer-links footer-links-main">
+              <a href="../">Главная</a>
+              <a href="../farm/">Расчёт фермы</a>
+              <a href="../study/">Сопровождение</a>
+              <a href="../consultations/">Консультации</a>
+              <a href="../klubhack/">Клубничный Хак</a>
+              <a href="../seeds/">Посадочный материал</a>
+            </div>
+          </div>
+
+          <div class="footer-column">
+            <div class="footer-column-title">Полезное</div>
+            <div class="footer-links footer-service-links">
+              <a href="../calc/">Калькулятор</a>
+              <a href="../catalog/">Каталог</a>
+              <a href="https://klubnikaproject.ru/docs/policy">Политика</a>
+              <a href="https://klubnikaproject.ru/docs/offero">Оферта</a>
+              <a href="https://klubnikaproject.ru/docs/warrenty">Гарантия</a>
+            </div>
+          </div>
+
+          <div class="footer-column">
+            <div class="footer-column-title">Как связаться</div>
+            <div class="footer-links footer-contacts">
+              <a href="tel:+79255831669">+7 925 583-16-69</a>
+              <a href="mailto:info@klubnikaproject.ru">info@klubnikaproject.ru</a>
+              <a href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">Telegram</a>
+              <a href="https://wa.me/79891250150" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+              <a href="https://www.instagram.com/ilya_patiev/" target="_blank" rel="noopener noreferrer">Instagram</a>
+              <a href="https://www.youtube.com/@Ilya_patiev" target="_blank" rel="noopener noreferrer">YouTube</a>
+            </div>
           </div>
         </div>
-        <div class="footer-contacts">
-          <a href="tel:+79255831669">+7 925 583-16-69</a>
-          <a href="mailto:info@klubnikaproject.ru">info@klubnikaproject.ru</a>
-          <a href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">Telegram</a>
-          <a href="https://wa.me/79891250150" target="_blank" rel="noopener noreferrer">WhatsApp</a>
-          <a href="https://www.instagram.com/ilya_patiev/" target="_blank" rel="noopener noreferrer">Instagram</a>
-          <a href="https://www.youtube.com/@Ilya_patiev" target="_blank" rel="noopener noreferrer">YouTube</a>
+
+        <div class="footer-bottomline">
+          <span>© Klubnika Project, 2026</span>
+          <span>Россия и СНГ</span>
+          <span>Свет, полив, стеллажи и посадка</span>
         </div>
       </div>
     </div>
   </footer>
 
-  <script src="../site.js?v=20260405h" defer></script>
-  <script src="./cabinet.js?v=20260405be" type="module"></script>
+  <script src="../site.js?v=20260405m" defer></script>
+  <script src="./cabinet.js?v=20260405bq" type="module"></script>
 </body>
 </html>
