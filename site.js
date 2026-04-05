@@ -666,8 +666,7 @@ function closeUtilityPanel(tools) {
 function applyStoredUi() {
   const storedTheme = window.localStorage.getItem("kp-theme");
   const storedLang = window.localStorage.getItem("kp-lang");
-  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-  applyTheme(storedTheme || (prefersDark ? "dark" : "light"));
+  applyTheme(storedTheme || "light");
   applyLanguage(storedLang || "ru");
 }
 
@@ -1264,6 +1263,7 @@ const TRANSLATIONS_EN = {
   "Кабинет": "Account",
   "Связь": "Contact",
   "Обсудить задачу": "Discuss project",
+  "Разобрать задачу": "Discuss project",
   "Klubnika Project — расчёт, комплектация и запуск клубничных ферм": "Klubnika Project — farm planning, sourcing, and launch for strawberry farms",
   "Расчёт, комплектация и запуск клубничных ферм": "Farm planning, sourcing, and launch for strawberry farms",
   "Главная": "Home",

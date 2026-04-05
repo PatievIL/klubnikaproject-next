@@ -336,13 +336,13 @@ h3 {
 }
 
 .hero {
-  padding: 24px 0 44px;
+  padding: 20px 0 18px;
 }
 
 .hero-shell {
   position: relative;
   overflow: hidden;
-  padding: 28px;
+  padding: 13px 18px 14px;
   border-radius: var(--radius-shell);
   background:
     radial-gradient(circle at top right, rgba(255, 213, 160, 0.18), transparent 30%),
@@ -367,7 +367,7 @@ h3 {
 }
 
 .hero .topbar {
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   background: linear-gradient(180deg, rgba(14, 94, 57, 0.72), rgba(10, 79, 49, 0.58));
   border-color: rgba(255, 250, 242, 0.12);
   box-shadow: 0 14px 24px rgba(0, 11, 48, 0.1);
@@ -1392,11 +1392,11 @@ html[data-theme="dark"] .solutions-note span {
 
 @media (min-width: 981px) {
   .hero-main {
-    padding: 10px 0 18px;
+    padding: 20px 0 18px;
   }
 
   .hero-main .hero-shell {
-    padding: 18px 18px 14px;
+    padding: 13px 18px 14px;
   }
 
   .hero-main .topbar {
@@ -4082,7 +4082,7 @@ html[data-theme="dark"] .route-card-shop .route-card-outcome {
 }
 
 .compact-shell {
-  padding: 18px 0 0;
+  padding: 20px 0 0;
 }
 
 .compact-shell .container {
@@ -4096,8 +4096,8 @@ html[data-theme="dark"] .route-card-shop .route-card-outcome {
 }
 
 .compact-shell-inner {
-  padding: 18px 22px;
-  border-radius: 30px;
+  padding: 13px 22px 18px;
+  border-radius: var(--radius-shell);
   background:
     radial-gradient(circle at top left, rgba(255, 213, 160, 0.12), transparent 34%),
     linear-gradient(180deg, #015e35 0%, #004d2b 100%);
