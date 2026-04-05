@@ -149,6 +149,83 @@ function normalizeProductCopyText(value = "") {
   return replaceNodeLexicon(value);
 }
 
+function toShortListingLine(value = "") {
+  const normalized = normalizeProductCopyText(value)
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!normalized) return "";
+  const [head] = normalized.split(/(?<=[.!?])\s+/);
+  const base = (head || normalized).trim().replace(/[.!?]+$/, "");
+  if (base.length <= 96) return base;
+  const shortened = base.slice(0, 93).replace(/[,;:\s-]+$/g, "");
+  return `${shortened}…`;
+}
+
+const listingSummaryBySlug = {
+  "luma-line-60": "Для короткой полки или сервисного ряда, когда нужно просто добрать свет без пересборки всего яруса.",
+  "luma-line-95": "Хороший рабочий вариант для типового яруса: ставится спокойно и закрывает обычный пролёт без лишней сборки.",
+  "luma-line-191": "Берут на длинный стеллажный ряд, когда нужна цельная линия света и понятная логика подвеса по всей длине.",
+  "canopy-boost-140": "Подходит для зоны досветки, где уже понятна высота подвеса и нужно усилить ряд, а не гадать по мощности.",
+  "canopy-boost-200": "Для длинного тепличного ряда и серьёзной досветки, когда свет уже считается как часть рабочей схемы.",
+  "rivulet-dripper-22": "Готовая капельница под обычную рабочую схему. Удобно брать, когда нужно быстро заменить подачу без пересборки линии.",
+  "pressure-stick-20": "Аккуратно заводит раствор прямо в мат или кубик. Нужна там, где важна чистая раскладка и ровная подача.",
+  "micro-spike-assembly": "Точечная подача под растение, когда хочется разложить линию аккуратно и без хаоса из микротрубки.",
+  "tube-blank-16": "Обычная белая магистраль под врезку капельниц и фитингов. Базовая вещь, если собираете линию с нуля или чините участок.",
+  "tube-blank-roll": "Большая бухта на запуск, расширение или запас. Удобно, когда не хочется собирать линию из коротких кусков.",
+  "punch-16-20": "Простой инструмент, чтобы быстро и ровно сделать отверстие в магистрали без лишней переделки потом.",
+  "disc-filter-34": "Базовый фильтр для линии полива. Ставит воду в порядок и помогает системе работать спокойнее каждый день.",
+  dosatron: "Растворный узел для тех, кто уже дошёл до нормальной подачи питания и хочет убрать ручную импровизацию.",
+  "fittings-kit-module": "Набор нужных фитингов под один модуль, чтобы не собирать систему поштучно и не теряться в мелочах.",
+  "starter-irrigation-96": "Стартовый комплект полива на типовой модуль. Хорош, когда нужно быстро собрать базовую схему и двинуться дальше.",
+  "irrigation-base-rack": "Готовый полив под базовый стеллажный модуль. Помогает не расползаться по десяткам мелких позиций.",
+  "rack-irrigation-module": "Собранный набор полива под рабочий ряд, когда хочется взять совместимую схему, а не подбирать всё вручную.",
+  "frame-base-12": "Базовый каркас под небольшой модуль. Подходит, когда нужна понятная стартовая геометрия без лишнего масштаба.",
+  "frame-plus-16": "Каркас под 16 матов для уже серьёзного рабочего ряда. Нормальный вариант, если схема модуля уже подтверждена.",
+  "aisle-rack-kit": "Готовый модуль с проходом и повторяемой геометрией. Для тех, кто строит ряд системно, а не по месту.",
+  "rack-extra-16mats": "Дополнительный модуль, если ферма уже работает и нужно расшириться без пересборки того, что собрано правильно.",
+  "metal-gutter-210": "Рабочий лоток под мат и ряд с нормальным сбором влаги. Не декоративная деталь, а часть спокойной сервисной схемы.",
+  "berry-tray-160": "Более лёгкий лоток для сервисного ряда или компактной зоны, где не нужен тяжёлый основной формат.",
+  "service-shelf-rail": "Полка для расходников и сервисных мелочей прямо по ряду. Делает обслуживание спокойнее и чище.",
+  "rootslab-classic-100": "Понятный мат под обычный ряд плодоношения. Его берут, когда нужна предсказуемая корневая зона без экспериментов.",
+  "rootslab-prestige-65": "Компактный мат для плотной посадки и короткого ряда. Уместен там, где геометрия уже понятна и места немного.",
+  "rootslab-hydro-80": "Промежуточный формат для тех случаев, когда ряд уже не короткий, но до длинного мата ещё нет смысла доходить.",
+  "plug-cube-36": "Стартовый кубик для рассады и раннего этапа. Хорош, когда нужен аккуратный старт без перегруза по объёму.",
+  "plug-cube-77": "Более объёмная пробка под уверенный ранний рост, если маленького стартового формата уже не хватает.",
+  "frigo-a-plus": "Frigo A+ под быстрый старт ряда, когда нужен ровный запуск и не хочется растягивать начало цикла.",
+  "frigo-tray-ready": "Партия под спокойную высадку в лоток и понятный производственный старт, без лишней возни на первом шаге.",
+  "berry-start-f1": "Семенная серия для ровного старта и понятной товарной ягоды, когда нужен предсказуемый цикл без сюрпризов.",
+  "city-harvest-f1": "Подходит под стабильную фасовку и ровный результат, если важна аккуратная ягода в регулярной работе.",
+  "compact-sweet-f1": "Серия для короткого модуля и ограниченной площади, когда нужно держать схему компактной и управляемой.",
+  "airflow-clip-40": "Компактный вентилятор для модуля или локальной зоны, где воздуху просто нужно помочь двигаться ровнее.",
+  "row-fan-ec-60": "Более серьёзный вентилятор под рабочий ряд, если уже нужно выравнивать воздух не точечно, а системно.",
+  "mistline-6l": "Небольшая станция тумана для рассадной, сервиса или компактной фермы, где влажность надо подправить мягко.",
+  "fogstation-30": "Станция тумана для более рабочей зоны, когда влажность уже нужно вести как часть общей схемы объекта.",
+  "berry-feed-grow": "Базовое питание на вегетативный этап, когда задача простая: спокойно нарастить лист и не переусложнять схему.",
+  "berry-feed-fruit": "Линия питания под плодоношение и ровную товарную ягоду, когда ферма уже перешла в рабочий режим.",
+  "ph-balance-kit": "Набор для спокойного контроля pH, чтобы не угадывать вручную и не ловить перекосы по раствору.",
+  "ec-buffer-pack": "Буферы для быстрой проверки EC-метра и понятного рабочего контроля, без лишней ручной самодеятельности.",
+  "climate-brain-mini": "Компактный контроллер для небольшого объекта, когда климат и тревоги уже хочется видеть в одной точке.",
+  "fertigation-hub-pro": "Контроллер для полива и датчиков на более серьёзной схеме, где ручного управления уже мало.",
+  "sensor-pack-basic": "Стартовый комплект датчиков, чтобы наконец видеть, что происходит в среде, а не ходить по ощущениям.",
+  "sensor-leaf-temp": "Датчик, который помогает понять температуру листа и точнее читать, что реально происходит в ряду.",
+  "clamshell-250": "Контейнер под фасовку 250 г для ровной выдачи и понятной полки. Берут, когда нужна нормальная упаковка без лишних поисков.",
+  "label-roll-red": "Этикетка для быстрой маркировки партии, даты и базовой информации, чтобы упаковка выглядела собранно.",
+  "osmos-1600": "Компактный осмос под чистую воду для маточника или модуля, когда по воде уже нужен не компромисс, а база.",
+  "membrane-1600": "Сменная мембрана для осмоса 1600, чтобы система продолжала работать ровно и не теряла в качестве воды.",
+  "prefilter-set-1600": "Комплект предфильтров на замену, если хочется обслуживать осмос спокойно и без внезапных остановок.",
+  "fertilizers-year-1000": "Годовой набор удобрений под ферму на 1000 кустов. Удобно, когда хочется закрыть базовую потребность одним шагом.",
+  "mixing-kit-solution": "Набор для замеса раствора без суеты: весы, стаканчики и вёдра в одной понятной связке.",
+  "smart-home-kit-farm": "Базовый комплект автоматики, если хочется видеть ключевые процессы объекта и не держать всё в голове.",
+  "split-system-climate": "Сплит-система для мягкого контроля температуры, когда объекту уже нужна не форточка, а нормальный режим.",
+  "water-tank-kit": "Ёмкости под воду и рабочие задачи по маточнику, чтобы хранение и подача были собраны в одну систему.",
+  "ventilation-duct-kit": "Набор под вытяжку и вентиляционные каналы, когда воздух на объекте пора собирать по-взрослому.",
+  "electrical-panel-kit": "Щиток, автоматы и проводка под базовую сборку фермы, чтобы электрика не расползалась по случайным покупкам.",
+};
+
+function getListingSummary(product) {
+  return toShortListingLine(listingSummaryBySlug[product.slug] || product.shortDescription);
+}
+
 function slugToId(value) {
   return value.replace(/[^a-z0-9_-]/gi, "-");
 }
@@ -277,13 +354,12 @@ function renderProductCard(ctx, state, categorySlug, product, options = {}) {
         <a class="catalog-product-card__title" href="${resolveHref(ctx, productHref)}">${escapeHtml(
           product.name
         )}</a>
-        <p class="catalog-product-card__summary">${escapeHtml(normalizeProductCopyText(product.shortDescription))}</p>
+        <p class="catalog-product-card__summary">${escapeHtml(getListingSummary(product))}</p>
         <div class="catalog-product-card__price-row">
           <div>
             <strong>${formatPrice(product.price)}</strong>
             ${product.oldPrice ? `<span class="catalog-old-price">${formatPrice(product.oldPrice)}</span>` : ""}
           </div>
-          <button type="button" class="catalog-link-button" data-action="open-price-tiers" data-product-id="${product.id}">Цена по объёму</button>
         </div>
         <div class="catalog-product-card__actions">
           ${
@@ -293,13 +369,16 @@ function renderProductCard(ctx, state, categorySlug, product, options = {}) {
                 }">${inCart ? "Уже в корзине" : "В корзину"}</button>`
               : `<button type="button" class="catalog-primary-button" disabled>Нет в наличии</button>`
           }
-          <a class="catalog-secondary-button" href="${resolveHref(ctx, productHref)}">Карточка</a>
-          ${
-            options.showQuickView
-              ? `<button type="button" class="catalog-link-button" data-action="open-quick-view" data-product-id="${product.id}">Быстрый просмотр</button>`
-              : ""
-          }
         </div>
+        ${
+          options.showQuickView
+            ? `
+              <div class="catalog-product-card__utility">
+                <button type="button" class="catalog-link-button" data-action="open-quick-view" data-product-id="${product.id}">Быстрый просмотр</button>
+              </div>
+            `
+            : ""
+        }
       </div>
     </article>
   `;
@@ -587,12 +666,13 @@ function renderCategoryListing(ctx, state, data) {
 function renderCategoryPage(ctx, state, data) {
   return `
     <section class="catalog-page-head catalog-page-head--category">
-      ${renderBreadcrumbs(ctx, data.breadcrumbs)}
-      <div class="catalog-page-head__copy">
-        <span class="catalog-eyebrow">Раздел каталога</span>
-        <h1>${escapeHtml(data.category.name)}</h1>
-        <p>${escapeHtml(data.category.description)}</p>
-        <div class="catalog-page-head__meta">
+      ${renderBreadcrumbs(ctx, data.breadcrumbs.slice(0, -1))}
+      <div class="catalog-page-head__toolbar">
+        <div class="catalog-page-head__titleblock">
+          <h1>${escapeHtml(data.category.name)}</h1>
+          <p>${escapeHtml(data.category.description)}</p>
+        </div>
+        <div class="catalog-page-head__meta catalog-page-head__meta--toolbar">
           <span>${data.products.length} товаров</span>
           <span>Цена и наличие сразу в карточках</span>
         </div>
@@ -1006,13 +1086,7 @@ function renderProductPage(ctx, state, data) {
   const activeImage = data.product.images[activeImageIndex] || data.product.images[0];
   const stock = STOCK_META[data.product.stockStatus] || STOCK_META.out_of_stock;
   const positionMeta = inferPositionMeta(data.product);
-  const decision = buildDecisionLayer(data.product, data.category, positionMeta);
   const signals = getProductSignals(data.product, data.category);
-  const scenarioAttribute = getProductAttribute(data.product, ["scenario", "zone", "use", "coverage", "phase"]);
-  const mountAttribute = getProductAttribute(data.product, ["mount", "connection", "assembly", "service", "control"]);
-  const formatAttribute = getProductAttribute(data.product, ["format", "type", "class", "diameter", "length", "power", "plants", "volume"]);
-  const reviews = sortReviews(state.product.reviews || data.reviews || [], state.product.reviewSort || "newest");
-  const reviewStats = summarizeReviewStats(reviews);
   return `
     <section class="catalog-page-head catalog-page-head--product">
       ${renderBreadcrumbs(ctx, data.breadcrumbs)}
@@ -1088,34 +1162,6 @@ function renderProductPage(ctx, state, data) {
           </div>
         </div>
       </div>
-      <section class="catalog-product-decision" id="product-decision">
-        <div class="catalog-section-head">
-          <h2>Перед покупкой</h2>
-          <p>Когда можно брать, что сверить и где лучше остановиться на уточнении.</p>
-        </div>
-        <div class="catalog-product-decision__shell">
-          <article class="catalog-decision-card catalog-decision-card--main">
-            <div class="catalog-decision-block">
-              <h3 class="catalog-decision-card__title">Когда можно брать спокойно</h3>
-              ${renderDecisionList(decision.buyNow)}
-            </div>
-            <div class="catalog-decision-block catalog-decision-block--divider">
-              <h3 class="catalog-decision-card__title">Что лучше сверить до заказа</h3>
-              ${renderDecisionList(decision.check)}
-            </div>
-          </article>
-          <aside class="catalog-decision-card catalog-decision-card--caution">
-            <h3 class="catalog-decision-card__title">Когда лучше остановиться на уточнении</h3>
-            ${renderDecisionList(decision.caution)}
-            <div class="catalog-decision-card__compatibility">
-              <strong>Обычно смотрят рядом</strong>
-              <div class="catalog-product-brief__signals">
-                ${decision.together.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}
-              </div>
-            </div>
-          </aside>
-        </div>
-      </section>
       <section class="catalog-product-application" id="product-application">
         <div class="catalog-section-head">
           <h2>Применение и контекст</h2>
@@ -1126,107 +1172,6 @@ function renderProductPage(ctx, state, data) {
             <h3 class="catalog-support-card__title">Коротко по делу</h3>
             <div class="catalog-rich-text">${normalizeProductRichText(data.product.fullDescription)}</div>
           </article>
-          <div class="catalog-product-application__side">
-            <article class="catalog-support-card">
-              <h3 class="catalog-support-card__title">Что сверить</h3>
-              <ul class="catalog-decision-list">
-                <li>${scenarioAttribute ? `${escapeHtml(scenarioAttribute.label)}: ${escapeHtml(scenarioAttribute.value)}.` : `Обычно такой товар берут внутри раздела ${escapeHtml(data.category.name.toLowerCase())}.`}</li>
-                <li>${formatAttribute ? `${escapeHtml(formatAttribute.label)}: ${escapeHtml(formatAttribute.value)}.` : `Важно понимать формат товара и его место в общей схеме.`}</li>
-                <li>${mountAttribute ? `${escapeHtml(mountAttribute.label)}: ${escapeHtml(mountAttribute.value)}.` : `Если есть монтаж или подключение, их лучше сверить до заказа.`}</li>
-              </ul>
-            </article>
-            <article class="catalog-support-card">
-              <h3 class="catalog-support-card__title">Что открыть рядом</h3>
-              <div class="catalog-product-next-links">
-                <a class="catalog-product-next-link" href="${resolveHref(ctx, `/catalog/${data.category.slug}/`)}">
-                  <strong>${escapeHtml(data.category.name)}</strong>
-                  <span>Весь раздел с этим товаром и соседними решениями</span>
-                </a>
-                ${data.relatedProducts.slice(0, 2).map((product) => `
-                  <a class="catalog-product-next-link" href="${resolveHref(ctx, getProductCatalogPath(product))}">
-                    <strong>${escapeHtml(product.name)}</strong>
-                    <span>${escapeHtml(normalizeProductCopyText(product.shortDescription))}</span>
-                  </a>
-                `).join("")}
-              </div>
-            </article>
-          </div>
-        </div>
-      </section>
-      <section class="catalog-product-support-grid" id="product-support">
-        <div class="catalog-product-support-grid__main">
-          <article class="catalog-support-card" id="product-specs">
-            <div class="catalog-section-head">
-              <h2>Характеристики и документы</h2>
-              <p>Техданные, партии и файлы без лишней методички.</p>
-            </div>
-            <div class="catalog-support-card__stack">
-              <div class="catalog-spec-grid">
-                ${renderProductSpecGroups(data.product)}
-              </div>
-              <div class="catalog-support-card__split">
-                <article class="catalog-spec-card">
-                  <strong>Партии и цена</strong>
-                  <ul class="catalog-document-list">
-                    ${data.product.priceTiers
-                      .map(
-                        (tier) => `
-                          <li>
-                            <div>
-                              <strong>${escapeHtml(tier.label)}</strong>
-                              <span>${escapeHtml(tier.summary)}</span>
-                            </div>
-                            <span>от ${tier.minQty} · ${formatPrice(tier.price)}</span>
-                          </li>
-                        `
-                      )
-                      .join("")}
-                  </ul>
-                </article>
-                <article class="catalog-spec-card">
-                  <strong>Документы и файлы</strong>
-                  ${renderProductDocuments(ctx, data.product)}
-                </article>
-              </div>
-            </div>
-          </article>
-          <article class="catalog-support-card" id="product-faq">
-            <div class="catalog-section-head">
-              <h2>Вопросы перед заказом</h2>
-              <p>То, что чаще всего мешает спокойно принять решение.</p>
-            </div>
-            <div class="catalog-risk-grid">
-              <div class="catalog-risk-list">
-                ${renderProductFaq(data.product)}
-              </div>
-              <aside class="catalog-risk-aside">
-                <div class="catalog-risk-callout">
-                  <strong>Когда лучше уточнить до заказа</strong>
-                  <p>${positionMeta.tone === "project"
-                    ? "Когда покупка влияет не на один товар, а на связку света, полива, стеллажа или автоматики."
-                    : "Когда меняете не один товар отдельно, а сразу связку соседних элементов."}</p>
-                </div>
-                ${
-                  reviews.length
-                    ? `
-                      <div class="catalog-risk-proof">
-                        <strong>Отзывы по товару</strong>
-                        ${renderReviewDistribution(reviewStats)}
-                        <div class="catalog-review-list">
-                          ${reviews.slice(0, 2).map((review) => renderReviewCard(ctx, review)).join("")}
-                        </div>
-                      </div>
-                    `
-                    : `
-                      <div class="catalog-risk-proof">
-                        <strong>Пока без отзывов</strong>
-                        <p>Если нужен быстрый ориентир по совместимости, лучше задать короткий вопрос до оформления заказа.</p>
-                      </div>
-                    `
-                }
-              </aside>
-            </div>
-          </article>
         </div>
       </section>
       <section class="catalog-product-next-step" id="product-next-step">
@@ -1235,13 +1180,6 @@ function renderProductPage(ctx, state, data) {
           <p>Открыть раздел, сравнить соседние позиции или уйти в расчёт, если покупка уже шире одного товара.</p>
         </div>
         <div class="catalog-product-next-step__shell">
-          <article class="catalog-support-card catalog-support-card--next">
-            <span class="catalog-eyebrow">В этом же разделе</span>
-            <a class="catalog-product-next-link catalog-product-next-link--featured" href="${resolveHref(ctx, `/catalog/${data.category.slug}/`)}">
-              <strong>${escapeHtml(data.category.name)}</strong>
-              <span>${escapeHtml(data.category.description)}</span>
-            </a>
-          </article>
           <div class="catalog-grid-listing catalog-grid-listing--compact">
             ${data.relatedProducts.map((product) => renderProductCard(ctx, state, data.category.slug, product)).join("")}
           </div>
@@ -1278,16 +1216,22 @@ function renderLandingPage(ctx) {
   return `
     <section class="catalog-page-head catalog-page-head--landing">
       ${renderBreadcrumbs(ctx, data.breadcrumbs)}
-      <div class="catalog-page-head__copy">
-        <span class="catalog-eyebrow">Рабочий магазин</span>
-        <h1>Всё для клубничной фермы</h1>
-        <div class="catalog-page-head__meta">
+      <div class="catalog-page-head__toolbar">
+        <div class="catalog-page-head__titleblock">
+          <h1>Каталог для клубничной фермы</h1>
+          <p>Разделы, готовые позиции и рабочие узлы без лишнего обхода по сайту.</p>
+        </div>
+        <div class="catalog-page-head__meta catalog-page-head__meta--toolbar">
           <span>${topCategoryCount} разделов</span>
           <span>${totalProductCount} товаров</span>
         </div>
       </div>
-      <div class="catalog-category-grid" id="catalog-categories">
+    </section>
+    <section class="catalog-category-layout catalog-category-layout--landing" id="catalog-categories">
+      <div class="catalog-category-main">
+        <div class="catalog-category-grid">
         ${data.categories.map((category) => renderCategoryCard(ctx, category)).join("")}
+        </div>
       </div>
     </section>
   `;
