@@ -2782,25 +2782,34 @@ function renderCatalogImageRow(image = "") {
   const resolved = resolveCatalogMediaHref(image);
   return `
     <div class="cabinet-repeater-row cabinet-repeater-row--media" data-catalog-collection-item="images" draggable="true">
-      <div class="cabinet-media-row">
+      <div class="cabinet-media-card">
         <div class="cabinet-media-preview">
+          <div class="cabinet-media-preview__head">
+            <span class="cabinet-media-order-badge" data-catalog-image-order>01</span>
+            <div class="cabinet-media-preview__chips">
+              <span class="cabinet-media-cover-badge" data-catalog-image-cover hidden>Обложка</span>
+              <button class="btn btn-ghost btn-ghost--small" type="button" data-catalog-image-action="drag">Потянуть</button>
+            </div>
+          </div>
           ${resolved ? `<img src="${escapeAttribute(resolved)}" alt="" loading="lazy" data-catalog-image-preview />` : `<div class="cabinet-media-preview__empty" data-catalog-image-preview-empty>Нет превью</div>`}
         </div>
         <div class="cabinet-media-main">
+          <div class="cabinet-media-copy">
+            <strong data-catalog-image-title>Изображение товара</strong>
+            <span>Первое фото становится обложкой карточки и каталога.</span>
+          </div>
           <label class="cabinet-field cabinet-field--wide">
-            <span class="cabinet-field-label">Файл</span>
+            <span class="cabinet-field-label">Файл / URL</span>
             <input class="admin-input" type="text" data-catalog-collection-field="value" value="${escapeAttribute(image)}" placeholder="assets/catalog/example.webp" />
           </label>
-          <div class="cabinet-repeater-row__actions">
+          <div class="cabinet-media-footer">
             <div class="cabinet-inline-meta cabinet-media-meta">
-              <span class="cabinet-media-cover-badge" data-catalog-image-cover hidden>Обложка</span>
-              <span>Первое изображение становится обложкой товара.</span>
+              <span>Перетащите карточки мышкой, чтобы поменять порядок.</span>
             </div>
             <div class="cabinet-media-actions">
-              <button class="btn btn-ghost btn-ghost--small" type="button" data-catalog-image-action="drag">Перетащить</button>
               <button class="btn btn-ghost btn-ghost--small" type="button" data-catalog-image-action="first">Сделать первым</button>
-              <button class="btn btn-ghost btn-ghost--small" type="button" data-catalog-image-action="up">Вверх</button>
-              <button class="btn btn-ghost btn-ghost--small" type="button" data-catalog-image-action="down">Вниз</button>
+              <button class="btn btn-ghost btn-ghost--small" type="button" data-catalog-image-action="up">Выше</button>
+              <button class="btn btn-ghost btn-ghost--small" type="button" data-catalog-image-action="down">Ниже</button>
               <button class="btn btn-ghost btn-ghost--small" type="button" data-catalog-image-action="remove">Убрать</button>
               <button class="btn btn-ghost btn-ghost--small" type="button" data-catalog-image-action="delete-file">Удалить файл</button>
             </div>
@@ -2964,7 +2973,7 @@ function renderCatalogCollectionSection({ kicker, title, note, type, addLabel, c
 function renderCatalogMediaSection(product) {
   const images = Array.isArray(product.images) && product.images.length ? product.images : [""];
   return `
-    <section class="cabinet-editor-section">
+    <section class="cabinet-editor-section cabinet-editor-section--media">
       <div class="cabinet-editor-section__head">
         <div>
           <div class="cabinet-kicker">Media manager</div>
@@ -2972,11 +2981,21 @@ function renderCatalogMediaSection(product) {
         </div>
         <div class="cabinet-media-toolbar">
           <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden data-catalog-media-input="${escapeAttribute(product.slug)}" />
-          <button class="btn btn-secondary btn-ghost--small" type="button" data-catalog-media-pick="${escapeAttribute(product.slug)}">Загрузить фото</button>
-          <button class="btn btn-secondary btn-ghost--small" type="button" data-catalog-collection-add="images">Добавить ссылку</button>
+          <button class="btn btn-primary" type="button" data-catalog-media-pick="${escapeAttribute(product.slug)}">Загрузить фото</button>
+          <button class="btn btn-secondary btn-ghost--small" type="button" data-catalog-collection-add="images">Добавить вручную</button>
         </div>
       </div>
-      <p class="cabinet-inline-hint">Фото можно загрузить прямо отсюда. Первое изображение в списке считается главным.</p>
+      <div class="cabinet-media-dropzone">
+        <div class="cabinet-media-dropzone__copy">
+          <strong>Перетащите файлы сюда или загрузите их кнопкой выше</strong>
+          <span>Поддерживаются JPG, PNG, WEBP и GIF. Главное фото, порядок и состав галереи управляются в одном месте.</span>
+        </div>
+        <div class="cabinet-media-dropzone__meta">
+          <span>1. Загрузите фото</span>
+          <span>2. Поставьте главное первым</span>
+          <span>3. Сохраните карточку</span>
+        </div>
+      </div>
       <div class="cabinet-users-status cabinet-product-editor__status" data-catalog-media-status="${escapeAttribute(product.slug)}"></div>
       <div class="cabinet-repeater" data-catalog-collection="images">${images.map(renderCatalogImageRow).join("")}</div>
     </section>
@@ -4081,6 +4100,11 @@ function updateCatalogImageRowPreview(row) {
   if (!input) return;
   const value = input.value.trim();
   const resolved = resolveCatalogMediaHref(value);
+  const title = row.querySelector("[data-catalog-image-title]");
+  const filename = value.split("/").filter(Boolean).pop() || "";
+  if (title) {
+    title.textContent = filename || "Изображение товара";
+  }
   const preview = row.querySelector("[data-catalog-image-preview]");
   const empty = row.querySelector("[data-catalog-image-preview-empty]");
   if (resolved) {
@@ -4116,6 +4140,8 @@ function refreshCatalogImageCollectionState(container) {
     row.dataset.catalogImageCover = index === 0 ? "true" : "false";
     const badge = row.querySelector("[data-catalog-image-cover]");
     if (badge) badge.hidden = index !== 0;
+    const order = row.querySelector("[data-catalog-image-order]");
+    if (order) order.textContent = String(index + 1).padStart(2, "0");
     row.classList.toggle("is-cover", index === 0);
   });
 }
@@ -4165,7 +4191,7 @@ function bindCatalogImageRow(row) {
       const status = editor?.querySelector("[data-catalog-media-status]");
       if (!container) return;
       if (action === "drag") {
-        if (status) status.textContent = "Перетащите строку мышкой, чтобы поменять порядок.";
+        if (status) status.textContent = "Перетащите карточку мышкой, чтобы поменять порядок.";
         return;
       }
       if (action === "first") {
