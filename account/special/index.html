@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
   <title>Специальные страницы — Klubnika Project</title>
-  <link rel="stylesheet" href="../../styles.css?v=20260404r" />
+  <link rel="stylesheet" href="../../styles.css?v=20260405g" />
   <link rel="stylesheet" href="../account.css?v=20260402b" />
   <!-- SEO:START -->
   <meta name="robots" content="noindex, nofollow" />
@@ -15,23 +15,57 @@
   <header class="hero">
     <div class="container">
       <div class="hero-shell">
+        <div class="topbar">
+          <div class="brand">
+            <a class="brand-home" href="../../">
+              <img class="brand-lockup brand-lockup-primary" src="../../documents/logo/header-lockup-v1-close-compact-dark.svg?v=20260403aa" alt="KLUBNIKA PROJECT" />
+              <img class="brand-lockup brand-lockup-compact" src="../../documents/logo/header-lockup-v1-close-compact-dark.svg?v=20260403aa" alt="KLUBNIKA PROJECT" />
+            </a>
+          </div>
+
+          <nav class="nav">
+            <a class="nav-link" href="../../">Главная</a>
+            <a class="nav-link" href="../../catalog/">Каталог</a>
+            <a class="nav-link" href="../../calc/">Калькулятор</a>
+            <a class="nav-link" href="../../cabinet/">Кабинет</a>
+            <div class="nav-mobile-utility">
+              <a class="site-header-link" href="../../catalog/index.html">Поиск в каталоге</a>
+              <a class="site-header-link site-phone-link" href="tel:+79255831669">+7 925 583-16-69</a>
+              <a class="site-header-link" href="../../cabinet/login/">Вход</a>
+              <a class="site-header-link" href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">Telegram</a>
+              <a class="nav-cta" href="../../consultations/#request">Разобрать задачу</a>
+            </div>
+          </nav>
+
+          <div class="site-header-actions">
+            <a class="site-header-link" href="../../cabinet/login/">Вход</a>
+            <a class="nav-cta" href="../../consultations/#request">Разобрать задачу</a>
+          </div>
+
+          <a class="site-mobile-quick" href="tel:+79255831669">Связь</a>
+          <button class="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false">
+            <span></span>
+          </button>
+        </div>
+
         <div class="hero-grid hero-grid-lean">
           <div class="hero-copy">
-            <span class="eyebrow">Special routes</span>
-            <h1 class="hero-title-compact">Специальные страницы по member-доступу</h1>
-            <p class="lead">Этот слой подходит для private routes, материалов, подборок и маршрутов, которые не должны индексироваться.</p>
+            <span class="eyebrow">Bridge спецмаршруты</span>
+            <h1 class="hero-title-compact">Закрытые материалы как совместимый слой старых member-ссылок</h1>
+            <p class="lead">Этот слой остаётся для private routes, материалов и старых сценариев доступа, но основная пользовательская система уже собрана в общем кабинете.</p>
             <div class="account-user" data-account-user></div>
             <div class="btn-row">
-              <a class="btn btn-secondary" data-account-link="hub" href="../">Назад в кабинет</a>
+              <a class="btn btn-primary" href="../../cabinet/">Открыть основной кабинет</a>
+              <a class="btn btn-secondary" data-account-link="hub" href="../">Назад в bridge-кабинет</a>
               <button class="btn btn-ghost" data-account-logout type="button">Выйти</button>
             </div>
           </div>
           <aside class="visual-panel">
-            <div class="tag">Следующий этап</div>
+            <div class="tag">Что это теперь</div>
             <ul class="calc-list">
-              <li>Материалы под клиента.</li>
-              <li>Закрытые проектные страницы.</li>
+              <li>Материалы под клиента и старые закрытые страницы.</li>
               <li>Спецмаршруты после консультации или расчёта.</li>
+              <li>Не новый продуктовый контур, а совместимый bridge-слой.</li>
             </ul>
           </aside>
         </div>
@@ -49,7 +83,30 @@
     </section>
   </main>
 
-  <script src="../../site.js?v=20260402f" defer></script>
+  <footer class="footer-main">
+    <div class="container">
+      <div class="footer-shell">
+        <div class="footer-meta">
+          <div class="footer-copy">© Klubnika Project</div>
+          <div class="footer-service-links">
+            <a href="https://klubnikaproject.ru/docs/policy">Политика</a>
+            <a href="https://klubnikaproject.ru/docs/offero">Оферта</a>
+            <a href="https://klubnikaproject.ru/docs/warrenty">Гарантия</a>
+          </div>
+        </div>
+        <div class="footer-contacts">
+          <a href="tel:+79255831669">+7 925 583-16-69</a>
+          <a href="mailto:info@klubnikaproject.ru">info@klubnikaproject.ru</a>
+          <a href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">Telegram</a>
+          <a href="https://wa.me/79891250150" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+          <a href="https://www.instagram.com/ilya_patiev/" target="_blank" rel="noopener noreferrer">Instagram</a>
+          <a href="https://www.youtube.com/@Ilya_patiev" target="_blank" rel="noopener noreferrer">YouTube</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../../site.js?v=20260405h" defer></script>
   <script src="../account.js?v=20260405c" type="module"></script>
 </body>
 </html>

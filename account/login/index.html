@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
   <title>Вход в кабинет клиента — Klubnika Project</title>
-  <link rel="stylesheet" href="../../styles.css?v=20260404r" />
+  <link rel="stylesheet" href="../../styles.css?v=20260405g" />
   <link rel="stylesheet" href="../account.css?v=20260402b" />
   <!-- SEO:START -->
   <meta name="robots" content="noindex, nofollow" />
@@ -15,18 +15,51 @@
   <header class="hero">
     <div class="container">
       <div class="hero-shell">
+        <div class="topbar">
+          <div class="brand">
+            <a class="brand-home" href="../../">
+              <img class="brand-lockup brand-lockup-primary" src="../../documents/logo/header-lockup-v1-close-compact-dark.svg?v=20260403aa" alt="KLUBNIKA PROJECT" />
+              <img class="brand-lockup brand-lockup-compact" src="../../documents/logo/header-lockup-v1-close-compact-dark.svg?v=20260403aa" alt="KLUBNIKA PROJECT" />
+            </a>
+          </div>
+
+          <nav class="nav">
+            <a class="nav-link" href="../../">Главная</a>
+            <a class="nav-link" href="../../catalog/">Каталог</a>
+            <a class="nav-link" href="../../calc/">Калькулятор</a>
+            <a class="nav-link" href="../../cabinet/">Кабинет</a>
+            <div class="nav-mobile-utility">
+              <a class="site-header-link" href="../../catalog/index.html">Поиск в каталоге</a>
+              <a class="site-header-link site-phone-link" href="tel:+79255831669">+7 925 583-16-69</a>
+              <a class="site-header-link" href="../../cabinet/login/">Вход</a>
+              <a class="site-header-link" href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">Telegram</a>
+              <a class="nav-cta" href="../../consultations/#request">Разобрать задачу</a>
+            </div>
+          </nav>
+
+          <div class="site-header-actions">
+            <a class="site-header-link" href="../../cabinet/login/">Вход</a>
+            <a class="nav-cta" href="../../consultations/#request">Разобрать задачу</a>
+          </div>
+
+          <a class="site-mobile-quick" href="tel:+79255831669">Связь</a>
+          <button class="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false">
+            <span></span>
+          </button>
+        </div>
+
         <div class="hero-grid hero-grid-lean">
           <div class="hero-copy">
-            <span class="eyebrow">Кабинет клиента</span>
-            <h1 class="hero-title-compact">Вход в кабинет с материалами и каталогом по вашему доступу</h1>
-            <p class="lead">Используйте логин и пароль, которые получили от нас. После входа откроются только те разделы, которые доступны вашему аккаунту.</p>
+            <span class="eyebrow">Bridge вход</span>
+            <h1 class="hero-title-compact">Старый account-login работает как совместимый вход в кабинет</h1>
+            <p class="lead">Используйте логин и пароль, которые получили от нас. Основной пользовательский контур живёт в `cabinet`, а этот экран оставлен для старых ссылок и member-flow.</p>
           </div>
           <aside class="visual-panel">
             <div class="tag">Что откроется после входа</div>
             <ul class="calc-list">
-              <li>Закрытый каталог под ваш доступ.</li>
-              <li>Материалы и специальные страницы.</li>
-              <li>Отдельный кабинет без смешивания с админкой.</li>
+              <li>Основной кабинет по вашему доступу.</li>
+              <li>Member-каталог и закрытые материалы, если права выданы.</li>
+              <li>Без смешивания с admin-контуром.</li>
             </ul>
           </aside>
         </div>
@@ -65,7 +98,30 @@
     </section>
   </main>
 
-  <script src="../../site.js?v=20260402f" defer></script>
+  <footer class="footer-main">
+    <div class="container">
+      <div class="footer-shell">
+        <div class="footer-meta">
+          <div class="footer-copy">© Klubnika Project</div>
+          <div class="footer-service-links">
+            <a href="https://klubnikaproject.ru/docs/policy">Политика</a>
+            <a href="https://klubnikaproject.ru/docs/offero">Оферта</a>
+            <a href="https://klubnikaproject.ru/docs/warrenty">Гарантия</a>
+          </div>
+        </div>
+        <div class="footer-contacts">
+          <a href="tel:+79255831669">+7 925 583-16-69</a>
+          <a href="mailto:info@klubnikaproject.ru">info@klubnikaproject.ru</a>
+          <a href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">Telegram</a>
+          <a href="https://wa.me/79891250150" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+          <a href="https://www.instagram.com/ilya_patiev/" target="_blank" rel="noopener noreferrer">Instagram</a>
+          <a href="https://www.youtube.com/@Ilya_patiev" target="_blank" rel="noopener noreferrer">YouTube</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../../site.js?v=20260405h" defer></script>
   <script src="../account.js?v=20260405c" type="module"></script>
 </body>
 </html>
