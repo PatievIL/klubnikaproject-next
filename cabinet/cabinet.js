@@ -1627,7 +1627,7 @@ async function renderAdminCatalogSection() {
             </div>
             <div class="cabinet-home-actions">
               <a class="btn btn-primary" href="${escapeAttribute(cabinetRoutes.catalog)}">Открыть магазин</a>
-              <a class="btn btn-secondary" href="${escapeAttribute(cabinetRoutes.admin)}">Старый админ-раздел</a>
+              <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("dashboard"))}">Открыть обзор кабинета</a>
             </div>
             ${categoryNames.length ? `
               <div class="cabinet-mini-list">
@@ -1731,7 +1731,7 @@ async function renderCrmSection() {
               </article>
             </div>
             <div class="cabinet-home-actions">
-              <a class="btn btn-primary" href="${escapeAttribute(cabinetRoutes.admin)}">Открыть CRM</a>
+              <a class="btn btn-primary" href="${escapeAttribute(cabinetSectionHref("crm"))}">Открыть CRM</a>
               <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("users"))}">Проверить owners</a>
             </div>
           </article>
@@ -1922,7 +1922,7 @@ async function renderAdminSiteSection() {
             <h3 class="calc-card-title">Куда идти первым</h3>
             <div class="cabinet-home-actions">
               <a class="btn btn-primary" href="${escapeAttribute(cabinetRoutes.site)}">Открыть сайт</a>
-              <a class="btn btn-secondary" href="${escapeAttribute(cabinetRoutes.admin)}">Legacy admin</a>
+              <a class="btn btn-secondary" href="${escapeAttribute(cabinetSectionHref("dashboard"))}">Открыть кабинет</a>
             </div>
             <div class="cabinet-mini-list">
               <article class="cabinet-mini-card">
@@ -2123,6 +2123,39 @@ async function loadAdminCatalogProducts() {
   const response = await fetchJson(`${apiBase()}/admin/catalog/products`);
   if (!response.ok) throw new Error(cleanupError(response.text || `HTTP ${response.status}`));
   return response.data.items || [];
+}
+
+async function loadAdminCatalogProductMedia(slug) {
+  const response = await fetchJson(`${apiBase()}/admin/catalog/products/${encodeURIComponent(slug)}/media`);
+  if (!response.ok) throw new Error(cleanupError(response.text || `HTTP ${response.status}`));
+  return response.data.items || [];
+}
+
+async function uploadAdminCatalogProductMedia(slug, file) {
+  const headers = { Accept: "application/json", "X-KP-Requested-With": "klubnikaproject" };
+  const adminToken = readStoredSessionToken("admin");
+  if (adminToken) headers["X-KP-Admin-Session"] = adminToken;
+  const body = new FormData();
+  body.append("file", file);
+  const response = await fetch(`${apiBase()}/admin/catalog/products/${encodeURIComponent(slug)}/media`, {
+    method: "POST",
+    credentials: "include",
+    headers,
+    body,
+  });
+  if (!response.ok) {
+    throw new Error(cleanupError(await response.text() || `HTTP ${response.status}`));
+  }
+  const data = await response.json();
+  return data.item || null;
+}
+
+async function deleteAdminCatalogProductMedia(slug, filename) {
+  const response = await fetchJson(`${apiBase()}/admin/catalog/products/${encodeURIComponent(slug)}/media/${encodeURIComponent(filename)}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) throw new Error(cleanupError(response.text || `HTTP ${response.status}`));
+  return true;
 }
 
 async function saveAdminCatalogProduct(slug, payload) {
@@ -2724,14 +2757,54 @@ function renderCatalogBadgeControls(currentBadges) {
   `;
 }
 
+function resolveCatalogMediaHref(value = "") {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  if (/^(https?:)?\/\//i.test(raw) || raw.startsWith("data:")) return raw;
+  return routePath(raw.replace(/^\//, ""));
+}
+
+function getCatalogUploadedMediaFilename(slug, value = "") {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  try {
+    const parsed = new URL(raw, window.location.origin);
+    const match = parsed.pathname.match(/\/v1\/public\/catalog\/media\/([^/]+)\/([^/]+)$/);
+    if (!match) return "";
+    if (decodeURIComponent(match[1]) !== String(slug || "").trim()) return "";
+    return decodeURIComponent(match[2]);
+  } catch {
+    return "";
+  }
+}
+
 function renderCatalogImageRow(image = "") {
+  const resolved = resolveCatalogMediaHref(image);
   return `
-    <div class="cabinet-repeater-row" data-catalog-collection-item="images">
-      <label class="cabinet-field cabinet-field--wide">
-        <span class="cabinet-field-label">Путь к файлу</span>
-        <input class="admin-input" type="text" data-catalog-collection-field="value" value="${escapeAttribute(image)}" placeholder="assets/catalog/example.webp" />
-      </label>
-      <button class="btn btn-ghost btn-ghost--small" type="button" data-catalog-collection-remove>Убрать</button>
+    <div class="cabinet-repeater-row cabinet-repeater-row--media" data-catalog-collection-item="images">
+      <div class="cabinet-media-row">
+        <div class="cabinet-media-preview">
+          ${resolved ? `<img src="${escapeAttribute(resolved)}" alt="" loading="lazy" data-catalog-image-preview />` : `<div class="cabinet-media-preview__empty" data-catalog-image-preview-empty>Нет превью</div>`}
+        </div>
+        <div class="cabinet-media-main">
+          <label class="cabinet-field cabinet-field--wide">
+            <span class="cabinet-field-label">Файл</span>
+            <input class="admin-input" type="text" data-catalog-collection-field="value" value="${escapeAttribute(image)}" placeholder="assets/catalog/example.webp" />
+          </label>
+          <div class="cabinet-repeater-row__actions">
+            <div class="cabinet-inline-meta">
+              <span>Первое изображение становится обложкой товара.</span>
+            </div>
+            <div class="cabinet-media-actions">
+              <button class="btn btn-ghost btn-ghost--small" type="button" data-catalog-image-action="first">Сделать первым</button>
+              <button class="btn btn-ghost btn-ghost--small" type="button" data-catalog-image-action="up">Вверх</button>
+              <button class="btn btn-ghost btn-ghost--small" type="button" data-catalog-image-action="down">Вниз</button>
+              <button class="btn btn-ghost btn-ghost--small" type="button" data-catalog-image-action="remove">Убрать</button>
+              <button class="btn btn-ghost btn-ghost--small" type="button" data-catalog-image-action="delete-file">Удалить файл</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -2886,6 +2959,28 @@ function renderCatalogCollectionSection({ kicker, title, note, type, addLabel, c
   `;
 }
 
+function renderCatalogMediaSection(product) {
+  const images = Array.isArray(product.images) && product.images.length ? product.images : [""];
+  return `
+    <section class="cabinet-editor-section">
+      <div class="cabinet-editor-section__head">
+        <div>
+          <div class="cabinet-kicker">Media manager</div>
+          <h4 class="calc-card-title">Галерея товара</h4>
+        </div>
+        <div class="cabinet-media-toolbar">
+          <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden data-catalog-media-input="${escapeAttribute(product.slug)}" />
+          <button class="btn btn-secondary btn-ghost--small" type="button" data-catalog-media-pick="${escapeAttribute(product.slug)}">Загрузить фото</button>
+          <button class="btn btn-secondary btn-ghost--small" type="button" data-catalog-collection-add="images">Добавить ссылку</button>
+        </div>
+      </div>
+      <p class="cabinet-inline-hint">Фото можно загрузить прямо отсюда. Первое изображение в списке считается главным.</p>
+      <div class="cabinet-users-status cabinet-product-editor__status" data-catalog-media-status="${escapeAttribute(product.slug)}"></div>
+      <div class="cabinet-repeater" data-catalog-collection="images">${images.map(renderCatalogImageRow).join("")}</div>
+    </section>
+  `;
+}
+
 function renderCatalogCollapsibleSection({ kicker, title, note, content, open = false }) {
   return `
     <details class="cabinet-editor-section cabinet-editor-section--collapsible"${open ? " open" : ""}>
@@ -2905,7 +3000,6 @@ function renderCatalogCollapsibleSection({ kicker, title, note, content, open = 
 }
 
 function renderAdminCatalogProductEditor(product, adminProducts = []) {
-  const images = Array.isArray(product.images) && product.images.length ? product.images : [""];
   const attributes = Array.isArray(product.attributes) && product.attributes.length ? product.attributes : [{}];
   const documents = Array.isArray(product.documents) && product.documents.length ? product.documents : [{}];
   const faq = Array.isArray(product.faq) && product.faq.length ? product.faq : [{}];
@@ -2986,14 +3080,7 @@ function renderAdminCatalogProductEditor(product, adminProducts = []) {
           ${renderCatalogBadgeControls(product.badges || [])}
         </label>
       </div>
-      ${renderCatalogCollectionSection({
-        kicker: "Media manager",
-        title: "Галерея товара",
-        note: "Вместо textarea: держим изображения как отдельные строки, чтобы легче управлять порядком и составом.",
-        type: "images",
-        addLabel: "Добавить изображение",
-        content: images.map(renderCatalogImageRow).join(""),
-      })}
+      ${renderCatalogMediaSection(product)}
       ${renderCatalogCollectionSection({
         kicker: "Характеристики",
         title: "Что показывать в карточке и фильтрах",
@@ -3586,6 +3673,9 @@ function bindAdminCatalogSection() {
       button.closest("[data-catalog-collection-item]")?.remove();
     });
   });
+  document.querySelectorAll("[data-catalog-product-editor]").forEach((editor) => {
+    bindCatalogMediaManager(editor);
+  });
 }
 
 function bindMemberMessagesSection(session) {
@@ -3966,7 +4056,10 @@ async function handleAdminCatalogProductSave(slug) {
 function handleCatalogCollectionAdd(type) {
   const container = document.querySelector(`[data-catalog-collection="${CSS.escape(String(type || ""))}"]`);
   if (!container) return;
-  if (type === "images") container.insertAdjacentHTML("beforeend", renderCatalogImageRow(""));
+  if (type === "images") {
+    appendCatalogImageRow(container, "");
+    return;
+  }
   if (type === "attributes") container.insertAdjacentHTML("beforeend", renderCatalogAttributeRow({}));
   if (type === "documents") container.insertAdjacentHTML("beforeend", renderCatalogDocumentRow({}));
   if (type === "faq") container.insertAdjacentHTML("beforeend", renderCatalogFaqRow({}));
@@ -3979,6 +4072,140 @@ function handleCatalogCollectionAdd(type) {
       button.closest("[data-catalog-collection-item]")?.remove();
     });
   });
+}
+
+function updateCatalogImageRowPreview(row) {
+  const input = row?.querySelector('[data-catalog-collection-field="value"]');
+  if (!input) return;
+  const value = input.value.trim();
+  const resolved = resolveCatalogMediaHref(value);
+  const preview = row.querySelector("[data-catalog-image-preview]");
+  const empty = row.querySelector("[data-catalog-image-preview-empty]");
+  if (resolved) {
+    if (preview) {
+      preview.src = resolved;
+    } else {
+      row.querySelector(".cabinet-media-preview")?.insertAdjacentHTML("afterbegin", `<img src="${escapeAttribute(resolved)}" alt="" loading="lazy" data-catalog-image-preview />`);
+    }
+    if (empty) empty.remove();
+  } else {
+    if (preview) preview.remove();
+    if (!empty) {
+      row.querySelector(".cabinet-media-preview")?.insertAdjacentHTML("afterbegin", `<div class="cabinet-media-preview__empty" data-catalog-image-preview-empty>Нет превью</div>`);
+    }
+  }
+}
+
+function appendCatalogImageRow(container, value = "") {
+  container.insertAdjacentHTML("beforeend", renderCatalogImageRow(value));
+  const row = container.lastElementChild;
+  if (row) {
+    bindCatalogImageRow(row);
+    updateCatalogImageRowPreview(row);
+  }
+  return row;
+}
+
+function bindCatalogImageRow(row) {
+  const input = row.querySelector('[data-catalog-collection-field="value"]');
+  if (input && !input.dataset.catalogImageBound) {
+    input.dataset.catalogImageBound = "true";
+    input.addEventListener("input", () => updateCatalogImageRowPreview(row));
+  }
+  row.querySelectorAll("[data-catalog-image-action]").forEach((button) => {
+    if (button.dataset.catalogImageBound) return;
+    button.dataset.catalogImageBound = "true";
+    button.addEventListener("click", async () => {
+      const action = button.dataset.catalogImageAction;
+      const editor = row.closest("[data-catalog-product-editor]");
+      const slug = editor?.dataset.catalogProductEditor || "";
+      const container = row.closest('[data-catalog-collection="images"]');
+      const status = editor?.querySelector("[data-catalog-media-status]");
+      if (!container) return;
+      if (action === "first") {
+        container.prepend(row);
+        if (status) status.textContent = "Главное фото переставлено на первое место.";
+        return;
+      }
+      if (action === "up") {
+        const previous = row.previousElementSibling;
+        if (previous) container.insertBefore(row, previous);
+        return;
+      }
+      if (action === "down") {
+        const next = row.nextElementSibling;
+        if (next) container.insertBefore(next, row);
+        return;
+      }
+      if (action === "remove") {
+        row.remove();
+        if (!container.children.length) appendCatalogImageRow(container, "");
+        return;
+      }
+      if (action === "delete-file") {
+        const value = input?.value.trim() || "";
+        const filename = getCatalogUploadedMediaFilename(slug, value);
+        if (!filename) {
+          if (status) status.textContent = "Этот файл не был загружен через media manager. Можно только убрать его из галереи.";
+          return;
+        }
+        if (status) status.textContent = "Удаляем файл…";
+        try {
+          await deleteAdminCatalogProductMedia(slug, filename);
+          row.remove();
+          if (!container.children.length) appendCatalogImageRow(container, "");
+          if (status) status.textContent = "Файл удалён и убран из галереи.";
+        } catch (error) {
+          if (status) status.textContent = `Не удалось удалить файл: ${cleanupError(error.message || "runtime_error")}`;
+        }
+      }
+    });
+  });
+}
+
+function bindCatalogMediaManager(editor) {
+  const slug = editor?.dataset.catalogProductEditor || "";
+  if (!slug) return;
+  const input = editor.querySelector(`[data-catalog-media-input="${CSS.escape(slug)}"]`);
+  const pick = editor.querySelector(`[data-catalog-media-pick="${CSS.escape(slug)}"]`);
+  const container = editor.querySelector('[data-catalog-collection="images"]');
+  const status = editor.querySelector(`[data-catalog-media-status="${CSS.escape(slug)}"]`);
+  if (!container) return;
+  container.querySelectorAll('[data-catalog-collection-item="images"]').forEach(bindCatalogImageRow);
+  if (pick && input && !pick.dataset.catalogMediaBound) {
+    pick.dataset.catalogMediaBound = "true";
+    pick.addEventListener("click", () => input.click());
+  }
+  if (input && !input.dataset.catalogMediaBound) {
+    input.dataset.catalogMediaBound = "true";
+    input.addEventListener("change", async () => {
+      const files = Array.from(input.files || []);
+      if (!files.length) return;
+      for (const file of files) {
+        if (status) status.textContent = `Загружаем ${file.name}…`;
+        try {
+          const item = await uploadAdminCatalogProductMedia(slug, file);
+          if (item?.url) {
+            const onlyEmptyRow = container.children.length === 1
+              && !String(container.querySelector('[data-catalog-collection-field="value"]')?.value || "").trim();
+            if (onlyEmptyRow) {
+              const field = container.querySelector('[data-catalog-collection-field="value"]');
+              if (field) {
+                field.value = item.url;
+                updateCatalogImageRowPreview(container.firstElementChild);
+              }
+            } else {
+              appendCatalogImageRow(container, item.url);
+            }
+          }
+          if (status) status.textContent = `Фото ${file.name} загружено.`;
+        } catch (error) {
+          if (status) status.textContent = `Не удалось загрузить ${file.name}: ${cleanupError(error.message || "runtime_error")}`;
+        }
+      }
+      input.value = "";
+    });
+  }
 }
 
 function readCatalogImageCollection(editor) {

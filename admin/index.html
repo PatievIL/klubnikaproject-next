@@ -3,131 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png" />
-  <link rel="manifest" href="../site.webmanifest" />
-  <title>Вход в кабинет — Klubnika Project</title>
-  <meta
-    name="description"
-    content="Вход в рабочий кабинет Klubnika Project для администратора и менеджеров."
-  />
-  <link rel="stylesheet" href="../styles.css?v=20260405g" />
-  <link rel="stylesheet" href="./admin.css?v=20260402k" />
-  <!-- SEO:START -->
   <meta name="robots" content="noindex, nofollow" />
-  <!-- SEO:END -->
+  <title>Переход в кабинет — Klubnika Project</title>
+  <meta http-equiv="refresh" content="0; url=../cabinet/?section=dashboard" />
+  <link rel="stylesheet" href="../styles.css?v=20260405g" />
 </head>
 <body>
-  <header class="hero">
+  <main class="section">
     <div class="container">
-      <div class="hero-shell">
-        <div class="topbar">
-          <a class="brand-home" href="../">
-            <img class="brand-lockup brand-lockup-primary" src="../documents/logo/header-lockup-v1-close-compact-dark.svg?v=20260403aa" alt="KLUBNIKA PROJECT" />
-            <img class="brand-lockup brand-lockup-compact" src="../documents/logo/header-lockup-v1-close-compact-dark.svg?v=20260403aa" alt="KLUBNIKA PROJECT" />
-          </a>
-
-          <button class="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false">
-            <span></span>
-          </button>
-
-          <nav class="nav">
-            <a href="../">Сайт</a>
-            <a href="../catalog/">Каталог</a>
-            <a href="../calc/">Калькулятор</a>
-            <a href="../calc/admin/">Цены калькулятора</a>
-          </nav>
-        </div>
-
-        <div class="hero-grid admin-hub-hero">
-          <div class="hero-copy">
-            <span class="eyebrow">Внутренний кабинет</span>
-            <h1>Вход в кабинет</h1>
-            <p class="lead">
-              Рабочий вход для администратора и менеджеров. После авторизации кабинет покажет только те разделы, которые доступны по вашей роли.
-            </p>
+      <div class="section-frame">
+        <div class="card card-pad">
+          <div class="tag">Migration</div>
+          <h1 class="calc-card-title">Старый `/admin/` больше не используется</h1>
+          <p class="sublead">Рабочий admin-контур переведён в единый кабинет. Перенаправляем в новый shell.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="../cabinet/?section=dashboard">Открыть кабинет</a>
+            <a class="btn btn-secondary" href="../cabinet/?section=catalog">Открыть каталог в кабинете</a>
           </div>
-
-          <aside class="visual-panel admin-hub-note admin-entry-panel">
-            <div class="tag">Авторизация</div>
-            <h3>Логин и пароль</h3>
-            <p class="sublead">Обычный рабочий вход для администратора и менеджеров. После входа откроются только доступные вам разделы.</p>
-
-            <div class="admin-auth-panel">
-              <div class="admin-grid">
-                <label class="admin-field">
-                  <span class="admin-field-label">Логин или email</span>
-                  <input class="admin-input" id="admin-login-identity" type="text" autocomplete="username" placeholder="Логин или email" />
-                </label>
-                <label class="admin-field">
-                  <span class="admin-field-label">Пароль</span>
-                  <input class="admin-input" id="admin-login-password" type="password" autocomplete="current-password" placeholder="Введите пароль" />
-                </label>
-              </div>
-
-              <div class="admin-auth-actions">
-                <button class="btn btn-primary" id="admin-password-login-button" type="button">Войти</button>
-                <button class="btn btn-ghost" id="admin-session-button" type="button" hidden>Проверить доступ</button>
-                <button class="btn btn-ghost" id="admin-logout-button" type="button" hidden>Выйти из кабинета</button>
-              </div>
-              <div class="admin-session-state" id="admin-session-state">Проверяем сохранённую сессию…</div>
-            </div>
-          </aside>
         </div>
       </div>
     </div>
-  </header>
-
-  <main>
-    <section class="section" id="admin-workspace">
-      <div class="container">
-        <div class="section-frame">
-          <div class="admin-hub-layout">
-            <section class="admin-hub-main">
-              <div class="admin-workspace-head">
-                <div class="admin-tabs" id="admin-tabs" role="tablist" aria-label="Разделы кабинета"></div>
-
-                <details class="card card-pad admin-card admin-tools-card admin-inline-tools">
-                  <summary class="admin-tools-summary">
-                    <div>
-                      <strong>Действия и JSON</strong>
-                      <span>Загрузка, сохранение, сброс и технический слой кабинета остаются под рукой, но больше не занимают отдельный экранный блок.</span>
-                    </div>
-                  </summary>
-
-                  <div class="admin-toolbar-actions">
-                    <button class="btn btn-secondary" id="pull-backend-config" type="button">Загрузить текущую версию</button>
-                    <button class="btn btn-primary" id="push-backend-config" type="button">Сохранить изменения</button>
-                    <button class="btn btn-secondary" id="reset-admin-button" type="button">Сбросить черновик</button>
-                  </div>
-
-                  <div class="admin-json-actions">
-                    <button class="btn btn-primary" id="download-admin-json" type="button">Скачать admin-config.json</button>
-                    <button class="btn btn-secondary" id="copy-admin-json" type="button">Копировать JSON</button>
-                    <label class="btn btn-ghost admin-import-button">
-                      Импортировать JSON
-                      <input id="import-admin-json" type="file" accept="application/json" hidden />
-                    </label>
-                  </div>
-
-                  <div class="admin-status" id="admin-status">Черновик совпадает с базовой конфигурацией.</div>
-
-                  <label class="admin-json-label" for="admin-json-output">Текущая структура проекта</label>
-                  <textarea class="admin-json-output" id="admin-json-output" spellcheck="false" readonly></textarea>
-                </details>
-
-                <div class="summary-grid admin-summary-grid-hidden" id="admin-summary-grid" hidden></div>
-              </div>
-
-              <section class="card card-pad admin-card admin-section" id="admin-section-content" aria-live="polite"></section>
-            </section>
-          </div>
-        </div>
-      </div>
-    </section>
   </main>
-
-  <script src="../site.js?v=20260405h" defer></script>
-  <script src="./admin.js?v=20260402k" type="module"></script>
+  <script>
+    const target = new URL("../cabinet/?section=dashboard", window.location.href);
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("product")) target.searchParams.set("product", params.get("product"));
+    window.location.replace(target.toString());
+  </script>
 </body>
 </html>
