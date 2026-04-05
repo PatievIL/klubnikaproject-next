@@ -856,6 +856,8 @@ function bindDraftForms(config) {
       const openedTelegram = Boolean(popup);
       const copied = await copyText(text);
       let backendLeadId = null;
+      let crmDeliveryStatus = "";
+      let crmLeadId = null;
 
       if (latestConfig.forms.mode === "backend_submit" && apiBase) {
         try {
@@ -870,21 +872,45 @@ function bindDraftForms(config) {
           if (response.ok) {
             const payload = await response.json();
             backendLeadId = payload?.lead?.id || null;
+            crmDeliveryStatus = payload?.lead?.crm?.delivery_status || "";
+            crmLeadId = payload?.lead?.crm?.crm_lead_id || null;
           }
         } catch (error) {
           backendLeadId = null;
+          crmDeliveryStatus = "";
+          crmLeadId = null;
         }
       }
 
       if (status) {
         if (latestConfig.forms.mode === "backend_submit") {
-          status.textContent = backendLeadId
-            ? (lang === "en"
-              ? `The brief has been stored in the system as lead #${backendLeadId}.`
-              : `Задача сохранена в системе как лид #${backendLeadId}.`)
-            : (lang === "en"
+          if (backendLeadId) {
+            if (lang === "en") {
+              if (crmDeliveryStatus === "succeeded") {
+                status.textContent = `The brief has been stored in the system as lead #${backendLeadId} and sent to CRM${crmLeadId ? ` as #${crmLeadId}` : ""}.`;
+              } else if (crmDeliveryStatus === "failed") {
+                status.textContent = `The brief has been stored in the system as lead #${backendLeadId}, but CRM is unavailable right now.`;
+              } else if (crmDeliveryStatus === "disabled") {
+                status.textContent = `The brief has been stored in the system as lead #${backendLeadId}. CRM forwarding is disabled.`;
+              } else {
+                status.textContent = `The brief has been stored in the system as lead #${backendLeadId}.`;
+              }
+            } else {
+              if (crmDeliveryStatus === "succeeded") {
+                status.textContent = `Задача сохранена в системе как лид #${backendLeadId} и отправлена в CRM${crmLeadId ? ` как #${crmLeadId}` : ""}.`;
+              } else if (crmDeliveryStatus === "failed") {
+                status.textContent = `Задача сохранена в системе как лид #${backendLeadId}, но CRM сейчас недоступна.`;
+              } else if (crmDeliveryStatus === "disabled") {
+                status.textContent = `Задача сохранена в системе как лид #${backendLeadId}. Отправка в CRM сейчас отключена.`;
+              } else {
+                status.textContent = `Задача сохранена в системе как лид #${backendLeadId}.`;
+              }
+            }
+          } else {
+            status.textContent = lang === "en"
               ? "The brief is prepared, but the system is unavailable right now. A local handoff copy was kept."
-              : "Сообщение подготовлено, но система сейчас недоступна. Локальная копия для передачи сохранена.");
+              : "Сообщение подготовлено, но система сейчас недоступна. Локальная копия для передачи сохранена.";
+          }
         } else if (copied && openedTelegram) {
           status.textContent = lang === "en"
             ? "The brief has been copied and Telegram opened in a new tab."
