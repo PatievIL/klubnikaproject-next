@@ -469,53 +469,38 @@
       <div class="section-frame">
         <div class="grid grid-2">
           <div>
-            <span class="eyebrow">Форма на расчёт</span>
-            <h2>Оставьте вводные по объекту и получите расчёт фермы</h2>
+            <span class="eyebrow">Продолжение расчёта</span>
+            <h2>Теперь уточним пару моментов под ваш объект</h2>
             <p class="sublead">
-              Нужны площадь, стадия проекта, задача и несколько ограничений по объекту.
+              Этот расчёт — базовая модель. В реальности она меняется от помещения, климата, бюджета и задачи.
             </p>
 
             <div class="grid grid-2 mt-24">
               <div class="card result-card">
-                <div class="tag">Что получите</div>
-                <h3>Рамку комплекта</h3>
-                <p class="sublead">Состав решения, логику закупки и понимание, что считать дальше как проект.</p>
+                <div class="tag">Что уточняем</div>
+                <h3>Реальные условия объекта</h3>
+                <p class="sublead">Где находится объект, что уже есть на месте и какие ограничения могут изменить расчёт.</p>
               </div>
               <div class="card result-card">
-                <div class="tag">Если задача глубже</div>
-                <h3>Переход в сопровождение</h3>
-                <p class="sublead">Если вопрос уже упирается не только в комплект, а в технологию и запуск.</p>
+                <div class="tag">Что дальше</div>
+                <h3>Разбор под ваш проект</h3>
+                <p class="sublead">После этого можно уже не гадать, а привязать рамку расчёта к вашему помещению и задаче.</p>
               </div>
             </div>
           </div>
 
           <div class="card form-card">
-            <h3>Собрать вводные по объекту</h3>
-            <p class="sublead">Форма для проектных запросов и расчёта комплекта под объект.</p>
-            <form class="form-grid" data-brief-form="Расчёт фермы — вводные по объекту">
-              <input class="input" id="farm-name" type="text" placeholder="Имя / компания" />
-              <input class="input" id="farm-contact" type="text" placeholder="Контакт для связи" />
-              <input class="input" id="farm-object" type="text" placeholder="Площадь / формат объекта" />
-              <select class="select" id="farm-stage">
-                <option>Стадия проекта</option>
-                <option>Запуск с нуля</option>
-                <option>Действующая ферма</option>
-                <option>Пересборка / масштабирование</option>
-              </select>
-              <select class="select" id="farm-need">
-                <option>Что нужно посчитать</option>
-                <option>Всю ферму</option>
-                <option>Состав комплекта</option>
-                <option>Свет</option>
-                <option>Полив</option>
-                <option>Стеллажи</option>
-              </select>
-              <textarea class="textarea" id="farm-details" placeholder="Опишите задачу: что уже есть, какие ограничения у объекта и что нужно получить на выходе"></textarea>
+            <h3>Давайте уточним расчёт под ваш объект</h3>
+            <p class="sublead">Не заявка, а короткое уточнение по проекту: где объект, как с вами связаться и что может повлиять на расчёт.</p>
+            <form class="form-grid" data-brief-form="Расчёт фермы — уточнение под объект" data-brief-button-label="Передать расчёт" data-brief-done-label="Передано на разбор">
+              <input class="input" id="farm-contact" type="text" placeholder="Telegram / WhatsApp для связи" />
+              <input class="input" id="farm-location" type="text" placeholder="Где объект: город / страна" />
+              <textarea class="textarea" id="farm-details" placeholder="Что может повлиять на расчёт: жара, тип помещения, бюджет, ограничения по воде, свету, проходам или запуску"></textarea>
               <div class="brief-form-actions">
-                <button class="btn btn-primary" data-brief-button type="button">Собрать вводные и открыть Telegram</button>
+                <button class="btn btn-primary" data-brief-button type="button">Передать расчёт</button>
                 <a class="brief-telegram-link" href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">Открыть Telegram</a>
               </div>
-              <p class="brief-form-note">Кнопка соберёт вводные, скопирует их и сразу откроет рабочий Telegram. Рабочий Telegram: <a href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">@patiev_admin</a>.</p>
+              <p class="brief-form-note">Мы не начинаем заново. Берём вашу рамку расчёта и докручиваем её под реальные условия объекта. Быстрый контакт: <a href="https://t.me/patiev_admin" target="_blank" rel="noopener noreferrer">@patiev_admin</a>.</p>
               <p class="brief-form-status" data-brief-status aria-live="polite"></p>
             </form>
           </div>
@@ -547,7 +532,7 @@
     </div>
   </footer>
 
-  <script src="../site.js?v=20260405h" defer></script>
+  <script src="../site.js?v=20260405i" defer></script>
   <script src="./farm.js"></script>
 </body>
 </html>

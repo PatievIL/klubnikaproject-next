@@ -820,7 +820,8 @@ function bindDraftForms(config) {
       const missing = validateBriefForm(form, latestConfig);
       const lang = document.documentElement.lang === "en" ? "en" : "ru";
       const ui = getBriefUi(latestConfig, lang);
-      const idleLabel = ui.buttonLabel;
+      const idleLabel = normalizeText(form.dataset.briefButtonLabel || "") || ui.buttonLabel;
+      const doneLabel = normalizeText(form.dataset.briefDoneLabel || "") || ui.doneLabel;
 
       if (missing.length) {
         if (status) {
@@ -904,8 +905,8 @@ function bindDraftForms(config) {
       }
 
       button.textContent = copied
-        ? ui.doneLabel
-        : ui.buttonLabel;
+        ? doneLabel
+        : idleLabel;
       window.setTimeout(() => {
         button.textContent = idleLabel;
       }, 1800);
@@ -982,15 +983,23 @@ function applyBriefFormPresentation(config, lang) {
     const link = form.querySelector(".brief-telegram-link");
     const note = form.querySelector(".brief-form-note");
     const status = form.querySelector("[data-brief-status]");
+    const customButtonLabel = normalizeText(form.dataset.briefButtonLabel || "");
+    const customDoneLabel = normalizeText(form.dataset.briefDoneLabel || "");
+    const customLinkLabel = normalizeText(form.dataset.briefLinkLabel || "");
+    const resolvedUi = {
+      buttonLabel: customButtonLabel || ui.buttonLabel,
+      doneLabel: customDoneLabel || ui.doneLabel,
+      linkLabel: customLinkLabel || ui.linkLabel,
+    };
 
     if (button) {
-      button.textContent = ui.buttonLabel;
-      button.dataset.siteInitialLabel = ui.buttonLabel;
+      button.textContent = resolvedUi.buttonLabel;
+      button.dataset.siteInitialLabel = resolvedUi.buttonLabel;
     }
 
     if (link) {
       link.href = config.site.supportTelegramUrl || "https://t.me/patiev_admin";
-      link.textContent = ui.linkLabel;
+      link.textContent = resolvedUi.linkLabel;
       link.hidden = config.forms.primaryChannel !== "telegram" && !config.site.supportTelegramUrl;
     }
 
