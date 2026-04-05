@@ -950,6 +950,17 @@ body[data-cabinet-view] .footer-contacts a {
 
 .cabinet-repeater-row--media {
   padding: 14px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.cabinet-repeater-row--media.is-cover {
+  border-color: rgba(0, 77, 43, 0.24);
+  box-shadow: 0 10px 24px rgba(0, 77, 43, 0.08);
+}
+
+.cabinet-repeater-row--media.is-dragging {
+  opacity: 0.82;
+  transform: scale(0.99);
 }
 
 .cabinet-media-row {
@@ -989,6 +1000,23 @@ body[data-cabinet-view] .footer-contacts a {
 .cabinet-media-main {
   display: grid;
   gap: 10px;
+}
+
+.cabinet-media-meta {
+  align-items: center;
+}
+
+.cabinet-media-cover-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(0, 77, 43, 0.1);
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .cabinet-media-actions,

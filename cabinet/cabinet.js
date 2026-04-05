@@ -2781,7 +2781,7 @@ function getCatalogUploadedMediaFilename(slug, value = "") {
 function renderCatalogImageRow(image = "") {
   const resolved = resolveCatalogMediaHref(image);
   return `
-    <div class="cabinet-repeater-row cabinet-repeater-row--media" data-catalog-collection-item="images">
+    <div class="cabinet-repeater-row cabinet-repeater-row--media" data-catalog-collection-item="images" draggable="true">
       <div class="cabinet-media-row">
         <div class="cabinet-media-preview">
           ${resolved ? `<img src="${escapeAttribute(resolved)}" alt="" loading="lazy" data-catalog-image-preview />` : `<div class="cabinet-media-preview__empty" data-catalog-image-preview-empty>Нет превью</div>`}
@@ -2792,10 +2792,12 @@ function renderCatalogImageRow(image = "") {
             <input class="admin-input" type="text" data-catalog-collection-field="value" value="${escapeAttribute(image)}" placeholder="assets/catalog/example.webp" />
           </label>
           <div class="cabinet-repeater-row__actions">
-            <div class="cabinet-inline-meta">
+            <div class="cabinet-inline-meta cabinet-media-meta">
+              <span class="cabinet-media-cover-badge" data-catalog-image-cover hidden>Обложка</span>
               <span>Первое изображение становится обложкой товара.</span>
             </div>
             <div class="cabinet-media-actions">
+              <button class="btn btn-ghost btn-ghost--small" type="button" data-catalog-image-action="drag">Перетащить</button>
               <button class="btn btn-ghost btn-ghost--small" type="button" data-catalog-image-action="first">Сделать первым</button>
               <button class="btn btn-ghost btn-ghost--small" type="button" data-catalog-image-action="up">Вверх</button>
               <button class="btn btn-ghost btn-ghost--small" type="button" data-catalog-image-action="down">Вниз</button>
@@ -4103,7 +4105,19 @@ function appendCatalogImageRow(container, value = "") {
     bindCatalogImageRow(row);
     updateCatalogImageRowPreview(row);
   }
+  refreshCatalogImageCollectionState(container);
   return row;
+}
+
+function refreshCatalogImageCollectionState(container) {
+  if (!container) return;
+  const rows = Array.from(container.querySelectorAll('[data-catalog-collection-item="images"]'));
+  rows.forEach((row, index) => {
+    row.dataset.catalogImageCover = index === 0 ? "true" : "false";
+    const badge = row.querySelector("[data-catalog-image-cover]");
+    if (badge) badge.hidden = index !== 0;
+    row.classList.toggle("is-cover", index === 0);
+  });
 }
 
 function bindCatalogImageRow(row) {
@@ -4111,6 +4125,34 @@ function bindCatalogImageRow(row) {
   if (input && !input.dataset.catalogImageBound) {
     input.dataset.catalogImageBound = "true";
     input.addEventListener("input", () => updateCatalogImageRowPreview(row));
+  }
+  if (!row.dataset.catalogImageDnDBound) {
+    row.dataset.catalogImageDnDBound = "true";
+    row.addEventListener("dragstart", (event) => {
+      row.classList.add("is-dragging");
+      event.dataTransfer.effectAllowed = "move";
+    });
+    row.addEventListener("dragend", () => {
+      row.classList.remove("is-dragging");
+      refreshCatalogImageCollectionState(row.closest('[data-catalog-collection="images"]'));
+    });
+    row.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      const container = row.closest('[data-catalog-collection="images"]');
+      const dragging = container?.querySelector('.cabinet-repeater-row--media.is-dragging');
+      if (!dragging || dragging === row) return;
+      const rect = row.getBoundingClientRect();
+      const insertAfter = (event.clientY - rect.top) > rect.height / 2;
+      if (insertAfter) {
+        row.after(dragging);
+      } else {
+        row.before(dragging);
+      }
+    });
+    row.addEventListener("drop", (event) => {
+      event.preventDefault();
+      refreshCatalogImageCollectionState(row.closest('[data-catalog-collection="images"]'));
+    });
   }
   row.querySelectorAll("[data-catalog-image-action]").forEach((button) => {
     if (button.dataset.catalogImageBound) return;
@@ -4122,24 +4164,32 @@ function bindCatalogImageRow(row) {
       const container = row.closest('[data-catalog-collection="images"]');
       const status = editor?.querySelector("[data-catalog-media-status]");
       if (!container) return;
+      if (action === "drag") {
+        if (status) status.textContent = "Перетащите строку мышкой, чтобы поменять порядок.";
+        return;
+      }
       if (action === "first") {
         container.prepend(row);
+        refreshCatalogImageCollectionState(container);
         if (status) status.textContent = "Главное фото переставлено на первое место.";
         return;
       }
       if (action === "up") {
         const previous = row.previousElementSibling;
         if (previous) container.insertBefore(row, previous);
+        refreshCatalogImageCollectionState(container);
         return;
       }
       if (action === "down") {
         const next = row.nextElementSibling;
         if (next) container.insertBefore(next, row);
+        refreshCatalogImageCollectionState(container);
         return;
       }
       if (action === "remove") {
         row.remove();
         if (!container.children.length) appendCatalogImageRow(container, "");
+        refreshCatalogImageCollectionState(container);
         return;
       }
       if (action === "delete-file") {
@@ -4154,6 +4204,7 @@ function bindCatalogImageRow(row) {
           await deleteAdminCatalogProductMedia(slug, filename);
           row.remove();
           if (!container.children.length) appendCatalogImageRow(container, "");
+          refreshCatalogImageCollectionState(container);
           if (status) status.textContent = "Файл удалён и убран из галереи.";
         } catch (error) {
           if (status) status.textContent = `Не удалось удалить файл: ${cleanupError(error.message || "runtime_error")}`;
@@ -4172,6 +4223,7 @@ function bindCatalogMediaManager(editor) {
   const status = editor.querySelector(`[data-catalog-media-status="${CSS.escape(slug)}"]`);
   if (!container) return;
   container.querySelectorAll('[data-catalog-collection-item="images"]').forEach(bindCatalogImageRow);
+  refreshCatalogImageCollectionState(container);
   if (pick && input && !pick.dataset.catalogMediaBound) {
     pick.dataset.catalogMediaBound = "true";
     pick.addEventListener("click", () => input.click());
@@ -4198,6 +4250,7 @@ function bindCatalogMediaManager(editor) {
               appendCatalogImageRow(container, item.url);
             }
           }
+          refreshCatalogImageCollectionState(container);
           if (status) status.textContent = `Фото ${file.name} загружено.`;
         } catch (error) {
           if (status) status.textContent = `Не удалось загрузить ${file.name}: ${cleanupError(error.message || "runtime_error")}`;
