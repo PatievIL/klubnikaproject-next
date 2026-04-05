@@ -217,6 +217,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindTopbarMenus();
   bindUiControls();
   applyStoredUi();
+  bindChoiceGroups();
   bindDraftForms(siteAdminConfig);
   applyGlobalContactLayer(siteAdminConfig);
   refreshBackendSettings().catch(() => {});
@@ -861,6 +862,31 @@ function normalizeText(text) {
   return (text || "").replace(/\s+/g, " ").trim();
 }
 
+function bindChoiceGroups() {
+  document.querySelectorAll("[data-choice-group]").forEach((group) => {
+    const hiddenInput = group.querySelector('input[type="hidden"]');
+    const buttons = Array.from(group.querySelectorAll("[data-choice-value]"));
+    if (!hiddenInput || !buttons.length) return;
+
+    const applyState = (value) => {
+      hiddenInput.value = value || "";
+      buttons.forEach((button) => {
+        const active = button.dataset.choiceValue === hiddenInput.value;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+    };
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        applyState(button.dataset.choiceValue || "");
+      });
+    });
+
+    applyState(hiddenInput.value || "");
+  });
+}
+
 function bindDraftForms(config) {
   applyBriefFormPresentation(config, document.documentElement.lang === "en" ? "en" : "ru");
 
@@ -872,6 +898,8 @@ function bindDraftForms(config) {
     button.addEventListener("click", async () => {
       const latestConfig = loadSiteAdminConfig();
       siteAdminConfig = latestConfig;
+      const success = form.querySelector("[data-brief-success]");
+      if (success) success.hidden = true;
       const lines = buildBriefLines(form);
       const missing = validateBriefForm(form, latestConfig);
       const lang = document.documentElement.lang === "en" ? "en" : "ru";
@@ -881,9 +909,11 @@ function bindDraftForms(config) {
 
       if (missing.length) {
         if (status) {
-          status.textContent = lang === "en"
-            ? `Fill in required fields: ${missing.join(", ")}.`
-            : `Заполните обязательные поля, и мы подготовим сообщение: ${missing.join(", ")}.`;
+          status.textContent = form.dataset.briefFormVariant === "routing"
+            ? missing[0]
+            : (lang === "en"
+              ? `Fill in required fields: ${missing.join(", ")}.`
+              : `Заполните обязательные поля, и мы подготовим сообщение: ${missing.join(", ")}.`);
         }
         return;
       }
@@ -902,6 +932,7 @@ function bindDraftForms(config) {
       const text = `${prefix}${[title, "", ...lines].join("\n")}`;
       const apiBase = detectRuntimeApiBase(latestConfig.integrations?.apiBase || "");
       const leadPayload = buildLeadPayload(form, title, lines, text);
+      const routeMeta = detectLeadRoute(leadPayload.stage, leadPayload.what_needed);
       const shouldOpenTelegram =
         latestConfig.forms.primaryChannel === "telegram" &&
         latestConfig.forms.openTelegramAfterCopy &&
@@ -941,6 +972,7 @@ function bindDraftForms(config) {
       if (status) {
         if (latestConfig.forms.mode === "backend_submit") {
           if (backendLeadId) {
+            presentBriefSuccess(form, routeMeta, latestConfig);
             if (lang === "en") {
               if (crmDeliveryStatus === "succeeded") {
                 status.textContent = `The brief has been stored in the system as lead #${backendLeadId} and sent to CRM${crmLeadId ? ` as #${crmLeadId}` : ""}.`;
@@ -997,6 +1029,7 @@ function bindDraftForms(config) {
 }
 
 function buildLeadPayload(form, title, lines, text) {
+  const routeMeta = detectLeadRoute("", "");
   const lead = {
     source: title,
     route: document.body.classList.contains("category-page")
@@ -1015,25 +1048,28 @@ function buildLeadPayload(form, title, lines, text) {
     stage: "",
     what_needed: "",
     message: "",
+    summary: "",
     brief_text: text,
     lines,
+    page_source: document.title,
+    block_source: form.dataset.blockSource || "",
+    current_url: window.location.href,
+    referrer: document.referrer || "",
+    timestamp: new Date().toISOString(),
+    device_type: detectDeviceType(),
+    utm_params: collectUtmParams(),
+    detected_route: routeMeta.key,
+    detected_route_label: routeMeta.label,
+    detected_route_href: routeMeta.href,
+    scenario_tags: [],
     payload: {},
   };
 
   Array.from(form.querySelectorAll("input, select, textarea")).forEach((field) => {
     const role = detectBriefFieldRole(field);
-    const fieldLabel = field.tagName === "SELECT"
-      ? normalizeText(field.options[0]?.textContent || "Поле")
-      : normalizeText(field.getAttribute("placeholder") || field.name || "Поле");
+    const fieldLabel = getBriefFieldLabel(field);
 
-    let value = "";
-    if (field.tagName === "SELECT") {
-      const firstOption = field.options[0]?.textContent?.trim();
-      const currentValue = field.options[field.selectedIndex]?.textContent?.trim();
-      if (currentValue && currentValue !== firstOption) value = currentValue;
-    } else {
-      value = field.value?.trim() || "";
-    }
+    const value = getBriefFieldValue(field);
     if (!value) return;
 
     lead.payload[fieldLabel] = value;
@@ -1049,11 +1085,25 @@ function buildLeadPayload(form, title, lines, text) {
       lead.stage = value;
     } else if (role === "request") {
       lead.what_needed = value;
+    } else if (role === "summary") {
+      lead.summary = value;
       lead.message = value;
     } else if (!lead.message) {
       lead.message = value;
     }
   });
+
+  if (!lead.message) {
+    lead.message = lead.what_needed || "";
+  }
+
+  const resolvedRoute = detectLeadRoute(lead.stage, lead.what_needed);
+  lead.detected_route = resolvedRoute.key;
+  lead.detected_route_label = resolvedRoute.label;
+  lead.detected_route_href = resolvedRoute.href;
+  lead.scenario_tags = resolvedRoute.tags;
+  lead.project_stage = lead.stage;
+  lead.current_need = lead.what_needed;
 
   return lead;
 }
@@ -1088,18 +1138,28 @@ function applyBriefFormPresentation(config, lang) {
     if (note) {
       const handle = config.site.supportTelegram || "@patiev_admin";
       const href = config.site.supportTelegramUrl || "https://t.me/patiev_admin";
+      const customBackendNote = normalizeText(form.dataset.briefNoteBackend || "");
+      const customCopyNote = normalizeText(form.dataset.briefNoteCopy || "");
       if (config.forms.mode === "copy_only") {
+        if (customCopyNote) {
+          note.textContent = customCopyNote;
+        } else {
         note.innerHTML = lang === "en"
           ? "The button will prepare the brief and copy it to the clipboard. If needed, send it manually in Telegram: "
             + `<a href="${href}" target="_blank" rel="noopener noreferrer">${handle}</a>.`
           : "Кнопка подготовит сообщение и скопирует его в буфер. При необходимости отправьте его вручную в Telegram: "
             + `<a href="${href}" target="_blank" rel="noopener noreferrer">${handle}</a>.`;
+        }
       } else if (config.forms.mode === "backend_submit") {
+        if (customBackendNote) {
+          note.textContent = customBackendNote;
+        } else {
         note.innerHTML = lang === "en"
           ? "The brief is stored in the system. If a fast manual follow-up is needed, it can also be duplicated in Telegram: "
             + `<a href="${href}" target="_blank" rel="noopener noreferrer">${handle}</a>.`
           : "Задача сохранится в системе. Если нужен быстрый ручной контакт, сообщение можно сразу продублировать в Telegram: "
             + `<a href="${href}" target="_blank" rel="noopener noreferrer">${handle}</a>.`;
+        }
       } else {
         note.innerHTML = lang === "en"
           ? "The button will prepare the brief, copy it, and open the working Telegram. Working Telegram: "
@@ -1141,6 +1201,18 @@ function getBriefUi(config, lang) {
 }
 
 function validateBriefForm(form, config) {
+  if (form.dataset.briefFormVariant === "routing") {
+    const values = collectBriefRoleValues(form);
+    const summaryLength = normalizeText(values.summary || "").length;
+    const missing = [];
+    if (!values.name) missing.push("Укажите, как к вам обращаться.");
+    if (!values.contact) missing.push("Оставьте телефон, Telegram или WhatsApp для связи.");
+    if (!values.stage) missing.push("Выберите текущую стадию проекта.");
+    if (!values.request) missing.push("Уточните, что нужно решить в первую очередь.");
+    if (summaryLength < 24) missing.push("Добавьте 1–2 предложения: что уже есть и что нужно сделать сейчас.");
+    return missing;
+  }
+
   const required = new Set(config.crm?.requiredFields || []);
   const values = {
     name: false,
@@ -1176,6 +1248,8 @@ function hasRoleField(form, role) {
 }
 
 function detectBriefFieldRole(field) {
+  const explicitRole = normalizeText(field.dataset.fieldRole || "");
+  if (explicitRole) return explicitRole;
   if (field.tagName === "TEXTAREA") return "request";
 
   const placeholder = normalizeText(field.getAttribute("placeholder") || "");
@@ -1186,6 +1260,108 @@ function detectBriefFieldRole(field) {
   if (/стадия/i.test(firstOption)) return "stage";
   if (/что нужно|формат интереса/i.test(firstOption)) return "request";
   return null;
+}
+
+function getBriefFieldLabel(field) {
+  const explicit = normalizeText(field.dataset.fieldLabel || "");
+  if (explicit) return explicit;
+  if (field.tagName === "SELECT") return normalizeText(field.options[0]?.textContent || "Поле");
+  return normalizeText(field.getAttribute("placeholder") || field.name || "Поле");
+}
+
+function getBriefFieldValue(field) {
+  if (field.tagName === "SELECT") {
+    const firstOption = field.options[0]?.textContent?.trim();
+    const currentValue = field.options[field.selectedIndex]?.textContent?.trim();
+    return currentValue && currentValue !== firstOption ? currentValue : "";
+  }
+  return field.value?.trim() || "";
+}
+
+function collectBriefRoleValues(form) {
+  const values = { name: "", contact: "", stage: "", request: "", summary: "" };
+  Array.from(form.querySelectorAll("input, select, textarea")).forEach((field) => {
+    const role = detectBriefFieldRole(field);
+    if (!role || !(role in values)) return;
+    const value = getBriefFieldValue(field);
+    if (value) values[role] = value;
+  });
+  return values;
+}
+
+function collectUtmParams() {
+  const params = new URLSearchParams(window.location.search || "");
+  const utm = {};
+  ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"].forEach((key) => {
+    const value = params.get(key);
+    if (value) utm[key] = value;
+  });
+  return utm;
+}
+
+function detectDeviceType() {
+  const width = window.innerWidth || document.documentElement.clientWidth || 0;
+  if (width <= 767) return "mobile";
+  if (width <= 1100) return "tablet";
+  return "desktop";
+}
+
+function detectLeadRoute(stage, need) {
+  const normalizedStage = normalizeText(stage).toLowerCase();
+  const normalizedNeed = normalizeText(need).toLowerCase();
+  const route = {
+    key: "orientation",
+    label: "Лёгкий ориентир",
+    href: "./calc/",
+    tags: [],
+  };
+
+  if (normalizedStage === "пересборка / замена узлов") {
+    route.key = "rebuild_nodes";
+    route.label = "Пересборка и подбор узлов";
+    route.href = "./catalog/";
+  } else if (normalizedStage === "действующая ферма" && normalizedNeed === "разобрать действующий объект") {
+    route.key = "analysis_support";
+    route.label = "Разбор действующего объекта";
+    route.href = "./study/";
+  } else if (normalizedStage === "запуск с нуля" && normalizedNeed === "расчёт и ориентир по смете") {
+    route.key = "calculation_flow";
+    route.label = "Расчёт и смета";
+    route.href = "./calc/";
+  } else if (normalizedStage === "запуск с нуля" && normalizedNeed === "подбор решений и каталога") {
+    route.key = "catalog_flow";
+    route.label = "Каталог и подбор решений";
+    route.href = "./catalog/";
+  } else if (normalizedStage === "пока изучаю и нужен ориентир") {
+    route.key = "calculation_orientation";
+    route.label = "Ориентир и первый расчёт";
+    route.href = "./calc/";
+  } else if (normalizedNeed === "сопровождение / консультация") {
+    route.key = "support_consultation";
+    route.label = "Сопровождение и консультация";
+    route.href = "./study/";
+  }
+
+  route.tags = [stage, need, route.key].filter(Boolean);
+  return route;
+}
+
+function presentBriefSuccess(form, routeMeta, config) {
+  const success = form.querySelector("[data-brief-success]");
+  if (!success) return;
+  const status = form.querySelector("[data-brief-status]");
+  const primary = success.querySelector("[data-brief-success-primary]");
+  const secondary = success.querySelector("[data-brief-success-secondary]");
+  if (status) status.textContent = "";
+  if (primary) {
+    primary.href = routeMeta?.href || "./calc/";
+    primary.textContent = "Открыть следующий шаг";
+  }
+  if (secondary) {
+    secondary.href = config.site.supportTelegramUrl || "https://t.me/patiev_admin";
+    secondary.textContent = "Написать в Telegram";
+  }
+  success.hidden = false;
 }
 
 function markActiveCompactNav() {
@@ -1232,17 +1408,9 @@ function markActiveCompactNav() {
 
 function buildBriefLines(form) {
   return Array.from(form.querySelectorAll("input, select, textarea")).reduce((rows, field) => {
-    if (field.tagName === "SELECT") {
-      const firstOption = field.options[0]?.textContent?.trim();
-      const currentValue = field.options[field.selectedIndex]?.textContent?.trim();
-      if (!currentValue || currentValue === firstOption) return rows;
-      rows.push(`${firstOption}: ${currentValue}`);
-      return rows;
-    }
-
-    const value = field.value?.trim();
+    const value = getBriefFieldValue(field);
     if (!value) return rows;
-    const label = field.getAttribute("placeholder") || field.name || "Поле";
+    const label = getBriefFieldLabel(field);
     rows.push(`${label}: ${value}`);
     return rows;
   }, []);

@@ -17,3 +17,56 @@ calc/klubnika/
 calc/ferticalc/
 
 docs/.brandbook-cache/
+.venv-brandpdf/
+
+# Local coordination / agent memory layers
+.codex-memory/
+.sid-memory/
+
+# Parallel workspaces and internal concept branches kept outside the public runtime
+5sez/
+cab/
+copy/
+graph/
+vk-group-concept/
+
+# Local-only ops inventory and secrets stay on the Mac and never go to repo
+ops/*.local.yaml
+ops/*.local.yml
+ops/*.local.json
+ops/*.local.md
+ops/secrets/
+
+# Local brand archive / preview artifacts kept on disk but excluded from repo noise
+documents/logo/header-lockup-compare.html
+documents/logo/header-lockup-preview.html
+documents/logo/header-lockup-reference-reconstruction.svg
+documents/logo/header-lockup-spec.svg
+documents/logo/header-lockup-v1-close-dark.svg
+documents/logo/header-lockup-v1-close-light.svg
+documents/logo/header-lockup-v1-spec.svg
+documents/logo/header-lockup-v2-site-compact-dark.svg
+documents/logo/header-lockup-v2-site-compact-light.svg
+documents/logo/header-lockup-v2-site-dark.svg
+documents/logo/header-lockup-v2-site-light.svg
+documents/logo/header-lockup-v2-spec.svg
+documents/logo/logo-direction-01-primary-dark.svg
+documents/logo/logo-direction-01-primary-light.svg
+documents/logo/logo-direction-02-compact-dark.svg
+documents/logo/logo-direction-02-compact-light.svg
+documents/logo/logo-direction-03-badge-first-dark.svg
+documents/logo/logo-direction-03-badge-first-light.svg
+documents/logo/logo-directions-site-preview.html
+documents/logo/logo-variant-01-horizontal.svg
+documents/logo/logo-variant-02-inline.svg
+documents/logo/logo-variant-03-badge.svg
+
+# Duplicate local brand exports not used by runtime
+assets/brand-berry-beige.png
+assets/brand-berry-green.png
+assets/brand-lockup-compact-beige.svg
+assets/brand-lockup-compact-green.svg
+assets/logo-lockup-compact-dark.svg
+assets/logo-lockup-compact-light.svg
+assets/logo-lockup-primary-dark.svg
+assets/logo-lockup-primary-light.svg
