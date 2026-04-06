@@ -208,7 +208,7 @@ function bindLogin() {
     try {
       const adminResponse = await fetch(`${apiBase()}/admin/auth/password-login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        headers: { "Content-Type": "application/json", Accept: "application/json", "X-KP-Requested-With": "klubnikaproject" },
         credentials: "include",
         body: JSON.stringify({ login, password }),
       });
@@ -225,7 +225,7 @@ function bindLogin() {
 
       const response = await fetch(`${apiBase()}/auth/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        headers: { "Content-Type": "application/json", Accept: "application/json", "X-KP-Requested-With": "klubnikaproject" },
         credentials: "include",
         body: JSON.stringify({ login, password }),
       });
@@ -327,21 +327,43 @@ function buildMemberAuthHeaders() {
 }
 
 function readStoredSessionToken(accountType) {
+  const key = accountType === "admin" ? ADMIN_SESSION_STORAGE_KEY : MEMBER_SESSION_STORAGE_KEY;
   try {
-    return window.localStorage.getItem(accountType === "admin" ? ADMIN_SESSION_STORAGE_KEY : MEMBER_SESSION_STORAGE_KEY) || "";
+    const current = window.sessionStorage.getItem(key) || "";
+    if (current) return current;
+  } catch {
+    // ignore storage failures
+  }
+  try {
+    const legacy = window.localStorage.getItem(key) || "";
+    if (legacy) {
+      try {
+        window.sessionStorage.setItem(key, legacy);
+      } catch {
+        // ignore storage failures
+      }
+      window.localStorage.removeItem(key);
+      return legacy;
+    }
+    return "";
   } catch {
     return "";
   }
 }
 
 function storeSessionToken(accountType, token) {
+  const key = accountType === "admin" ? ADMIN_SESSION_STORAGE_KEY : MEMBER_SESSION_STORAGE_KEY;
   try {
-    const key = accountType === "admin" ? ADMIN_SESSION_STORAGE_KEY : MEMBER_SESSION_STORAGE_KEY;
     if (token) {
-      window.localStorage.setItem(key, token);
+      window.sessionStorage.setItem(key, token);
     } else {
-      window.localStorage.removeItem(key);
+      window.sessionStorage.removeItem(key);
     }
+  } catch {
+    // ignore storage failures
+  }
+  try {
+    window.localStorage.removeItem(key);
   } catch {
     // ignore storage failures
   }
@@ -493,7 +515,7 @@ function bindLogout() {
       try {
         await fetch(`${apiBase()}/auth/logout`, {
           method: "POST",
-          headers: buildMemberAuthHeaders(),
+          headers: { ...buildMemberAuthHeaders(), "X-KP-Requested-With": "klubnikaproject" },
           credentials: "include",
         });
       } catch (error) {

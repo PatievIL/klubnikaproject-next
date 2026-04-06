@@ -434,8 +434,25 @@ async function checkCabinetSession() {
 }
 
 function readStoredSessionToken(accountType) {
+  const key = accountType === "admin" ? ADMIN_SESSION_STORAGE_KEY : MEMBER_SESSION_STORAGE_KEY;
   try {
-    return window.localStorage.getItem(accountType === "admin" ? ADMIN_SESSION_STORAGE_KEY : MEMBER_SESSION_STORAGE_KEY) || "";
+    const current = window.sessionStorage.getItem(key) || "";
+    if (current) return current;
+  } catch {
+    // ignore storage failures
+  }
+  try {
+    const legacy = window.localStorage.getItem(key) || "";
+    if (legacy) {
+      try {
+        window.sessionStorage.setItem(key, legacy);
+      } catch {
+        // ignore storage failures
+      }
+      window.localStorage.removeItem(key);
+      return legacy;
+    }
+    return "";
   } catch {
     return "";
   }

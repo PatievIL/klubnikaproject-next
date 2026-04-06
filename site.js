@@ -953,6 +953,7 @@ function bindDraftForms(config) {
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
+              "X-KP-Requested-With": "klubnikaproject",
             },
             body: JSON.stringify(leadPayload),
           });
